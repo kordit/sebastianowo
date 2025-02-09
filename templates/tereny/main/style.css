@@ -1,0 +1,1 @@
+.svg-tooltip{position:absolute;background:#000;color:#fff;padding:15px;border-radius:5px;font-size:14px;pointer-events:none;z-index:9999;white-space:nowrap;opacity:.9;display:none}.town-wrapper{position:relative}.town-wrapper svg{position:absolute;top:0;left:0;width:100%;height:100%;transform:translate(0px, -5px)}.town-wrapper svg path{stroke:#fff;stroke-width:5px}

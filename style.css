@@ -1,0 +1,14 @@
+/*
+Theme Name: My Game Theme
+Theme URI: http://example.com/my-game-theme
+Author: Your Name
+Author URI: http://example.com
+Description: A custom WordPress theme for my game.
+Version: 1.0
+Tags: game, custom, unique
+Text Domain: my-game-theme
+*/
+
+#wpadminbar {
+    display: none;
+}
