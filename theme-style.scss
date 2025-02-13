@@ -99,6 +99,7 @@ body {
         min-height: 100vh;
         color: #fff;
         text-align: center;
+        background-image: url(/wp-content/uploads/2025/02/DALL·E-2025-02-08-21.55.13-A-16_9-stylized-illustration-of-a-group-of-1990s-Polish-dresiarze-tracksuit-wearing-tough-guys-sprinting-toward-the-viewer-with-baseball-bats-ready.webp);
 
         h1 {
             font-size: 40px;
@@ -139,7 +140,7 @@ body {
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url(/wp-content/uploads/2025/02/DALL·E-2025-02-09-19.21.19-A-16_9-stylized-illustration-of-a-1990s-Eastern-European-neighborhood-osiedle-with-large-concrete-apartment-blocks-wielka-plyta.-The-scene-is-comp.webp);
+
             background-size: cover;
             background-position: top;
             z-index: -5;
@@ -170,6 +171,15 @@ body {
 
     &.template-kreator {
         min-height: 100vh;
+        background: #000;
+
+        .game-content--inner {
+            width: 100%;
+        }
+
+        .controler-popup {
+            width: 100%;
+        }
 
         &:after {
             content: " ";
@@ -277,7 +287,14 @@ html {
 }
 
 .container-world {
+    transition-duration: 1s;
+    transform-origin: top;
 
+    &.zooming {
+        transform: scale(3);
+
+        opacity: 0;
+    }
 
     img {
         width: 100%;
@@ -354,6 +371,19 @@ body.post-type-archive-tereny {
     &.active {
         transform: scale(1);
         opacity: 1;
+
+        .person {
+            img {
+                opacity: 1;
+                transform: translate(0, 0);
+            }
+
+            .wrappers-chat {
+                opacity: 1;
+            }
+        }
+
+
     }
 
     &:before {
@@ -366,8 +396,6 @@ body.post-type-archive-tereny {
         background-color: #000;
         z-index: -1;
         opacity: .5;
-
-
     }
 
     .person {
@@ -379,17 +407,36 @@ body.post-type-archive-tereny {
         .wrappers-chat {
             width: 50%;
             min-width: 50%;
-            transform: translate(35%, -40%);
+            // transform: translate(35%, -40%);
             display: flex;
             flex-direction: column;
             gap: 32px;
+            opacity: 0;
+            transition-duration: 1s;
+            transition-delay: 1.5s;
 
             .answers-container {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 16px;
                 margin-top: 32px;
-                justify-content: center;
+                justify-content: start;
+
+                &:before {
+                    content: "Odpowiedz: ";
+                    font-size: 26px;
+                    width: 100%;
+                    font-weight: bold;
+                    font-family: var(--ff);
+                    line-height: 150%;
+
+                }
+            }
+
+            h1 {
+                text-align: left;
+                margin-top: 0px;
+                margin-bottom: 10px;
             }
         }
 
@@ -421,10 +468,10 @@ body.post-type-archive-tereny {
                 width: 70px;
                 display: block;
                 position: absolute;
-                bottom: 1px;
+                bottom: 50%;
                 right: -1px;
-                transform: translate(0%, 100%);
-                clip-path: polygon(0 0, 100% 100%, 99% 0);
+                transform: translate(95%, 50%);
+                clip-path: polygon(0 0, 0% 100%, 100% 50%);
             }
         }
 
@@ -434,6 +481,10 @@ body.post-type-archive-tereny {
             height: auto;
             object-fit: contain;
             object-position: bottom;
+            opacity: .2;
+            transform: translate(100%, 0%);
+            transition-delay: .5s;
+            transition-duration: 1s;
         }
     }
 
@@ -790,13 +841,14 @@ button {
     border: none;
     color: #fff;
     font-family: var(--ff);
-    letter-spacing: 2px;
     cursor: pointer;
     text-decoration: none;
     mask-image: url(/wp-content/themes/game/assets/svg/button.svg);
     mask-size: 100% 100%;
-    font-weight: 700;
+    font-family: var(--fs);
     transition-duration: .5s;
+    text-transform: uppercase;
+    font-weight: 500;
 
     &:hover {
         background: #1d1d1d;

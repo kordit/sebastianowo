@@ -193,28 +193,6 @@ function custom_rewrite_rules()
 add_action('init', 'custom_rewrite_rules');
 
 
-// function handle_scene_template()
-// {
-//     $scene_index = get_query_var('scene_index');
-//     if ($scene_index !== '') {
-//         global $post;
-//         $scene_index = (int)$scene_index;
-//         $scenes = get_field('scenes', $post->ID);
-//         if (isset($scenes[$scene_index])) {
-//             get_header();
-//             echo '<h1>Scena ' . ($scene_index + 1) . '</h1>';
-//             echo wp_get_attachment_image($scenes[$scene_index]['tlo']['ID'], 'large');
-//             get_footer();
-//             exit;
-//         } else {
-//             wp_redirect(get_permalink($post->ID));
-//             exit;
-//         }
-//     }
-// }
-// add_action('template_redirect', 'handle_scene_template');
-
-
 add_action('template_redirect', function () {
     if (get_query_var('user_me')) {
         if (is_user_logged_in()) {

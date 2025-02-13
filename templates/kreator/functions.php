@@ -36,3 +36,22 @@ function handle_update_user_character()
         'redirect_url' => home_url("/user/{$user->user_nicename}") // Dodaj URL przekierowania
     ]);
 }
+
+
+$selected_paths = [
+    [
+        'select' => 'npc',
+        'npc'    => 'Mariuszek',
+        'title'  => 'droga skina',
+    ],
+    [
+        'select' => 'npc',
+        'npc'    => 'Seba',
+        'title'  => 'droga dresa',
+    ],
+    [
+        'select' => 'npc',
+        'npc'    => 'Paweł',
+        'title'  => 'droga skejta',
+    ],
+];

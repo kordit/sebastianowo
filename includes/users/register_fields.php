@@ -99,9 +99,9 @@ add_action('acf/include_fields', function () {
                 'required' => 0,
                 'conditional_logic' => 0,
                 'choices' => array(
-                    'zadymiarz' => 'Zadymiarz',
-                    'zlodziej' => 'Złodziej',
-                    'ogarniacz' => 'Ogarniacz',
+                    'skin' => 'Skin',
+                    'dres' => 'Dres',
+                    'skate' => 'Skejt',
                 ),
                 'default_value' => false,
                 'return_format' => 'array',

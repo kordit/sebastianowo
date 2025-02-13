@@ -1,2 +1,2 @@
 <?php
-include('homepage.php');
+include('content-game.php');

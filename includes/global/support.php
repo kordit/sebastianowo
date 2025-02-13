@@ -185,14 +185,6 @@ function admin_color_scheme()
 }
 add_action('admin_head', 'admin_color_scheme');
 
-// function hide_website_krotedev()
-// {
-//     echo "\n" . '<script type="text/javascript">jQuery(document).ready(function($) {
-//       $(\'label[for=url], input#url\').hide();
-//     }); 
-//     </script>' . "\n";
-// }
-// add_action('admin_head', 'hide_website_krotedev');
 add_filter('wp_is_application_passwords_available', '__return_false');
 
 add_action('admin_head', 'hide_avatar_admin_bar');

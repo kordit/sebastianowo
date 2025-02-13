@@ -160,20 +160,6 @@ if (function_exists('acf_add_local_field_group')) {
 }
 
 
-function count_svg_paths($url)
-{
-    if (is_admin()) {
-        $url = preg_replace('/https?\:\/\/[^\/]*\//', '', '../' . $url);
-    } else {
-        $url = preg_replace('/http?\:\/\/[^\/]*\//', '', $url);
-    }
-    $count = new SimpleXMLElement($url, 0, TRUE);
-    $mycount = count($count->children());
-    $mycount = count($count->path);
-    $mycount += count($count->polygon);
-    return $mycount;
-}
-
 if (function_exists('acf_add_options_page')) {
     acf_add_options_page([
         'page_title'  => 'SVG Paths Settings',

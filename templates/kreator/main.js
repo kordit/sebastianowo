@@ -1,70 +1,110 @@
-document.addEventListener("DOMContentLoaded", function () {
-    let selectedClass = '';
-    let selectedAvatarId = '';
+// Asynchroniczna funkcja ustawiania klasy postaci
+async function SetClass(npc) {
+    console.log("Wybrany NPC:", npc);
 
-    // Krok 1: Wybór klasy postaci
-    document.querySelectorAll('.select-class').forEach(button => {
-        button.addEventListener('click', function () {
-            selectedClass = this.closest('.class-box').getAttribute('data-class');
-            document.getElementById('step-1').classList.remove('active');
-            document.getElementById('step-2').classList.add('active');
-        });
-    });
+    const containerWorld = document.querySelector('.container-world');
+    const stepElement = document.querySelector('.step');
 
-    // Krok 2: Wybór avatara
+    if (!containerWorld || !stepElement) {
+        console.error("Elementy .container-world lub .step nie istnieją.");
+        return;
+    }
+
+    // Mapowanie NPC na klasy postaci
+    const classMap = {
+        142: "skin",
+        145: "skate",
+        143: "dres"
+    };
+
+    window.selectedClass = classMap[npc] || '';
+
+    // Dodanie efektu przejścia
+    containerWorld.classList.add('zooming');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    stepElement.classList.add('active');
+
+    if (!window.selectedClass) {
+        console.error("Nieznany NPC:", npc);
+        return;
+    }
+
+    console.log("Przypisana klasa:", window.selectedClass);
+
+    // Automatycznie wybiera pierwszy avatar zgodny z klasą
+    const avatar = document.querySelector(`.avatar-option[data-class="${window.selectedClass}"]`);
+    if (avatar) {
+        avatar.click();
+    }
+}
+
+// **Funkcja do obsługi wyboru avatara**
+function initAvatarSelection() {
     document.querySelectorAll('.avatar-option').forEach(img => {
         img.addEventListener('click', function () {
             document.querySelectorAll('.wrapper-image').forEach(wrapper => wrapper.classList.remove('active'));
             this.parentElement.classList.add('active');
-            selectedAvatarId = this.getAttribute('data-avatar-id');
+
+            window.selectedAvatarId = this.getAttribute('data-avatar-id');
+            const previewSrc = this.getAttribute('data-pair-src');
 
             const previewDiv = document.getElementById('preview');
             if (previewDiv) {
                 previewDiv.innerHTML = '';
-                const previewImg = document.createElement('img');
-                previewImg.src = this.src;
-                previewImg.alt = 'Podgląd wybranego avatara';
-                previewImg.classList.add('preview-image');
-                previewDiv.appendChild(previewImg);
+                if (previewSrc) {
+                    const previewImg = document.createElement('img');
+                    previewImg.src = previewSrc;
+                    previewImg.alt = 'Podgląd wybranego avatara';
+                    previewImg.classList.add('preview-image');
+                    previewDiv.appendChild(previewImg);
+                }
             }
         });
     });
+}
 
-    // Krok 3: Zapis danych – aktualizacja pól ACF, a następnie utworzenie custom popupu
-    document.getElementById('save-character').addEventListener('click', async function () {
-        const nickname = document.getElementById('nickname').value.trim();
-        const story = document.getElementById('story').value.trim();
+// **Funkcja do zapisu postaci**
+async function saveCharacter() {
+    const nickname = document.getElementById('nickname').value.trim();
+    const story = document.getElementById('story').value.trim();
 
-        if (!selectedClass || !selectedAvatarId || !nickname) {
-            showPopup('Uzupełnij wszystkie pola!', 'error');
-            return;
-        }
+    if (!window.selectedClass || !window.selectedAvatarId || !nickname) {
+        showPopup('Uzupełnij wszystkie pola!', 'error');
+        return;
+    }
 
-        try {
-            // Wywołaj funkcję aktualizującą dane ACF (bez GUI)
-            const updateResponse = await updateACFFields({
-                "creator_end": true,
-                "user_class": selectedClass,
-                "avatar": selectedAvatarId,
-                "nick": nickname,
-                "story": story
-            });
-            console.log(updateResponse);
+    try {
+        const updateResponse = await updateACFFields({
+            "creator_end": true,
+            "user_class": window.selectedClass,
+            "avatar": window.selectedAvatarId,
+            "nick": nickname,
+            "story": story
+        });
 
-            // Po udanej aktualizacji, wywołaj custom popup.
-            // Parametry popupu możesz zmieniać dynamicznie.
-            await createCustomPopup({
-                imageId: 12, // ID obrazka do wyświetlenia w popupie
-                header: "Twój nowy bohater został utworzony!",
-                description: "Gratulacje! Twoje dane zostały zaktualizowane. Przejdź do panelu, aby zobaczyć szczegóły.",
-                link: "/user/me", // adres URL, gdzie chcesz przekierować użytkownika
-                linkLabel: "Zacznij przygodę!",
-                status: "success", // lub 'error'
-                closeable: false
-            });
-        } catch (error) {
-            console.error("Błąd podczas aktualizacji danych:", error);
-            showPopup(error.message || "Wystąpił błąd", "error");
-        }
-    });
+        console.log(updateResponse);
+
+        await createCustomPopup({
+            imageId: 12,
+            header: "Twój nowy bohater został utworzony!",
+            description: "Gratulacje! Twoje dane zostały zaktualizowane. Przejdź do panelu, aby zobaczyć szczegóły.",
+            link: "/tereny/kolejowa",
+            linkLabel: "Zacznij przygodę!",
+            status: "success",
+            closeable: false
+        });
+    } catch (error) {
+        console.error("Błąd podczas aktualizacji danych:", error);
+        showPopup(error.message || "Wystąpił błąd", "error");
+    }
+}
+
+// **Ładowanie eventów po załadowaniu DOM**
+document.addEventListener("DOMContentLoaded", function () {
+    window.selectedClass = '';
+    window.selectedAvatarId = '';
+
+    initAvatarSelection();
+
+    document.getElementById('save-character').addEventListener('click', saveCharacter);
 });

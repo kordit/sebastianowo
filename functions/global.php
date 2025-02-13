@@ -322,3 +322,17 @@ function get_villagers_callback()
 
     wp_send_json_success(['villagers' => $villager_data]);
 }
+
+function count_svg_paths($url)
+{
+    if (is_admin()) {
+        $url = preg_replace('/https?\:\/\/[^\/]*\//', '', '../' . $url);
+    } else {
+        $url = preg_replace('/http?\:\/\/[^\/]*\//', '', $url);
+    }
+    $count = new SimpleXMLElement($url, 0, TRUE);
+    $mycount = count($count->children());
+    $mycount = count($count->path);
+    $mycount += count($count->polygon);
+    return $mycount;
+}

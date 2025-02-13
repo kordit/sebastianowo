@@ -1,3 +1,5 @@
+document.querySelectorAll('[title]').forEach(el => el.removeAttribute('title'));
+
 class AjaxHelper {
     static sendRequest(url, method, data) {
         return new Promise((resolve, reject) => {
@@ -285,49 +287,6 @@ document.querySelectorAll('.bar-game').forEach(wrapper => {
     wrapper.appendChild(barValue);
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    const whatPlace = document.querySelector("#what-place");
-    const welcomePopup = document.querySelector("#welcome-popup");
-    const closeWelcome = document.querySelector("#close-welcome");
-    const closeControlerPopup = document.querySelector("#close-controler-popup");
-    const controlerPopups = document.querySelectorAll(".controler-popup");
-    const createGroup = document.querySelector("#create-group");
-
-    // Obsługa #what-place
-    if (whatPlace && welcomePopup) {
-        whatPlace.addEventListener("click", function () {
-            welcomePopup.classList.add("active");
-        });
-    }
-
-    // Zamknięcie #welcome-popup
-    if (closeWelcome && welcomePopup) {
-        closeWelcome.addEventListener("click", function () {
-            welcomePopup.classList.remove("active");
-        });
-    }
-
-    // Zamknięcie wszystkich .controler-popup
-    if (closeControlerPopup && controlerPopups.length > 0) {
-        closeControlerPopup.addEventListener("click", function () {
-            controlerPopups.forEach(popup => popup.classList.remove("active"));
-        });
-    }
-
-    // Obsługa kliknięcia w <path> z data-id_open="zaloz-kryjowke"
-    document.querySelectorAll('path[data-id_open="zaloz-kryjowke"]').forEach(path => {
-        path.addEventListener("click", function () {
-            if (createGroup) {
-                createGroup.classList.add("active");
-            }
-        });
-    });
-});
-
-
-
-
-
 async function createCustomPost(title, postType, acfFields) {
     try {
         const response = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
@@ -350,223 +309,137 @@ async function createCustomPost(title, postType, acfFields) {
 window.createCustomPost = createCustomPost;
 
 
+document.addEventListener("DOMContentLoaded", function () {
+    const svg = document.querySelector(".container-world svg");
+    if (!svg) return;
 
+    const svgWidth = svg.viewBox.baseVal.width;
+    const svgHeight = svg.viewBox.baseVal.height;
 
+    const paths = svg.querySelectorAll("path");
 
-// document.addEventListener('DOMContentLoaded', () => {
-//     const leaveButton = document.querySelector('#leave-village-button');
+    paths.forEach(path => {
+        const title = path.getAttribute("data-title");
+        if (!title) return;
 
-//     if (leaveButton) {
-//         leaveButton.addEventListener('click', (e) => {
-//             e.preventDefault(); // Zatrzymaj domyślną akcję
-//             e.stopPropagation(); // Zatrzymaj propagację zdarzenia
+        const bbox = path.getBBox(); // Pobranie granic path w obrębie SVG
+        const percentX = (bbox.x + bbox.width / 2) / svgWidth * 100;
+        const percentY = (bbox.y - 20) / svgHeight * 100; // 20 jednostek nad ścieżką
 
-//             const userId = e.target.dataset.userId;
-//             const postId = e.target.dataset.postId;
-//             const fields = ['the_villagers', 'applications', 'leader']; // Pola do odłączenia
+        // Tworzenie dynamicznego napisu, ale ukrytego domyślnie
+        const text = document.createElement("div");
+        text.textContent = title;
+        text.style.position = "absolute";
+        text.style.left = `${percentX}%`;
+        text.style.top = `${percentY}%`;
+        text.style.transform = "translate(-50%, -50%)";
+        text.style.color = "#fff";
+        text.style.fontSize = "14px";
+        text.style.fontWeight = "700";
+        text.style.background = "rgba(0,0,0,0.8)";
+        text.style.padding = "4px 8px";
+        text.style.borderRadius = "3px";
+        text.style.whiteSpace = "nowrap";
+        text.style.pointerEvents = "none";
+        text.style.zIndex = "999";
+        text.style.display = "none"; // Ukryte domyślnie
 
-//             relationHandler
-//                 .disconnectRelation(userId, postId, fields)
-//                 .then((response) => {
-//                     showPopup(response.message || 'Relacje zostały pomyślnie odłączone!', 'success');
-//                     console.log('Relacje usunięte:', response); // Debugging
-//                 })
-//                 .catch((error) => {
-//                     showPopup(error || 'Wystąpił błąd podczas odłączania relacji.', 'error');
-//                     console.error('Błąd:', error); // Debugging
-//                 });
-//         });
-//     }
-//     const Applybutton = document.querySelector('#apply-to-village-button');
-//     if (Applybutton) {
-//         Applybutton.addEventListener('click', (e) => {
-//             e.preventDefault();
+        svg.parentNode.appendChild(text);
 
-//             const postId = e.target.dataset.postId;
+        // Pokazanie napisu na hoverze
+        path.addEventListener("mouseenter", () => {
+            text.style.display = "block";
+        });
 
-//             if (!postId) {
-//                 showPopup('Nie znaleziono ID wioski.', 'error');
-//                 return;
-//             }
+        // Ukrycie napisu po opuszczeniu elementu
+        path.addEventListener("mouseleave", () => {
+            text.style.display = "none";
+        });
+    });
+});
 
-//             // Wyślij żądanie AJAX do aplikowania do wioski
-//             AjaxHelper.sendRequest(DMVars.ajaxurl, 'POST', {
-//                 action: 'apply_to_village',
-//                 post_id: postId,
-//             })
-//                 .then((response) => {
-//                     showPopup(response.message || 'Aplikacja została pomyślnie złożona!', 'success');
-//                 })
-//                 .catch((error) => {
-//                     showPopup(error || 'Wystąpił błąd podczas aplikowania do wioski.', 'error');
-//                 });
-//         });
-//     }
-// });
+function initSvgInteractions() {
+    document.querySelectorAll('.container-world svg path').forEach(el => {
+        el.addEventListener('click', e => {
+            e.preventDefault();
+            let selectType = el.getAttribute('data-select');
 
+            if (selectType === "scena") {
+                let target = el.getAttribute('data-target');
+                if (target) {
+                    window.location.href = target;
+                }
+            } else if (selectType === "npc") {
+                const npcId = el.getAttribute('data-npc');
+                if (!npcId) {
+                    console.error("Brak atrybutu data-npc w elemencie");
+                    return;
+                }
 
-// document.addEventListener('DOMContentLoaded', () => {
-//     const section = document.querySelector('#applicants-section');
-//     const postId = section ? section.dataset.postId : null;
+                AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+                    action: 'get_npc_popup',
+                    npc_id: npcId
+                })
+                    .then(response => {
+                        const trimmedData = response.data.trim();
+                        document.body.insertAdjacentHTML('beforeend', trimmedData);
+                        // console.log("HTML po wstawieniu:", document.body.innerHTML);
 
-//     if (!postId) {
-//         console.error('Brak ID wioski w #applicants-section');
-//         return;
-//     }
+                        setTimeout(() => {
+                            const popup = document.getElementById('npc-popup');
+                            if (!popup) {
+                                console.error("Popup container nadal nie istnieje");
+                                return;
+                            }
+                            initNpcPopup(parseInt(npcId, 10), 'npc-popup', true);
+                        }, 500);
+                    })
+                    .catch(error => {
+                        console.error('Błąd:', error);
+                    });
+            }
+        });
+    });
+}
 
-//     const loadApplicants = () => {
-//         AjaxHelper.sendRequest(DMVars.ajaxurl, 'POST', {
-//             action: 'get_applicants',
-//             post_id: postId,
-//         })
-//             .then((response) => {
-//                 const tbody = document.querySelector('#applicants-table tbody');
-//                 tbody.innerHTML = '';
+// Uruchomienie funkcji po załadowaniu DOM
+document.addEventListener("DOMContentLoaded", initSvgInteractions);
 
-//                 // Sprawdź, czy aplikanci istnieją
-//                 if (Array.isArray(response.data.applicants) && response.data.applicants.length > 0) {
-//                     const currentVillagers = response.data.villagers || 0; // Liczba obecnych mieszkańców
-//                     const maxVillagers = 5; // Maksymalna liczba mieszkańców
-//                     const disableAccept = currentVillagers >= maxVillagers;
+function runFunctionNPC(functionsList) {
+    console.log('runFunctionNPC', functionsList);
+    console.log(typeof functionsList, Array.isArray(functionsList)); // Debugging
 
-//                     response.data.applicants.forEach((applicant) => {
-//                         const row = document.createElement('tr');
-//                         row.innerHTML = `
-//                             <td>${applicant.display_name}</td>
-//                             <td>${applicant.user_email}</td>
-//                             <td>
-//                                 <button class="accept-btn btn btn-green" data-applicant-id="${applicant.ID}" ${disableAccept ? 'disabled' : ''}>Akceptuj</button>
-//                                 <button class="reject-btn btn btn-red" data-applicant-id="${applicant.ID}">Odrzuć</button>
-//                             </td>
-//                         `;
-//                         tbody.appendChild(row);
-//                     });
+    // Jeśli dane są w postaci stringa JSON, parsujemy je
+    if (typeof functionsList === "string") {
+        try {
+            functionsList = JSON.parse(functionsList);
+        } catch (error) {
+            console.error("Błąd parsowania JSON:", error);
+            return;
+        }
+    }
 
-//                     addApplicantActionHandlers();
-//                 } else {
-//                     console.log('Brak aplikantów.');
-//                     const row = document.createElement('tr');
-//                     row.innerHTML = `<td colspan="3">Brak aplikantów.</td>`;
-//                     tbody.appendChild(row);
-//                 }
-//             })
-//             .catch((error) => {
-//                 console.error('Błąd AJAX:', error);
-//                 showPopup(error || 'Wystąpił problem podczas ładowania aplikantów.', 'error');
-//             });
-//     };
+    if (!Array.isArray(functionsList) || functionsList.length === 0) {
+        console.error("Błąd: Nieprawidłowa tablica funkcji.");
+        return;
+    }
 
-//     const updateApplicantStatus = (applicantId, actionType) => {
-//         AjaxHelper.sendRequest(DMVars.ajaxurl, 'POST', {
-//             action: 'update_applicant_status',
-//             post_id: postId,
-//             applicant_id: applicantId,
-//             action_type: actionType,
-//         })
-//             .then((response) => {
-//                 showPopup(response.message || 'Status aplikanta został zaktualizowany.', 'success');
-//                 loadApplicants(); // Odśwież listę aplikantów
-//             })
-//             .catch((error) => {
-//                 showPopup(error || 'Wystąpił problem podczas aktualizacji statusu aplikanta.', 'error');
-//             });
-//     };
+    functionsList.forEach(funcObj => {
+        if (!funcObj.function_name || !funcObj.npc_id) {
+            console.error("Błąd: Brak wymaganych danych w obiekcie funkcji.", funcObj);
+            return;
+        }
 
-//     const addApplicantActionHandlers = () => {
-//         document.querySelectorAll('.accept-btn').forEach((button) => {
-//             button.addEventListener('click', (e) => {
-//                 const applicantId = e.target.dataset.applicantId;
-//                 updateApplicantStatus(applicantId, 'accept');
-//             });
-//         });
+        // Zamiana nazwy funkcji z myślnikami na camelCase
+        const functionName = funcObj.function_name.replace(/-([a-z])/g, g => g[1].toUpperCase());
+        const npcId = funcObj.npc_id;
 
-//         document.querySelectorAll('.reject-btn').forEach((button) => {
-//             button.addEventListener('click', (e) => {
-//                 const applicantId = e.target.dataset.applicantId;
-//                 updateApplicantStatus(applicantId, 'reject');
-//             });
-//         });
-//     };
+        if (typeof window[functionName] === "function") {
+            window[functionName](npcId);
+        } else {
+            console.error(`Błąd: Funkcja "${functionName}" nie istnieje.`);
+        }
+    });
+}
 
-//     loadApplicants();
-// });
-
-
-// document.addEventListener('DOMContentLoaded', () => {
-//     const section = document.querySelector('#villagers-section');
-//     const postId = section ? section.dataset.postId : null;
-
-//     if (!postId) {
-//         console.error('Brak ID wioski w #villagers-section');
-//         return;
-//     }
-
-//     const loadVillagers = () => {
-//         AjaxHelper.sendRequest(DMVars.ajaxurl, 'POST', {
-//             action: 'get_villagers',
-//             post_id: postId,
-//         })
-//             .then((response) => {
-//                 const tbody = document.querySelector('#villagers-table tbody');
-//                 tbody.innerHTML = '';
-
-//                 if (Array.isArray(response.data.villagers) && response.data.villagers.length > 0) {
-//                     const currentUserId = response.data.current_user_id; // ID bieżącego użytkownika (lidera)
-
-//                     response.data.villagers.forEach((villager) => {
-//                         const isLeader = villager.ID === currentUserId;
-
-//                         const row = document.createElement('tr');
-//                         row.innerHTML = `
-//                             <td>${villager.display_name}</td>
-//                             <td>${villager.user_email}</td>
-//                             <td>
-//                                 ${isLeader
-//                                 ? '<span class="text-muted">Nie można usunąć lidera</span>'
-//                                 : `<button class="remove-btn btn btn-red" data-villager-id="${villager.ID}">Wyrzuć</button>`
-//                             }
-//                             </td>
-//                         `;
-//                         tbody.appendChild(row);
-//                     });
-
-//                     addVillagerActionHandlers();
-//                 } else {
-//                     const row = document.createElement('tr');
-//                     row.innerHTML = `<td colspan="3">Brak mieszkańców.</td>`;
-//                     tbody.appendChild(row);
-//                 }
-//             })
-//             .catch((error) => {
-//                 console.error('Błąd AJAX:', error);
-//                 showPopup(error || 'Wystąpił problem podczas ładowania mieszkańców.', 'error');
-//             });
-//     };
-
-//     const removeVillager = (villagerId) => {
-//         AjaxHelper.sendRequest(DMVars.ajaxurl, 'POST', {
-//             action: 'remove_villager',
-//             post_id: postId,
-//             villager_id: villagerId,
-//         })
-//             .then((response) => {
-//                 showPopup(response.message || 'Mieszkaniec został wyrzucony z wioski.', 'success');
-//                 loadVillagers(); // Odśwież listę mieszkańców
-//             })
-//             .catch((error) => {
-//                 showPopup(error || 'Wystąpił problem podczas wyrzucania mieszkańca.', 'error');
-//             });
-//     };
-
-//     const addVillagerActionHandlers = () => {
-//         document.querySelectorAll('.remove-btn').forEach((button) => {
-//             button.addEventListener('click', (e) => {
-//                 const villagerId = e.target.dataset.villagerId;
-//                 removeVillager(villagerId);
-//             });
-//         });
-//     };
-
-//     loadVillagers();
-// });
 
