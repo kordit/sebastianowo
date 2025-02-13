@@ -92,6 +92,31 @@ add_action('acf/include_fields', function () {
                 'enable_opacity'    => 0,
                 'return_format'     => 'string',
             ),
+            array(
+                'key' => 'field_67abab3abfd91',
+                'label' => 'NPC',
+                'name' => 'npc',
+                'aria-label' => '',
+                'type' => 'post_object',
+                'instructions' => '',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'post_type' => array(
+                    0 => 'npc',
+                ),
+                'post_status' => '',
+                'taxonomy' => '',
+                'return_format' => 'object',
+                'multiple' => 1,
+                'allow_null' => 0,
+                'bidirectional' => 0,
+                'ui' => 1,
+            ),
         ),
         'location' => array(
             array(

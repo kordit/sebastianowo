@@ -4,6 +4,8 @@ class AjaxHelper {
             const xhr = new XMLHttpRequest();
             xhr.open(method, url, true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            // Dodaj ten nagłówek, aby PHP rozpoznało żądanie jako AJAX
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
             xhr.onload = () => {
                 if (xhr.status >= 200 && xhr.status < 300) {
@@ -29,6 +31,7 @@ class AjaxHelper {
         });
     }
 }
+
 async function createCustomPopup(params) {
     try {
         // Usuń istniejący popup, jeśli taki jest
@@ -76,7 +79,7 @@ function showPopup(message, type = 'success') {
     popup.innerHTML = `
         <div class="popup-content">
             <div class="popup-message">${message}</div>
-            <button class="popup-close">Zamknij</button>
+            <button class="popup-close">X</button>
         </div>
     `;
 
@@ -114,6 +117,17 @@ async function fetchLatestACFFields() {
     }
 }
 
+async function updatePostACFFields(postId, fields) {
+    return AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+        action: 'update_acf_post_fields_reusable',
+        nonce: global.dataManagerNonce,
+        post_id: postId,
+        fields: JSON.stringify(fields),
+        request_id: Date.now() + Math.random().toString(36).substring(2, 9)
+    });
+}
+window.updatePostACFFields = updatePostACFFields;
+
 
 async function updateACFFields(fields) {
     try {
@@ -128,9 +142,8 @@ async function updateACFFields(fields) {
         }
         return response;
     } catch (error) {
-        const errorMsg = error && error.message ? error.message : String(error);
-        // console.error("❌ Błąd aktualizacji bazy danych:", errorMsg);
-        throw error; // <-- Dodajemy rethrow błędu
+        // const errorMsg = error && error.message ? error.message : String(error);
+        throw error;
     }
 }
 window.updateACFFields = updateACFFields;
@@ -209,50 +222,47 @@ function flattenData(data, prefix = '') {
 }
 
 
-async function createGroupWithCost(title, terenId, costFields) {
-    try {
-        // Najpierw pobierz najnowsze pola użytkownika
-        const userFields = await fetchLatestACFFields();
-        // Sprawdź, czy użytkownik już ma przypisaną grupę – używamy pola 'przynaleznosc_do_grupy' (dla użytkownika)
-        if (userFields.przynaleznosc_do_grupy) {
-            throw new Error("Jesteś już przypisany do grupy. Nie możesz założyć nowej.");
-        }
-        // Sprawdź, czy użytkownik ma wystarczająco złota, aby pokryć koszt
-        const currentGold = userFields.minerals && userFields.minerals.gold ? parseFloat(userFields.minerals.gold) : 0;
-        if (currentGold < Math.abs(costFields["minerals.gold"])) {
-            throw new Error("Nie masz wystarczająco złota, aby pokryć koszt.");
-        }
-        // Wywołaj endpoint tworzenia grupy
-        const groupResponse = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
-            action: 'create_group',
-            nonce: global.dataManagerNonce,
-            title: title,
-            teren_id: terenId,
-            request_id: Date.now() + Math.random().toString(36).substring(2, 9)
-        });
-        if (!groupResponse.success) {
-            throw new Error(groupResponse.data?.message || "Nieznany błąd serwera");
-        }
-        // Jeśli tworzenie grupy się powiodło, odejmij koszty oraz zaktualizuj interfejs
-        await updateACFFieldsWithGui(costFields, ['body'], "Koszt został pobrany.");
-        // Wyświetl popup z sukcesem i linkiem do nowo utworzonej grupy
-        createCustomPopup({
-            imageId: 54, // dopasuj ID obrazka do swoich potrzeb
-            header: "Grupa została utworzona!",
-            description: "Gratulacje! Twoja grupa została założona. Przejdź do niej, aby zobaczyć szczegóły.",
-            link: groupResponse.data.post_url,
-            linkLabel: "Przejdź do grupy",
-            status: "success",
-            closeable: false
-        });
-        return groupResponse;
-    } catch (error) {
-        console.error("❌ Błąd przy tworzeniu grupy:", error);
-        showPopup(error.message || "Wystąpił błąd przy tworzeniu grupy", "error");
-        throw error;
-    }
-}
-window.createGroupWithCost = createGroupWithCost;
+// async function createGroupWithCost(title, terenId, costFields) {
+//     try {
+//         const userFields = await fetchLatestACFFields();
+//         if (userFields.przynaleznosc_do_grupy) {
+//             throw new Error("Jesteś już przypisany do grupy. Nie możesz założyć nowej.");
+//         }
+//         const currentGold = userFields.minerals && userFields.minerals.gold ? parseFloat(userFields.minerals.gold) : 0;
+//         if (currentGold < Math.abs(costFields["minerals.gold"])) {
+//             throw new Error("Nie masz wystarczająco złota, aby pokryć koszt.");
+//         }
+//         // Najpierw pobierz hajsy – tylko gdy pobranie się uda, idziemy dalej
+//         await updateACFFieldsWithGui(costFields, ['body'], "Koszt został pobrany.");
+//         // Następnie tworzymy grupę
+//         const groupResponse = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+//             action: 'create_group',
+//             nonce: global.dataManagerNonce,
+//             title: title,
+//             teren_id: terenId,
+//             request_id: Date.now() + Math.random().toString(36).substring(2, 9)
+//         });
+//         if (!groupResponse.success) {
+//             throw new Error(groupResponse.data?.message || "Nieznany błąd serwera");
+//         }
+//         createCustomPopup({
+//             imageId: 54,
+//             header: "Grupa została utworzona!",
+//             description: "Gratulacje! Twoja grupa została założona. Przejdź do niej, aby zobaczyć szczegóły.",
+//             link: groupResponse.data.post_url,
+//             linkLabel: "Przejdź do grupy",
+//             status: "success",
+//             closeable: false
+//         });
+//         return groupResponse;
+//     } catch (error) {
+//         // console.error("❌ Błąd przy tworzeniu grupy:", error);
+//         showPopup(error.message || "Wystąpił błąd przy tworzeniu grupy", "error");
+//         throw error;
+//     }
+// }
+// window.createGroupWithCost = createGroupWithCost;
+
 
 
 document.querySelectorAll('.bar-game').forEach(wrapper => {
@@ -274,6 +284,72 @@ document.querySelectorAll('.bar-game').forEach(wrapper => {
     wrapper.appendChild(bar);
     wrapper.appendChild(barValue);
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const whatPlace = document.querySelector("#what-place");
+    const welcomePopup = document.querySelector("#welcome-popup");
+    const closeWelcome = document.querySelector("#close-welcome");
+    const closeControlerPopup = document.querySelector("#close-controler-popup");
+    const controlerPopups = document.querySelectorAll(".controler-popup");
+    const createGroup = document.querySelector("#create-group");
+
+    // Obsługa #what-place
+    if (whatPlace && welcomePopup) {
+        whatPlace.addEventListener("click", function () {
+            welcomePopup.classList.add("active");
+        });
+    }
+
+    // Zamknięcie #welcome-popup
+    if (closeWelcome && welcomePopup) {
+        closeWelcome.addEventListener("click", function () {
+            welcomePopup.classList.remove("active");
+        });
+    }
+
+    // Zamknięcie wszystkich .controler-popup
+    if (closeControlerPopup && controlerPopups.length > 0) {
+        closeControlerPopup.addEventListener("click", function () {
+            controlerPopups.forEach(popup => popup.classList.remove("active"));
+        });
+    }
+
+    // Obsługa kliknięcia w <path> z data-id_open="zaloz-kryjowke"
+    document.querySelectorAll('path[data-id_open="zaloz-kryjowke"]').forEach(path => {
+        path.addEventListener("click", function () {
+            if (createGroup) {
+                createGroup.classList.add("active");
+            }
+        });
+    });
+});
+
+
+
+
+
+async function createCustomPost(title, postType, acfFields) {
+    try {
+        const response = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+            action: 'create_custom_post',
+            nonce: global.dataManagerNonce,
+            title: title,
+            post_type: postType,
+            acf_fields: JSON.stringify(acfFields),
+            request_id: Date.now() + Math.random().toString(36).substring(2, 9)
+        });
+        if (!response.success) {
+            throw new Error(response.data?.message || "Nieznany błąd serwera");
+        }
+        return response;
+    } catch (error) {
+        console.error("❌ Błąd przy tworzeniu wpisu:", error);
+        throw error;
+    }
+}
+window.createCustomPost = createCustomPost;
+
+
 
 
 

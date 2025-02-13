@@ -79,7 +79,7 @@ class DynamicACFUpdater
                         }
                         if ($delta < 0 && abs($delta) > $oldNumeric) {
                             $resourceName = $this->getFriendlyResourceName("{$group_field_name}.{$sub_field_name}");
-                            $preCheckErrors[] = "Nie masz wystarczająco {$resourceName}. Próbujesz odjąć " . abs($delta) . ", ale masz tylko " . $oldNumeric . ".";
+                            $preCheckErrors[] = "Brakuje " . abs($delta) . " {$resourceName}.";
                         }
                     }
                 } else {
@@ -218,7 +218,7 @@ class DynamicACFUpdater
         $oldNumeric = is_numeric($old) ? floatval($old) : 0;
         if ($delta < 0 && abs($delta) > $oldNumeric) {
             $resourceName = $field_identifier ? $this->getFriendlyResourceName($field_identifier) : 'minerałów';
-            throw new Exception("Nie masz wystarczająco {$resourceName}. Próbujesz odjąć " . abs($delta) . ", ale masz tylko " . $oldNumeric . ".");
+            throw new Exception("Brakuje " . abs($delta) . " {$resourceName}");
         }
         $newValue = $oldNumeric + $delta;
         return [$oldNumeric, $newValue, false];
@@ -249,10 +249,10 @@ class DynamicACFUpdater
     {
         if (stripos($field_name, 'gold') !== false) {
             return "złotych";
-        } elseif (stripos($field_name, 'wood') !== false) {
-            return "drewna";
-        } elseif (stripos($field_name, 'iron') !== false) {
-            return "żelaza";
+        } elseif (stripos($field_name, 'piwo') !== false) {
+            return "piw";
+        } elseif (stripos($field_name, 'papierosy') !== false) {
+            return "szlugów";
         } elseif (stripos($field_name, 'stone') !== false) {
             return "kamienia";
         }

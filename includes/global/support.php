@@ -108,7 +108,8 @@ add_theme_support('post-thumbnails');
 function mytheme_enqueue_style()
 {
     wp_enqueue_style('mytheme-style', get_stylesheet_uri());
-    wp_enqueue_style('game-style', get_stylesheet_directory_uri() .  '/assets/css/style.css');
+    // wp_enqueue_style('game-style', get_stylesheet_directory_uri() .  '/assets/css/style.css');
+    wp_enqueue_style('game-style', get_stylesheet_directory_uri() .  '/theme-style.css');
 }
 add_action('wp_enqueue_scripts',  'mytheme_enqueue_style');
 
@@ -168,6 +169,8 @@ function enqueue_dm_scripts()
             'ajaxurl' => admin_url('admin-ajax.php'),
             'dataManagerNonce' => $nonce,
         ]);
+        wp_register_script('npc_script', get_template_directory_uri() . '/components/npc/script.js', '1.1', true);
+        wp_enqueue_script('npc_script');
     }
 }
 add_action('wp_enqueue_scripts', 'enqueue_dm_scripts');

@@ -1,13 +1,9 @@
-<?php $fields = get_fields(get_the_ID()); ?>
+<?php
+$fields = get_fields(get_the_ID());
+$man_image = get_field('group_man') ?: 87;
+?>
 <div class="teren-info">
     <a href="/tereny" class="btn back">wróć do rzutu miasta</a>
-    <div class="polaroid">
-        <?= wp_get_attachment_image(get_field('teren_zdjecie'), 'full'); ?>
-    </div>
-    <h1><?php the_title(); ?></h1>
-    <p class="description">
-        <?php the_field('teren_opis'); ?>
-    </p>
 </div>
 
 
@@ -17,15 +13,57 @@ if (!empty($fields['siedziba_grupy'])) : ?>
 
 <?php else:
 ?>
-    <form id="create-village-form">
-        <label for="village-title" class="bold">
-            Czy masz na tyle odwagi, żeby na terenie "<?php the_title(); ?>" założyć siedzibę swojej grupy?
-        </label>
-        <input type="text" id="village-title" name="village-title" required>
-        <!-- Ukryty input z ID terenu (dla CPT "tereny") -->
-        <input type="hidden" id="teren-id" value="<?php echo get_the_ID(); ?>">
-        <button type="submit">Załóż grupę (koszt 200 złota)</button>
-    </form>
+
 
 
 <?php endif; ?>
+
+<div class="controler-popup" id="create-group">
+    <div class="person">
+        <div class="wrappers-chat">
+            <div class="chat-me">
+
+                <h2>Czy masz na tyle odwagi, żeby na terenie "<?php the_title(); ?>" założyć siedzibę swojej grupy?</h2>
+                <p class="description">Jeśli tak, to <strong>dawaj 500 złotych, kratę piwa i karton szlugów</strong> i bierz ten sqout. Dzięki niemu, nie musisz jak debil biegać po osiedlu, tylko wiesz kto i od czego jest.</p>
+                <label for="group-title" class="bold">
+
+                </label>
+                <div class="page-popup">
+                    <div class="close"></div>
+                    <form id="create-group-form">
+                        <input type="text" id="group-title" name="group-title" required>
+                        <label class="check-color">Wybierz kolor swojej grupy:</label>
+                        <div class="all-labeles">
+
+                            <?php
+                            //                 $colors = [
+                            //                     "#ff0000" => "Czerwony",
+                            //                     "#00ff00" => "Zielony",
+                            //                     "#0000ff" => "Niebieski",
+                            //                     "#ffff00" => "Żółty",
+                            //                     "#ff00ff" => "Różowy",
+                            //                     "#00ffff" => "Turkusowy",
+                            //                 ];
+
+                            //                 foreach ($colors as $hex => $name) {
+                            //                     echo '<label>
+                            // <input type="radio" name="color-district" value="' . $hex . '" required> ';
+                            //                     echo '<div style="background-color: ' . $hex . '" class="preview-color"></div>';
+                            //                     echo '</label>';
+                            //                 }
+                            ?>
+
+                        </div>
+                        <!-- Teren (ID terenu pochodzi z wpisu, w którym formularz jest wyświetlony) -->
+                        <input type="hidden" id="teren-id" value="<?php echo get_the_ID(); ?>">
+                        <!-- Ukryte pole z ID użytkownika -->
+                        <input type="hidden" id="user-id" value="<?php echo get_current_user_id(); ?>">
+                        <button type="submit">Załóż grupę</button>
+                    </form>
+                </div>
+                <div id="close-controler-popup" class="btn">Wpadłem tu przypadkiem, elo!</div>
+            </div>
+        </div>
+        <?= wp_get_attachment_image($man_image, 'full'); ?>
+    </div>
+</div>

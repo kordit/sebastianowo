@@ -1,8 +1,9 @@
 class Game {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
-        this.engine = new BABYLON.Engine(this.canvas, true);
+        this.engine = new BABYLON.Engine(this.canvas, true, { alpha: true });
         this.scene = new BABYLON.Scene(this.engine);
+        this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
         this.hp1 = 100;
         this.hp2 = 100;
         this.power1 = 0;
@@ -13,7 +14,7 @@ class Game {
         this.powerIncrease = null;
         this.lastDodgeTime = 0;
         this.createScene();
-        this.createLayers();
+        // this.createLayers();
         this.createUI();
         this.run();
     }

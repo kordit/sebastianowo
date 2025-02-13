@@ -3,11 +3,10 @@ $current_user = wp_get_current_user();
 $author_url = get_author_posts_url($current_user->ID);
 $current_user_id = get_current_user_id();
 $avatar_id = get_field('avatar', 'user_' . $current_user_id);
-
-$current_user_id = get_current_user_id();
 $avatar = get_field('avatar', 'user_' . $current_user_id);
 $nick = get_field('nick', 'user_' . $current_user_id);
 $stats = get_field('stats', 'user_' . $current_user_id);
+
 ?>
 
 <div class="wrapper">
@@ -50,20 +49,19 @@ $stats = get_field('stats', 'user_' . $current_user_id);
         <div class="nowt-display">
             <?php
             $user_id = get_current_user_id();
-            $minerals = get_field('minerals', 'user_' . $user_id);
+            $minerals = get_field('bag', 'user_' . $user_id);
 
             $resources = [
-                ['name' => 'gold', 'icon' => '&#128176;'],
-                ['name' => 'iron', 'icon' => '&#129516;'],
-                ['name' => 'stone', 'icon' => '&#129704;'],
-                ['name' => 'wood', 'icon' => '&#127795;']
+                ['name' => 'gold', 'icon' => '&#128176;', 'name_pl' => 'Hajs'],
+                ['name' => 'piwo', 'icon' => '&#129516;', 'name_pl' =>  'Browary'],
+                ['name' => 'papierosy', 'icon' => '&#129704;', 'name_pl' => 'Szlugi'],
             ];
 
             foreach ($resources as $resource): ?>
                 <div class="resource-item">
-                    <span><?= $resource['icon'] ?></span>
-                    <span class="ud-minerals-<?= $resource['name'] ?>">
-                        <?= isset($minerals[$resource['name']]) ? esc_html($minerals[$resource['name']]) : 0 ?>
+                    <span><?= '<strong>' . $resource['name_pl'] . ': </strong>'; ?></span>
+                    <span class="ud-bag-<?= $resource['name'] ?>">
+                        <?php echo isset($minerals[$resource['name']]) ? esc_html($minerals[$resource['name']]) : 0 ?>
                     </span>
                 </div>
             <?php endforeach; ?>

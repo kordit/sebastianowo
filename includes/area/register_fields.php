@@ -52,56 +52,96 @@ if (function_exists('acf_add_local_field_group')) {
                 'bidirectional_target' => array('teren_grupy'),
             ),
             array(
-                'key' => 'field_6793e6a783c33_area',
-                'label' => 'Złoto',
-                'name' => 'area_cost_gold',
-                'type' => 'number',
-                'default_value' => '0',
-                'min' => 0,
+                'key' => 'field_67acfbf9a67a9',
+                'label' => 'npc',
+                'name' => 'npc',
+                'aria-label' => '',
+                'type' => 'relationship',
+                'instructions' => '',
+                'required' => 0,
+                'conditional_logic' => 0,
                 'wrapper' => array(
-                    'width' => '25',
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
                 ),
+                'post_type' => array(
+                    0 => 'npc',
+                ),
+                'post_status' => array(
+                    0 => 'publish',
+                ),
+                'taxonomy' => '',
+                'filters' => array(
+                    0 => 'search',
+                ),
+                'return_format' => 'object',
+                'min' => '',
+                'max' => '',
+                'elements' => array(
+                    0 => 'featured_image',
+                ),
+                'bidirectional' => 0,
             ),
             array(
-                'key' => 'field_6793e69b83c32_area',
-                'label' => 'Żelazo',
-                'name' => 'area_cost_iron',
-                'type' => 'number',
-                'default_value' => '0',
-                'min' => 0,
+                'key' => 'field_67acf8e748137',
+                'label' => 'Sceny',
+                'name' => 'scenes',
+                'aria-label' => '',
+                'type' => 'repeater',
+                'instructions' => '',
+                'required' => 0,
+                'conditional_logic' => 0,
                 'wrapper' => array(
-                    'width' => '25',
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
                 ),
-            ),
-            array(
-                'key' => 'field_6793e6bc83c36_area',
-                'label' => 'Kamień',
-                'name' => 'area_cost_stone',
-                'type' => 'number',
-                'default_value' => '0',
+                'layout' => 'table',
+                'pagination' => 0,
                 'min' => 0,
-                'wrapper' => array(
-                    'width' => '25',
+                'max' => 0,
+                'collapsed' => '',
+                'button_label' => 'Dodaj scenę',
+                'rows_per_page' => 20,
+                'sub_fields' => array(
+                    array(
+                        'key' => 'field_67acf8f448138',
+                        'label' => 'Tło',
+                        'name' => 'tlo',
+                        'aria-label' => '',
+                        'type' => 'image',
+                        'instructions' => '',
+                        'required' => 1,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'return_format' => 'id',
+                        'library' => 'all',
+                        'preview_size' => 'medium',
+                        'parent_repeater' => 'field_67acf8e748137',
+                    ),
+                    array(
+                        'key' => 'field_67acf8fc48139',
+                        'label' => 'Maska',
+                        'name' => 'maska',
+                        'type' => 'image',
+                        'required' => 1,
+                        'conditional_logic' => 1,
+                        'return_format' => 'url',
+                        'mime_types' => 'svg',
+                        'preview_size' => 'medium',
+                    ),
+                    array(
+                        'key' => 'field_id_sceny',
+                        'label' => 'ID sceny',
+                        'name' => 'id_sceny',
+                        'type' => 'text',
+                    ),
                 ),
-            ),
-            array(
-                'key' => 'field_6793e6c283c37_area',
-                'label' => 'Drewno',
-                'name' => 'area_cost_wood',
-                'type' => 'number',
-                'default_value' => '0',
-                'min' => 0,
-                'wrapper' => array(
-                    'width' => '25',
-                ),
-            ),
-            array(
-                'key' => 'field_teren_zdjecie',
-                'label' => 'Zdjęcie',
-                'name' => 'teren_zdjecie',
-                'type' => 'image',
-                'return_format' => 'id',
-                'preview_size' => 'medium',
             ),
         ),
         'location' => array(
@@ -181,5 +221,170 @@ add_action('acf/init', function () {
                 ],
             ],
         ]);
+    }
+});
+
+
+add_action('init', function () {
+    if (!is_admin() || !function_exists('acf_add_local_field_group')) {
+        return;
+    }
+
+    $custom_post_types = get_post_types(['_builtin' => false]);
+
+    foreach ($custom_post_types as $cpt) {
+        $posts = get_posts([
+            'post_type'      => $cpt,
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+        ]);
+
+        foreach ($posts as $post) {
+            $post_id    = $post->ID;
+            $post_title = sanitize_title($post->post_title);
+            $scenes     = get_field('scenes', $post_id);
+            if (!$scenes) {
+                continue;
+            }
+            foreach ($scenes as $scene_index => $scene) {
+                if (empty($scene['maska'])) {
+                    continue;
+                }
+                $maska     = $scene['maska'];
+                $maska_url = is_array($maska) && isset($maska['url']) ? $maska['url'] : $maska;
+                $path_count = count_svg_paths($maska_url);
+                if ($path_count === 0) {
+                    continue;
+                }
+                for ($i = 0; $i < $path_count; $i++) {
+                    acf_add_local_field_group([
+                        'key'        => "group_{$post_title}_scene_{$scene_index}_svg_path_{$i}",
+                        'title' => "Scena " . ($scene_index + 1) . " Path " . ($i + 1),
+                        'fields'     => [
+                            array(
+                                'key'   => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_name",
+                                'label' => 'Nazwa pola',
+                                'name' => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_name",
+                                'aria-label' => '',
+                                'type' => 'text',
+                                'instructions' => '',
+                                'required' => 1,
+                                'conditional_logic' => 1,
+                                'default_value' => false,
+                                'return_format' => 'array',
+                                'multiple' => 0,
+                                'allow_null' => 1,
+                                'ui' => 0,
+                                'ajax' => 0,
+                                'placeholder' => '',
+                                'wrapper' => array(
+                                    'width' => '33',
+                                    'class' => '',
+                                    'id' => '',
+                                ),
+                            ),
+                            array(
+                                'key'   => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_select",
+                                'label' => 'Wybierz aktywator',
+                                'name' => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_select",
+                                'aria-label' => '',
+                                'type' => 'select',
+                                'instructions' => '',
+                                'required' => 1,
+                                'conditional_logic' => 0,
+                                'choices' => array(
+                                    'npc' => 'npc',
+                                    'scena' => 'scena',
+                                ),
+                                'default_value' => false,
+                                'return_format' => 'array',
+                                'multiple' => 0,
+                                'allow_null' => 1,
+                                'ui' => 0,
+                                'ajax' => 0,
+                                'placeholder' => '',
+                                'wrapper' => array(
+                                    'width' => '33',
+                                    'class' => '',
+                                    'id' => '',
+                                ),
+                            ),
+                            array(
+                                'key'   => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_id",
+                                'label' => 'ID',
+                                'name' => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_id",
+                                'aria-label' => '',
+                                'type' => 'text',
+                                'instructions' => '',
+                                'required' => 0,
+                                'conditional_logic' => 0,
+                                'wrapper' => array(
+                                    'width' => '33',
+                                    'class' => '',
+                                    'id' => '',
+                                ),
+                                'default_value' => '',
+                                'maxlength' => '',
+                                'placeholder' => '',
+                                'prepend' => '',
+                                'append' => '',
+                                'conditional_logic' => array(
+                                    array(
+                                        array(
+                                            'field'    => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_select",
+                                            'operator' => '==',
+                                            'value'    => 'scena',
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            array(
+                                'key'   => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_npc",
+                                'label' => 'Npc do sceny',
+                                'name' => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_npc",
+                                'type' => 'post_object',
+                                'return_format' => 'object',
+                                'post_type' => array('npc'),
+                                'allow_null' => 1,
+                                'wrapper' => array(
+                                    'width' => '33',
+                                    'class' => '',
+                                    'id' => '',
+                                ),
+                                'conditional_logic' => array(
+                                    array(
+                                        array(
+                                            'field'    => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_select",
+                                            'operator' => '==',
+                                            'value'    => 'npc',
+                                        ),
+                                    ),
+                                ),
+                            ),
+
+
+
+
+
+
+
+
+                        ],
+                        'location'   => [
+                            [
+                                [
+                                    'param'    => 'post',
+                                    'operator' => '==',
+                                    'value'    => $post_id,
+                                ],
+                            ],
+                        ],
+                        // 'position'   => 'side',
+                        'style'      => 'default',
+                        'menu_order' => 99,
+                    ]);
+                }
+            }
+        }
     }
 });

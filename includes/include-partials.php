@@ -49,6 +49,7 @@ function include_init_files_in_directories($base_directory)
 
 // Wywołanie funkcji dla określonego katalogu
 include_init_files_in_directories(get_template_directory() . '/includes');
+include_init_files_in_directories(get_template_directory() . '/components');
 
 $directory = get_template_directory() . '/templates';
 $folders = glob($directory . '/*', GLOB_ONLYDIR);
