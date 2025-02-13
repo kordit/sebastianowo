@@ -14,11 +14,8 @@ get_header();
     <div class="container-world">
         <?php scene_generator(); ?>
     </div>
-    <?php if ($instance != 'kreator'): ?>
-        <div id="what-place" class="btn">Co to za miejsce?</div>
-    <?php endif; ?>
     <div class="game-content--inner">
-        <!-- <button id="loadNpc" data-npc-id="115">Wczytaj NPC</button> -->
+        <button id="go-to-a-walk" data-npc-id="115">Idź na spacer</button>
         <?php
         if ($instance) {
             include(THEME_SRC . '/templates/' . $instance . '/template.php');

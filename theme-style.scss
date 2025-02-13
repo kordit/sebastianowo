@@ -52,6 +52,31 @@
     src: url('assets/css/fonts/work-sans-v19-latin_latin-ext-700.woff2') format('woff2');
 }
 
+@keyframes pulse {
+    0% {
+        transform: scale(1) translate(-20%, -50%);
+    }
+
+    50% {
+        transform: scale(1.1) translate(-20%, -50%);
+    }
+
+    100% {
+        transform: scale(1) translate(-20%, -50%);
+    }
+}
+
+button#go-to-a-walk {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translate(-20%, -50%);
+    font-size: 21px;
+    background-color: #bd2222;
+    animation: pulse 3.5s infinite ease-in-out;
+    transform-origin: center;
+}
+
 :root {
     --ff: 'Bungee';
     --fs: 'Work Sans';
@@ -873,6 +898,7 @@ button {
 
 
 
+
 .popup-full {
     transition: opacity .5s;
     z-index: 100;
@@ -892,6 +918,10 @@ button {
     transform: scale(0);
     opacity: 0;
     transition: opacity .5s;
+
+    .container {
+        width: min(95%, 800px);
+    }
 
     .popup-close {
         position: absolute;

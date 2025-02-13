@@ -108,3 +108,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById('save-character').addEventListener('click', saveCharacter);
 });
+
+createCustomPopup({
+    imageId: 149,
+    header: "Podróż do Sebastianowa",
+    description: "Jeszcze zanim otwierasz drzwi, już widzisz ich w oknie. Trzech typów. Każdy inny, ale każdy wygląda, jakby nie miał dziś najlepszego dnia. Czuć, że w tym wagonie nie będzie miłej pogawędki. Pociąg rusza, drzwi zamykają się za tobą. Nie masz wyboru – siadasz. Ich spojrzenia już na tobie wiszą. Ktoś pierwszy się odezwie. Porozmawiaj z każdym z nich. Kliknij na ich avatary.",
+    link: "",
+    linkLabel: "",
+    status: "active",
+    closeable: true
+});

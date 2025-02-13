@@ -53,8 +53,8 @@ if (function_exists('acf_add_local_field_group')) {
             ),
             array(
                 'key' => 'field_67acfbf9a67a9',
-                'label' => 'npc',
-                'name' => 'npc',
+                'label' => 'Zdarzenia',
+                'name' => 'events',
                 'aria-label' => '',
                 'type' => 'relationship',
                 'instructions' => '',

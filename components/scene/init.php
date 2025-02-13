@@ -16,17 +16,17 @@ function scene_generator()
             [
                 'select' => 'npc',
                 'npc'    => '142',
-                'title'  => 'droga skina',
+                'title'  => 'Droga skina',
             ],
             [
                 'select' => 'npc',
                 'npc'    => '145',
-                'title'  => 'droga skejta',
+                'title'  => 'Droga skejta',
             ],
             [
                 'select' => 'npc',
                 'npc'    => '143',
-                'title'  => 'droga dresa',
+                'title'  => 'Droga dresa',
             ],
 
         ];

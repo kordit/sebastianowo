@@ -15,10 +15,14 @@ function handle_create_custom_popup()
 
     $html  = '<div class="popup-full ' . esc_attr($status) . '">';
     $html .= '<div class="container">';
-    $html .= '<div class="polaroid">' . $image_markup . '</div>';
+    if ($image_id) {
+        $html .= '<div class="polaroid">' . $image_markup . '</div>';
+    }
     $html .= '<h2>' . esc_html($header) . '</h2>';
     $html .= '<p class="description">' . esc_html($description) . '</p>';
-    $html .= '<a href="' . esc_url($link) . '" class="btn">' . esc_html($linkLabel) . '</a>';
+    if ($link && $linkLabel) {
+        $html .= '<a href="' . esc_url($link) . '" class="btn">' . esc_html($linkLabel) . '</a>';
+    }
     $html .= $close_button;
     $html .= '</div>';
     $html .= '</div>';

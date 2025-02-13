@@ -17,6 +17,12 @@ function et_svg_with_data($linksvg, $tereny = [])
     $svg = new DOMDocument();
     $svg->load($link);
 
+    // Usuwanie wszystkich <title>
+    $titles = $svg->getElementsByTagName('title');
+    while ($titles->length > 0) {
+        $titles->item(0)->parentNode->removeChild($titles->item(0));
+    }
+
     // Pobranie wszystkich <path>
     $paths = $svg->getElementsByTagName('path');
 

@@ -37,10 +37,11 @@ class AjaxHelper {
 async function createCustomPopup(params) {
     try {
         // Usuń istniejący popup, jeśli taki jest
-        const existingPopup = document.querySelector('.popup');
+        const existingPopup = document.querySelector('.popup-full');
         if (existingPopup) {
             existingPopup.remove();
         }
+
         // Wyślij żądanie AJAX, aby pobrać markup popupu
         const response = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
             action: 'create_custom_popup',
@@ -53,22 +54,42 @@ async function createCustomPopup(params) {
             status: params.status,
             closeable: params.closeable ? 'true' : 'false'
         });
+
         if (!response.success) {
             throw new Error(response.data?.message || "Nieznany błąd serwera");
         }
+
+        // Dodaj nowy popup do body
         document.body.insertAdjacentHTML('beforeend', response.data.popup);
-        // Po 0.1 sekundy dodaj klasę "active" do nowego popupu
+
+        // Po krótkim czasie dodaj klasę "active"
         setTimeout(() => {
             const newPopup = document.querySelector('.popup-full');
             if (newPopup) {
                 newPopup.classList.add('active');
+
+                // Dodanie obsługi zamknięcia popupu
+                const closeButton = newPopup.querySelector('.popup-close');
+                if (closeButton) {
+                    closeButton.addEventListener('click', () => {
+                        newPopup.classList.remove('active');
+
+                        // Usunięcie popupu po krótkim czasie dla płynnej animacji
+                        setTimeout(() => {
+                            newPopup.remove();
+                        }, 300);
+                    });
+                }
             }
         }, 100);
     } catch (error) {
         console.error("❌ Błąd przy tworzeniu popupu:", error);
     }
 }
+
+// Rejestracja w `window`, aby była dostępna globalnie
 window.createCustomPopup = createCustomPopup;
+
 
 
 
