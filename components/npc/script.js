@@ -4,14 +4,9 @@ function initNpcPopup(npcId, containerId = 'npc-popup', active = false) {
         console.error("Nie znaleziono popup container o id:", containerId);
         return;
     }
-    if (active) {
-        popupContainer.classList.add('active');
-    }
+    if (active) popupContainer.classList.add('active');
 
-    // Jeśli dane konwersacji nie zostały zapisane w window.npcConversations, spróbuj je pobrać z atrybutu data-conversation
-    if (!window.npcConversations) {
-        window.npcConversations = {};
-    }
+    window.npcConversations = window.npcConversations || {};
     if (!window.npcConversations[npcId]) {
         const conversationJson = popupContainer.getAttribute('data-conversation');
         if (!conversationJson) {
@@ -35,19 +30,33 @@ function initNpcPopup(npcId, containerId = 'npc-popup', active = false) {
     const conversationData = window.npcConversations[npcId];
     let currentQuestionId = 1;
 
-    function transformTransactionArrayToDotNotation(transactions) {
-        const result = {};
-        transactions.forEach(tx => {
-            if (!tx.hasOwnProperty("add_remove")) return;
-            const change = parseFloat(tx.add_remove);
-            if (isNaN(change)) return;
-            Object.keys(tx).forEach(key => {
-                if (key === "add_remove") return;
-                const dotKey = key + "." + tx[key];
-                result[dotKey] = (result[dotKey] || 0) + change;
+
+
+    function filterData(value) {
+        if (value === false || value === null || value === 0) {
+            return undefined;
+        }
+        if (Array.isArray(value)) {
+            const newArr = [];
+            value.forEach(item => {
+                const filtered = filterData(item);
+                if (filtered !== undefined) {
+                    newArr.push(filtered);
+                }
             });
-        });
-        return result;
+            return newArr;
+        }
+        if (typeof value === "object") {
+            const newObj = {};
+            Object.keys(value).forEach(key => {
+                const filtered = filterData(value[key]);
+                if (filtered !== undefined) {
+                    newObj[key] = filtered;
+                }
+            });
+            return newObj;
+        }
+        return value;
     }
 
     function renderQuestion(questionId) {
@@ -58,82 +67,136 @@ function initNpcPopup(npcId, containerId = 'npc-popup', active = false) {
             return;
         }
         conversationContainer.innerHTML = "";
-        const questionElement = document.createElement("p");
-        questionElement.innerHTML = questionObj.question;
-        conversationContainer.appendChild(questionElement);
+        const qEl = document.createElement("p");
+        qEl.innerHTML = questionObj.question;
+        conversationContainer.appendChild(qEl);
         const answersContainer = document.createElement("div");
         answersContainer.className = "answers-container";
         questionObj.answers.forEach(answer => {
-            const button = document.createElement("button");
-            button.textContent = answer.answer_text;
-            button.setAttribute("data-next", answer.next_question ? answer.next_question : "0");
-            button.setAttribute("data-transaction", answer.transaction ? JSON.stringify(answer.transaction) : "null");
-            button.setAttribute("data-question-type", answer.question_type);
-            button.setAttribute("data-slider-relation", answer.slider_relation);
-            if (answer.question_type === 'function') {
-                const functionArray = [
-                    {
-                        npc_id: npcId,
-                        function_name: answer.function
-                    }
-                ];
-                button.setAttribute("data-function", JSON.stringify(functionArray));
-            }
-
-            button.setAttribute("data-slider-relation", answer.slider_relation);
-            button.addEventListener("click", handleAnswer);
-            answersContainer.appendChild(button);
+            const btn = document.createElement("button");
+            answersContainer.setAttribute("last-question-id", questionId);
+            btn.textContent = answer.answer_text;
+            Object.keys(answer).forEach(key => {
+                let value = answer[key];
+                if (value === false || value === null || value === 0) return;
+                if (typeof value === "object") {
+                    const filtered = filterData(value);
+                    value = JSON.stringify(filtered);
+                }
+                btn.setAttribute(`data-${key.replace(/_/g, "-")}`, value);
+            });
+            btn.addEventListener("click", handleAnswer);
+            answersContainer.appendChild(btn);
         });
         conversationContainer.appendChild(answersContainer);
     }
 
+
     async function handleAnswer(event) {
-        const button = event.currentTarget;
-        const nextQuestionId = button.getAttribute("data-next");
-        const transactionData = button.getAttribute("data-transaction");
-        const questionType = button.getAttribute("data-question-type");
-        const sliderRelation = button.getAttribute("data-slider-relation");
-        const Datafunction = button.getAttribute("data-function");
-
-        if (Datafunction) {
-            window.lastDataFunction = Datafunction;
-        }
-
-        if (questionType === "relation_with_npc") {
-            const fieldKey = "npc-relation-user-" + currentUserId;
-            const fieldsData = {};
-            fieldsData[fieldKey] = parseFloat(sliderRelation);
-            try {
-                const response = await updatePostACFFields(npcId, fieldsData);
-                showPopup(response.data.message, "success");
-            } catch (error) {
-                showPopup(error, "error");
+        const dataset = event.target.dataset;
+        const answerObj = {};
+        Object.keys(dataset).forEach(key => {
+            let value = dataset[key];
+            if (value && (value.startsWith("{") || value.startsWith("["))) {
+                try {
+                    value = JSON.parse(value);
+                } catch (e) { }
             }
+            answerObj[key] = value;
+        });
+
+        const nextQuestionId = answerObj.nextQuestion;
+        const questionType = answerObj.questionType;
+        let message = null;
+        let popupstate = null;
+
+        switch (questionType) {
+            case "function":
+                window.lastDataFunction = [{ function_name: answerObj.function, npc_id: npcId }];
+                window.npcId = npcId;
+                break;
+
+            case "transaction":
+                const transactions = answerObj.transaction;
+                for (const transaction of transactions) {
+                    switch (transaction.transaction_type) {
+                        case "bag": {
+                            const addRemove = parseInt(transaction.add_remove, 10);
+                            const typevalue = transaction.transaction_type + "." + transaction.bag;
+                            let friendly = transaction.bag;
+                            if (transaction.bag === 'gold') {
+                                friendly = 'złote';
+                            } else if (transaction.bag === 'papierosy') {
+                                friendly = 'szlug';
+                            } else if (transaction.bag === 'piwo') {
+                                friendly = 'browara';
+                            }
+                            try {
+                                const response = await updateACFFieldsWithGui({ [typevalue]: addRemove }, ['body'], 'test');
+
+                                const bagMessage = `${addRemove} ${friendly}.`;
+
+                                message = message ? `${message} oraz ${bagMessage}` : bagMessage;
+                                popupstate = 'success';
+                            } catch (error) {
+                                const container = document.querySelector(".answers-container");
+                                const errorMessage = `Nie masz wystarczająco dużo ${friendly}`;
+
+                                message = message ? `${message} oraz ${errorMessage}` : errorMessage;
+                                popupstate = 'error';
+                                showPopup(message, popupstate);
+                                if (container) {
+                                    const lastQuestionId = container.getAttribute("last-question-id");
+                                    return renderQuestion(lastQuestionId);
+                                }
+                                return;
+                            }
+                            break;
+                        }
+
+                        case "relation": {
+                            const relationNPC = transaction.target_npc;
+                            const relationChange = parseInt(transaction.relation_change, 10);
+                            const field_name = `npc-relation-user-${currentUserId}`;
+                            if (relationChange > 0) {
+                                message = `Ziomeczek Cię bardziej lubi, cena: ` + message;
+                                popupstate = 'success';
+                            }
+                            else if (relationChange < 0) {
+                                message = `Wkurwiłeś ziomeczka`;
+                                popupstate = 'error';
+                            }
+
+                            updatePostACFFields(relationNPC, { [field_name]: relationChange });
+                            break;
+                        }
+
+                        default:
+                            break;
+                    }
+                }
+
+                break;
+
+            default:
+                break;
         }
 
-        if (transactionData && transactionData !== "null") {
-            try {
-                const transactionArray = JSON.parse(transactionData);
-                const dotTransaction = transformTransactionArrayToDotNotation(transactionArray);
-                console.log("Przetwarzanie transakcji (dot notation):", dotTransaction);
-                const response = await updateACFFieldsWithGui(dotTransaction);
-                showPopup(response.data.message, "success");
-            } catch (error) {
-                showPopup(error, "error");
-            }
+        // Wywołaj popup tylko, jeśli message i popupstate są ustawione
+        if (message && popupstate) {
+            showPopup(message, popupstate);
         }
-
         if (nextQuestionId !== "0") {
             renderQuestion(parseInt(nextQuestionId, 10));
         } else {
-            // Zamiast usuwać klasę "active", usuwamy cały popup z DOM:
             popupContainer.remove();
-            console.log(window.lastDataFunction);
             runFunctionNPC(window.lastDataFunction);
             window.lastDataFunction = null;
-
         }
     }
+
+
+
 
     renderQuestion(currentQuestionId);
 }

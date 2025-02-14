@@ -108,8 +108,5 @@ function scene_generator()
     }
     if (isset($svg_url)) {
         echo et_svg_with_data($svg_url, $selected_paths);
-        echo '<pre style="color:#fff;">';
-        et_r($selected_paths);
-        echo '</pre>';
     }
 }

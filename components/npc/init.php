@@ -1,4 +1,40 @@
 <?php
+// function clean_conversation($conversation)
+// {
+//     foreach ($conversation as &$q) {
+//         if (isset($q['answers']) && is_array($q['answers'])) {
+//             foreach ($q['answers'] as &$a) {
+//                 if (!isset($a['question_type']) || $a['question_type'] !== 'function') {
+//                     unset($a['function']);
+//                 }
+//                 if (!isset($a['question_type']) || $a['question_type'] !== 'transaction') {
+//                     unset($a['transaction']);
+//                 } else {
+//                     if (isset($a['transaction']) && is_array($a['transaction'])) {
+//                         foreach ($a['transaction'] as &$t) {
+//                             if (isset($t['transaction_type'])) {
+//                                 if ($t['transaction_type'] === 'bag') {
+//                                     unset($t['relation_target'], $t['target_npc'], $t['target_user'], $t['relation_change']);
+//                                 } elseif ($t['transaction_type'] === 'relation') {
+//                                     unset($t['bag'], $t['add_remove']);
+//                                     if (isset($t['relation_target'])) {
+//                                         if ($t['relation_target'] === 'npc') {
+//                                             unset($t['target_user']);
+//                                         } elseif ($t['relation_target'] === 'user') {
+//                                             unset($t['target_npc']);
+//                                         }
+//                                     }
+//                                 }
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     return $conversation;
+// }
+
 function get_npc($npc_id, $id_popup = 'npc-popup', $active = false)
 {
     $post = get_post($npc_id);
@@ -6,6 +42,8 @@ function get_npc($npc_id, $id_popup = 'npc-popup', $active = false)
     $npc_id = $post->ID;
     $npc_thumbnail = get_post_thumbnail_id($npc_id);
     $conversation = get_field('conversation', $npc_id);
+    // $conversation = clean_conversation($conversation);
+
     $current_user_id = get_current_user_id();
     $active_class = $active ? 'active' : '';
     $conversation_json = json_encode($conversation, JSON_UNESCAPED_UNICODE);

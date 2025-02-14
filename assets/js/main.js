@@ -90,9 +90,6 @@ async function createCustomPopup(params) {
 // Rejestracja w `window`, aby była dostępna globalnie
 window.createCustomPopup = createCustomPopup;
 
-
-
-
 function showPopup(message, type = 'success') {
     const existingPopup = document.querySelector('.popup');
     if (existingPopup) existingPopup.remove();
@@ -216,13 +213,13 @@ async function updateACFFieldsWithGui(fields, parentSelectors = ['body'], custom
         });
 
         // Wyświetl popup z komunikatem – użyj customMsg, jeśli został podany, lub domyślnego komunikatu z backendu
-        showPopup(customMsg || response.data.message, 'success');
+        // showPopup(customMsg || response.data.message, 'success');
 
         return response;
     } catch (error) {
         const errorMsg = error && error.message ? error.message : String(error);
         console.error("❌ Błąd aktualizacji bazy danych:", errorMsg);
-        showPopup(errorMsg, 'error');
+        // showPopup(errorMsg, 'error');
         throw error;
     }
 }
@@ -436,10 +433,19 @@ document.addEventListener("DOMContentLoaded", initSvgInteractions);
 
 function runFunctionNPC(functionsList) {
     console.log('runFunctionNPC', functionsList);
-    console.log(typeof functionsList, Array.isArray(functionsList)); // Debugging
-
-    // Jeśli dane są w postaci stringa JSON, parsujemy je
+    // Jeśli functionsList jest zwykłym stringiem, traktujemy go jako nazwę funkcji
     if (typeof functionsList === "string") {
+        const functionName = functionsList.replace(/-([a-z])/g, g => g[1].toUpperCase());
+        if (typeof window[functionName] === "function") {
+            window[functionName]();
+        } else {
+            console.error(`Błąd: Funkcja "${functionName}" nie istnieje.`);
+        }
+        return;
+    }
+
+    // Jeśli to już obiekt/array (np. JSON) – parsujemy dalej
+    if (typeof functionsList === "string" && (functionsList.trim().startsWith("{") || functionsList.trim().startsWith("["))) {
         try {
             functionsList = JSON.parse(functionsList);
         } catch (error) {
@@ -459,7 +465,6 @@ function runFunctionNPC(functionsList) {
             return;
         }
 
-        // Zamiana nazwy funkcji z myślnikami na camelCase
         const functionName = funcObj.function_name.replace(/-([a-z])/g, g => g[1].toUpperCase());
         const npcId = funcObj.npc_id;
 
@@ -470,5 +475,3 @@ function runFunctionNPC(functionsList) {
         }
     });
 }
-
-
