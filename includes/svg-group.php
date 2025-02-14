@@ -23,6 +23,13 @@ add_action('init', function () {
                 continue; // Pomijamy, jeśli brak SVG
             }
 
+            if (is_numeric($svg_url)) {
+                $svg_url = wp_get_attachment_url($svg_url);
+            } else {
+                $svg_url = $svg_url;
+            }
+
+
             // Oblicz liczbę ścieżek w SVG
             $path_count = count_svg_paths($svg_url);
             if ($path_count === 0) {

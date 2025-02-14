@@ -1,10 +1,7 @@
 <?php
 $instance = get_query_var('instance_name');
 get_header();
-?>
-
-
-<?php if ($instance != 'kreator'): ?>
+if ($instance != 'kreator'): ?>
     <aside>
         <?php get_sidebar();
         ?>
@@ -15,8 +12,16 @@ get_header();
         <?php scene_generator(); ?>
     </div>
     <div class="game-content--inner">
-        <button id="go-to-a-walk" data-npc-id="115">Idź na spacer</button>
         <?php
+        $request_uri = trim($_SERVER['REQUEST_URI'], '/'); // Usuwamy początkowe i końcowe "/"
+        $slash_count = substr_count($request_uri, '/');
+        if ($slash_count === 1) {
+        ?>
+            <button id="go-to-a-walk" data-npc-id="115">Idź na spacer</button>
+
+        <?php
+        }
+
         if ($instance) {
             include(THEME_SRC . '/templates/' . $instance . '/template.php');
         } elseif (is_author()) {

@@ -330,9 +330,13 @@ function count_svg_paths($url)
     } else {
         $url = preg_replace('/http?\:\/\/[^\/]*\//', '', $url);
     }
-    $count = new SimpleXMLElement($url, 0, TRUE);
-    $mycount = count($count->children());
-    $mycount = count($count->path);
-    $mycount += count($count->polygon);
+    if ($url) {
+        $count = new SimpleXMLElement($url, 0, TRUE);
+        $mycount = count($count->children());
+        $mycount = count($count->path);
+        $mycount += count($count->polygon);
+    } else {
+        $mycount = 0;
+    }
     return $mycount;
 }

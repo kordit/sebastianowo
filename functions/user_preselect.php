@@ -11,36 +11,7 @@ add_action('acf/include_fields', function () {
     acf_add_local_field_group(array(
         'key' => 'group_67aa20e8d3095',
         'title' => 'Świat gry',
-        'fields' => array(
-            array(
-                'key' => 'field_67aa20e878c49',
-                'label' => 'SVG',
-                'name' => 'svg',
-                'aria-label' => '',
-                'type' => 'image',
-                'instructions' => '',
-                'required' => 0,
-                'conditional_logic' => 0,
-                'wrapper' => array(
-                    'width' => '',
-                    'class' => '',
-                    'id' => '',
-                ),
-                'return_format' => 'url',
-                'library' => 'all',
-                'mime_types' => 'svg',
-                'preview_size' => 'medium',
-            ),
-            array(
-                'key' => 'npc_leader',
-                'label' => 'Lider wpisu',
-                'name' => 'npc_leaader',
-                'type' => 'post_object',
-                'return_format' => 'id',
-                'post_type' => array('npc'),
-                'allow_null' => 0,
-            ),
-        ),
+        'fields' => array(),
         'location' => array(
             array(
                 array(

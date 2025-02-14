@@ -192,6 +192,20 @@ function custom_rewrite_rules()
 }
 add_action('init', 'custom_rewrite_rules');
 
+function redirect_main_segment()
+{
+    $request_uri = $_SERVER['REQUEST_URI'];
+
+    // Sprawdza, czy URL kończy się na "/main/" i ma dokładnie dwa segmenty przed nim
+    if (preg_match('#^/[^/]+/[^/]+/main/?$#', $request_uri)) {
+        $new_url = preg_replace('#/main/?$#', '', $request_uri);
+        wp_redirect($new_url, 301);
+        exit;
+    }
+}
+add_action('template_redirect', 'redirect_main_segment');
+
+
 
 add_action('template_redirect', function () {
     if (get_query_var('user_me')) {

@@ -390,7 +390,14 @@ function initSvgInteractions() {
                 if (target) {
                     window.location.href = target;
                 }
-            } else if (selectType === "npc") {
+            }
+            else if (selectType === "page") {
+                let target = el.getAttribute('data-page');
+                if (target) {
+                    window.location.href = target;
+                }
+            }
+            else if (selectType === "npc") {
                 const npcId = el.getAttribute('data-npc');
                 if (!npcId) {
                     console.error("Brak atrybutu data-npc w elemencie");

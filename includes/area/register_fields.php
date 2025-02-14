@@ -279,8 +279,9 @@ add_action('init', function () {
                                 'required' => 1,
                                 'conditional_logic' => 0,
                                 'choices' => array(
-                                    'npc' => 'npc',
-                                    'scena' => 'scena',
+                                    'npc' => 'NPC',
+                                    'scena' => 'Scena',
+                                    'page' => 'Przekieruj',
                                 ),
                                 'default_value' => false,
                                 'return_format' => 'array',
@@ -325,6 +326,29 @@ add_action('init', function () {
                                 ),
                             ),
                             array(
+                                'key'   => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_page",
+                                'label' => 'Link',
+                                'name' => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_page",
+                                'type' => 'link',
+                                'required' => 0,
+                                'conditional_logic' => 0,
+                                'wrapper' => array(
+                                    'width' => '33',
+                                    'class' => '',
+                                    'id' => '',
+                                ),
+                                'return_format' => 'url',
+                                'conditional_logic' => array(
+                                    array(
+                                        array(
+                                            'field'    => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_select",
+                                            'operator' => '==',
+                                            'value'    => 'page',
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            array(
                                 'key'   => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_npc",
                                 'label' => 'Npc do sceny',
                                 'name' => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_npc",
@@ -347,14 +371,6 @@ add_action('init', function () {
                                     ),
                                 ),
                             ),
-
-
-
-
-
-
-
-
                         ],
                         'location'   => [
                             [

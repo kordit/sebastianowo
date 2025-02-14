@@ -45,12 +45,13 @@ function scene_generator()
                     $path_id = get_field("field_{$post_title}_scene_0_svg_path_{$i}_id", $post_id);
                     $npc     = get_field("field_{$post_title}_scene_0_svg_path_{$i}_npc", $post_id);
                     $name    = get_field("field_{$post_title}_scene_0_svg_path_{$i}_name", $post_id);
+                    $link    = get_field("field_{$post_title}_scene_0_svg_path_{$i}_page", $post_id);
                     if (!empty($select) || !empty($path_id) || !empty($npc)) {
                         $selected_paths[] = [
                             'select' => $select,
                             'target' => get_site_url() . '/' . $post_type . '/' . $post_name . '/' . $path_id,
                             'npc'    => $npc ?: NULL,
-                            'title'  => $name ?: 'brak tytułu',
+                            'link'  => $link ?: '',
                         ];
                     }
                 }
@@ -77,12 +78,18 @@ function scene_generator()
                     $path_id = get_field("field_{$post_title}_scene_{$found_index}_svg_path_{$i}_id", $post_id);
                     $npc     = get_field("field_{$post_title}_scene_{$found_index}_svg_path_{$i}_npc", $post_id);
                     $name    = get_field("field_{$post_title}_scene_{$found_index}_svg_path_{$i}_name", $post_id);
+                    $link    = get_field("field_{$post_title}_scene_{$found_index}_svg_path_{$i}_page", $post_id) ?: '';
+                    if (isset($link['url'])) {
+                        $link = $link['url'];
+                    }
+
                     if (!empty($select) || !empty($path_id) || !empty($npc)) {
                         $selected_paths[] = [
                             'select' => $select,
                             'target' => get_site_url() . '/' . $post_type . '/' . $post_name . '/' . $path_id,
                             'npc'    => $npc ?: NULL,
                             'title'  => $name ?: 'brak tytułu',
+                            'page'  => $link,
                         ];
                     }
                 }
