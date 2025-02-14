@@ -46,12 +46,16 @@ function scene_generator()
                     $npc     = get_field("field_{$post_title}_scene_0_svg_path_{$i}_npc", $post_id);
                     $name    = get_field("field_{$post_title}_scene_0_svg_path_{$i}_name", $post_id);
                     $link    = get_field("field_{$post_title}_scene_0_svg_path_{$i}_page", $post_id);
-                    if (!empty($select) || !empty($path_id) || !empty($npc)) {
+                    if (isset($link['url'])) {
+                        $link = $link['url'];
+                    }
+                    if (!empty($select) || !empty($path_id) || !empty($npc) || !empty($name)) {
                         $selected_paths[] = [
                             'select' => $select,
                             'target' => get_site_url() . '/' . $post_type . '/' . $post_name . '/' . $path_id,
                             'npc'    => $npc ?: NULL,
-                            'link'  => $link ?: '',
+                            'page'  => $link ?: '',
+                            'title'  => $name ?: 'brak tytułu',
                         ];
                     }
                 }
@@ -83,7 +87,7 @@ function scene_generator()
                         $link = $link['url'];
                     }
 
-                    if (!empty($select) || !empty($path_id) || !empty($npc)) {
+                    if (!empty($select) || !empty($path_id) || !empty($npc) || !empty($name)) {
                         $selected_paths[] = [
                             'select' => $select,
                             'target' => get_site_url() . '/' . $post_type . '/' . $post_name . '/' . $path_id,
@@ -104,5 +108,8 @@ function scene_generator()
     }
     if (isset($svg_url)) {
         echo et_svg_with_data($svg_url, $selected_paths);
+        echo '<pre style="color:#fff;">';
+        et_r($selected_paths);
+        echo '</pre>';
     }
 }

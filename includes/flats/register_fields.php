@@ -17,7 +17,7 @@ add_action('init', function () {
             'not_found_in_trash'    => 'Nie znaleziono żadnych mieszkań w koszu',
         ),
         'public'              => true,
-        'has_archive'         => true,
+        'has_archive'         => false,
         'rewrite'             => array('slug' => 'mieszkania'),
         'menu_icon'           => 'dashicons-admin-home', // lub użyj własnego SVG
         'supports'            => array('title', 'editor', 'author', 'thumbnail'),

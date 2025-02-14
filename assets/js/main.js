@@ -393,6 +393,7 @@ function initSvgInteractions() {
             }
             else if (selectType === "page") {
                 let target = el.getAttribute('data-page');
+                console.log(target);
                 if (target) {
                     window.location.href = target;
                 }
