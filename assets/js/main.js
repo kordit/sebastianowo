@@ -338,6 +338,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     paths.forEach(path => {
         const title = path.getAttribute("data-title");
+        const color = path.getAttribute("data-color");
+        path.style.fill = color;
         if (!title) return;
 
         const bbox = path.getBBox(); // Pobranie granic path w obrębie SVG

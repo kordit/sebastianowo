@@ -1,4 +1,20 @@
 <?php
+function getRelationColor($relation)
+{
+    // Ograniczenie wartości do zakresu -100 do 100
+    $relation = max(-100, min(100, $relation));
+
+    // Przeliczamy wartość na zakres 0-1
+    $normalized = ($relation + 100) / 200;
+
+    // Interpolacja kolorów (czerwony -> żółty -> zielony)
+    $r = (1 - $normalized) * 255; // Od czerwonego do zielonego
+    $g = ($normalized) * 255; // Od żółtego do zielonego
+    $b = 0; // Brak niebieskiego
+
+    return sprintf("#%02X%02X%02X", $r, $g, $b);
+}
+
 function scene_generator()
 {
     $post_id = get_the_ID();
@@ -7,6 +23,7 @@ function scene_generator()
     $scene_id = get_query_var('scene_id', $post_id);
     $get_scenes = get_field('scenes');
     $i = 1;
+    $current_user_id = get_current_user_id();
 
     $instance = get_query_var('instance_name');
     $post_title = sanitize_title(get_the_title($post_id));
@@ -17,16 +34,19 @@ function scene_generator()
                 'select' => 'npc',
                 'npc'    => '142',
                 'title'  => 'Droga skina',
+                'color' => '#008000',
             ],
             [
                 'select' => 'npc',
                 'npc'    => '145',
                 'title'  => 'Droga skejta',
+                'color' => '#008000',
             ],
             [
                 'select' => 'npc',
                 'npc'    => '143',
                 'title'  => 'Droga dresa',
+                'color' => '#008000',
             ],
 
         ];
@@ -46,6 +66,18 @@ function scene_generator()
                     $npc     = get_field("field_{$post_title}_scene_0_svg_path_{$i}_npc", $post_id);
                     $name    = get_field("field_{$post_title}_scene_0_svg_path_{$i}_name", $post_id);
                     $link    = get_field("field_{$post_title}_scene_0_svg_path_{$i}_page", $post_id);
+                    $relation = $current_user_id;
+
+                    if ($select == 'scena') {
+                        $color = '#fff';
+                    } elseif ($select == 'page') {
+                        $color = '#fff';
+                    } elseif ($select == 'npc') {
+                        $color = get_field('npc-relation-user-' . $current_user_id, $npc);
+                        $color = getRelationColor($color);
+                    } else {
+                        $color = '#000';
+                    }
                     if (isset($link['url'])) {
                         $link = $link['url'];
                     }
@@ -56,6 +88,8 @@ function scene_generator()
                             'npc'    => $npc ?: NULL,
                             'page'  => $link ?: '',
                             'title'  => $name ?: 'brak tytułu',
+                            'color'  => $color,
+                            'relation' => $relation,
                         ];
                     }
                 }
@@ -83,6 +117,17 @@ function scene_generator()
                     $npc     = get_field("field_{$post_title}_scene_{$found_index}_svg_path_{$i}_npc", $post_id);
                     $name    = get_field("field_{$post_title}_scene_{$found_index}_svg_path_{$i}_name", $post_id);
                     $link    = get_field("field_{$post_title}_scene_{$found_index}_svg_path_{$i}_page", $post_id) ?: '';
+
+                    if ($select == 'scena') {
+                        $color = '#fff';
+                    } elseif ($select == 'page') {
+                        $color = '#fff';
+                    } elseif ($select == 'npc') {
+                        $color = get_field('npc-relation-user-' . $current_user_id, $npc);
+                        $color = getRelationColor($color);
+                    } else {
+                        $color = '#000';
+                    }
                     if (isset($link['url'])) {
                         $link = $link['url'];
                     }
@@ -94,6 +139,7 @@ function scene_generator()
                             'npc'    => $npc ?: NULL,
                             'title'  => $name ?: 'brak tytułu',
                             'page'  => $link,
+                            'color'  => $color,
                         ];
                     }
                 }

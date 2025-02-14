@@ -48,7 +48,7 @@ function get_npc($npc_id, $id_popup = 'npc-popup', $active = false)
     $active_class = $active ? 'active' : '';
     $conversation_json = json_encode($conversation, JSON_UNESCAPED_UNICODE);
 ?>
-    <div class="controler-popup <?= esc_attr($active_class); ?>" id="<?= esc_attr($id_popup); ?>" data-npc-id="<?= esc_attr($npc_id); ?>" data-conversation='<?= esc_attr($conversation_json); ?>'>
+    <div data-id-start-conversation="" class="controler-popup <?= esc_attr($active_class); ?>" id="<?= esc_attr($id_popup); ?>" data-npc-id="<?= esc_attr($npc_id); ?>" data-conversation='<?= esc_attr($conversation_json); ?>'>
         <div class="person">
             <div class="wrappers-chat">
                 <div class="chat-me">
