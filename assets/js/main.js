@@ -485,14 +485,11 @@ function initSvgInteractions() {
                         }
 
                         const { html, npc_data } = response.data;
-                        console.log('HTML zwrócony z PHP:', html);
-
                         const trimmedData = html.trim();
                         document.body.insertAdjacentHTML('beforeend', trimmedData);
 
                         setTimeout(() => {
                             const popup = document.getElementById(npc_data.popup_id);
-                            console.log('Sprawdzam popup:', popup);
 
                             if (!popup) {
                                 console.error("Popup container nadal nie istnieje");
@@ -501,9 +498,6 @@ function initSvgInteractions() {
 
                             // ✅ Dodanie klasy 'active' do .controler-popup
                             popup.classList.add('active');
-                            console.log('Dodano klasę .active do popup');
-
-                            console.log('Dane przekazane do initNpcPopup:', npc_data);
                             initNpcPopup(npc_data);
                         }, 500);
 
@@ -565,3 +559,106 @@ function runFunctionNPC(functionsList) {
         }
     });
 }
+document.getElementById("go-to-a-walk").addEventListener("click", async () => {
+    try {
+        // Pobieranie ID podstrony z klasy 'postid-*'
+        const bodyClasses = document.body.classList;
+        const postIdClass = [...bodyClasses].find(cls => cls.startsWith('postid-'));
+        const postId = postIdClass ? postIdClass.replace('postid-', '') : null;
+        const currentUrl = window.location.pathname;
+
+        console.log("📌 ID podstrony:", postId);
+
+        const response = await AjaxHelper.sendRequest(global.ajaxurl, "POST", {
+            action: "get_random_event",
+            post_id: postId
+        });
+
+        if (!response.success) {
+            throw new Error(response.data?.message || "Nieznany błąd serwera");
+        }
+
+        const eventData = response.data;
+        console.log("🔹 Wylosowane zdarzenie:", eventData);
+
+        if (eventData.events_type === "npc") {
+            console.log("🔹 Trafiono NPC, otwieranie popupu...");
+
+            AjaxHelper.sendRequest(global.ajaxurl, "POST", {
+                action: "get_npc_popup",
+                npc_id: eventData.npc,
+                page_id: JSON.stringify(getPageData()),
+                current_url: window.location.href
+            }).then(response => {
+                console.log("🟢 Otrzymana odpowiedź AJAX:", response);
+
+                if (!response.success) {
+                    console.error("❌ Błąd pobierania NPC Popup:", response.data);
+                    return;
+                }
+
+                const { html, npc_data } = response.data;
+                const trimmedData = html.trim();
+
+                // Sprawdź, czy popup już istnieje
+                let popup = document.getElementById(npc_data.popup_id);
+                if (!popup) {
+                    console.warn("⚠ Nie znaleziono NPC Popup, tworzę nowy...");
+                    document.body.insertAdjacentHTML("beforeend", trimmedData);
+                    popup = document.getElementById(npc_data.popup_id);
+                }
+
+                setTimeout(() => {
+                    if (!popup) {
+                        console.error("❌ Popup nadal nie istnieje!");
+                        return;
+                    }
+
+                    popup.classList.add("active");
+
+                    if (npc_data.conversation) {
+                        popup.setAttribute("data-conversation", JSON.stringify(npc_data.conversation));
+                    } else {
+                        console.warn("⚠ Brak danych konwersacji, ale popup otwarty.");
+                    }
+
+                    initNpcPopup(eventData.npc, npc_data.popup_id, true);
+                }, 500);
+            });
+
+        } else if (eventData.events_type === "event") {
+            console.log("🔹 Trafiono Event");
+
+            if (!currentUrl.includes("/spacer")) {
+                console.log("🔹 Przekierowanie na spacer...");
+                window.location.href = eventData.redirect_url + "?losuj=1";
+            } else {
+                console.log("🔹 Jesteś już na /spacer – generowanie popupa...");
+                createCustomPopup({
+                    imageId: eventData.image_id || 13,
+                    header: eventData.header,
+                    description: eventData.description,
+                    link: eventData.redirect_url + "?losuj=1",
+                    linkLabel: "Idź dalej",
+                    status: "success",
+                    closeable: true
+                });
+            }
+        } else {
+            console.error("❌ Nieznany typ zdarzenia:", eventData);
+        }
+    } catch (error) {
+        console.error("❌ Błąd przy losowaniu eventu:", error);
+    }
+});
+
+
+// Jeśli jest już `losuj=1` w URL, losuj automatycznie nowe zdarzenie
+document.addEventListener("DOMContentLoaded", () => {
+    const hasLosujParam = new URLSearchParams(window.location.search).has("losuj");
+    if (hasLosujParam) {
+        console.log("🔹 Automatyczne losowanie nowego zdarzenia...");
+        document.getElementById("go-to-a-walk").click();
+    }
+});
+

@@ -8,12 +8,4 @@ $man_image = get_field('group_man') ?: 87;
 
 
 <?php
-if (!empty($fields['siedziba_grupy'])) : ?>
-
-
-<?php else:
-?>
-
-
-
-<?php endif; ?>
+// et_r(get_field('events'));
