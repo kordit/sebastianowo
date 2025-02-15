@@ -511,64 +511,20 @@ function initSvgInteractions() {
         });
     });
 }
-
-// Uruchomienie funkcji po załadowaniu DOM
-document.addEventListener("DOMContentLoaded", initSvgInteractions);
-
-function runFunctionNPC(functionsList) {
-    console.log('runFunctionNPC', functionsList);
-    // Jeśli functionsList jest zwykłym stringiem, traktujemy go jako nazwę funkcji
-    if (typeof functionsList === "string") {
-        const functionName = functionsList.replace(/-([a-z])/g, g => g[1].toUpperCase());
-        if (typeof window[functionName] === "function") {
-            window[functionName]();
-        } else {
-            console.error(`Błąd: Funkcja "${functionName}" nie istnieje.`);
-        }
-        return;
-    }
-
-    // Jeśli to już obiekt/array (np. JSON) – parsujemy dalej
-    if (typeof functionsList === "string" && (functionsList.trim().startsWith("{") || functionsList.trim().startsWith("["))) {
-        try {
-            functionsList = JSON.parse(functionsList);
-        } catch (error) {
-            console.error("Błąd parsowania JSON:", error);
-            return;
-        }
-    }
-
-    if (!Array.isArray(functionsList) || functionsList.length === 0) {
-        console.error("Błąd: Nieprawidłowa tablica funkcji.");
-        return;
-    }
-
-    functionsList.forEach(funcObj => {
-        if (!funcObj.function_name || !funcObj.npc_id) {
-            console.error("Błąd: Brak wymaganych danych w obiekcie funkcji.", funcObj);
-            return;
-        }
-
-        const functionName = funcObj.function_name.replace(/-([a-z])/g, g => g[1].toUpperCase());
-        const npcId = funcObj.npc_id;
-
-        if (typeof window[functionName] === "function") {
-            window[functionName](npcId);
-        } else {
-            console.error(`Błąd: Funkcja "${functionName}" nie istnieje.`);
-        }
-    });
-}
 document.getElementById("go-to-a-walk").addEventListener("click", async () => {
     try {
-        // Pobieranie ID podstrony z klasy 'postid-*'
+        // Pobieranie ID podstrony
         const bodyClasses = document.body.classList;
-        const postIdClass = [...bodyClasses].find(cls => cls.startsWith('postid-'));
-        const postId = postIdClass ? postIdClass.replace('postid-', '') : null;
+        const postIdClass = [...bodyClasses].find(cls => cls.startsWith("postid-"));
+        const postId = postIdClass ? postIdClass.replace("postid-", "") : null;
         const currentUrl = window.location.pathname;
 
         console.log("📌 ID podstrony:", postId);
 
+        // ✅ Odejmowanie energii o 1 (bez sprawdzania)
+        await updateACFFieldsWithGui({ "stats.energy": -1 });
+
+        // ✅ Pobieranie wylosowanego zdarzenia
         const response = await AjaxHelper.sendRequest(global.ajaxurl, "POST", {
             action: "get_random_event",
             post_id: postId
@@ -581,6 +537,13 @@ document.getElementById("go-to-a-walk").addEventListener("click", async () => {
         const eventData = response.data;
         console.log("🔹 Wylosowane zdarzenie:", eventData);
 
+        // ✅ Aktualizacja zasobów i statystyk
+        if (eventData.acf_updates && Object.keys(eventData.acf_updates).length > 0) {
+            console.log("🔄 Aktualizacja ACF:", eventData.acf_updates);
+            await updateACFFieldsWithGui(eventData.acf_updates);
+        }
+
+        // ✅ Obsługa NPC
         if (eventData.events_type === "npc") {
             console.log("🔹 Trafiono NPC, otwieranie popupu...");
 
@@ -589,7 +552,7 @@ document.getElementById("go-to-a-walk").addEventListener("click", async () => {
                 npc_id: eventData.npc,
                 page_id: JSON.stringify(getPageData()),
                 current_url: window.location.href
-            }).then(response => {
+            }).then((response) => {
                 console.log("🟢 Otrzymana odpowiedź AJAX:", response);
 
                 if (!response.success) {
@@ -600,7 +563,6 @@ document.getElementById("go-to-a-walk").addEventListener("click", async () => {
                 const { html, npc_data } = response.data;
                 const trimmedData = html.trim();
 
-                // Sprawdź, czy popup już istnieje
                 let popup = document.getElementById(npc_data.popup_id);
                 if (!popup) {
                     console.warn("⚠ Nie znaleziono NPC Popup, tworzę nowy...");
@@ -651,14 +613,3 @@ document.getElementById("go-to-a-walk").addEventListener("click", async () => {
         console.error("❌ Błąd przy losowaniu eventu:", error);
     }
 });
-
-
-// Jeśli jest już `losuj=1` w URL, losuj automatycznie nowe zdarzenie
-document.addEventListener("DOMContentLoaded", () => {
-    const hasLosujParam = new URLSearchParams(window.location.search).has("losuj");
-    if (hasLosujParam) {
-        console.log("🔹 Automatyczne losowanie nowego zdarzenia...");
-        document.getElementById("go-to-a-walk").click();
-    }
-});
-
