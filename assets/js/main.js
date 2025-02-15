@@ -378,6 +378,49 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+function getPageData() {
+    const body = document.body;
+    let pageData = {};
+
+    // Pobierz aktualny URL i segmenty ścieżki
+    const url = new URL(window.location.href);
+    const pathSegments = url.pathname.split('/').filter(segment => segment); // Usunięcie pustych wartości
+    const segmentCount = pathSegments.length;
+
+    let lastSegment = pathSegments[segmentCount - 1] || ''; // Ostatni segment (domyślnie)
+
+    // 1️⃣ Jeśli body ma klasę zaczynającą się od 'template-', to jest to 'instance' (zwraca normalnie)
+    const templateClass = [...body.classList].find(cls => cls.startsWith('template-'));
+    if (templateClass) {
+        pageData = {
+            TypePage: 'instance',
+            value: lastSegment // ✅ Pobranie ostatniego segmentu URL
+        };
+    }
+    // 2️⃣ Jeśli body ma klasę 'single', to jest to 'scene' (musi zwracać kolejną logikę)
+    else if (body.classList.contains('single')) {
+        if (segmentCount === 2) {
+            pageData = {
+                TypePage: 'scena',
+                value: `${pathSegments[1]}/main` // ✅ Format: "kolejowa/main"
+            };
+        } else if (segmentCount >= 3) {
+            pageData = {
+                TypePage: 'scena',
+                value: `${pathSegments[1]}/${lastSegment}` // ✅ Format: "kolejowa/klatka"
+            };
+        }
+    }
+
+    return pageData;
+}
+
+
+
+
+const pageData = getPageData();
+
+
 function initSvgInteractions() {
     document.querySelectorAll('.container-world svg path').forEach(el => {
         el.addEventListener('click', e => {
@@ -386,15 +429,38 @@ function initSvgInteractions() {
 
             if (selectType === "scena") {
                 let target = el.getAttribute('data-target');
+
                 if (target) {
-                    window.location.href = target;
+                    let container = document.querySelector('.container-world');
+
+                    if (container) {
+                        container.style.animation = 'fadeZoomBlur .5s ease-in forwards';
+
+                        setTimeout(() => {
+                            window.location.href = target;
+                        }, 500); // 1 sekunda (500 ms)
+                    } else {
+                        window.location.href = target; // Jeśli kontener nie istnieje, przekierowanie od razu
+                    }
                 }
             }
+
             else if (selectType === "page") {
                 let target = el.getAttribute('data-page');
                 console.log(target);
+
                 if (target) {
-                    window.location.href = target;
+                    let container = document.querySelector('.container-world');
+
+                    if (container) {
+                        container.style.animation = 'fadeZoomBlur 1s ease-in forwards';
+
+                        setTimeout(() => {
+                            window.location.href = target;
+                        }, 500); // 1 sekunda (500 ms)
+                    } else {
+                        window.location.href = target; // Jeśli kontener nie istnieje, przekierowanie od razu
+                    }
                 }
             }
             else if (selectType === "npc") {
@@ -406,25 +472,47 @@ function initSvgInteractions() {
 
                 AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
                     action: 'get_npc_popup',
-                    npc_id: npcId
+                    npc_id: npcId,
+                    page_id: JSON.stringify(pageData), // ✅ Przekazanie poprawnie sformatowanego obiektu
+                    current_url: window.location.href // ✅ Pełny URL w razie potrzeby
                 })
                     .then(response => {
-                        const trimmedData = response.data.trim();
+                        console.log('Otrzymana odpowiedź AJAX:', response);
+
+                        if (!response.success) {
+                            console.error('Błąd:', response.data);
+                            return;
+                        }
+
+                        const { html, npc_data } = response.data;
+                        console.log('HTML zwrócony z PHP:', html);
+
+                        const trimmedData = html.trim();
                         document.body.insertAdjacentHTML('beforeend', trimmedData);
-                        // console.log("HTML po wstawieniu:", document.body.innerHTML);
 
                         setTimeout(() => {
-                            const popup = document.getElementById('npc-popup');
+                            const popup = document.getElementById(npc_data.popup_id);
+                            console.log('Sprawdzam popup:', popup);
+
                             if (!popup) {
                                 console.error("Popup container nadal nie istnieje");
                                 return;
                             }
-                            initNpcPopup(parseInt(npcId, 10), 'npc-popup', true);
+
+                            // ✅ Dodanie klasy 'active' do .controler-popup
+                            popup.classList.add('active');
+                            console.log('Dodano klasę .active do popup');
+
+                            console.log('Dane przekazane do initNpcPopup:', npc_data);
+                            initNpcPopup(npc_data);
                         }, 500);
+
                     })
                     .catch(error => {
-                        console.error('Błąd:', error);
+                        console.error('Błąd w żądaniu AJAX:', error);
                     });
+
+
             }
         });
     });

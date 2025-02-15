@@ -190,13 +190,12 @@ function initNpcPopup(npcId, containerId = 'npc-popup', active = false) {
             renderQuestion(parseInt(nextQuestionId, 10));
         } else {
             popupContainer.remove();
-            runFunctionNPC(window.lastDataFunction);
+            if (typeof window.lastDataFunction !== 'undefined' && window.lastDataFunction !== null) {
+                runFunctionNPC(window.lastDataFunction);
+            }
+
             window.lastDataFunction = null;
         }
     }
-
-
-
-
     renderQuestion(currentQuestionId);
 }

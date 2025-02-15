@@ -1,5 +1,7 @@
 <?php
 $instance = get_query_var('instance_name');
+
+
 get_header();
 if ($instance != 'kreator'): ?>
     <aside>
@@ -15,7 +17,12 @@ if ($instance != 'kreator'): ?>
         <?php
         $request_uri = trim($_SERVER['REQUEST_URI'], '/'); // Usuwamy początkowe i końcowe "/"
         $slash_count = substr_count($request_uri, '/');
-        if ($slash_count === 1) {
+        if (isset($post_id)) {
+            $scene = get_query_var('scene_id', $post_id);
+        } else {
+            $scene = '';
+        }
+        if ($slash_count === 1 || $scene == 'spacer') {
         ?>
             <button id="go-to-a-walk" data-npc-id="115">Idź na spacer</button>
 
