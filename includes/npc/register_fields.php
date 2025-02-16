@@ -1,5 +1,5 @@
 <?php
-// Rejestracja CPT "NPC"
+
 function register_cpt_npc()
 {
     register_post_type('npc', array(
@@ -28,26 +28,22 @@ function register_cpt_npc()
 }
 add_action('init', 'register_cpt_npc');
 
-
 if (function_exists('acf_add_local_field_group')) {
     acf_add_local_field_group(array(
         'key' => 'group_NPC',
         'title' => 'Dane NPC',
         'fields' => array(
+
+            array(
+                'key'   => 'tab_conversation_start',
+                'label' => 'Start rozmowy',
+                'type'  => 'tab',
+            ),
             array(
                 'key' => 'field_67b08ae59dc59',
                 'label' => 'Start rozmowy',
                 'name' => 'conversation_start',
-                'aria-label' => '',
                 'type' => 'repeater',
-                'instructions' => '',
-                'required' => 0,
-                'conditional_logic' => 0,
-                'wrapper' => array(
-                    'width' => '',
-                    'class' => '',
-                    'id' => '',
-                ),
                 'layout' => 'block',
                 'pagination' => 0,
                 'min' => 0,
@@ -55,20 +51,16 @@ if (function_exists('acf_add_local_field_group')) {
                 'collapsed' => '',
                 'button_label' => 'Dodaj warunek',
                 'rows_per_page' => 20,
+                'acfe_repeater_collapsed' => 1,
+                'acfe_repeater_edit_in_modal' => 1,
                 'sub_fields' => array(
                     array(
                         'key' => 'field_67b08af09dc5a',
                         'label' => 'Jeśli',
                         'name' => 'if',
-                        'aria-label' => '',
                         'type' => 'select',
-                        'instructions' => '',
-                        'required' => 0,
-                        'conditional_logic' => 0,
                         'wrapper' => array(
                             'width' => '20',
-                            'class' => '',
-                            'id' => '',
                         ),
                         'choices' => array(
                             'mission' => 'Misja',
@@ -78,21 +70,12 @@ if (function_exists('acf_add_local_field_group')) {
                         ),
                         'default_value' => false,
                         'return_format' => 'value',
-                        'multiple' => 0,
-                        'allow_null' => 0,
-                        'ui' => 0,
-                        'ajax' => 0,
-                        'placeholder' => '',
-                        'parent_repeater' => 'field_67b08ae59dc59',
                     ),
                     array(
                         'key' => 'field_67b08fcbf1563',
                         'label' => 'Misja',
                         'name' => 'mission_select',
-                        'aria-label' => '',
                         'type' => 'group',
-                        'instructions' => '',
-                        'required' => 0,
                         'conditional_logic' => array(
                             array(
                                 array(
@@ -102,70 +85,43 @@ if (function_exists('acf_add_local_field_group')) {
                                 ),
                             ),
                         ),
+                        'layout' => 'block',
                         'wrapper' => array(
                             'width' => '40',
-                            'class' => '',
-                            'id' => '',
                         ),
-                        'layout' => 'block',
                         'sub_fields' => array(
                             array(
                                 'key' => 'field_67b08ba89dc5b',
                                 'label' => 'Misja',
                                 'name' => 'mission',
-                                'aria-label' => '',
                                 'type' => 'post_object',
-                                'instructions' => '',
-                                'required' => 0,
-                                'conditional_logic' => 0,
                                 'wrapper' => array(
                                     'width' => '50',
-                                    'class' => '',
-                                    'id' => '',
                                 ),
                                 'post_type' => array(
                                     0 => 'tereny',
                                 ),
-                                'post_status' => '',
-                                'taxonomy' => '',
                                 'return_format' => 'object',
-                                'multiple' => 0,
-                                'allow_null' => 0,
-                                'bidirectional' => 0,
                                 'ui' => 1,
-                                'bidirectional_target' => array(),
                             ),
                             array(
                                 'key' => 'field_67b08e96fffbe',
                                 'label' => 'Jest ukończona',
                                 'name' => 'is_end',
-                                'aria-label' => '',
                                 'type' => 'true_false',
-                                'instructions' => '',
-                                'required' => 0,
-                                'conditional_logic' => 0,
                                 'wrapper' => array(
                                     'width' => '50',
-                                    'class' => '',
-                                    'id' => '',
                                 ),
-                                'message' => '',
                                 'default_value' => 0,
                                 'ui' => 0,
-                                'ui_on_text' => '',
-                                'ui_off_text' => '',
                             ),
                         ),
-                        'parent_repeater' => 'field_67b08ae59dc59',
                     ),
                     array(
                         'key' => 'field_67b08bc79dc5c',
                         'label' => 'Scena',
                         'name' => 'scena',
-                        'aria-label' => '',
                         'type' => 'text',
-                        'instructions' => '',
-                        'required' => 0,
                         'conditional_logic' => array(
                             array(
                                 array(
@@ -177,24 +133,14 @@ if (function_exists('acf_add_local_field_group')) {
                         ),
                         'wrapper' => array(
                             'width' => '40',
-                            'class' => '',
-                            'id' => '',
                         ),
-                        'default_value' => '',
-                        'maxlength' => '',
-                        'placeholder' => '',
                         'prepend' => 'jest równa',
-                        'append' => '',
-                        'parent_repeater' => 'field_67b08ae59dc59',
                     ),
                     array(
                         'key' => 'field_67b08c0c9dc5d',
                         'label' => 'Instancja',
                         'name' => 'instation',
-                        'aria-label' => '',
                         'type' => 'text',
-                        'instructions' => '',
-                        'required' => 0,
                         'conditional_logic' => array(
                             array(
                                 array(
@@ -206,24 +152,14 @@ if (function_exists('acf_add_local_field_group')) {
                         ),
                         'wrapper' => array(
                             'width' => '40',
-                            'class' => '',
-                            'id' => '',
                         ),
-                        'default_value' => '',
-                        'maxlength' => '',
-                        'placeholder' => '',
                         'prepend' => 'jest równa',
-                        'append' => '',
-                        'parent_repeater' => 'field_67b08ae59dc59',
                     ),
                     array(
                         'key' => 'field_67b0901df1565',
                         'label' => 'Relacja',
                         'name' => 'relation_select',
-                        'aria-label' => '',
                         'type' => 'group',
-                        'instructions' => '',
-                        'required' => 0,
                         'conditional_logic' => array(
                             array(
                                 array(
@@ -235,8 +171,6 @@ if (function_exists('acf_add_local_field_group')) {
                         ),
                         'wrapper' => array(
                             'width' => '40',
-                            'class' => '',
-                            'id' => '',
                         ),
                         'layout' => 'block',
                         'sub_fields' => array(
@@ -244,41 +178,23 @@ if (function_exists('acf_add_local_field_group')) {
                                 'key' => 'field_67b08c2b9dc5e',
                                 'label' => 'Relacja',
                                 'name' => 'relacja',
-                                'aria-label' => '',
                                 'type' => 'post_object',
-                                'instructions' => '',
-                                'required' => 0,
-                                'conditional_logic' => 0,
                                 'wrapper' => array(
                                     'width' => '33',
-                                    'class' => '',
-                                    'id' => '',
                                 ),
                                 'post_type' => array(
                                     0 => 'npc',
                                 ),
-                                'post_status' => '',
-                                'taxonomy' => '',
                                 'return_format' => 'id',
-                                'multiple' => 0,
-                                'allow_null' => 0,
-                                'bidirectional' => 0,
                                 'ui' => 1,
-                                'bidirectional_target' => array(),
                             ),
                             array(
                                 'key' => 'field_67b08c829dc5f',
                                 'label' => 'Operator',
                                 'name' => 'operator',
-                                'aria-label' => '',
                                 'type' => 'select',
-                                'instructions' => '',
-                                'required' => 0,
-                                'conditional_logic' => 0,
                                 'wrapper' => array(
                                     'width' => '33',
-                                    'class' => '',
-                                    'id' => '',
                                 ),
                                 'choices' => array(
                                     '>' => '>',
@@ -289,67 +205,49 @@ if (function_exists('acf_add_local_field_group')) {
                                 ),
                                 'default_value' => false,
                                 'return_format' => 'value',
-                                'multiple' => 0,
-                                'allow_null' => 0,
-                                'ui' => 0,
-                                'ajax' => 0,
-                                'placeholder' => '',
                             ),
                             array(
                                 'key' => 'field_67b08cab9dc60',
                                 'label' => 'Wartość',
                                 'name' => 'value',
-                                'aria-label' => '',
                                 'type' => 'text',
-                                'instructions' => '',
-                                'required' => 0,
-                                'conditional_logic' => 0,
                                 'wrapper' => array(
                                     'width' => '33',
-                                    'class' => '',
-                                    'id' => '',
                                 ),
-                                'default_value' => '',
-                                'maxlength' => '',
-                                'placeholder' => '',
-                                'prepend' => '',
-                                'append' => '',
                             ),
                         ),
-                        'parent_repeater' => 'field_67b08ae59dc59',
                     ),
                     array(
                         'key' => 'field_67b08bc79dcasdasw2',
                         'label' => 'To zacznij rozmowę od sceny dialogowej',
                         'name' => 'when_start_conversation',
-                        'aria-label' => '',
                         'type' => 'text',
-                        // 'instructions' => 'To zacznij rozmowę od sceny dialogowej',
-                        'required' => 0,
                         'wrapper' => array(
                             'width' => '40',
-                            'class' => '',
-                            'id' => '',
                         ),
-                        'default_value' => '',
-                        'maxlength' => '',
-                        'placeholder' => '',
-                        'prepend' => '',
-                        'append' => '',
-                        'parent_repeater' => 'field_67b08ae59dc59',
                     ),
                 ),
+            ),
+
+            array(
+                'key'   => 'tab_avatar',
+                'label' => 'Avatar',
+                'type'  => 'tab',
             ),
             array(
                 'key' => 'field_6794avatr_npc',
                 'label' => 'Avatar',
                 'name' => 'big_avatar',
                 'type' => 'image',
-                'required' => 0,
-                'conditional_logic' => 0,
                 'return_format' => 'array',
                 'library' => 'all',
                 'preview_size' => 'medium',
+            ),
+
+            array(
+                'key'   => 'tab_wrapper_chat',
+                'label' => 'Odpowiedzi',
+                'type'  => 'tab',
             ),
             array(
                 'key' => 'field_wrapper_chat',
@@ -361,6 +259,8 @@ if (function_exists('acf_add_local_field_group')) {
                 'min' => 1,
                 'max' => 5,
                 'layout' => 'block',
+                'acfe_repeater_collapsed' => 1,
+                'acfe_repeater_edit_in_modal' => 1,
                 'sub_fields' => array(
                     array(
                         'key' => 'field_scena_dialogowa',
@@ -373,19 +273,7 @@ if (function_exists('acf_add_local_field_group')) {
                         'key' => 'field_67afbe46c8395',
                         'label' => 'Konwersacje',
                         'name' => '',
-                        'aria-label' => '',
                         'type' => 'accordion',
-                        'instructions' => '',
-                        'required' => 0,
-                        'conditional_logic' => 0,
-                        'wrapper' => array(
-                            'width' => '',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                        'open' => 0,
-                        'multi_expand' => 0,
-                        'endpoint' => 0,
                     ),
                     array(
                         'key' => 'field_conversation',
@@ -394,17 +282,15 @@ if (function_exists('acf_add_local_field_group')) {
                         'type' => 'repeater',
                         'button_label' => 'Dodaj pytanie',
                         'instructions' => 'Dodaj pytania i odpowiedzi do konwersacji.',
-                        'min' => 0,
-                        'max' => 0,
                         'layout' => 'block',
+                        'acfe_repeater_collapsed' => 1,
+                        'acfe_repeater_edit_in_modal' => 1,
                         'sub_fields' => array(
-
                             array(
                                 'key' => 'field_question',
                                 'label' => 'Pytanie',
                                 'name' => 'question',
                                 'type' => 'wysiwyg',
-                                'instructions' => 'Treść pytania.',
                                 'required' => 1,
                                 'tabs' => 'all',
                                 'toolbar' => 'basic',
@@ -421,6 +307,8 @@ if (function_exists('acf_add_local_field_group')) {
                                 'min' => 1,
                                 'max' => 5,
                                 'layout' => 'block',
+                                'acfe_repeater_collapsed' => 1,
+                                'acfe_repeater_edit_in_modal' => 1,
                                 'sub_fields' => array(
                                     array(
                                         'key' => 'field_answer_visibility',
@@ -433,11 +321,6 @@ if (function_exists('acf_add_local_field_group')) {
                                         ),
                                         'default_value' => 'always',
                                         'return_format' => 'value',
-                                        'wrapper' => array(
-                                            'width' => '100',
-                                            'class' => '',
-                                            'id' => '',
-                                        ),
                                     ),
                                     array(
                                         'key' => 'field_answer_conditions',
@@ -447,6 +330,8 @@ if (function_exists('acf_add_local_field_group')) {
                                         'button_label' => 'Dodaj warunek',
                                         'instructions' => 'Dodaj warunki, które muszą być spełnione, by odpowiedź była widoczna.',
                                         'layout' => 'block',
+                                        'acfe_repeater_collapsed' => 1,
+                                        'acfe_repeater_edit_in_modal' => 1,
                                         'conditional_logic' => array(
                                             array(
                                                 array(
@@ -472,8 +357,6 @@ if (function_exists('acf_add_local_field_group')) {
                                                 'return_format' => 'value',
                                                 'wrapper' => array(
                                                     'width' => '30',
-                                                    'class' => '',
-                                                    'id' => '',
                                                 ),
                                             ),
                                             array(
@@ -483,8 +366,6 @@ if (function_exists('acf_add_local_field_group')) {
                                                 'type' => 'group',
                                                 'wrapper' => array(
                                                     'width' => '70',
-                                                    'class' => '',
-                                                    'id' => '',
                                                 ),
                                                 'conditional_logic' => array(
                                                     array(
@@ -503,25 +384,19 @@ if (function_exists('acf_add_local_field_group')) {
                                                         'type' => 'post_object',
                                                         'post_type' => array('misja'),
                                                         'return_format' => 'object',
-                                                        'multiple' => 0,
-                                                        'allow_null' => 0,
+                                                        'ui' => 1,
                                                         'wrapper' => array(
                                                             'width' => '50',
-                                                            'class' => '',
-                                                            'id' => '',
                                                         ),
                                                     ),
                                                     array(
                                                         'key' => 'field_answer_is_end',
                                                         'label' => 'Jest ukończona',
-                                                        'instructions' => "Misja musi być przypisana do usera",
                                                         'name' => 'is_end',
                                                         'type' => 'true_false',
                                                         'default_value' => 0,
                                                         'wrapper' => array(
                                                             'width' => '50',
-                                                            'class' => '',
-                                                            'id' => '',
                                                         ),
                                                     ),
                                                 ),
@@ -542,8 +417,6 @@ if (function_exists('acf_add_local_field_group')) {
                                                 ),
                                                 'wrapper' => array(
                                                     'width' => '70',
-                                                    'class' => '',
-                                                    'id' => '',
                                                 ),
                                                 'prepend' => 'jest równa',
                                             ),
@@ -563,8 +436,6 @@ if (function_exists('acf_add_local_field_group')) {
                                                 ),
                                                 'wrapper' => array(
                                                     'width' => '70',
-                                                    'class' => '',
-                                                    'id' => '',
                                                 ),
                                                 'prepend' => 'jest równa',
                                             ),
@@ -575,8 +446,6 @@ if (function_exists('acf_add_local_field_group')) {
                                                 'type' => 'group',
                                                 'wrapper' => array(
                                                     'width' => '70',
-                                                    'class' => '',
-                                                    'id' => '',
                                                 ),
                                                 'conditional_logic' => array(
                                                     array(
@@ -595,12 +464,8 @@ if (function_exists('acf_add_local_field_group')) {
                                                         'type' => 'post_object',
                                                         'post_type' => array('npc'),
                                                         'return_format' => 'object',
-                                                        'multiple' => 0,
-                                                        'allow_null' => 0,
                                                         'wrapper' => array(
                                                             'width' => '33',
-                                                            'class' => '',
-                                                            'id' => '',
                                                         ),
                                                     ),
                                                     array(
@@ -610,8 +475,6 @@ if (function_exists('acf_add_local_field_group')) {
                                                         'type' => 'select',
                                                         'wrapper' => array(
                                                             'width' => '33',
-                                                            'class' => '',
-                                                            'id' => '',
                                                         ),
                                                         'choices' => array(
                                                             '>' => '>',
@@ -629,16 +492,12 @@ if (function_exists('acf_add_local_field_group')) {
                                                         'type' => 'text',
                                                         'wrapper' => array(
                                                             'width' => '33',
-                                                            'class' => '',
-                                                            'id' => '',
                                                         ),
                                                     ),
                                                 ),
                                             ),
                                         ),
                                     ),
-
-
                                     array(
                                         'key' => 'field_answer_text',
                                         'label' => 'Tekst odpowiedzi',
@@ -647,8 +506,6 @@ if (function_exists('acf_add_local_field_group')) {
                                         'required' => 1,
                                         'wrapper' => array(
                                             'width' => '33',
-                                            'class' => '',
-                                            'id' => '',
                                         ),
                                     ),
                                     array(
@@ -659,8 +516,6 @@ if (function_exists('acf_add_local_field_group')) {
                                         'instructions' => 'Wpisz ID kolejnego pytania (lub 0, by zakończyć).',
                                         'wrapper' => array(
                                             'width' => '33',
-                                            'class' => '',
-                                            'id' => '',
                                         ),
                                     ),
                                 ),
@@ -675,6 +530,8 @@ if (function_exists('acf_add_local_field_group')) {
                                 'min' => 1,
                                 'max' => 5,
                                 'layout' => 'block',
+                                'acfe_repeater_collapsed' => 1,
+                                'acfe_repeater_edit_in_modal' => 1,
                                 'sub_fields' => array(
                                     array(
                                         'key' => 'field_answer_text',
@@ -684,8 +541,6 @@ if (function_exists('acf_add_local_field_group')) {
                                         'required' => 1,
                                         'wrapper' => array(
                                             'width' => '33',
-                                            'class' => '',
-                                            'id' => '',
                                         ),
                                     ),
                                     array(
@@ -696,8 +551,6 @@ if (function_exists('acf_add_local_field_group')) {
                                         'instructions' => 'Wpisz ID kolejnego pytania (lub 0, by zakończyć).',
                                         'wrapper' => array(
                                             'width' => '33',
-                                            'class' => '',
-                                            'id' => '',
                                         ),
                                     ),
                                     array(
@@ -706,50 +559,40 @@ if (function_exists('acf_add_local_field_group')) {
                                         'name' => 'question_type',
                                         'type' => 'select',
                                         'choices' => array(
-                                            'default'           => 'Nic nie rób',
-                                            'transaction'       => 'Transakcja',
-                                            'from_group'        => 'Z grupy',
-                                            'function'          => 'Funkcja',
+                                            'default'    => 'Nic nie rób',
+                                            'transaction' => 'Transakcja',
+                                            'from_group' => 'Z grupy',
+                                            'function'   => 'Funkcja',
                                         ),
                                         'default_value' => 'default',
                                         'return_format' => 'value',
                                         'wrapper' => array(
                                             'width' => '33',
-                                            'class' => '',
-                                            'id' => '',
                                         ),
                                     ),
                                     array(
                                         'key' => 'field_67ab9655ea305_function',
                                         'label' => 'Funkcja',
                                         'name' => 'function',
-                                        'aria-label' => '',
                                         'type' => 'select',
-                                        'instructions' => '',
-                                        'required' => 0,
-                                        'conditional_logic' => 0,
                                         'choices' => array(
                                             'default' => 'Nic nie rób',
                                             'SetClass' => 'Wybierz klasę',
                                         ),
-                                        'wrapper' => array(
-                                            'width' => '50',
-                                            'class' => '',
-                                            'id' => '',
-                                        ),
                                         'default_value' => false,
                                         'return_format' => 'value',
-                                        'multiple'    => 0,
-                                        'allow_null'  => 0,
-                                        'ui'          => 0,
-                                        'ajax'        => 0,
-                                        'placeholder' => '',
+                                        'multiple' => 0,
+                                        'allow_null' => 0,
+                                        'ui' => 0,
+                                        'ajax' => 0,
                                         'parent_repeater' => 'field_67ab9613ea303',
                                         'conditional_logic' => array(
                                             array(
-                                                'field'    => 'field_67ab9655ea305',
-                                                'operator' => '==',
-                                                'value'    => 'function',
+                                                array(
+                                                    'field'    => 'field_67ab9655ea305',
+                                                    'operator' => '==',
+                                                    'value'    => 'function',
+                                                ),
                                             ),
                                         ),
                                     ),
@@ -757,16 +600,7 @@ if (function_exists('acf_add_local_field_group')) {
                                         'key' => 'field_67afaa9fdd159',
                                         'label' => 'Parametry funkcji',
                                         'name' => 'function_parametr',
-                                        'aria-label' => '',
                                         'type' => 'repeater',
-                                        'instructions' => '',
-                                        'required' => 0,
-                                        'conditional_logic' => 0,
-                                        'wrapper' => array(
-                                            'width' => '50',
-                                            'class' => '',
-                                            'id' => '',
-                                        ),
                                         'layout' => 'block',
                                         'pagination' => 0,
                                         'min' => 0,
@@ -776,52 +610,29 @@ if (function_exists('acf_add_local_field_group')) {
                                         'rows_per_page' => 20,
                                         'conditional_logic' => array(
                                             array(
-                                                'field'    => 'field_67ab9655ea305',
-                                                'operator' => '==',
-                                                'value'    => 'function',
+                                                array(
+                                                    'field' => 'field_67ab9655ea305',
+                                                    'operator' => '==',
+                                                    'value' => 'function',
+                                                ),
                                             ),
+                                        ),
+                                        'wrapper' => array(
+                                            'width' => '50',
                                         ),
                                         'sub_fields' => array(
                                             array(
                                                 'key' => 'field_67afaab1dd15a',
                                                 'label' => 'Nazwa',
                                                 'name' => 'name',
-                                                'aria-label' => '',
                                                 'type' => 'text',
-                                                'instructions' => '',
-                                                'required' => 0,
-                                                'conditional_logic' => 0,
-                                                'wrapper' => array(
-                                                    'width' => '',
-                                                    'class' => '',
-                                                    'id' => '',
-                                                ),
-                                                'default_value' => '',
-                                                'maxlength' => '',
-                                                'placeholder' => '',
-                                                'prepend' => '',
-                                                'append' => '',
                                                 'parent_repeater' => 'field_67afaa9fdd159',
                                             ),
                                             array(
                                                 'key' => 'field_67afaac3dd15b',
                                                 'label' => 'Wartość',
                                                 'name' => 'value',
-                                                'aria-label' => '',
                                                 'type' => 'text',
-                                                'instructions' => '',
-                                                'required' => 0,
-                                                'conditional_logic' => 0,
-                                                'wrapper' => array(
-                                                    'width' => '',
-                                                    'class' => '',
-                                                    'id' => '',
-                                                ),
-                                                'default_value' => '',
-                                                'maxlength' => '',
-                                                'placeholder' => '',
-                                                'prepend' => '',
-                                                'append' => '',
                                                 'parent_repeater' => 'field_67afaa9fdd159',
                                             ),
                                         ),
@@ -833,6 +644,7 @@ if (function_exists('acf_add_local_field_group')) {
                                         'type' => 'repeater',
                                         'button_label' => 'Dodaj transakcje',
                                         'instructions' => 'Zdefiniuj elementy transakcji.',
+                                        'layout' => 'block',
                                         'conditional_logic' => array(
                                             array(
                                                 array(
@@ -842,7 +654,6 @@ if (function_exists('acf_add_local_field_group')) {
                                                 ),
                                             ),
                                         ),
-                                        'layout' => 'block',
                                         'sub_fields' => array(
                                             array(
                                                 'key' => 'field_67ab9961cd299',
@@ -852,15 +663,12 @@ if (function_exists('acf_add_local_field_group')) {
                                                 'allow_null' => 1,
                                                 'required' => 1,
                                                 'choices' => array(
-                                                    'bag'    => 'Towar',
+                                                    'bag'      => 'Towar',
                                                     'relation' => 'Relacja',
                                                 ),
                                                 'wrapper' => array(
                                                     'width' => '33',
-                                                    'class' => '',
-                                                    'id' => '',
                                                 ),
-                                                // 'default_value' => 'bag',
                                             ),
                                             array(
                                                 'key' => 'field_67abcde123fgh',
@@ -883,24 +691,16 @@ if (function_exists('acf_add_local_field_group')) {
                                                 ),
                                                 'wrapper' => array(
                                                     'width' => '25',
-                                                    'class' => '',
-                                                    'id' => '',
                                                 ),
                                             ),
                                             array(
                                                 'key' => 'field_67ab996bagsadas',
                                                 'label' => 'Towar',
                                                 'name' => 'bag',
-                                                'aria-label' => '',
                                                 'type' => 'select',
-                                                'instructions' => '',
-                                                'required' => 0,
-                                                'conditional_logic' => 0,
                                                 'allow_null' => 1,
                                                 'wrapper' => array(
                                                     'width' => '25',
-                                                    'class' => '',
-                                                    'id'    => '',
                                                 ),
                                                 'choices' => array(
                                                     'gold'       => 'Hajs',
@@ -927,11 +727,8 @@ if (function_exists('acf_add_local_field_group')) {
                                                 'key' => 'field_67ab98ffcd298',
                                                 'label' => 'Dodaj/zabierz',
                                                 'name' => 'add_remove',
-                                                'aria-label' => '',
                                                 'type' => 'number',
                                                 'instructions' => 'Napisz ile chcesz zabrać lub dodać towaru. Minus odbiera, liczba dodatnia dodaje.',
-                                                'required' => 0,
-                                                'conditional_logic' => 0,
                                                 'conditional_logic' => array(
                                                     array(
                                                         array(
@@ -943,12 +740,8 @@ if (function_exists('acf_add_local_field_group')) {
                                                 ),
                                                 'wrapper' => array(
                                                     'width' => '25',
-                                                    'class' => '',
-                                                    'id' => '',
                                                 ),
-
                                             ),
-
                                             array(
                                                 'key' => 'field_67abcde456ijk',
                                                 'label' => 'Wybierz NPC',
@@ -958,8 +751,6 @@ if (function_exists('acf_add_local_field_group')) {
                                                 'post_type' => array('npc'),
                                                 'wrapper' => array(
                                                     'width' => '50',
-                                                    'class' => '',
-                                                    'id' => '',
                                                 ),
                                                 'conditional_logic' => array(
                                                     array(
@@ -978,8 +769,6 @@ if (function_exists('acf_add_local_field_group')) {
                                                 'type' => 'user',
                                                 'wrapper' => array(
                                                     'width' => '25',
-                                                    'class' => '',
-                                                    'id' => '',
                                                 ),
                                                 'conditional_logic' => array(
                                                     array(
@@ -997,13 +786,11 @@ if (function_exists('acf_add_local_field_group')) {
                                                 'name' => 'relation_change',
                                                 'type' => 'range',
                                                 'instructions' => 'Ustaw wartość dodatnią dla poprawienia relacji, ujemną dla pogorszenia.',
-                                                'min'           => -20,
-                                                'max'           => 20,
+                                                'min' => -20,
+                                                'max' => 20,
                                                 'default_value' => NULL,
                                                 'wrapper' => array(
                                                     'width' => '25',
-                                                    'class' => '',
-                                                    'id' => '',
                                                 ),
                                                 'conditional_logic' => array(
                                                     array(
@@ -1015,8 +802,6 @@ if (function_exists('acf_add_local_field_group')) {
                                                     ),
                                                 ),
                                             ),
-
-
                                         ),
                                     ),
                                 ),
@@ -1024,7 +809,6 @@ if (function_exists('acf_add_local_field_group')) {
                         ),
                     ),
                 ),
-
             ),
         ),
         'location' => array(
@@ -1041,14 +825,6 @@ if (function_exists('acf_add_local_field_group')) {
         'show_in_rest'  => 0,
     ));
 }
-// add_filter('acf/load_field/key=field_67abcde456ijk', function ($field) {
-//     if (isset($_GET['post']) && is_admin()) {
-//         $field['default_value'] = intval($_GET['post']);
-//     }
-//     return $field;
-// });
-
-
 
 if (function_exists('acf_add_local_field_group')) {
     $fields_relacja = array();

@@ -344,7 +344,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const bbox = path.getBBox(); // Pobranie granic path w obrębie SVG
         const percentX = (bbox.x + bbox.width / 2) / svgWidth * 100;
-        const percentY = (bbox.y - 20) / svgHeight * 100; // 20 jednostek nad ścieżką
+        const percentY = (bbox.y + bbox.height + 15) / svgHeight * 100; // 5 jednostek pod ścieżką
+
 
         // Tworzenie dynamicznego napisu, ale ukrytego domyślnie
         const text = document.createElement("div");
@@ -485,11 +486,13 @@ function initSvgInteractions() {
                         }
 
                         const { html, npc_data } = response.data;
+
                         const trimmedData = html.trim();
                         document.body.insertAdjacentHTML('beforeend', trimmedData);
 
                         setTimeout(() => {
                             const popup = document.getElementById(npc_data.popup_id);
+                            console.log('Sprawdzam popup:', popup);
 
                             if (!popup) {
                                 console.error("Popup container nadal nie istnieje");
@@ -498,6 +501,9 @@ function initSvgInteractions() {
 
                             // ✅ Dodanie klasy 'active' do .controler-popup
                             popup.classList.add('active');
+                            console.log('Dodano klasę .active do popup');
+
+                            console.log('Dane przekazane do initNpcPopup:', npc_data);
                             initNpcPopup(npc_data);
                         }, 500);
 
@@ -511,105 +517,51 @@ function initSvgInteractions() {
         });
     });
 }
-document.getElementById("go-to-a-walk").addEventListener("click", async () => {
-    try {
-        // Pobieranie ID podstrony
-        const bodyClasses = document.body.classList;
-        const postIdClass = [...bodyClasses].find(cls => cls.startsWith("postid-"));
-        const postId = postIdClass ? postIdClass.replace("postid-", "") : null;
-        const currentUrl = window.location.pathname;
 
-        console.log("📌 ID podstrony:", postId);
+// Uruchomienie funkcji po załadowaniu DOM
+document.addEventListener("DOMContentLoaded", initSvgInteractions);
 
-        // ✅ Odejmowanie energii o 1 (bez sprawdzania)
-        await updateACFFieldsWithGui({ "stats.energy": -1 });
-
-        // ✅ Pobieranie wylosowanego zdarzenia
-        const response = await AjaxHelper.sendRequest(global.ajaxurl, "POST", {
-            action: "get_random_event",
-            post_id: postId
-        });
-
-        if (!response.success) {
-            throw new Error(response.data?.message || "Nieznany błąd serwera");
-        }
-
-        const eventData = response.data;
-        console.log("🔹 Wylosowane zdarzenie:", eventData);
-
-        // ✅ Aktualizacja zasobów i statystyk
-        if (eventData.acf_updates && Object.keys(eventData.acf_updates).length > 0) {
-            console.log("🔄 Aktualizacja ACF:", eventData.acf_updates);
-            await updateACFFieldsWithGui(eventData.acf_updates);
-        }
-
-        // ✅ Obsługa NPC
-        if (eventData.events_type === "npc") {
-            console.log("🔹 Trafiono NPC, otwieranie popupu...");
-
-            AjaxHelper.sendRequest(global.ajaxurl, "POST", {
-                action: "get_npc_popup",
-                npc_id: eventData.npc,
-                page_id: JSON.stringify(getPageData()),
-                current_url: window.location.href
-            }).then((response) => {
-                console.log("🟢 Otrzymana odpowiedź AJAX:", response);
-
-                if (!response.success) {
-                    console.error("❌ Błąd pobierania NPC Popup:", response.data);
-                    return;
-                }
-
-                const { html, npc_data } = response.data;
-                const trimmedData = html.trim();
-
-                let popup = document.getElementById(npc_data.popup_id);
-                if (!popup) {
-                    console.warn("⚠ Nie znaleziono NPC Popup, tworzę nowy...");
-                    document.body.insertAdjacentHTML("beforeend", trimmedData);
-                    popup = document.getElementById(npc_data.popup_id);
-                }
-
-                setTimeout(() => {
-                    if (!popup) {
-                        console.error("❌ Popup nadal nie istnieje!");
-                        return;
-                    }
-
-                    popup.classList.add("active");
-
-                    if (npc_data.conversation) {
-                        popup.setAttribute("data-conversation", JSON.stringify(npc_data.conversation));
-                    } else {
-                        console.warn("⚠ Brak danych konwersacji, ale popup otwarty.");
-                    }
-
-                    initNpcPopup(eventData.npc, npc_data.popup_id, true);
-                }, 500);
-            });
-
-        } else if (eventData.events_type === "event") {
-            console.log("🔹 Trafiono Event");
-
-            if (!currentUrl.includes("/spacer")) {
-                console.log("🔹 Przekierowanie na spacer...");
-                window.location.href = eventData.redirect_url + "?losuj=1";
-            } else {
-                console.log("🔹 Jesteś już na /spacer – generowanie popupa...");
-                createCustomPopup({
-                    imageId: eventData.image_id || 13,
-                    header: eventData.header,
-                    description: eventData.description,
-                    link: eventData.redirect_url + "?losuj=1",
-                    linkLabel: "Idź dalej",
-                    status: "success",
-                    closeable: true
-                });
-            }
+function runFunctionNPC(functionsList) {
+    console.log('runFunctionNPC', functionsList);
+    // Jeśli functionsList jest zwykłym stringiem, traktujemy go jako nazwę funkcji
+    if (typeof functionsList === "string") {
+        const functionName = functionsList.replace(/-([a-z])/g, g => g[1].toUpperCase());
+        if (typeof window[functionName] === "function") {
+            window[functionName]();
         } else {
-            console.error("❌ Nieznany typ zdarzenia:", eventData);
+            console.error(`Błąd: Funkcja "${functionName}" nie istnieje.`);
         }
-    } catch (error) {
-        console.error("❌ Błąd przy losowaniu eventu:", error);
+        return;
     }
-});
+
+    // Jeśli to już obiekt/array (np. JSON) – parsujemy dalej
+    if (typeof functionsList === "string" && (functionsList.trim().startsWith("{") || functionsList.trim().startsWith("["))) {
+        try {
+            functionsList = JSON.parse(functionsList);
+        } catch (error) {
+            console.error("Błąd parsowania JSON:", error);
+            return;
+        }
+    }
+
+    if (!Array.isArray(functionsList) || functionsList.length === 0) {
+        console.error("Błąd: Nieprawidłowa tablica funkcji.");
+        return;
+    }
+
+    functionsList.forEach(funcObj => {
+        if (!funcObj.function_name || !funcObj.npc_id) {
+            console.error("Błąd: Brak wymaganych danych w obiekcie funkcji.", funcObj);
+            return;
+        }
+
+        const functionName = funcObj.function_name.replace(/-([a-z])/g, g => g[1].toUpperCase());
+        const npcId = funcObj.npc_id;
+
+        if (typeof window[functionName] === "function") {
+            window[functionName](npcId);
+        } else {
+            console.error(`Błąd: Funkcja "${functionName}" nie istnieje.`);
+        }
+    });
+}

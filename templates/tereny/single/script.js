@@ -75,34 +75,20 @@ if (createGroupForm) {
     });
 }
 
-
 document.getElementById("go-to-a-walk").addEventListener("click", async () => {
     try {
         // Pobieranie ID podstrony
         const bodyClasses = document.body.classList;
-        const postIdClass = [...bodyClasses].find(cls => cls.startsWith('postid-'));
-        const postId = postIdClass ? postIdClass.replace('postid-', '') : null;
-        const currentUrl = new URL(window.location.href);
-        const hasLosujParam = currentUrl.searchParams.has("losuj");
+        const postIdClass = [...bodyClasses].find(cls => cls.startsWith("postid-"));
+        const postId = postIdClass ? postIdClass.replace("postid-", "") : null;
+        const currentUrl = window.location.pathname;
 
         console.log("📌 ID podstrony:", postId);
 
-        // Pobranie aktualnej energii przed ruchem
-        const acfData = await fetchLatestACFFields();
-        const currentEnergy = parseInt(acfData.stats?.energy || 0, 10);
+        // ✅ Odejmowanie energii o 1
+        await updateACFFieldsWithGui({ "stats.energy": -1 });
 
-        if (currentEnergy <= 0) {
-            console.warn("❌ Brak energii, nie możesz się ruszyć!");
-            showPopup("Nie masz wystarczająco energii!", "error");
-            return;
-        }
-
-        // Odejmowanie energii tylko jeśli to pierwszy ruch, a nie kolejne losowanie
-        if (!hasLosujParam) {
-            await updateACFFieldsWithGui({ "stats.energy": -1 });
-        }
-
-        // Pobranie losowego zdarzenia
+        // ✅ Pobieranie wylosowanego zdarzenia
         const response = await AjaxHelper.sendRequest(global.ajaxurl, "POST", {
             action: "get_random_event",
             post_id: postId
@@ -115,6 +101,13 @@ document.getElementById("go-to-a-walk").addEventListener("click", async () => {
         const eventData = response.data;
         console.log("🔹 Wylosowane zdarzenie:", eventData);
 
+        // ✅ Aktualizacja zasobów w GUI
+        if (eventData.acf_updates && Object.keys(eventData.acf_updates).length > 0) {
+            console.log("🔄 Aktualizacja ACF GUI:", eventData.acf_updates);
+            await updateACFFieldsWithGui(eventData.acf_updates);
+        }
+
+        // ✅ Obsługa NPC
         if (eventData.events_type === "npc") {
             console.log("🔹 Trafiono NPC, otwieranie popupu...");
 
@@ -123,7 +116,7 @@ document.getElementById("go-to-a-walk").addEventListener("click", async () => {
                 npc_id: eventData.npc,
                 page_id: JSON.stringify(getPageData()),
                 current_url: window.location.href
-            }).then(response => {
+            }).then((response) => {
                 console.log("🟢 Otrzymana odpowiedź AJAX:", response);
 
                 if (!response.success) {
@@ -162,17 +155,16 @@ document.getElementById("go-to-a-walk").addEventListener("click", async () => {
         } else if (eventData.events_type === "event") {
             console.log("🔹 Trafiono Event");
 
-            if (!hasLosujParam) {
+            if (!currentUrl.includes("/spacer")) {
                 console.log("🔹 Przekierowanie na spacer...");
-                currentUrl.searchParams.set("losuj", "1");
-                window.location.href = currentUrl.toString();
+                window.location.href = eventData.redirect_url + "?losuj=1";
             } else {
                 console.log("🔹 Jesteś już na /spacer – generowanie popupa...");
                 createCustomPopup({
                     imageId: eventData.image_id || 13,
                     header: eventData.header,
                     description: eventData.description,
-                    link: currentUrl.toString(),
+                    link: eventData.redirect_url + "?losuj=1",
                     linkLabel: "Idź dalej",
                     status: "success",
                     closeable: true
@@ -183,6 +175,7 @@ document.getElementById("go-to-a-walk").addEventListener("click", async () => {
         }
     } catch (error) {
         console.error("❌ Błąd przy losowaniu eventu:", error);
+        error = error.replace("stats.energy", "energii");
+        showPopup(error, "error");
     }
 });
-
