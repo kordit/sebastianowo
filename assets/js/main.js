@@ -415,104 +415,68 @@ function getPageData() {
 
     return pageData;
 }
-
-
-
-
 const pageData = getPageData();
-
-
 function initSvgInteractions() {
     document.querySelectorAll('.container-world svg path').forEach(el => {
         el.addEventListener('click', e => {
             e.preventDefault();
-            let selectType = el.getAttribute('data-select');
 
-            if (selectType === "scena") {
-                let target = el.getAttribute('data-target');
+            const selectType = el.getAttribute('data-select');
 
-                if (target) {
-                    let container = document.querySelector('.container-world');
-
-                    if (container) {
-                        container.style.animation = 'fadeZoomBlur .5s ease-in forwards';
-
-                        setTimeout(() => {
-                            window.location.href = target;
-                        }, 500); // 1 sekunda (500 ms)
-                    } else {
-                        window.location.href = target; // Jeśli kontener nie istnieje, przekierowanie od razu
-                    }
-                }
-            }
-
-            else if (selectType === "page") {
-                let target = el.getAttribute('data-page');
-                console.log(target);
-
-                if (target) {
-                    let container = document.querySelector('.container-world');
-
-                    if (container) {
-                        container.style.animation = 'fadeZoomBlur 1s ease-in forwards';
-
-                        setTimeout(() => {
-                            window.location.href = target;
-                        }, 500); // 1 sekunda (500 ms)
-                    } else {
-                        window.location.href = target; // Jeśli kontener nie istnieje, przekierowanie od razu
-                    }
-                }
-            }
-            else if (selectType === "npc") {
+            if (selectType === 'npc') {
                 const npcId = el.getAttribute('data-npc');
                 if (!npcId) {
-                    console.error("Brak atrybutu data-npc w elemencie");
+                    console.error("No data-npc attribute found on element.");
                     return;
                 }
-
+                // Example usage of the AjaxHelper and buildNpcPopup
                 AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
                     action: 'get_npc_popup',
                     npc_id: npcId,
-                    page_id: JSON.stringify(pageData), // ✅ Przekazanie poprawnie sformatowanego obiektu
-                    current_url: window.location.href // ✅ Pełny URL w razie potrzeby
+                    page_id: JSON.stringify(pageData),
+                    current_url: window.location.href
                 })
                     .then(response => {
-                        console.log('Otrzymana odpowiedź AJAX:', response);
-
-                        if (!response.success) {
-                            console.error('Błąd:', response.data);
+                        // response.data.npc_data contains the NPC info
+                        const npcData = response?.data?.npc_data;
+                        console.log(npcData);
+                        if (!npcData) {
+                            console.error("No npc_data in the AJAX response:", response);
                             return;
                         }
-
-                        const { html, npc_data } = response.data;
-
-                        const trimmedData = html.trim();
-                        document.body.insertAdjacentHTML('beforeend', trimmedData);
-
-                        setTimeout(() => {
-                            const popup = document.getElementById(npc_data.popup_id);
-                            console.log('Sprawdzam popup:', popup);
-
-                            if (!popup) {
-                                console.error("Popup container nadal nie istnieje");
-                                return;
-                            }
-
-                            // ✅ Dodanie klasy 'active' do .controler-popup
-                            popup.classList.add('active');
-                            console.log('Dodano klasę .active do popup');
-
-                            console.log('Dane przekazane do initNpcPopup:', npc_data);
-                            initNpcPopup(npc_data);
-                        }, 500);
-
+                        const userId = npcData.user_id; // Get the userId from the response
+                        // Build (or rebuild) the NPC popup from the JSON data
+                        buildNpcPopup(npcData, userId);
                     })
                     .catch(error => {
-                        console.error('Błąd w żądaniu AJAX:', error);
+                        console.error("AJAX request error:", error);
                     });
-
-
+            }
+            else if (selectType === 'scena') {
+                const target = el.getAttribute('data-target');
+                if (!target) return;
+                const container = document.querySelector('.container-world');
+                if (container) {
+                    container.style.animation = 'fadeZoomBlur .5s ease-in forwards';
+                    setTimeout(() => {
+                        window.location.href = target;
+                    }, 500);
+                } else {
+                    window.location.href = target;
+                }
+            }
+            else if (selectType === 'page') {
+                const target = el.getAttribute('data-page');
+                if (!target) return;
+                const container = document.querySelector('.container-world');
+                if (container) {
+                    container.style.animation = 'fadeZoomBlur 1s ease-in forwards';
+                    setTimeout(() => {
+                        window.location.href = target;
+                    }, 500);
+                } else {
+                    window.location.href = target;
+                }
             }
         });
     });

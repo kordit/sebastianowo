@@ -88,8 +88,8 @@ if (function_exists('acf_add_local_field_group')) {
                             'id' => '',
                         ),
                         'choices' => array(
-                            'npc' => 'NPC',
                             'event' => 'zdarzenie',
+                            'npc' => 'NPC',
                         ),
                         'default_value' => false,
                         'return_format' => 'value',

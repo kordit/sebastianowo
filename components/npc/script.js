@@ -1,201 +1,232 @@
-function initNpcPopup(npcId, containerId = 'npc-popup', active = false) {
-    const popupContainer = document.getElementById(containerId);
-    if (!popupContainer) {
-        console.error("Nie znaleziono popup container o id:", containerId);
+
+function buildNpcPopup(npcData, userId) {
+    // Remove any existing popup for a fresh display
+    const existingPopup = document.getElementById('npc-popup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+
+    // Create container
+    const popupContainer = document.createElement('div');
+    popupContainer.id = 'npc-popup';
+    popupContainer.className = 'controler-popup ';
+    popupContainer.npcData = npcData; // Store npcData in the popup
+    setTimeout(() => {
+        popupContainer.classList.add('active');
+    }, 100);
+
+    // NPC Thumbnail (if exists)
+    if (npcData.npc_thumbnail) {
+        const img = document.createElement('img');
+        img.src = npcData.npc_thumbnail;
+        img.alt = npcData.npc_name || 'NPC Image';
+        img.className = 'npc-thumbnail';
+        popupContainer.appendChild(img);
+    }
+
+    // Conversation Display
+    const conversationWrapper = document.createElement('div');
+    conversationWrapper.className = 'npc-conversation-wrapper';
+    popupContainer.appendChild(conversationWrapper);
+
+    // Add the container to the body
+    document.body.appendChild(popupContainer);
+
+    // Initial index is 0
+    console.log()
+    renderConversation(0, npcData, conversationWrapper, popupContainer, userId);
+}
+
+function renderConversation(index, npcData, conversationWrapper, popupContainer, userId) {
+    const conversationStep = npcData.conversation[index];
+
+    if (!conversationStep) {
+        // No more questions, remove popup or do something else
+        popupContainer.remove();
         return;
     }
-    if (active) popupContainer.classList.add('active');
 
-    window.npcConversations = window.npcConversations || {};
-    if (!window.npcConversations[npcId]) {
-        const conversationJson = popupContainer.getAttribute('data-conversation');
-        if (!conversationJson) {
-            console.error("Brak atrybutu data-conversation w popupie");
-            return;
-        }
-        try {
-            window.npcConversations[npcId] = JSON.parse(conversationJson);
-        } catch (e) {
-            console.error("Błąd parsowania data-conversation:", e);
-            return;
-        }
-    }
+    const newQuestionEl = document.createElement('div');
+    newQuestionEl.className = 'npc-question';
+    newQuestionEl.style.opacity = 0; // Start hidden
 
-    const conversationContainer = popupContainer.querySelector("#conversation");
-    if (!conversationContainer) {
-        console.error("Nie znaleziono kontenera rozmowy w popupie");
-        return;
-    }
-    const currentUserId = conversationContainer.getAttribute('data-current-user-id');
-    const conversationData = window.npcConversations[npcId];
-    let currentQuestionId = 1;
+    const npcNameElement = document.createElement('h2');
+    npcNameElement.textContent = (npcData.npc_name ?? 'Unknown NPC') + ' mówi';
 
+    const questionTextElement = document.createElement('p');
+    questionTextElement.innerHTML = conversationStep.question ?? '';
 
+    newQuestionEl.appendChild(npcNameElement);
+    newQuestionEl.appendChild(questionTextElement);
 
-    function filterData(value) {
-        if (value === false || value === null || value === 0) {
-            return undefined;
-        }
-        if (Array.isArray(value)) {
-            const newArr = [];
-            value.forEach(item => {
-                const filtered = filterData(item);
-                if (filtered !== undefined) {
-                    newArr.push(filtered);
-                }
-            });
-            return newArr;
-        }
-        if (typeof value === "object") {
-            const newObj = {};
-            Object.keys(value).forEach(key => {
-                const filtered = filterData(value[key]);
-                if (filtered !== undefined) {
-                    newObj[key] = filtered;
-                }
-            });
-            return newObj;
-        }
-        return value;
-    }
+    const answersEl = document.createElement('div');
+    answersEl.className = 'npc-answers';
 
-    function renderQuestion(questionId) {
-        const index = parseInt(questionId, 10) - 1;
-        const questionObj = conversationData[index];
-        if (!questionObj) {
-            console.error("Nie znaleziono pytania dla id:", questionId);
-            return;
-        }
-        conversationContainer.innerHTML = "";
-        const qEl = document.createElement("p");
-        qEl.innerHTML = questionObj.question;
-        conversationContainer.appendChild(qEl);
-        const answersContainer = document.createElement("div");
-        answersContainer.className = "answers-container";
-        questionObj.answers.forEach(answer => {
-            const btn = document.createElement("button");
-            answersContainer.setAttribute("last-question-id", questionId);
-            btn.textContent = answer.answer_text;
-            Object.keys(answer).forEach(key => {
-                let value = answer[key];
-                if (value === false || value === null || value === 0) return;
-                if (typeof value === "object") {
-                    const filtered = filterData(value);
-                    value = JSON.stringify(filtered);
-                }
-                btn.setAttribute(`data-${key.replace(/_/g, "-")}`, value);
-            });
-            btn.addEventListener("click", handleAnswer);
-            answersContainer.appendChild(btn);
-        });
-        conversationContainer.appendChild(answersContainer);
-    }
+    (conversationStep.answers || []).forEach((answer) => {
+        const answerBtn = document.createElement('button');
+        answerBtn.textContent = answer.answer_text || '...';
+        answerBtn.className = 'npc-answer-btn';
 
-
-    async function handleAnswer(event) {
-        const dataset = event.target.dataset;
-        const answerObj = {};
-        Object.keys(dataset).forEach(key => {
-            let value = dataset[key];
-            if (value && (value.startsWith("{") || value.startsWith("["))) {
-                try {
-                    value = JSON.parse(value);
-                } catch (e) { }
+        // Add data attributes to the button
+        Object.keys(answer).forEach(key => {
+            let val = answer[key];
+            if (typeof val === 'object') {
+                val = JSON.stringify(val);
             }
-            answerObj[key] = value;
+            answerBtn.dataset[key] = val; // Use dataset to set data attributes
         });
+        answerBtn.dataset.userId = userId; // Store user ID in the dataset
 
-        const nextQuestionId = answerObj.nextQuestion;
-        const questionType = answerObj.questionType;
-        let message = null;
-        let popupstate = null;
+        answerBtn.addEventListener('click', handleAnswer);
+        answersEl.appendChild(answerBtn);
+    });
 
-        switch (questionType) {
-            case "function":
-                window.lastDataFunction = [{ function_name: answerObj.function, npc_id: npcId }];
-                window.npcId = npcId;
-                break;
+    // Fade out old content, fade in new content
+    if (conversationWrapper.firstChild) {
+        conversationWrapper.firstChild.style.transition = 'opacity 0.5s';
+        conversationWrapper.firstChild.style.opacity = 0;
+        setTimeout(() => {
+            conversationWrapper.innerHTML = ''; // Clear previous
+            conversationWrapper.appendChild(newQuestionEl);
+            conversationWrapper.appendChild(answersEl);
 
-            case "transaction":
-                const transactions = answerObj.transaction;
-                for (const transaction of transactions) {
-                    switch (transaction.transaction_type) {
-                        case "bag": {
-                            const addRemove = parseInt(transaction.add_remove, 10);
-                            const typevalue = transaction.transaction_type + "." + transaction.bag;
-                            let friendly = transaction.bag;
-                            if (transaction.bag === 'gold') {
-                                friendly = 'złote';
-                            } else if (transaction.bag === 'papierosy') {
-                                friendly = 'szlug';
-                            } else if (transaction.bag === 'piwo') {
-                                friendly = 'browara';
-                            }
-                            try {
-                                const response = await updateACFFieldsWithGui({ [typevalue]: addRemove }, ['body'], 'test');
+            // Fade in new content with delay
+            setTimeout(() => {
+                newQuestionEl.style.transition = 'opacity 0.5s'; // Duration of 0.5s
+                newQuestionEl.style.opacity = 1;
+            }, 100); // Delay of 100ms before fade-in starts
 
-                                const bagMessage = `${addRemove} ${friendly}.`;
+        }, 500); // Wait for fade out
+    } else {
+        // Initial load
+        conversationWrapper.innerHTML = '';
+        conversationWrapper.appendChild(newQuestionEl);
+        conversationWrapper.appendChild(answersEl);
 
-                                message = message ? `${message} oraz ${bagMessage}` : bagMessage;
-                                popupstate = 'success';
-                            } catch (error) {
-                                const container = document.querySelector(".answers-container");
-                                const errorMessage = `Nie masz wystarczająco dużo ${friendly}`;
+        // Fade in new content with delay
+        setTimeout(() => {
+            newQuestionEl.style.transition = 'opacity 0.5s'; // Duration of 0.5s
+            newQuestionEl.style.opacity = 1;
+        }, 100); // Delay of 100ms before fade-in starts
+    }
+}
+async function handleAnswer(event) {
+    const dataset = event.target.dataset;
+    const answerObj = {};
+    Object.keys(dataset).forEach(key => {
+        let value = dataset[key];
+        if (value && (value.startsWith("{") || value.startsWith("["))) {
+            try {
+                value = JSON.parse(value);
+            } catch (e) { }
+        }
+        answerObj[key] = value;
+    });
+    console.log('Odpowiedź:', answerObj);
 
-                                message = message ? `${message} oraz ${errorMessage}` : errorMessage;
-                                popupstate = 'error';
-                                showPopup(message, popupstate);
-                                if (container) {
-                                    const lastQuestionId = container.getAttribute("last-question-id");
-                                    return renderQuestion(lastQuestionId);
-                                }
-                                return;
-                            }
-                            break;
+    const nextQuestionId = answerObj.next_question;
+    const questionType = answerObj.question_type;
+    let message = null;
+    let popupstate = null;
+    console.log(questionType);
+    switch (questionType) {
+        case "function":
+            window.lastDataFunction = [{ function_name: answerObj.function, npc_id: npcId }];
+            window.npcId = npcId;
+            break;
+
+        case "transaction":
+            const transactions = answerObj.transaction;
+            for (const transaction of transactions) {
+                switch (transaction.transaction_type) {
+                    case "bag": {
+                        const addRemove = parseInt(transaction.add_remove, 10);
+                        const typevalue = transaction.transaction_type + "." + transaction.bag;
+                        let friendly = transaction.bag;
+                        if (transaction.bag === 'gold') {
+                            friendly = 'złote';
+                        } else if (transaction.bag === 'papierosy') {
+                            friendly = 'szlug';
+                        } else if (transaction.bag === 'piwo') {
+                            friendly = 'browara';
                         }
+                        try {
+                            await updateACFFieldsWithGui({ [typevalue]: addRemove }, ['body'], 'test')
 
-                        case "relation": {
-                            const relationNPC = transaction.target_npc;
-                            const relationChange = parseInt(transaction.relation_change, 10);
-                            const field_name = `npc-relation-user-${currentUserId}`;
-                            if (relationChange > 0) {
-                                message = `Ziomeczek Cię bardziej lubi, cena: ` + message;
-                                popupstate = 'success';
-                            }
-                            else if (relationChange < 0) {
-                                message = `Wkurwiłeś ziomeczka`;
-                                popupstate = 'error';
-                            }
+                            const numVal = parseInt(addRemove, 10)
+                            let bagMessage = numVal < 0
+                                ? `Wydano ${Math.abs(numVal)} ${friendly}`
+                                : `Otrzymano ${numVal} ${friendly}`
 
-                            updatePostACFFields(relationNPC, { [field_name]: relationChange });
-                            break;
+                            message = message
+                                ? `${message} i ${bagMessage}`
+                                : bagMessage
+
+                            popupstate = 'success'
+                            showPopup(message, popupstate)
+                        } catch (error) {
+                            const container = document.querySelector(".answers-container");
+                            const errorMessage = `Nie masz wystarczająco dużo ${friendly}`;
+
+                            message = message ? `${message} oraz ${errorMessage}` : errorMessage;
+                            popupstate = 'error';
+
+                            showPopup(message, popupstate);
+                            return;
                         }
-
-                        default:
-                            break;
+                        break;
                     }
+
+                    case "relation": {
+                        const relationNPC = transaction.target_npc;
+                        const relationChange = parseInt(transaction.relation_change, 10);
+                        const userId = answerObj.userId; // Get the userId from the dataset
+                        const field_name = `npc-relation-user-${userId}`;
+                        if (relationChange > 0) {
+                            message = `Ziomeczek Cię bardziej lubi, cena: ` + message;
+                            popupstate = 'success';
+                        }
+                        else if (relationChange < 0) {
+                            message = `Wkurwiłeś ziomeczka`;
+                            popupstate = 'error';
+                        }
+
+                        updatePostACFFields(relationNPC, { [field_name]: relationChange });
+                        break;
+                    }
+
+                    default:
+                        break;
                 }
-
-                break;
-
-            default:
-                break;
-        }
-
-        // Wywołaj popup tylko, jeśli message i popupstate są ustawione
-        if (message && popupstate) {
-            showPopup(message, popupstate);
-        }
-        if (nextQuestionId !== "0") {
-            renderQuestion(parseInt(nextQuestionId, 10));
-        } else {
-            popupContainer.remove();
-            if (typeof window.lastDataFunction !== 'undefined' && window.lastDataFunction !== null) {
-                runFunctionNPC(window.lastDataFunction);
             }
 
-            window.lastDataFunction = null;
+            break;
+
+        default:
+            break;
+    }
+
+    // Handle moving to the next question or closing the popup
+    const popupContainer = document.getElementById('npc-popup'); // Get the popup container
+
+    // Get userId from the dataset
+    const userId = answerObj.userId;
+
+    const nextQId = parseInt(nextQuestionId, 10);
+
+    if (nextQId === 0) {
+        if (popupContainer) {
+            popupContainer.remove(); // Close popup
+        }
+    } else {
+        // Move to the next question
+        const newIndex = nextQId - 1; // Calculate the new index
+
+        if (popupContainer) {
+            const conversationWrapper = popupContainer.querySelector('.npc-conversation-wrapper');
+            const npcData = popupContainer.npcData;
+            // Call renderConversation with the updated index and other necessary parameters
+            renderConversation(newIndex, npcData, conversationWrapper, popupContainer, userId);
         }
     }
-    renderQuestion(currentQuestionId);
 }

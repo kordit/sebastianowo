@@ -75,107 +75,89 @@ if (createGroupForm) {
     });
 }
 
-document.getElementById("go-to-a-walk").addEventListener("click", async () => {
+async function startRandomEventProcess() {
     try {
-        // Pobieranie ID podstrony
         const bodyClasses = document.body.classList;
         const postIdClass = [...bodyClasses].find(cls => cls.startsWith("postid-"));
         const postId = postIdClass ? postIdClass.replace("postid-", "") : null;
-        const currentUrl = window.location.pathname;
+        const currentUrl = window.location.href;
 
-        console.log("📌 ID podstrony:", postId);
-
-        // ✅ Odejmowanie energii o 1
         await updateACFFieldsWithGui({ "stats.energy": -1 });
 
-        // ✅ Pobieranie wylosowanego zdarzenia
         const response = await AjaxHelper.sendRequest(global.ajaxurl, "POST", {
             action: "get_random_event",
             post_id: postId
         });
-
         if (!response.success) {
             throw new Error(response.data?.message || "Nieznany błąd serwera");
         }
 
         const eventData = response.data;
-        console.log("🔹 Wylosowane zdarzenie:", eventData);
 
-        // ✅ Aktualizacja zasobów w GUI
         if (eventData.acf_updates && Object.keys(eventData.acf_updates).length > 0) {
-            console.log("🔄 Aktualizacja ACF GUI:", eventData.acf_updates);
             await updateACFFieldsWithGui(eventData.acf_updates);
         }
 
-        // ✅ Obsługa NPC
         if (eventData.events_type === "npc") {
-            console.log("🔹 Trafiono NPC, otwieranie popupu...");
-
             AjaxHelper.sendRequest(global.ajaxurl, "POST", {
                 action: "get_npc_popup",
                 npc_id: eventData.npc,
                 page_id: JSON.stringify(getPageData()),
                 current_url: window.location.href
             }).then((response) => {
-                console.log("🟢 Otrzymana odpowiedź AJAX:", response);
-
-                if (!response.success) {
-                    console.error("❌ Błąd pobierania NPC Popup:", response.data);
-                    return;
-                }
-
+                if (!response.success) return;
                 const { html, npc_data } = response.data;
                 const trimmedData = html.trim();
 
                 let popup = document.getElementById(npc_data.popup_id);
                 if (!popup) {
-                    console.warn("⚠ Nie znaleziono NPC Popup, tworzę nowy...");
                     document.body.insertAdjacentHTML("beforeend", trimmedData);
                     popup = document.getElementById(npc_data.popup_id);
                 }
-
                 setTimeout(() => {
-                    if (!popup) {
-                        console.error("❌ Popup nadal nie istnieje!");
-                        return;
-                    }
-
+                    if (!popup) return;
                     popup.classList.add("active");
-
                     if (npc_data.conversation) {
                         popup.setAttribute("data-conversation", JSON.stringify(npc_data.conversation));
-                    } else {
-                        console.warn("⚠ Brak danych konwersacji, ale popup otwarty.");
                     }
-
                     initNpcPopup(eventData.npc, npc_data.popup_id, true);
                 }, 500);
             });
 
         } else if (eventData.events_type === "event") {
-            console.log("🔹 Trafiono Event");
-
-            if (!currentUrl.includes("/spacer")) {
-                console.log("🔹 Przekierowanie na spacer...");
-                window.location.href = eventData.redirect_url + "?losuj=1";
+            if (!currentUrl.includes("go-further")) {
+                window.location.href = eventData.redirect_url;
             } else {
-                console.log("🔹 Jesteś już na /spacer – generowanie popupa...");
                 createCustomPopup({
                     imageId: eventData.image_id || 13,
                     header: eventData.header,
                     description: eventData.description,
-                    link: eventData.redirect_url + "?losuj=1",
+                    link: eventData.redirect_url,
                     linkLabel: "Idź dalej",
                     status: "success",
                     closeable: true
                 });
             }
         } else {
-            console.error("❌ Nieznany typ zdarzenia:", eventData);
+            console.error("Nieznany typ zdarzenia:", eventData);
         }
     } catch (error) {
-        console.error("❌ Błąd przy losowaniu eventu:", error);
-        error = error.replace("stats.energy", "energii");
-        showPopup(error, "error");
+        // Zastąp 'stats.energy' → 'energii' i pokaż błąd
+        if (typeof error === "string") {
+            error = error.replace("stats.energy", "energii");
+        } else if (error.message) {
+            error.message = error.message.replace("stats.energy", "energii");
+        }
+        showPopup(error.message || error, "error");
+    }
+}
+
+// 1) Wywołanie przy kliknięciu
+document.getElementById("go-to-a-walk").addEventListener("click", startRandomEventProcess);
+
+// 2) Wywołanie przy wejściu, jeśli jest "go-further"
+document.addEventListener("DOMContentLoaded", function () {
+    if (window.location.search.includes("go-further")) {
+        startRandomEventProcess();
     }
 });

@@ -4,10 +4,7 @@ $instance = get_query_var('instance_name');
 
 get_header();
 if ($instance != 'kreator'): ?>
-    <aside>
-        <?php get_sidebar();
-        ?>
-    </aside>
+    <?php get_sidebar(); ?>
 <?php endif; ?>
 <main class="game-content">
     <div class="container-world">

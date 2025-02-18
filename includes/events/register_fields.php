@@ -17,13 +17,31 @@ add_action('init', function () {
             'not_found_in_trash'    => 'Nie znaleziono żadnych zdarzeń w koszu',
         ),
         'public'              => true,
-        'has_archive'         => true,
+        'has_archive'         => false,
         'rewrite'             => array('slug' => 'zdarzenia'),
         'menu_icon'           => 'dashicons-calendar-alt',
         'supports'            => array('title', 'thumbnail'),
         'show_in_rest'        => false,
     ));
+    register_taxonomy('event_location', 'events', array(
+        'labels' => array(
+            'name'              => 'Lokalizacje',
+            'singular_name'     => 'Lokalizacja',
+            'search_items'      => 'Szukaj lokalizacji',
+            'all_items'         => 'Wszystkie lokalizacje',
+            'edit_item'         => 'Edytuj lokalizację',
+            'update_item'       => 'Aktualizuj lokalizację',
+            'add_new_item'      => 'Dodaj nową lokalizację',
+            'new_item_name'     => 'Nowa lokalizacja',
+            'menu_name'         => 'Lokalizacja',
+        ),
+        'public'            => true,
+        'hierarchical'      => false,
+        'show_admin_column' => true,
+        'rewrite'           => array('slug' => 'lokalizacja'),
+    ));
 });
+
 
 // Rejestracja ACF Field Group dla CPT "events"
 add_action('acf/include_fields', function () {

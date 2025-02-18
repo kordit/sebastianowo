@@ -101,14 +101,14 @@
 }
 
 pre {
-    color: #fff;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1000000;
-    background-color: #000;
+    color: #fff !important;
+    // position: fixed;
+    // top: 0;
+    // left: 0;
+    // width: 100%;
+    // height: 100%;
+    // z-index: 1000000;
+    // background-color: #000;
     overflow: scroll;
 }
 
@@ -448,23 +448,51 @@ body.post-type-archive-tereny {
     -webkit-backdrop-filter: blur(3px);
     backdrop-filter: blur(3px);
     transition: opacity 1s;
+    flex-direction: row-reverse;
+
+    .npc-conversation-wrapper {
+        background: #fff;
+        padding: 20px;
+        margin-bottom: auto;
+        top: 50%;
+        position: relative;
+        transform: translate(0px, -50%) scale(0);
+        opacity: 0;
+        transition: opacity 1s 1s;
+
+        &:after {
+            clip-path: polygon(100% 45%, 0 0, 0 100%);
+            content: " ";
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 30px;
+            height: 40px;
+            background: #fff;
+            transform: translate(100%, -50%);
+
+        }
+    }
+
+    .npc-answers {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
 
     &.active {
         transform: scale(1);
         opacity: 1;
 
-        .person {
-            img {
-                opacity: 1;
-                transform: translate(0, 0);
-            }
-
-            .wrappers-chat {
-                opacity: 1;
-            }
+        .npc-conversation-wrapper {
+            transform: translate(0px, -50%) scale(1);
+            opacity: 1;
         }
 
-
+        img {
+            opacity: 1;
+            transform: translate(0%, 0%);
+        }
     }
 
     &:before {
@@ -479,94 +507,18 @@ body.post-type-archive-tereny {
         opacity: .5;
     }
 
-    .person {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: start;
-        width: 100%;
-
-        .wrappers-chat {
-            width: 50%;
-            min-width: 50%;
-            // transform: translate(35%, -40%);
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
-            opacity: 0;
-            transition-duration: 1s;
-            transition-delay: 1.5s;
-
-            .answers-container {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 16px;
-                margin-top: 32px;
-                justify-content: start;
-
-                &:before {
-                    content: "Odpowiedz: ";
-                    font-size: 26px;
-                    width: 100%;
-                    font-weight: bold;
-                    font-family: var(--ff);
-                    line-height: 150%;
-
-                }
-            }
-
-            h1 {
-                text-align: left;
-                margin-top: 0px;
-                margin-bottom: 10px;
-            }
-        }
-
-        .chat-me {
-            width: 100%;
-            background-color: #fff;
-            padding: 40px;
-            position: relative;
-
-            h2 {
-                text-align: center;
-            }
-
-            .inner {
-                max-height: 50vh;
-                overflow: scroll;
-
-                h2 {
-                    font-size: 16px;
-                    font-family: var(--fs);
-                    letter-spacing: 0px;
-                }
-            }
-
-            &:after {
-                content: " ";
-                background-color: #fff;
-                height: 60px;
-                width: 70px;
-                display: block;
-                position: absolute;
-                bottom: 50%;
-                right: -1px;
-                transform: translate(95%, 50%);
-                clip-path: polygon(0 0, 0% 100%, 100% 50%);
-            }
-        }
-
-        img {
-            width: 50%;
-            min-width: 50%;
-            height: auto;
-            object-fit: contain;
-            object-position: bottom;
-            opacity: .2;
-            transform: translate(100%, 0%);
-            transition-delay: .5s;
-            transition-duration: 1s;
-        }
+    img {
+        width: 50%;
+        min-width: 50%;
+        height: auto;
+        object-fit: contain;
+        object-position: bottom;
+        opacity: .2;
+        transform: translate(100%, 0%);
+        transition-delay: .5s;
+        transition-duration: 1s;
+        max-height: 80vh;
+        margin-left: auto;
     }
 
 }
@@ -1050,8 +1002,4 @@ body.template-kreator .game-content {
     &:hover {
         // transform: rotate(0deg);
     }
-}
-
-body {
-    background-color: red !important;
 }
