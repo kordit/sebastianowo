@@ -29,15 +29,15 @@ if ($instance != 'kreator'): ?>
         }
 
         if ($instance) {
-            include(THEME_SRC . '/templates/' . $instance . '/template.php');
+            include(THEME_SRC . '/page-templates/' . $instance . '/template.php');
         } elseif (is_author()) {
-            include(THEME_SRC . '/templates/author/config.php');
+            include(THEME_SRC . '/page-templates/author/config.php');
         } elseif (is_archive()) {
             $single_src = get_post()->post_type;
-            include(THEME_SRC . '/templates/' . $single_src . '/main/template.php');
+            include(THEME_SRC . '/page-templates/' . $single_src . '/main/template.php');
         } elseif (is_single()) {
             $single_src = get_post()->post_type;
-            include(THEME_SRC . '/templates/' . $single_src . '/single/template.php');
+            include(THEME_SRC . '/page-templates/' . $single_src . '/single/template.php');
         } else {
         }
         ?>

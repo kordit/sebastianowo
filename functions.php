@@ -15,13 +15,12 @@ define('THEME_SRC', get_stylesheet_directory());
 define('ASSETS_DIR', get_stylesheet_directory() . '/assets');
 define('ASSETS_URL', get_stylesheet_directory_uri() . '/assets');
 
-define('IMAGES', ASSETS_DIR . "/img/");
-define('SVG', ASSETS_URL . "/svg/");
+define('IMAGES', ASSETS_DIR . "/images/");
+define('SVG', ASSETS_URL . "/images/svg/");
 define('CSS', ASSETS_DIR . "/css/");
 define('JS', ASSETS_DIR . "/js/");
-require_once('includes/include-partials.php');
-require_once('includes/global/support.php');
-
+require_once('inc/includes/include-partials.php');
+require_once('inc/includes/global/support.php');
 
 function et_image($acffield, $size = "full", $url = false, $class = '')
 {
@@ -110,11 +109,11 @@ function load_all_files_php_from_directory($directory, $priority_files = [])
 }
 
 
-load_all_files_php_from_directory(get_template_directory() . '/functions');
+load_all_files_php_from_directory(get_template_directory() . '/inc/functions');
 
 add_action('init', function () {
-    // Ładowanie wszystkich klas z katalogu 'classes'
-    load_all_files_php_from_directory(get_template_directory() . '/classes');
+    // Ładowanie wszystkich klas z katalogu 'inc/classes'
+    load_all_files_php_from_directory(get_template_directory() . '/inc/classes');
     new InstanceManager('walka', true);
     new InstanceManager('kreator', true);
 
@@ -218,4 +217,4 @@ add_action('template_redirect', function () {
     }
 });
 
-require_once('includes/svg-group.php');
+require_once('inc/includes/svg-group.php');
