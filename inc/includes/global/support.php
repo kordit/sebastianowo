@@ -169,7 +169,8 @@ function enqueue_dm_scripts()
             'ajaxurl' => admin_url('admin-ajax.php'),
             'dataManagerNonce' => $nonce,
         ]);
-        wp_register_script('npc_script', get_template_directory_uri() . '/components/npc/script.js', '1.1', true);
+        // Skorygowana ścieżka do komponentu NPC w template-parts
+        wp_register_script('npc_script', get_template_directory_uri() . '/template-parts/components/npc/script.js', ['jquery'], filemtime(get_template_directory() . '/template-parts/components/npc/script.js'), true);
         wp_enqueue_script('npc_script');
     }
 }

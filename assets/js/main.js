@@ -1,38 +1,5 @@
 document.querySelectorAll('[title]').forEach(el => el.removeAttribute('title'));
 
-class AjaxHelper {
-    static sendRequest(url, method, data) {
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open(method, url, true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-
-            xhr.onload = () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.success) {
-                            resolve(response);
-                        } else {
-                            reject(response.data?.message || 'Unknown error');
-                        }
-                    } catch (error) {
-                        reject('Invalid JSON response');
-                    }
-                } else {
-                    reject(`HTTP error: ${xhr.status}`);
-                }
-            };
-
-            xhr.onerror = () => reject('Request failed');
-
-            const encodedData = new URLSearchParams(data).toString();
-            xhr.send(encodedData);
-        });
-    }
-}
-
 async function createCustomPopup(params) {
     try {
         const existingPopup = document.querySelector('.popup-full');
@@ -399,7 +366,9 @@ function getPageData() {
 
     return pageData;
 }
-const pageData = getPageData();
+
+// Bezpieczna deklaracja pageData - nie spowoduje błędu przy wielokrotnym załadowaniu skryptu
+window.pageData = window.pageData || getPageData();
 
 function initSvgInteractions() {
     document.querySelectorAll('.container-world svg path').forEach(el => {
@@ -512,10 +481,3 @@ function runFunctionNPC(functionsList) {
         }
     });
 }
-
-
-
-
-
-
-
