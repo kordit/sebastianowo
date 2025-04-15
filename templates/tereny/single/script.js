@@ -152,12 +152,14 @@ async function startRandomEventProcess() {
     }
 }
 
-// 1) Wywołanie przy kliknięciu
-document.getElementById("go-to-a-walk").addEventListener("click", startRandomEventProcess);
+var goToAWalk = document.getElementById("go-to-a-walk");
+if (goToAWalk) {
+    goToAWalk.addEventListener("click", startRandomEventProcess);
+}
 
-// 2) Wywołanie przy wejściu, jeśli jest "go-further"
 document.addEventListener("DOMContentLoaded", function () {
     if (window.location.search.includes("go-further")) {
         startRandomEventProcess();
     }
 });
+

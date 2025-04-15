@@ -22,7 +22,7 @@ $stats = get_field('stats', 'user_' . $current_user_id);
             </div>
         </div>
         <div class="content-sidebar">
-            <h4><?= $nick; ?></h4>
+            <h4 id="get-user-id" data-id="<?= $current_user_id; ?>"><?= $nick; ?></h4>
             <div class="wrap-bar">
                 <h6>Życie</h6>
                 <div class="bar-game" data-bar-max="<?= $stats['max_life']; ?>" data-bar-current="<?= $stats['life']; ?>" data-bar-color="#4caf50" data-bar-type="life"></div>

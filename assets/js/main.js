@@ -6,7 +6,6 @@ class AjaxHelper {
             const xhr = new XMLHttpRequest();
             xhr.open(method, url, true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            // Dodaj ten nagłówek, aby PHP rozpoznało żądanie jako AJAX
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
             xhr.onload = () => {
@@ -36,13 +35,10 @@ class AjaxHelper {
 
 async function createCustomPopup(params) {
     try {
-        // Usuń istniejący popup, jeśli taki jest
         const existingPopup = document.querySelector('.popup-full');
         if (existingPopup) {
             existingPopup.remove();
         }
-
-        // Wyślij żądanie AJAX, aby pobrać markup popupu
         const response = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
             action: 'create_custom_popup',
             nonce: global.dataManagerNonce,
@@ -59,22 +55,16 @@ async function createCustomPopup(params) {
             throw new Error(response.data?.message || "Nieznany błąd serwera");
         }
 
-        // Dodaj nowy popup do body
         document.body.insertAdjacentHTML('beforeend', response.data.popup);
-
-        // Po krótkim czasie dodaj klasę "active"
         setTimeout(() => {
             const newPopup = document.querySelector('.popup-full');
             if (newPopup) {
                 newPopup.classList.add('active');
-
-                // Dodanie obsługi zamknięcia popupu
                 const closeButton = newPopup.querySelector('.popup-close');
                 if (closeButton) {
                     closeButton.addEventListener('click', () => {
                         newPopup.classList.remove('active');
 
-                        // Usunięcie popupu po krótkim czasie dla płynnej animacji
                         setTimeout(() => {
                             newPopup.remove();
                         }, 300);
@@ -188,10 +178,7 @@ async function updateACFFieldsWithGui(fields, parentSelectors = ['body'], custom
             });
         });
 
-        // Aktualizacja pasków postępu – zakładamy, że każdy pasek ma klasę .bar-game
-        // oraz atrybut data-bar-type, którego wartość odpowiada nazwie statystyki (np. "life")
         document.querySelectorAll('.bar-game').forEach(wrapper => {
-            // Klucz statystyki oczekiwany w spłaszczonych danych to "stats-" + barType
             const statKey = 'stats-' + (wrapper.dataset.barType || '');
             if (flatData.hasOwnProperty(statKey)) {
                 const newCurrent = parseFloat(flatData[statKey]);
@@ -211,9 +198,6 @@ async function updateACFFieldsWithGui(fields, parentSelectors = ['body'], custom
                 wrapper.dataset.barCurrent = newCurrent;
             }
         });
-
-        // Wyświetl popup z komunikatem – użyj customMsg, jeśli został podany, lub domyślnego komunikatu z backendu
-        // showPopup(customMsg || response.data.message, 'success');
 
         return response;
     } catch (error) {
@@ -416,6 +400,7 @@ function getPageData() {
     return pageData;
 }
 const pageData = getPageData();
+
 function initSvgInteractions() {
     document.querySelectorAll('.container-world svg path').forEach(el => {
         el.addEventListener('click', e => {
@@ -429,7 +414,7 @@ function initSvgInteractions() {
                     console.error("No data-npc attribute found on element.");
                     return;
                 }
-                // Example usage of the AjaxHelper and buildNpcPopup
+
                 AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
                     action: 'get_npc_popup',
                     npc_id: npcId,
@@ -437,20 +422,20 @@ function initSvgInteractions() {
                     current_url: window.location.href
                 })
                     .then(response => {
-                        // response.data.npc_data contains the NPC info
                         const npcData = response?.data?.npc_data;
-                        console.log(npcData);
                         if (!npcData) {
                             console.error("No npc_data in the AJAX response:", response);
                             return;
                         }
-                        const userId = npcData.user_id; // Get the userId from the response
-                        // Build (or rebuild) the NPC popup from the JSON data
+                        const userId = npcData.user_id;
                         buildNpcPopup(npcData, userId);
+                        console.log(pageData);
                     })
                     .catch(error => {
+                        console.log(error);
                         console.error("AJAX request error:", error);
                     });
+
             }
             else if (selectType === 'scena') {
                 const target = el.getAttribute('data-target');
@@ -487,7 +472,6 @@ document.addEventListener("DOMContentLoaded", initSvgInteractions);
 
 function runFunctionNPC(functionsList) {
     console.log('runFunctionNPC', functionsList);
-    // Jeśli functionsList jest zwykłym stringiem, traktujemy go jako nazwę funkcji
     if (typeof functionsList === "string") {
         const functionName = functionsList.replace(/-([a-z])/g, g => g[1].toUpperCase());
         if (typeof window[functionName] === "function") {
@@ -498,7 +482,6 @@ function runFunctionNPC(functionsList) {
         return;
     }
 
-    // Jeśli to już obiekt/array (np. JSON) – parsujemy dalej
     if (typeof functionsList === "string" && (functionsList.trim().startsWith("{") || functionsList.trim().startsWith("["))) {
         try {
             functionsList = JSON.parse(functionsList);
@@ -529,3 +512,10 @@ function runFunctionNPC(functionsList) {
         }
     });
 }
+
+
+
+
+
+
+

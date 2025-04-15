@@ -101,7 +101,7 @@ add_action('acf/include_fields', function () {
                 'choices' => array(
                     'skin' => 'Skin',
                     'dres' => 'Dres',
-                    'skate' => 'Skejt',
+                    'blokers' => 'Blokers',
                 ),
                 'default_value' => false,
                 'return_format' => 'array',

@@ -13,7 +13,7 @@ async function SetClass(npc) {
     // Mapowanie NPC na klasy postaci
     const classMap = {
         142: "skin",
-        145: "skate",
+        145: "blokers",
         143: "dres"
     };
 

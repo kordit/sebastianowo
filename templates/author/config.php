@@ -1,23 +1,17 @@
 <?php
-$wrapper_chat = get_field('wrapper_chat', 115);
-$conversation_start = get_field('conversation_start', 115);
-echo "<pre>";
-// filter_conversation_by_conditions($wrapper_chat, $conversation_start);
-$relation_meet_field_key = "npc-meet-user-2";
-$npc_relation_value = get_field($relation_meet_field_key, 115);
+$npc_data = ['npc_id' => 115];
+$conditions = [
+    'scena'     => 'kolejowa/main',
+    'mission'   => '',
+    'instation' => ''
+];
+$result = get_dialogue($npc_data, null, $conditions);
+et_r($result);
 
-echo "conversation_start to:";
-var_dump($conversation_start);
-echo '<br><br><br>';
-echo "wrapper_chat to:";
-var_dump($wrapper_chat);
-echo '<br><br><br>';
-echo "relacja to:";
-var_dump($npc_relation_value);
-
-echo "</pre>";
 
 ?>
+
+<div class="btn" id="open-npc-popup">otworz kurwe</div>
 
 
 <form id="drug-form">
