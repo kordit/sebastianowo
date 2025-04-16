@@ -144,95 +144,119 @@ async function handleAnswer(input) {
 
     const transactions = Object.values(dataset);
 
-    for (const singletransaction of transactions) {
-        console.log(transactions);
-        switch (singletransaction.acf_fc_layout) {
-            case "transaction":
+    // Najpierw zbieramy wszystkie transakcje i sprawdzamy, czy wszystkie mogą zostać wykonane
+    const transactionsToExecute = [];
+    const functionsToExecute = [];
+    const relationsToUpdate = [];
+
+    // Faza 1: Walidacja wszystkich transakcji
+    try {
+        // Pobieramy aktualne wartości zasobów gracza
+        const userFields = await fetchLatestACFFields();
+
+        for (const singletransaction of transactions) {
+            if (singletransaction.acf_fc_layout === "transaction") {
                 const bagType = singletransaction.bag;
                 const value = parseInt(singletransaction.value, 10);
 
-                let friendly;
-                switch (bagType) {
-                    case 'gold':
-                        friendly = 'złote';
-                        break;
-                    case 'papierosy':
-                        friendly = 'szlug';
-                        break;
-                    case 'piwo':
-                        friendly = 'browara';
-                        break;
-                    default:
-                        friendly = bagType;
-                }
-                console.log("BagType" + bagType);
-                console.log("Value: " + value);
+                // Sprawdzenie czy gracz ma wystarczająco dużo zasobów
+                if (value < 0) {
+                    const currentValue = userFields.bag && userFields.bag[bagType] ?
+                        parseInt(userFields.bag[bagType], 10) : 0;
 
-                try {
-                    await updateACFFieldsWithGui(
-                        { [`bag.${bagType}`]: value },
-                        ['body']
-                    );
+                    if (currentValue < Math.abs(value)) {
+                        let friendly;
+                        switch (bagType) {
+                            case 'gold': friendly = 'złote'; break;
+                            case 'papierosy': friendly = 'szlug'; break;
+                            case 'piwo': friendly = 'browara'; break;
+                            default: friendly = bagType;
+                        }
 
-                    const bagMessage = value < 0
-                        ? `Wydano ${Math.abs(value)} ${friendly}`
-                        : `Otrzymano ${value} ${friendly}`;
-
-                    message = message
-                        ? `${message} i ${bagMessage}`
-                        : bagMessage;
-
-                    popupstate = 'success';
-                    showPopup(message, popupstate);
-                } catch (error) {
-                    const errorMessage = `Nie masz wystarczająco dużo ${friendly}`;
-                    message = message
-                        ? `${message} oraz ${errorMessage}`
-                        : errorMessage;
-                    popupstate = 'error';
-                    showPopup(message, popupstate);
-                    return;
-                }
-                break;
-
-            case "function":
-                const innernpcId = document.getElementById('npcdatamanager').dataset.id;
-                const functionsArray = [{ function_name: singletransaction.do_function, npc_id: innernpcId }];
-                document.getElementById('npc-popup').dataset.functions = JSON.stringify(functionsArray);
-                break;
-
-            case "relation":
-                const npcId = singletransaction.npc;
-                const relationChange = parseInt(singletransaction.change_relation, 10);
-                const userId = document.getElementById('get-user-id').dataset.id;
-                const fieldName = `npc-relation-user-${userId}`;
-
-                if (relationChange > 0) {
-                    message = message
-                        ? `${message} i ziomeczek Cię bardziej lubi`
-                        : 'Ziomeczek Cię bardziej lubi';
-                    popupstate = 'success';
-                } else if (relationChange < 0) {
-                    message = message
-                        ? `${message} i wkurwiłeś ziomeczka`
-                        : 'Wkurwiłeś ziomeczka';
-                    popupstate = 'bad';
+                        const errorMessage = `Nie masz wystarczająco dużo ${friendly}`;
+                        showPopup(errorMessage, 'error');
+                        return; // Przerwij całą operację
+                    }
                 }
 
-
-                const tempnpcId = document.getElementById('npcdatamanager')?.dataset?.id;
-                const finalNpcId = npcId || tempnpcId;
-
-                updatePostACFFields(finalNpcId, { [fieldName]: relationChange });
-                showPopup(message, popupstate);
-
-                break;
-
-            default:
-                console.warn('Nieznany typ akcji:', singletransaction.acf_fc_layout);
-                break;
-
+                // Jeśli walidacja przeszła, dodaj do transakcji do wykonania
+                transactionsToExecute.push({
+                    bagType,
+                    value,
+                    friendly: (() => {
+                        switch (bagType) {
+                            case 'gold': return 'złote';
+                            case 'papierosy': return 'szlug';
+                            case 'piwo': return 'browara';
+                            default: return bagType;
+                        }
+                    })()
+                });
+            } else if (singletransaction.acf_fc_layout === "function") {
+                functionsToExecute.push(singletransaction);
+            } else if (singletransaction.acf_fc_layout === "relation") {
+                relationsToUpdate.push(singletransaction);
+            }
         }
 
+        // Faza 2: Wykonanie wszystkich transakcji
+        // Wykonaj transakcje
+        for (const transaction of transactionsToExecute) {
+            await updateACFFieldsWithGui(
+                { [`bag.${transaction.bagType}`]: transaction.value },
+                ['body']
+            );
+
+            const bagMessage = transaction.value < 0
+                ? `Wydano ${Math.abs(transaction.value)} ${transaction.friendly}`
+                : `Otrzymano ${transaction.value} ${transaction.friendly}`;
+
+            message = message
+                ? `${message} i ${bagMessage}`
+                : bagMessage;
+
+            popupstate = 'success';
+        }
+
+        // Wykonaj funkcje
+        for (const func of functionsToExecute) {
+            const innernpcId = document.getElementById('npcdatamanager').dataset.id;
+            const functionsArray = [{ function_name: func.do_function, npc_id: innernpcId }];
+            document.getElementById('npc-popup').dataset.functions = JSON.stringify(functionsArray);
+        }
+
+        // Aktualizuj relacje
+        for (const relation of relationsToUpdate) {
+            const npcId = relation.npc;
+            const relationChange = parseInt(relation.change_relation, 10);
+            const userId = document.getElementById('get-user-id').dataset.id;
+            const fieldName = `npc-relation-user-${userId}`;
+
+            if (relationChange > 0) {
+                message = message
+                    ? `${message} i ziomeczek Cię bardziej lubi`
+                    : 'Ziomeczek Cię bardziej lubi';
+                popupstate = 'success';
+            } else if (relationChange < 0) {
+                message = message
+                    ? `${message} i wkurwiłeś ziomeczka`
+                    : 'Wkurwiłeś ziomeczka';
+                popupstate = 'bad';
+            }
+
+            const tempnpcId = document.getElementById('npcdatamanager')?.dataset?.id;
+            const finalNpcId = npcId || tempnpcId;
+
+            updatePostACFFields(finalNpcId, { [fieldName]: relationChange });
+        }
+
+        // Wyświetl komunikat podsumowujący
+        if (message) {
+            showPopup(message, popupstate || 'success');
+        }
+
+    } catch (error) {
+        console.error('Błąd podczas przetwarzania transakcji:', error);
+        showPopup('Wystąpił błąd podczas przetwarzania transakcji', 'error');
     }
 }
