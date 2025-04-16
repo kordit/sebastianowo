@@ -338,15 +338,16 @@ html {
     z-index: 1000;
     font-family: 'Work Sans', sans-serif;
     transition: opacity 0.3s ease;
+    transform: translate(25%, -20px) !important;
 }
 
 .npc-dialog-bubble::after {
     content: '';
     position: absolute;
-    bottom: -10px;
-    left: 50%;
+    bottom: -20px;
+    left: 15px;
     margin-left: -10px;
-    border-width: 10px 10px 0;
+    border-width: 20px 20px 0;
     border-style: solid;
     border-color: #333 transparent transparent transparent;
 }

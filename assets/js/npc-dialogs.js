@@ -131,7 +131,13 @@
                 const prevDialog = dialogs[currentDialogIndex];
                 const dialogElement = document.getElementById(`npc-dialog-${prevDialog.npc_id}`);
                 if (dialogElement) {
-                    dialogElement.style.display = 'none';
+                    // Nie ukrywaj poprzedniego dialogu jeśli to ostatni dialog i akcja to 'stop'
+                    const isLastDialog = currentDialogIndex === dialogs.length - 1;
+                    const isStopAction = koniecDialogu && koniecDialogu.akcja === 'stop';
+
+                    if (!(isLastDialog && isStopAction)) {
+                        dialogElement.style.display = 'none';
+                    }
                 }
             }
 
@@ -201,6 +207,16 @@
                         dialogElement.style.display = 'none';
                     }
                 });
+                break;
+
+            case 'stop':
+                // Zatrzymaj rotację ale zachowaj ostatni dialog na ekranie
+                console.log('Akcja: Zatrzymaj na ostatnim dialogu');
+                if (rotationInterval) {
+                    clearInterval(rotationInterval);
+                    rotationInterval = null;
+                }
+                // Nie ukrywamy dialogów - ostatni pozostaje widoczny
                 break;
 
             case 'repeater':
