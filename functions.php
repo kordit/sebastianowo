@@ -22,6 +22,7 @@ define('CSS', ASSETS_DIR . "/css/");
 define('JS', ASSETS_DIR . "/js/");
 require_once('inc/includes/include-partials.php');
 require_once('inc/includes/global/support.php');
+require_once('inc/functions/npc_dialogs.php');
 
 function et_image($acffield, $size = "full", $url = false, $class = '')
 {

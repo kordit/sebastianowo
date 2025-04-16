@@ -327,6 +327,54 @@ html {
     // padding-top: 32px;
 }
 
+.npc-dialog-bubble {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #333;
+    border-radius: 12px;
+    padding: 10px 15px;
+    max-width: 250px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    font-family: 'Work Sans', sans-serif;
+    transition: opacity 0.3s ease;
+}
+
+.npc-dialog-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    margin-left: -10px;
+    border-width: 10px 10px 0;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.npc-dialog-content {
+    color: #333;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: center;
+}
+
+/* Animacja pojawiania się */
+@keyframes dialogFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) translateX(-50%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) translateX(-50%);
+    }
+}
+
+.npc-dialog-bubble {
+    animation: dialogFadeIn 0.5s ease forwards;
+}
+
 aside {
     position: absolute;
     z-index: 4;
