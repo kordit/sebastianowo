@@ -216,11 +216,16 @@ async function handleAnswer(input) {
                     message = message
                         ? `${message} i wkurwiłeś ziomeczka`
                         : 'Wkurwiłeś ziomeczka';
-                    popupstate = 'error';
+                    popupstate = 'bad';
                 }
-                // showPopup(message, popupstate);
 
-                updatePostACFFields(npcId, { [fieldName]: relationChange });
+
+                const tempnpcId = document.getElementById('npcdatamanager')?.dataset?.id;
+                const finalNpcId = npcId || tempnpcId;
+
+                updatePostACFFields(finalNpcId, { [fieldName]: relationChange });
+                showPopup(message, popupstate);
+
                 break;
 
             default:
@@ -228,5 +233,6 @@ async function handleAnswer(input) {
                 break;
 
         }
+
     }
 }

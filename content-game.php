@@ -23,7 +23,7 @@ if ($instance != 'kreator'): ?>
         }
         if ($slash_count === 1 || $scene == 'spacer') {
         ?>
-            <button id="go-to-a-walk">Idź na spacer</button>
+            <!-- <button id="go-to-a-walk">Idź na spacer</button> -->
 
         <?php
         }

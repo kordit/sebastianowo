@@ -16,6 +16,7 @@ define('ASSETS_DIR', get_stylesheet_directory() . '/assets');
 define('ASSETS_URL', get_stylesheet_directory_uri() . '/assets');
 
 define('IMAGES', ASSETS_DIR . "/images/");
+define('PNG', ASSETS_URL . "/images/png");
 define('SVG', ASSETS_URL . "/images/svg/");
 define('CSS', ASSETS_DIR . "/css/");
 define('JS', ASSETS_DIR . "/js/");
@@ -119,7 +120,7 @@ add_action('init', function () {
 
     $all_instance = get_all_instance();
     foreach ($all_instance as $istance) {
-        new InstanceManager(sanitize_title($istance));
+        new InstanceManager(sanitize_title($istance), true); // Ustawienie parametru load_assets na true dla wszystkich instancji
     }
 });
 flush_rewrite_rules();

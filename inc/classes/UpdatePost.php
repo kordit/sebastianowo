@@ -2,10 +2,10 @@
 function update_acf_post_fields_reusable()
 {
     // Akceptujemy tylko żądania AJAX
-    if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest') {
-        wp_send_json_error(['message' => 'Nieautoryzowane żądanie']);
-        wp_die();
-    }
+    // if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest') {
+    //     wp_send_json_error(['message' => 'Nieautoryzowane żądanie']);
+    //     wp_die();
+    // }
 
     check_ajax_referer('dm_nonce', 'nonce');
 

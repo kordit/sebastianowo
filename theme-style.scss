@@ -145,6 +145,7 @@ body {
     &.logged-in {
         background-color: #000;
         background-image: none;
+        display: flex;
     }
 
     &.post-type-archive-tereny {
@@ -321,9 +322,80 @@ html {
 }
 
 .game-content--inner {
-    width: calc(100% - 300px);
+    width: calc(100% - 25vw);
     margin-left: auto;
-    padding-top: 32px;
+    // padding-top: 32px;
+}
+
+aside {
+    position: absolute;
+    z-index: 4;
+    background-image: url(/wp-content/themes/game/assets/images/png/sidebar.png);
+    padding: 20px 10px 10px;
+    left: 20px;
+    top: 20px;
+    border: solid 7px #000;
+    max-width: 270px;
+
+
+    .icons {
+        margin-top: 20px;
+        display: flex;
+        gap: 5px 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+
+        a {
+            display: flex;
+            flex-direction: column;
+            font-size: 10px;
+            font-weight: bold;
+            color: #000;
+            text-decoration: none;
+            opacity: .5;
+            transition: opacity .5s;
+            align-items: center;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+
+        img {
+            width: 30px;
+            height: 30px;
+            margin-bottom: 5px;
+        }
+    }
+
+    #get-user-id {
+        text-align: center;
+    }
+
+
+    &:before {
+        content: " ";
+        background-image: url(/wp-content/themes/game/assets/images/png/pin.png);
+        position: absolute;
+        top: 0px;
+        left: 50%;
+        width: 90px;
+        height: 40px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: bottom;
+        transform: translate(-50%, -70%);
+    }
+
+    .content-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+.game-content {
+    width: 100vw;
 }
 
 html {
@@ -333,7 +405,7 @@ html {
 .bar-game {
     width: 100%;
     max-width: 300px;
-    height: 20px;
+    height: 15px;
     background: #444;
     position: relative;
     overflow: hidden;
@@ -342,7 +414,7 @@ html {
     font-weight: bold;
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 7px;
     justify-content: center;
     border: solid 2px #333;
 }
@@ -358,28 +430,72 @@ html {
 }
 
 .bar-value {
+    font-size: 11px;
     position: relative;
     z-index: 2;
 }
 
-.container-world {
+header {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 40;
+    padding: 10px;
+    background-image: url(/wp-content/themes/game/assets/images/png/sidebar.png);
+    background-size: contain;
+    border: solid 4px #000;
 
-    // transition-duration: 1s;
+    .resource-item {
+        img {
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    .nowt-display {
+        display: flex;
+        gap: 20px;
+
+        .resource-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: .5;
+            transition: opacity .5s;
+
+            &:hover {
+                opacity: 1;
+            }
+
+            span {
+                font-size: 12px;
+            }
+        }
+    }
+}
+
+.container-world {
+    margin-left: auto;
+    position: relative;
     transform-origin: center;
     transform: scale(1.5);
     opacity: 0;
     filter: blur(10px);
     animation: reverseFadeZoomBlur .5s ease-out forwards;
 
+
+    // transition-duration: 1s;
+
+
     &.zooming {
         transform: scale(3);
-
         opacity: 0;
     }
 
     img {
-        width: 100%;
-        height: auto;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
     }
 
     svg {
@@ -387,6 +503,7 @@ html {
         left: 0;
         width: 100%;
         height: auto;
+        top: 0;
 
         path {
             fill: red;
@@ -438,20 +555,20 @@ body.post-type-archive-tereny {
     position: fixed;
     top: 0;
     right: 0px;
-    width: calc(100% - 200px);
+    width: 100vw;
     padding-left: 100px;
     height: 100%;
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
-    z-index: 3;
+    z-index: 13;
     -webkit-backdrop-filter: blur(3px);
     backdrop-filter: blur(3px);
     transition: opacity 1s;
     flex-direction: row-reverse;
 
     .npc-conversation-wrapper {
-        width: 50%;
+        width: 75%;
         background: #fff;
         padding: 20px;
         margin-bottom: auto;
@@ -509,7 +626,7 @@ body.post-type-archive-tereny {
     }
 
     img {
-        width: 50%;
+        width: 75%;
         min-width: 50%;
         height: auto;
         object-fit: contain;
@@ -543,7 +660,7 @@ a.btn.back {
 
 .login-page-wrapper {
     text-align: center;
-    min-height: 100vh;
+    // min-height: 100vh;
     display: flex;
     align-items: center;
 
@@ -579,110 +696,7 @@ a.btn.back {
     }
 }
 
-aside {
-    width: calc(25% - 16px);
-    position: fixed;
-    padding: 2px 8px 8px 2px;
-    max-width: 300px;
-    margin-left: -30px;
-    height: calc(100vh + 80px);
-    padding-left: 20px;
-    margin-top: -30px;
-    z-index: 5;
 
-    &:after {
-        content: " ";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: #000;
-        mask-image: url(/wp-content/themes/game/assets/images/svg/pion.svg);
-        mask-size: 100% 100%;
-        z-index: 0;
-    }
-
-    .wrapper {
-        background-image: url(/wp-content/uploads/2025/02/wall-texture-with-damaged-paint-scaled-e1739040234649.jpg);
-        background-size: cover;
-        mask-image: url(/wp-content/themes/game/assets/images/svg/pion.svg);
-        mask-size: 100% 100%;
-        position: relative;
-        z-index: 2;
-        height: 100%;
-    }
-
-    .content-sidebar {
-        padding: 30px;
-        padding-top: 20px;
-    }
-
-    .polaroid {
-        margin: 0;
-        margin-top: 32px;
-    }
-
-
-    .navigation-title {
-        margin-top: 40px;
-    }
-
-    .wrap-bar {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .wrap-bar {
-        margin-top: 16px;
-    }
-
-    nav {
-        ul {
-            list-style-type: none;
-            padding: 0px;
-            margin: 30px 0px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-top: 10px;
-
-            li {
-                display: flex;
-                gap: 8px;
-
-                &:before {
-                    content: "- ";
-                }
-
-                a {
-                    font-family: var(--fs);
-                    text-decoration: none;
-                    font-size: 16px;
-                    color: #000;
-                    font-weight: 500;
-                }
-            }
-        }
-    }
-
-    .avatar-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding-top: 40px;
-
-        img {
-            aspect-ratio: 1/1;
-        }
-    }
-
-    h4 {
-        text-align: center;
-        line-height: 180%;
-    }
-}
 
 .bold {
     font-weight: bold !important;
@@ -821,7 +835,8 @@ ul.tabs {
     color: white;
 }
 
-.popup-error {
+.popup-error,
+.popup-bad {
     background-color: #f44336;
     color: white;
 }
@@ -957,7 +972,6 @@ button {
         width: 60%;
         height: auto;
         margin: auto;
-        margin-bottom: 32px;
     }
 
     &.neutral {}
@@ -988,7 +1002,8 @@ body.template-kreator .game-content {
     border: solid 8px #fff;
     box-shadow: 6px 6px 2px #000;
     transform-origin: top left;
-    // transform: rotate(3deg);
+    max-width: 70%;
+    margin: 0 auto 20px;
     transition-duration: .5s;
 
     &.bigger-border {

@@ -234,9 +234,24 @@ function flattenData(data, prefix = '') {
 // }
 // window.createGroupWithCost = createGroupWithCost;
 
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.container-world');
+    if (!container) return;
+
+    const svg = container.querySelector('svg');
+    if (!svg) return;
+
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    svg.style.width = '100%';
+    svg.style.height = '100%';
+    svg.style.display = 'block';
+});
+
 
 
 document.querySelectorAll('.bar-game').forEach(wrapper => {
+    wrapper.innerHTML = '';
+
     const max = parseFloat(wrapper.dataset.barMax);
     const current = parseFloat(wrapper.dataset.barCurrent);
     const color = wrapper.dataset.barColor || '#4caf50';
@@ -255,6 +270,7 @@ document.querySelectorAll('.bar-game').forEach(wrapper => {
     wrapper.appendChild(bar);
     wrapper.appendChild(barValue);
 });
+
 
 async function createCustomPost(title, postType, acfFields) {
     try {

@@ -10,7 +10,7 @@ class InstanceManager
     {
         $this->instance_name = sanitize_title($instance_name);
         $this->instance_title = $instance_name;
-        $this->template_dir = get_template_directory() . '/templates/' . $this->instance_name;
+        $this->template_dir = get_template_directory() . '/page-templates/' . $this->instance_name;
         $this->load_assets = $load_assets;
 
         $this->register_rewrite_rule();
@@ -45,15 +45,21 @@ class InstanceManager
         $instance_name = get_query_var('instance_name');
 
         if ($instance_name === $this->instance_name) {
-            $style_path = get_template_directory_uri() . '/templates/' . $this->instance_name . '/style.css';
-            $script_path = get_template_directory_uri() . '/templates/' . $this->instance_name . '/main.js';
+            // Używamy ścieżki bezpośrednio z $this->template_dir, która jest ustawiona poprawnie w konstruktorze
+            $style_path = get_template_directory_uri() . '/page-templates/' . $this->instance_name . '/style.css';
+            $script_path = get_template_directory_uri() . '/page-templates/' . $this->instance_name . '/main.js';
+
+            // Dodajemy unikalny timestamp aby uniknąć problemów z cache
+            $version = filemtime($this->template_dir . '/style.css') ?: null;
 
             if (file_exists($this->template_dir . '/style.css')) {
-                wp_enqueue_style($this->instance_name . '-style', $style_path);
+                wp_enqueue_style($this->instance_name . '-style', $style_path, [], $version);
             }
 
+            $script_version = filemtime($this->template_dir . '/main.js') ?: null;
+
             if (file_exists($this->template_dir . '/main.js')) {
-                wp_enqueue_script($this->instance_name . '-script', $script_path, [], null, true);
+                wp_enqueue_script($this->instance_name . '-script', $script_path, ['jquery'], $script_version, true);
             }
         }
     }
