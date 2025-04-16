@@ -350,7 +350,7 @@ add_action('init', function () {
     }
 });
 
-// Dodajemy osobny repeater "rozmowy" dla wybranych NPC we wszystkich scenach
+// Dodajemy osobny repeater "rozmowy" dla wybranych NPC we wszystkich scenach z uwzględnieniem tabów dla każdej sceny
 add_action('init', function () {
     if (!is_admin() || !function_exists('acf_add_local_field_group')) {
         return;
@@ -370,10 +370,17 @@ add_action('init', function () {
             $post_title = sanitize_title($post->post_title);
             $scenes     = get_field('scenes', $post_id);
 
-            if (!$scenes) {
+            if (!$scenes || !is_array($scenes) || empty($scenes)) {
                 continue;
             }
 
+            // Tworzymy jeden field group dla wszystkich rozmów w scenach
+            $scene_tabs_fields = [];
+
+            // Zbieramy wszystkie NPC ze wszystkich scen - do użycia w polach wyboru
+            $all_npc_choices = array();
+
+            // Najpierw przetwarzamy wszystkie sceny aby zebrać NPC
             foreach ($scenes as $scene_index => $scene) {
                 if (empty($scene['maska'])) {
                     continue;
@@ -388,187 +395,212 @@ add_action('init', function () {
                 }
 
                 // Zbieramy wszystkie wybrane NPC z tej sceny
-                $npc_choices = array();
                 for ($i = 0; $i < $path_count; $i++) {
                     $npc_field_name = "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_npc";
-                    $npc_field_key = $npc_field_name;
                     $npc_value = get_field($npc_field_name, $post_id);
 
                     if ($npc_value && is_object($npc_value)) {
-                        $npc_choices[$npc_value->ID] = $npc_value->post_title;
+                        $all_npc_choices[$npc_value->ID] = $npc_value->post_title;
                     }
                 }
+            }
 
-                if (empty($npc_choices)) {
+            // Jeśli nie znaleziono żadnych NPC, dodajmy domyślną opcję
+            if (empty($all_npc_choices)) {
+                $all_npc_choices = array(
+                    'brak' => 'Brak dostępnych NPC'
+                );
+            }
+
+            // Teraz tworzymy taby dla każdej sceny
+            foreach ($scenes as $scene_index => $scene) {
+                // Pomiń sceny bez maski
+                if (empty($scene['maska'])) {
                     continue;
                 }
 
-                // Tworzymy repeater "rozmowy"
-                acf_add_local_field_group([
-                    'key'        => "group_{$post_title}_scene_{$scene_index}_rozmowy",
-                    'title'      => isset($scene['id_sceny']) && $scene['id_sceny']
-                        ? 'Rozmowy - Scena: ' . $scene['id_sceny']
-                        : 'Rozmowy - Scena ' . ($scene_index + 1),
-                    'fields'     => [
+                // Dodaj zakładkę dla każdej sceny
+                $scene_title = isset($scene['id_sceny']) && !empty($scene['id_sceny'])
+                    ? 'Scena: ' . $scene['id_sceny']
+                    : 'Scena ' . ($scene_index + 1);
+
+                $scene_tabs_fields[] = [
+                    'key'           => "field_{$post_title}_scene_{$scene_index}_tab",
+                    'label'         => $scene_title,
+                    'name'          => '',
+                    'type'          => 'tab',
+                    'instructions'  => '',
+                    'placement'     => 'top',
+                    'endpoint'      => 0,
+                ];
+
+                // Dodajemy pola dla tej sceny
+                $scene_tabs_fields[] = [
+                    'key'           => "field_{$post_title}_scene_{$scene_index}_rozmowy",
+                    'label'         => 'Rozmowy',
+                    'name'          => "scene_{$scene_index}_rozmowy",
+                    'type'          => 'repeater',
+                    'layout'        => 'block',
+                    'button_label'  => 'Dodaj rozmowę',
+                    'sub_fields'    => [
                         [
-                            'key'           => "field_{$post_title}_scene_{$scene_index}_rozmowy",
-                            'label'         => 'Rozmowy',
-                            'name'          => "scene_{$scene_index}_rozmowy",
+                            'key'           => "field_{$post_title}_scene_{$scene_index}_rozmowy_slug",
+                            'label'         => 'Slug rozmowy',
+                            'name'          => "rozmowy_slug",
+                            'type'          => 'text',
+                            'instructions'  => 'Unikalny identyfikator tej rozmowy, np. "powitanie", "quest_1", "informacja"',
+                            'placeholder'   => 'np. powitanie',
+                            'wrapper'       => [
+                                'width'     => '100',
+                            ],
+                        ],
+
+                        [
+                            'key'           => "field_{$post_title}_scene_{$scene_index}_rozmowy_dialogow",
+                            'label'         => 'Dialogi',
+                            'name'          => "rozmowy_dialogow",
                             'type'          => 'repeater',
-                            'layout'        => 'block',
-                            'button_label'  => 'Dodaj rozmowę',
+                            'layout'        => 'row',
+                            'button_label'  => 'Dodaj dialog',
+                            'wrapper'       => [
+                                'width'     => '100',
+                            ],
                             'sub_fields'    => [
                                 [
-                                    'key'           => "field_{$post_title}_scene_{$scene_index}_rozmowy_slug",
-                                    'label'         => 'Slug rozmowy',
-                                    'name'          => "rozmowy_slug",
-                                    'type'          => 'text',
-                                    'instructions'  => 'Unikalny identyfikator tej rozmowy, np. "powitanie", "quest_1", "informacja"',
-                                    'placeholder'   => 'np. powitanie',
-                                    'wrapper'       => [
-                                        'width'     => '100',
-                                    ],
-                                ],
-
-                                [
-                                    'key'           => "field_{$post_title}_scene_{$scene_index}_rozmowy_dialogow",
-                                    'label'         => 'Dialogi',
-                                    'name'          => "rozmowy_dialogow",
-                                    'type'          => 'repeater',
-                                    'layout'        => 'row',
-                                    'button_label'  => 'Dodaj dialog',
-                                    'wrapper'       => [
-                                        'width'     => '100',
-                                    ],
-                                    'sub_fields'    => [
-                                        [
-                                            'key'           => "field_{$post_title}_scene_{$scene_index}_rozmowy_dialogow_npc",
-                                            'label'         => 'Mówiący NPC',
-                                            'name'          => "dialog_npc",
-                                            'type'          => 'select',
-                                            'choices'       => $npc_choices,
-                                            'allow_null'    => 0,
-                                            'multiple'      => 0,
-                                            'ui'            => 1,
-                                            'wrapper'       => [
-                                                'width'     => '30',
-                                            ],
-                                        ],
-                                        [
-                                            'key'           => "field_{$post_title}_scene_{$scene_index}_rozmowy_dialogow_wiadomosc",
-                                            'label'         => 'Wiadomość',
-                                            'name'          => "wiadomosc",
-                                            'type'          => 'textarea',
-                                            'rows'          => 3,
-                                            'wrapper'       => [
-                                                'width'     => '70',
-                                            ],
-                                        ],
-                                    ],
-                                ],
-
-                                [
-                                    'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_akcja",
-                                    'label'         => 'Koniec dialogu - Akcja',
-                                    'name'          => "koniec_dialogu_akcja",
+                                    'key'           => "field_{$post_title}_scene_{$scene_index}_rozmowy_dialogow_npc",
+                                    'label'         => 'Mówiący NPC',
+                                    'name'          => "dialog_npc",
                                     'type'          => 'select',
-                                    'choices'       => [
-                                        'nic'          => 'Nic nie rób',
-                                        'repeater'          => 'Powtarzaj dialog cały czas',
-                                        'otworz_chat'  => 'Otwórz chat',
-                                        'misja'        => 'Misja'
-                                    ],
-                                    'default_value' => 'nic',
+                                    'choices'       => $all_npc_choices,
+                                    'allow_null'    => 0,
+                                    'multiple'      => 0,
+                                    'ui'            => 1,
                                     'wrapper'       => [
                                         'width'     => '30',
                                     ],
                                 ],
-
                                 [
-                                    'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_npc",
-                                    'label'         => 'NPC do chatu',
-                                    'name'          => "koniec_dialogu_npc",
-                                    'type'          => 'select',
-                                    'choices'       => $npc_choices,
-                                    'allow_null'    => 0,
-                                    'multiple'      => 0,
-                                    'ui'            => 1,
-                                    'conditional_logic' => [
-                                        [
-                                            [
-                                                'field'    => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_akcja",
-                                                'operator' => '==',
-                                                'value'    => 'otworz_chat',
-                                            ],
-                                        ],
-                                    ],
+                                    'key'           => "field_{$post_title}_scene_{$scene_index}_rozmowy_dialogow_wiadomosc",
+                                    'label'         => 'Wiadomość',
+                                    'name'          => "wiadomosc",
+                                    'type'          => 'textarea',
+                                    'rows'          => 3,
                                     'wrapper'       => [
                                         'width'     => '70',
                                     ],
                                 ],
+                            ],
+                        ],
 
+                        [
+                            'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_akcja",
+                            'label'         => 'Koniec dialogu - Akcja',
+                            'name'          => "koniec_dialogu_akcja",
+                            'type'          => 'select',
+                            'choices'       => [
+                                'nic'          => 'Nic nie rób',
+                                'repeater'     => 'Powtarzaj dialog cały czas',
+                                'otworz_chat'  => 'Otwórz chat',
+                                'misja'        => 'Misja'
+                            ],
+                            'default_value' => 'nic',
+                            'wrapper'       => [
+                                'width'     => '30',
+                            ],
+                        ],
+
+                        [
+                            'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_npc",
+                            'label'         => 'NPC do chatu',
+                            'name'          => "koniec_dialogu_npc",
+                            'type'          => 'select',
+                            'choices'       => $all_npc_choices,
+                            'allow_null'    => 0,
+                            'multiple'      => 0,
+                            'ui'            => 1,
+                            'conditional_logic' => [
                                 [
-                                    'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_misja_nazwa",
-                                    'label'         => 'Nazwa funkcji misji',
-                                    'name'          => "koniec_dialogu_misja_nazwa",
+                                    [
+                                        'field'    => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_akcja",
+                                        'operator' => '==',
+                                        'value'    => 'otworz_chat',
+                                    ],
+                                ],
+                            ],
+                            'wrapper'       => [
+                                'width'     => '70',
+                            ],
+                        ],
+
+                        [
+                            'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_misja_nazwa",
+                            'label'         => 'Nazwa funkcji misji',
+                            'name'          => "koniec_dialogu_misja_nazwa",
+                            'type'          => 'text',
+                            'conditional_logic' => [
+                                [
+                                    [
+                                        'field'    => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_akcja",
+                                        'operator' => '==',
+                                        'value'    => 'misja',
+                                    ],
+                                ],
+                            ],
+                            'wrapper'       => [
+                                'width'     => '70',
+                            ],
+                        ],
+
+                        [
+                            'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_misja_parametry",
+                            'label'         => 'Parametry funkcji',
+                            'name'          => "koniec_dialogu_misja_parametry",
+                            'type'          => 'repeater',
+                            'layout'        => 'table',
+                            'button_label'  => 'Dodaj parametr',
+                            'conditional_logic' => [
+                                [
+                                    [
+                                        'field'    => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_akcja",
+                                        'operator' => '==',
+                                        'value'    => 'misja',
+                                    ],
+                                ],
+                            ],
+                            'wrapper'       => [
+                                'width'     => '100',
+                            ],
+                            'sub_fields'    => [
+                                [
+                                    'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_misja_parametr_nazwa",
+                                    'label'         => 'Nazwa parametru',
+                                    'name'          => "parametr_nazwa",
                                     'type'          => 'text',
-                                    'conditional_logic' => [
-                                        [
-                                            [
-                                                'field'    => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_akcja",
-                                                'operator' => '==',
-                                                'value'    => 'misja',
-                                            ],
-                                        ],
-                                    ],
                                     'wrapper'       => [
-                                        'width'     => '70',
+                                        'width'     => '50',
                                     ],
                                 ],
-
                                 [
-                                    'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_misja_parametry",
-                                    'label'         => 'Parametry funkcji',
-                                    'name'          => "koniec_dialogu_misja_parametry",
-                                    'type'          => 'repeater',
-                                    'layout'        => 'table',
-                                    'button_label'  => 'Dodaj parametr',
-                                    'conditional_logic' => [
-                                        [
-                                            [
-                                                'field'    => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_akcja",
-                                                'operator' => '==',
-                                                'value'    => 'misja',
-                                            ],
-                                        ],
-                                    ],
+                                    'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_misja_parametr_wartosc",
+                                    'label'         => 'Wartość parametru',
+                                    'name'          => "parametr_wartosc",
+                                    'type'          => 'text',
                                     'wrapper'       => [
-                                        'width'     => '100',
-                                    ],
-                                    'sub_fields'    => [
-                                        [
-                                            'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_misja_parametr_nazwa",
-                                            'label'         => 'Nazwa parametru',
-                                            'name'          => "parametr_nazwa",
-                                            'type'          => 'text',
-                                            'wrapper'       => [
-                                                'width'     => '50',
-                                            ],
-                                        ],
-                                        [
-                                            'key'           => "field_{$post_title}_scene_{$scene_index}_koniec_dialogu_misja_parametr_wartosc",
-                                            'label'         => 'Wartość parametru',
-                                            'name'          => "parametr_wartosc",
-                                            'type'          => 'text',
-                                            'wrapper'       => [
-                                                'width'     => '50',
-                                            ],
-                                        ],
+                                        'width'     => '50',
                                     ],
                                 ],
                             ],
                         ],
                     ],
+                ];
+            }
+
+            // Jeśli mamy zakładki ze scenami, tworzymy grupę pól
+            if (!empty($scene_tabs_fields)) {
+                acf_add_local_field_group([
+                    'key'        => "group_{$post_title}_all_scenes_rozmowy",
+                    'title'      => 'Rozmowy w scenach',
+                    'fields'     => $scene_tabs_fields,
                     'location'   => [
                         [
                             [
