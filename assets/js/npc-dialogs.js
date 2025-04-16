@@ -20,6 +20,8 @@
     // Domyślne ustawienia
     const settings = {
         intervalTime: 5000,  // Interwał zmiany dialogów (5 sekund)
+        minDisplayTime: 1000, // Minimalny czas wyświetlania dialogu (3 sekundy)
+        charTime: 50, // Czas na znak (0,1 sekundy)
         dialogClass: 'npc-dialog-bubble',
         defaultSlug: 'powitanie'
     };
@@ -101,7 +103,8 @@
     function startDialogRotation(dialogs, koniecDialogu = null) {
         // Zatrzymaj istniejącą rotację, jeśli istnieje
         if (rotationInterval) {
-            clearInterval(rotationInterval);
+            clearTimeout(rotationInterval);
+            rotationInterval = null;
             currentDialogIndex = 0;
         }
 
@@ -116,46 +119,52 @@
             }
         });
 
-        // Pokaż pierwszy dialog
-        if (dialogs && dialogs.length > 0) {
-            const dialog = dialogs[currentDialogIndex];
-            showNpcDialog(dialog.npc_id, dialog.message);
-
-            // Ustaw interwał do zmiany dialogów
-            rotationInterval = setInterval(() => {
-                // Ukryj poprzedni dialog
+        // Funkcja do wyświetlania następnego dialogu
+        function showNextDialog() {
+            // Ukryj poprzedni dialog jeśli istnieje
+            if (dialogs[currentDialogIndex]) {
                 const prevDialog = dialogs[currentDialogIndex];
                 const dialogElement = document.getElementById(`npc-dialog-${prevDialog.npc_id}`);
                 if (dialogElement) {
                     dialogElement.style.display = 'none';
                 }
+            }
 
-                // Przejdź do następnego dialogu
-                currentDialogIndex = (currentDialogIndex + 1);
+            // Przejdź do następnego dialogu
+            currentDialogIndex++;
 
-                // Sprawdź czy to ostatni dialog (przekroczyliśmy długość tablicy)
-                if (currentDialogIndex >= dialogs.length && koniecDialogu) {
-                    // Jeśli to ostatni dialog i mamy koniecDialogu, wykonaj akcję
+            // Sprawdź czy to ostatni dialog
+            if (currentDialogIndex >= dialogs.length) {
+                if (koniecDialogu) {
+                    // Jeśli mamy akcję końcową, wykonaj ją
                     handleDialogEndAction(koniecDialogu);
-                    return; // Przerwij wykonanie, aby nie pokazywać więcej dialogów
-                } else if (currentDialogIndex >= dialogs.length) {
-                    // Gdy nie ma akcji końcowej, a osiągnęliśmy koniec
+                    return;
+                } else {
+                    // Bez akcji końcowej, wracamy do początku
                     currentDialogIndex = 0;
-                    if (koniecDialogu && koniecDialogu.akcja === 'repeater') {
-                        // Tylko dla typu 'repeater' zapętlamy dialogi
-                    } else {
-                        // Dla innych typów kończymy
-                        clearInterval(rotationInterval);
+
+                    // Jeśli to nie typ 'repeater', kończymy rotację
+                    if (!koniecDialogu || koniecDialogu.akcja !== 'repeater') {
                         rotationInterval = null;
                         return;
                     }
                 }
+            }
 
-                const nextDialog = dialogs[currentDialogIndex];
+            // Pokaż aktualny dialog
+            const currentDialog = dialogs[currentDialogIndex];
+            showNpcDialog(currentDialog.npc_id, currentDialog.message);
 
-                // Pokaż następny dialog
-                showNpcDialog(nextDialog.npc_id, nextDialog.message);
-            }, settings.intervalTime);
+            // Zaplanuj pokazanie następnego dialogu po czasie zależnym od długości tekstu
+            rotationInterval = setTimeout(() => {
+                showNextDialog();
+            }, activeDialogs[currentDialog.npc_id].duration);
+        }
+
+        // Rozpocznij rotację od pierwszego dialogu
+        if (dialogs && dialogs.length > 0) {
+            currentDialogIndex = -1; // Zaczynamy od -1, bo showNextDialog zwiększy to do 0
+            showNextDialog();
         }
     }
 
@@ -393,9 +402,9 @@
      * Wyświetla dialog dla danego NPC
      * @param {string|number} npcId - ID NPC
      * @param {string} message - Wiadomość do wyświetlenia
-     * @param {number} [duration] - Czas wyświetlania w ms, domyślnie settings.intervalTime
+     * @param {number} [duration] - Czas wyświetlania w ms, automatycznie obliczany na podstawie długości tekstu
      */
-    function showNpcDialog(npcId, message, duration = settings.intervalTime) {
+    function showNpcDialog(npcId, message, duration = null) {
         const dialogElement = document.getElementById(`npc-dialog-${npcId}`);
         if (!dialogElement) {
             console.warn(`Nie znaleziono kontenera dialogowego dla NPC ${npcId}`);
@@ -417,19 +426,33 @@
         dialogElement.appendChild(contentDiv);
         dialogElement.style.display = 'block';
 
+        // Oblicz czas wyświetlania na podstawie liczby znaków
+        // Usuń tagi HTML, aby policzyć tylko tekst
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = message;
+        const textLength = tempDiv.textContent.length;
+
+        // Oblicz całkowity czas: minimalny czas + (liczba znaków * czas na znak)
+        const calculatedDuration = settings.minDisplayTime + (textLength * settings.charTime);
+
+        // Użyj obliczonego czasu lub podanego parametru duration
+        const displayTime = duration || calculatedDuration;
+
         // W przypadku pojedynczego dialogu (nie w rotacji) ustaw timer do ukrycia dymka
         if (rotationInterval === null) {
             activeDialogs[npcId] = {
                 message: message,
+                duration: displayTime,
                 timeout: setTimeout(() => {
                     dialogElement.style.display = 'none';
                     delete activeDialogs[npcId];
-                }, duration)
+                }, displayTime)
             };
         } else {
             // Dla dialogów w rotacji, zapisujemy stan bez timera
             activeDialogs[npcId] = {
                 message: message,
+                duration: displayTime,
                 timeout: null
             };
         }
