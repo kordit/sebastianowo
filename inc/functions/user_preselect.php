@@ -377,10 +377,10 @@ add_action('init', function () {
             // Tworzymy jeden field group dla wszystkich rozmów w scenach
             $scene_tabs_fields = [];
 
-            // Zbieramy wszystkie NPC ze wszystkich scen - do użycia w polach wyboru
-            $all_npc_choices = array();
+            // Przygotujemy tablicę, która będzie przechowywać NPC dla każdej sceny
+            $scene_specific_npc_choices = array();
 
-            // Najpierw przetwarzamy wszystkie sceny aby zebrać NPC
+            // Najpierw przetwarzamy wszystkie sceny aby zebrać NPC specyficzne dla każdej sceny
             foreach ($scenes as $scene_index => $scene) {
                 if (empty($scene['maska'])) {
                     continue;
@@ -394,22 +394,25 @@ add_action('init', function () {
                     continue;
                 }
 
+                // Inicjalizujemy tablicę NPC dla tej sceny
+                $scene_specific_npc_choices[$scene_index] = array();
+
                 // Zbieramy wszystkie wybrane NPC z tej sceny
                 for ($i = 0; $i < $path_count; $i++) {
                     $npc_field_name = "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_npc";
                     $npc_value = get_field($npc_field_name, $post_id);
 
                     if ($npc_value && is_object($npc_value)) {
-                        $all_npc_choices[$npc_value->ID] = $npc_value->post_title;
+                        $scene_specific_npc_choices[$scene_index][$npc_value->ID] = $npc_value->post_title;
                     }
                 }
-            }
 
-            // Jeśli nie znaleziono żadnych NPC, dodajmy domyślną opcję
-            if (empty($all_npc_choices)) {
-                $all_npc_choices = array(
-                    'brak' => 'Brak dostępnych NPC'
-                );
+                // Jeśli nie znaleziono żadnych NPC dla tej sceny, dodajmy domyślną opcję
+                if (empty($scene_specific_npc_choices[$scene_index])) {
+                    $scene_specific_npc_choices[$scene_index] = array(
+                        'brak' => 'Brak dostępnych NPC w tej scenie'
+                    );
+                }
             }
 
             // Teraz tworzymy taby dla każdej sceny
@@ -471,7 +474,7 @@ add_action('init', function () {
                                     'label'         => 'Mówiący NPC',
                                     'name'          => "dialog_npc",
                                     'type'          => 'select',
-                                    'choices'       => $all_npc_choices,
+                                    'choices'       => $scene_specific_npc_choices[$scene_index],
                                     'allow_null'    => 0,
                                     'multiple'      => 0,
                                     'ui'            => 1,
@@ -501,7 +504,8 @@ add_action('init', function () {
                                 'nic'          => 'Nic nie rób',
                                 'repeater'     => 'Powtarzaj dialog cały czas',
                                 'otworz_chat'  => 'Otwórz chat',
-                                'misja'        => 'Misja'
+                                'misja'        => 'Misja',
+                                'stop'        => 'Zatrzymaj na ostatnim'
                             ],
                             'default_value' => 'nic',
                             'wrapper'       => [
@@ -514,7 +518,7 @@ add_action('init', function () {
                             'label'         => 'NPC do chatu',
                             'name'          => "koniec_dialogu_npc",
                             'type'          => 'select',
-                            'choices'       => $all_npc_choices,
+                            'choices'       => $scene_specific_npc_choices[$scene_index],
                             'allow_null'    => 0,
                             'multiple'      => 0,
                             'ui'            => 1,

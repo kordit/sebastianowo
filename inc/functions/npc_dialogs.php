@@ -43,6 +43,9 @@ function get_npc_dialogs_by_post_id()
     // Pobierz ID podstrony z żądania
     $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
 
+    // Pobierz scenę z żądania (jeśli została przekazana)
+    $scene_id = isset($_POST['scene_id']) ? sanitize_text_field($_POST['scene_id']) : '';
+
     if (!$post_id) {
         wp_send_json_error([
             'message' => 'Nie podano prawidłowego ID podstrony.'
@@ -80,6 +83,11 @@ function get_npc_dialogs_by_post_id()
         if (empty($scene['maska'])) {
             continue;
         }
+
+        // Pobierz ID sceny - jeśli nie istnieje, użyj indeksu
+        $current_scene_id = isset($scene['id_sceny']) && !empty($scene['id_sceny'])
+            ? $scene['id_sceny']
+            : 'scene_' . ($scene_index + 1);
 
         // Pobierz rozmowy dla danej sceny
         $field_name = "scene_{$scene_index}_rozmowy";
@@ -146,13 +154,13 @@ function get_npc_dialogs_by_post_id()
         }
 
         if (!empty($scene_dialogs)) {
-            $scene_id = isset($scene['id_sceny']) ? $scene['id_sceny'] : 'scene_' . ($scene_index + 1);
-            $dialogs_data[$scene_id] = $scene_dialogs;
+            $dialogs_data[$current_scene_id] = $scene_dialogs;
         }
     }
 
     wp_send_json_success([
         'post_id' => $post_id,
+        'selected_scene' => !empty($scene_id) ? $scene_id : 'main',
         'dialogs' => $dialogs_data
     ]);
 

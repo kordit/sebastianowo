@@ -72,8 +72,13 @@
      * @param {Object} dialogs - Pobrane dialogi
      */
     function initializeDialogs(npcPaths, dialogs) {
-        // Znajdź aktualną scenę (możesz dostosować tę logikę do swojej struktury)
-        const currentScene = Object.keys(dialogs)[0]; // Używamy pierwszej sceny jako domyślnej
+        // Pobierz identyfikator sceny z URL zamiast używać pierwszej dostępnej sceny
+        const sceneId = getSceneIdFromUrl();
+        console.log('Inicjalizacja dialogów dla sceny:', sceneId);
+
+        // Sprawdź czy mamy dialogi dla tej sceny, jeśli nie, użyj sceny "main" jako zapasowej
+        const currentScene = dialogs[sceneId] ? sceneId : Object.keys(dialogs)[0];
+        console.log('Używana scena dla dialogów:', currentScene);
 
         if (!currentScene || !dialogs[currentScene]) {
             console.warn('Brak dialogów dla aktywnej sceny');
@@ -308,6 +313,34 @@
     }
 
     /**
+     * Pobiera identyfikator sceny z URL
+     * @returns {string|null} Identyfikator sceny lub null, jeśli nie znaleziono
+     */
+    function getSceneIdFromUrl() {
+        console.log('Próba pobrania identyfikatora sceny z URL...');
+
+        // Pobierz pełny URL strony
+        const url = window.location.pathname;
+
+        // Rozdziel URL na segmenty
+        const segments = url.split('/').filter(segment => segment.length > 0);
+
+        // Sprawdź, czy mamy format /tereny/nazwa/scena/
+        if (segments.length >= 3 && segments[0] === 'tereny') {
+            // Ostatni niepusty segment to nazwa sceny
+            const lastSegment = segments[segments.length - 1];
+            if (lastSegment && lastSegment !== '') {
+                console.log('Znaleziono identyfikator sceny w URL:', lastSegment);
+                return lastSegment;
+            }
+        }
+
+        // Jeśli nie znaleziono sceny, zwróć domyślną wartość 'main'
+        console.log('Nie znaleziono identyfikatora sceny w URL, używam domyślnej wartości: main');
+        return 'main';
+    }
+
+    /**
      * Pobiera dialogi za pomocą AJAX na podstawie ID podstrony
      * @param {number} postId - ID podstrony
      * @param {Function} callback - Funkcja callback do wywołania po pobraniu dialogów
@@ -326,6 +359,10 @@
             return;
         }
 
+        // Pobierz identyfikator sceny z URL
+        const sceneId = getSceneIdFromUrl() || 'main';
+        console.log('Pobrano identyfikator sceny z URL:', sceneId);
+
         // Wykonaj zapytanie AJAX
         $.ajax({
             url: npcDialogsData.ajaxurl,
@@ -333,6 +370,7 @@
             data: {
                 action: 'get_npc_dialogs',
                 post_id: postId,
+                scene_id: sceneId,
                 security: npcDialogsData.security
             },
             success: function (response) {
