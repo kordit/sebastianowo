@@ -43,3 +43,209 @@ label {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+.row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.left-side,
+.right-side {
+    width: calc(25% - 8px);
+}
+
+h1 {
+    text-align: center;
+    margin: 32px 0;
+    width: 100%;
+}
+
+.main-side {
+    width: calc(50% - 16px);
+    position: relative;
+
+    .lightning {
+        position: absolute;
+        top: 20px;
+        left: 270px;
+        width: 100px;
+        height: 100%;
+        z-index: 10;
+        filter: blur(10px);
+
+        &:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: brightness(2);
+            display: block;
+        }
+    }
+}
+
+p {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 150%;
+}
+
+.polaroid {
+    // max-width: 200px;
+    margin: auto;
+    margin-bottom: 32px;
+}
+
+
+#avatar-selection {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-right: 20px;
+    border-right: solid 3px #000;
+    max-height: 540px;
+    overflow: scroll;
+    align-items: start;
+    margin-bottom: 32px;
+
+    .wrapper-image {
+
+        img {
+            width: 100%;
+            height: auto;
+        }
+
+    }
+}
+
+
+
+
+
+.wrapper-image {
+    cursor: pointer;
+    transform: scale(.95);
+    transform-origin: center;
+    filter: grayscale(1);
+    opacity: .5;
+    width: calc(50% - 8px);
+    margin: 0px;
+    transition: .5s;
+    background: #fff;
+    box-shadow: inset 0px 0px 10px #000;
+    padding: 10px;
+    padding-bottom: 0px;
+    overflow: hidden;
+
+    img {
+        margin-bottom: -10px;
+    }
+
+    &:hover {
+        opacity: 1;
+        filter: grayscale(0);
+    }
+}
+
+.wrapper-image.active {
+    opacity: 1;
+    transform: scale(1);
+    filter: grayscale(0);
+}
+
+
+.step {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-image: url(/wp-content/uploads/2025/04/ChatGPT-Image-Apr-16-2025-10_34_24-PM-e1744835746635.png);
+    background-size: cover;
+    background-position: bottom left;
+    height: 100vh;
+    z-index: 10000;
+    transform: scale(0);
+    opacity: 0;
+    transition: all .5s;
+    padding-top: 70px;
+
+    &.active {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    .wrap-left {
+        width: 25%;
+    }
+
+    &:after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, .5);
+        z-index: 5;
+    }
+
+    .inner {
+        position: relative;
+        z-index: 6;
+        color: #fff;
+        height: 100%;
+
+        .container {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+    }
+
+    .item {
+        margin-bottom: 20px;
+    }
+
+    h3 {
+        color: #fff;
+        margin-bottom: 20px;
+    }
+
+    .wrapper-preview {
+        width: calc(75% - 16px);
+        position: relative;
+
+        img,
+        span {
+            display: flex;
+            color: #fff;
+            object-fit: contain;
+            ;
+            max-height: 60vh;
+            transform: scaleX(-1);
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: -40px;
+        }
+    }
+
+    h2 {
+        width: 100%;
+    }
+}
