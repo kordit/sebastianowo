@@ -1,8 +1,9 @@
+// filepath: /Users/kordiansasiela/localhost/seb.soeasy.it/public_html/wp-content/themes/game/assets/js/npc-dialogs.js
 /**
  * Obsługa dialogów NPC
  * Wyświetla dialogi nad głowami NPC w scenach SVG
  */
-(function ($) {
+(function () {
     'use strict';
 
     // Obiekt przechowujący wszystkie dialogi dla bieżącej sceny
@@ -23,7 +24,9 @@
         minDisplayTime: 1000, // Minimalny czas wyświetlania dialogu (3 sekundy)
         charTime: 50, // Czas na znak (0,1 sekundy)
         dialogClass: 'npc-dialog-bubble',
-        defaultSlug: 'powitanie'
+        defaultSlug: 'powitanie',
+        fadeTime: 300, // Czas trwania animacji fade (w ms)
+        defaultMode: 'manual' // Domyślny tryb: 'manual' (ze strzałkami) lub 'auto' (automatyczny)
     };
 
     /**
@@ -100,6 +103,10 @@
         }
     }
 
+    // Globalna zmienna przechowująca dialogi do rotacji
+    let currentDialogs = [];
+    let currentEndAction = null;
+
     /**
      * Rozpoczyna rotację dialogów pomiędzy NPC
      * @param {Array} dialogs - Lista dialogów do rotacji
@@ -117,65 +124,99 @@
         Object.keys(activeDialogs).forEach(npcId => {
             const dialogElement = document.getElementById(`npc-dialog-${npcId}`);
             if (dialogElement) {
-                dialogElement.style.display = 'none';
+                hideDialog(dialogElement);
             }
             if (activeDialogs[npcId] && activeDialogs[npcId].timeout) {
                 clearTimeout(activeDialogs[npcId].timeout);
             }
         });
 
-        // Funkcja do wyświetlania następnego dialogu
-        function showNextDialog() {
-            // Ukryj poprzedni dialog jeśli istnieje
-            if (dialogs[currentDialogIndex]) {
-                const prevDialog = dialogs[currentDialogIndex];
-                const dialogElement = document.getElementById(`npc-dialog-${prevDialog.npc_id}`);
-                if (dialogElement) {
-                    // Nie ukrywaj poprzedniego dialogu jeśli to ostatni dialog i akcja to 'stop'
-                    const isLastDialog = currentDialogIndex === dialogs.length - 1;
-                    const isStopAction = koniecDialogu && koniecDialogu.akcja === 'stop';
-
-                    if (!(isLastDialog && isStopAction)) {
-                        dialogElement.style.display = 'none';
-                    }
-                }
-            }
-
-            // Przejdź do następnego dialogu
-            currentDialogIndex++;
-
-            // Sprawdź czy to ostatni dialog
-            if (currentDialogIndex >= dialogs.length) {
-                if (koniecDialogu) {
-                    // Jeśli mamy akcję końcową, wykonaj ją
-                    handleDialogEndAction(koniecDialogu);
-                    return;
-                } else {
-                    // Bez akcji końcowej, wracamy do początku
-                    currentDialogIndex = 0;
-
-                    // Jeśli to nie typ 'repeater', kończymy rotację
-                    if (!koniecDialogu || koniecDialogu.akcja !== 'repeater') {
-                        rotationInterval = null;
-                        return;
-                    }
-                }
-            }
-
-            // Pokaż aktualny dialog
-            const currentDialog = dialogs[currentDialogIndex];
-            showNpcDialog(currentDialog.npc_id, currentDialog.message);
-
-            // Zaplanuj pokazanie następnego dialogu po czasie zależnym od długości tekstu
-            rotationInterval = setTimeout(() => {
-                showNextDialog();
-            }, activeDialogs[currentDialog.npc_id].duration);
-        }
+        // Zapisz dialogi i akcję końcową w zmiennych globalnych
+        currentDialogs = dialogs;
+        currentEndAction = koniecDialogu;
 
         // Rozpocznij rotację od pierwszego dialogu
         if (dialogs && dialogs.length > 0) {
             currentDialogIndex = -1; // Zaczynamy od -1, bo showNextDialog zwiększy to do 0
             showNextDialog();
+        }
+    }
+
+    /**
+     * Funkcja do wyświetlania następnego dialogu
+     */
+    function showNextDialog() {
+        const dialogs = currentDialogs;
+        const koniecDialogu = currentEndAction;
+
+        if (!dialogs || !dialogs.length) {
+            return; // Brak dialogów do wyświetlenia
+        }
+
+        // Ukryj poprzedni dialog jeśli istnieje
+        if (dialogs[currentDialogIndex]) {
+            const prevDialog = dialogs[currentDialogIndex];
+            const dialogElement = document.getElementById(`npc-dialog-${prevDialog.npc_id}`);
+            if (dialogElement) {
+                // Nie ukrywaj poprzedniego dialogu jeśli to ostatni dialog i akcja to 'stop'
+                const isLastDialog = currentDialogIndex === dialogs.length - 1;
+                const isStopAction = koniecDialogu && koniecDialogu.akcja === 'stop';
+
+                if (!(isLastDialog && isStopAction)) {
+                    hideDialog(dialogElement);
+                }
+            }
+        }
+
+        // Przejdź do następnego dialogu
+        currentDialogIndex++;
+
+        // Sprawdź czy to ostatni dialog
+        if (currentDialogIndex >= dialogs.length) {
+            if (koniecDialogu) {
+                // Jeśli mamy akcję końcową, wykonaj ją
+                handleDialogEndAction(koniecDialogu);
+                return;
+            } else {
+                // Bez akcji końcowej, wracamy do początku
+                currentDialogIndex = 0;
+
+                // Jeśli to nie typ 'repeater', kończymy rotację
+                if (!koniecDialogu || koniecDialogu.akcja !== 'repeater') {
+                    rotationInterval = null;
+                    return;
+                }
+            }
+        }
+
+        // Pokaż aktualny dialog
+        const currentDialog = dialogs[currentDialogIndex];
+
+        // Określ tryb wyświetlania dialogu - auto jeśli akcja to repeater lub auto, w przeciwnym razie manual
+        const dialogMode = (koniecDialogu && (koniecDialogu.akcja === 'repeater' || koniecDialogu.akcja === 'auto')) ? 'auto' : settings.defaultMode;
+
+        showNpcDialog(currentDialog.npc_id, currentDialog.message, null, dialogMode);
+
+        // Jeśli tryb to auto, zaplanuj automatyczne przejście do następnego dialogu
+        if (dialogMode === 'auto') {
+            // Resetujemy istniejący rotationInterval dla pewności
+            if (rotationInterval) {
+                clearTimeout(rotationInterval);
+            }
+
+            // Określamy czas trwania na podstawie długości wiadomości
+            const textLength = currentDialog.message.replace(/<[^>]*>/g, '').length; // Usuń tagi HTML przy liczeniu
+            const displayDuration = settings.minDisplayTime + (textLength * settings.charTime);
+
+            console.log('Auto przejście do następnego dialogu za', displayDuration, 'ms');
+
+            // Ustawienie timera dla automatycznego przejścia
+            rotationInterval = setTimeout(() => {
+                showNextDialog();
+            }, displayDuration);
+        } else {
+            // Dla trybu manual timer zostanie ustawiony po kliknięciu przycisku
+            rotationInterval = null;
         }
     }
 
@@ -379,17 +420,25 @@
         const sceneId = getSceneIdFromUrl() || 'main';
         console.log('Pobrano identyfikator sceny z URL:', sceneId);
 
-        // Wykonaj zapytanie AJAX
-        $.ajax({
-            url: npcDialogsData.ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'get_npc_dialogs',
-                post_id: postId,
-                scene_id: sceneId,
-                security: npcDialogsData.security
-            },
-            success: function (response) {
+        // Utwórz obiekt FormData
+        const formData = new FormData();
+        formData.append('action', 'get_npc_dialogs');
+        formData.append('post_id', postId);
+        formData.append('scene_id', sceneId);
+        formData.append('security', npcDialogsData.security);
+
+        // Wykonaj zapytanie AJAX używając fetch API
+        fetch(npcDialogsData.ajaxurl, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Błąd sieci podczas pobierania dialogów');
+                }
+                return response.json();
+            })
+            .then(response => {
                 console.log('Odpowiedź z AJAX dla dialogów:', response);
 
                 if (response.success && response.data && response.data.dialogs) {
@@ -404,11 +453,10 @@
                     console.error('Błąd podczas pobierania dialogów:',
                         response.data ? response.data.message : 'Nieznany błąd');
                 }
-            },
-            error: function (xhr, status, error) {
+            })
+            .catch(error => {
                 console.error('Błąd AJAX podczas pobierania dialogów:', error);
-            }
-        });
+            });
     }
 
     /**
@@ -431,19 +479,23 @@
             const pathRect = pathElement.getBBox();
             const svgRect = svgElement.getBoundingClientRect();
 
-            // Oblicz środek ścieżki w koordynatach viewportu
-            const centerX = pathRect.x + (pathRect.width / 2);
-            const centerY = pathRect.y - 20; // Umieść dymek nad NPC
+            // Obliczamy współczynnik skalowania SVG
+            const scaleX = svgRect.width / svgElement.viewBox.baseVal.width || 1;
+
+            // Obliczamy pozycję środka górnej krawędzi ścieżki z uwzględnieniem skalowania
+            const centerX = (pathRect.x + (pathRect.width / 2)) * scaleX;
+            const topY = pathRect.y * scaleX - 20; // Umieść dymek nad NPC
+
+            // Dodajemy offset SVG - początkową pozycję SVG w dokumencie
+            const svgOffsetLeft = svgRect.left;
+            const svgOffsetTop = svgRect.top;
 
             // Utwórz element dymku
             const dialogElement = document.createElement('div');
             dialogElement.id = `npc-dialog-${npcId}`;
             dialogElement.className = settings.dialogClass;
-            dialogElement.style.position = 'absolute';
-            dialogElement.style.left = `${centerX}px`;
-            dialogElement.style.top = `${centerY}px`;
-            dialogElement.style.transform = 'translate(-50%, -100%)'; // Wyśrodkuj i umieść nad NPC
-            dialogElement.style.display = 'none'; // Początkowo ukryty
+            dialogElement.style.left = `${svgOffsetLeft + centerX}px`;
+            dialogElement.style.top = `${svgOffsetTop + topY}px`;
 
             // Dodaj dymek do dokumentu (jako dziecko SVG lub innego kontenera)
             svgElement.parentNode.appendChild(dialogElement);
@@ -457,8 +509,9 @@
      * @param {string|number} npcId - ID NPC
      * @param {string} message - Wiadomość do wyświetlenia
      * @param {number} [duration] - Czas wyświetlania w ms, automatycznie obliczany na podstawie długości tekstu
+     * @param {string} [mode] - Tryb wyświetlania: 'auto' (automatyczny) lub 'manual' (ze strzałkami)
      */
-    function showNpcDialog(npcId, message, duration = null) {
+    function showNpcDialog(npcId, message, duration = null, mode = settings.defaultMode) {
         const dialogElement = document.getElementById(`npc-dialog-${npcId}`);
         if (!dialogElement) {
             console.warn(`Nie znaleziono kontenera dialogowego dla NPC ${npcId}`);
@@ -479,35 +532,74 @@
             npcName = `NPC #${npcId}`;
         }
 
-        // Wyczyść poprzednią zawartość
-        dialogElement.innerHTML = '';
+        // Zastosuj efekt fade out przed zmianą treści
+        function fadeOutAndUpdateContent() {
+            return new Promise(resolve => {
+                // Jeśli element jest ukryty, przejdź od razu do aktualizacji
+                if (dialogElement.style.display === 'none') {
+                    resolve();
+                    return;
+                }
 
-        // Dodaj nagłówek z imieniem NPC
-        const nameDiv = document.createElement('div');
-        nameDiv.className = 'npc-dialog-speaker';
-        nameDiv.textContent = npcName;
-        nameDiv.style.color = '#111';
-        nameDiv.style.fontSize = '12px';
-        nameDiv.style.fontWeight = 'bold';
-        nameDiv.style.textAlign = 'left';
-        nameDiv.style.marginBottom = '6px';
-        nameDiv.style.textTransform = 'uppercase';
-        nameDiv.style.letterSpacing = '0.5px';
-        nameDiv.style.borderBottom = '1px solid #ccc';
-        nameDiv.style.paddingBottom = '4px';
-        nameDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.03)';
-        nameDiv.style.padding = '3px 6px';
-        nameDiv.style.borderRadius = '4px';
-        dialogElement.appendChild(nameDiv);
+                // Zastosuj animację fade out
+                dialogElement.style.opacity = '1';
+                dialogElement.style.transition = `opacity ${settings.fadeTime}ms ease`;
+                dialogElement.style.opacity = '0';
 
-        // Utwórz element zawartości dialogu
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'npc-dialog-content';
-        contentDiv.innerHTML = message;
-        dialogElement.appendChild(contentDiv);
+                // Po zakończeniu animacji, przejdź do aktualizacji treści
+                setTimeout(() => {
+                    resolve();
+                }, settings.fadeTime);
+            });
+        }
 
-        // Pokaż dymek
-        dialogElement.style.display = 'block';
+        // Aktualizuj zawartość i pokaż z efektem fade in
+        function updateContentAndFadeIn() {
+            // Wyczyść poprzednią zawartość
+            dialogElement.innerHTML = '';
+
+            // Dodaj nagłówek z imieniem NPC
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'npc-dialog-speaker';
+            nameDiv.textContent = npcName;
+            dialogElement.appendChild(nameDiv);
+
+            // Utwórz element zawartości dialogu
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'npc-dialog-content';
+            contentDiv.innerHTML = message;
+            dialogElement.appendChild(contentDiv);
+
+            // Dodaj przyciski nawigacji tylko, jeśli tryb to 'manual'
+            // ale nie gdy jest to rotacja z repeaterem (rotationInterval !== null && akcja === 'repeater')
+            const isRepeaterAction = currentEndAction && currentEndAction.akcja === 'repeater';
+
+            if (mode === 'manual' && !isRepeaterAction) {
+                const navContainer = document.createElement('div');
+                navContainer.className = 'npc-dialog-navigation';
+
+                const nextButton = document.createElement('button');
+                nextButton.className = 'npc-dialog-next';
+                nextButton.innerHTML = '&#10095;'; // Znak strzałki w prawo
+                nextButton.setAttribute('aria-label', 'Następna wiadomość');
+
+                // Dodaj obsługę kliknięcia przycisku
+                nextButton.addEventListener('click', handleNextButtonClick);
+
+                navContainer.appendChild(nextButton);
+                dialogElement.appendChild(navContainer);
+            }
+
+            // Pokaż dymek z efektem fade in
+            dialogElement.style.display = 'block';
+            dialogElement.style.opacity = '0';
+
+            // Uruchom fade in po krótkim opóźnieniu (aby przeglądarka miała czas na wyrenderowanie)
+            setTimeout(() => {
+                dialogElement.style.transition = `opacity ${settings.fadeTime}ms ease`;
+                dialogElement.style.opacity = '1';
+            }, 10);
+        }
 
         // Oblicz czas wyświetlania na podstawie liczby znaków
         // Usuń tagi HTML, aby policzyć tylko tekst
@@ -521,30 +613,82 @@
         // Użyj obliczonego czasu lub podanego parametru duration
         const displayTime = duration || calculatedDuration;
 
-        // W przypadku pojedynczego dialogu (nie w rotacji) ustaw timer do ukrycia dymka
-        if (rotationInterval === null) {
-            activeDialogs[npcId] = {
-                message: message,
-                duration: displayTime,
-                timeout: setTimeout(() => {
-                    dialogElement.style.display = 'none';
-                    delete activeDialogs[npcId];
-                }, displayTime)
-            };
-        } else {
-            // Dla dialogów w rotacji, zapisujemy stan bez timera
-            activeDialogs[npcId] = {
-                message: message,
-                duration: displayTime,
-                timeout: null
-            };
+        // Wykonaj animację i aktualizację treści
+        fadeOutAndUpdateContent().then(() => {
+            updateContentAndFadeIn();
+
+            // W trybie 'auto' ustaw timer do automatycznego przejścia, w trybie 'manual' nie ustawiaj timera
+            // dialogu powinien pozostać widoczny dopóki użytkownik nie kliknie strzałki
+            if (mode === 'auto') {
+                // Dla trybu auto zawsze ustawiamy timer
+                activeDialogs[npcId] = {
+                    message: message,
+                    duration: displayTime,
+                    timeout: setTimeout(() => {
+                        if (rotationInterval !== null) {
+                            handleNextButtonClick();
+                        } else {
+                            hideDialog(dialogElement);
+                        }
+                    }, displayTime),
+                    mode: mode
+                };
+            } else {
+                // Dla trybu manual nie ustawiamy timera - dialog pozostaje widoczny do kliknięcia
+                activeDialogs[npcId] = {
+                    message: message,
+                    duration: displayTime,
+                    timeout: null,
+                    mode: mode
+                };
+            }
+        });
+    }
+
+    /**
+     * Funkcja ukrywająca dialog z efektem fade out
+     * @param {HTMLElement} dialogElement - Element dymka dialogowego
+     */
+    function hideDialog(dialogElement) {
+        dialogElement.style.transition = `opacity ${settings.fadeTime}ms ease`;
+        dialogElement.style.opacity = '0';
+
+        setTimeout(() => {
+            dialogElement.style.display = 'none';
+            // Usuwamy dialog z aktywnych dialogów
+            const npcId = dialogElement.id.replace('npc-dialog-', '');
+            delete activeDialogs[npcId];
+        }, settings.fadeTime);
+    }
+
+    /**
+     * Obsługa kliknięcia przycisku "Dalej"
+     */
+    function handleNextButtonClick() {
+        // Zatrzymaj istniejący timer
+        if (rotationInterval) {
+            clearTimeout(rotationInterval);
         }
+
+        // Sprawdź czy to ostatni dialog w sekwencji
+        if (currentDialogIndex === currentDialogs.length - 1) {
+            // Jeśli to ostatni dialog, zamknij go (ukryj)
+            const lastDialog = currentDialogs[currentDialogIndex];
+            const dialogElement = document.getElementById(`npc-dialog-${lastDialog.npc_id}`);
+            if (dialogElement) {
+                hideDialog(dialogElement);
+            }
+            return;
+        }
+
+        // Pokaż następny dialog (jeśli nie jest to ostatni)
+        showNextDialog();
     }
 
     // Uruchom inicjalizację po załadowaniu dokumentu
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', function () {
         console.log('Inicjalizacja dialogów NPC...');
         initNpcDialogs();
     });
 
-})(jQuery);
+})();

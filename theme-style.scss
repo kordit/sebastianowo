@@ -333,23 +333,32 @@ html {
     border: 2px solid #333;
     border-radius: 12px;
     padding: 10px 15px;
-    max-width: 250px;
+    width: 250px;
+    max-width: 100%;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    font-family: 'Work Sans', sans-serif;
     transition: opacity 0.3s ease;
-    transform: translate(90%, -20px) !important;
+    transform: translate(-50%, 0%);
+    display: none;
+
+    .npc-dialog-next {
+        margin: auto;
+        display: block;
+        background: green;
+    }
 }
 
 .npc-dialog-bubble::after {
-    content: '';
+    content: "";
     position: absolute;
-    bottom: -20px;
-    left: 15px;
+    top: 40px;
+    left: -20px;
     margin-left: -10px;
     border-width: 20px 20px 0;
     border-style: solid;
-    border-color: #333 transparent transparent transparent;
+    border-color: #fff rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
+    transform: rotate(90deg);
+    opacity: .9;
 }
 
 .npc-dialog-speaker {
@@ -1086,5 +1095,13 @@ body.template-kreator .game-content {
 
     &:hover {
         // transform: rotate(0deg);
+    }
+}
+
+body.postid-24 {
+
+    header,
+    aside {
+        display: none;
     }
 }

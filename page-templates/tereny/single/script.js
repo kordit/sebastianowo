@@ -163,6 +163,70 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+function runFunctionNPC(functionsList) {
+    console.log('🔥 runFunctionNPC:', functionsList);
+
+    // Obsługa JSON w stringu
+    if (typeof functionsList === 'string') {
+        try {
+            if (functionsList.trim().startsWith('{') || functionsList.trim().startsWith('[')) {
+                functionsList = JSON.parse(functionsList);
+            } else {
+                // Jeśli to pojedyncza funkcja jako string
+                return runFunctionNPC([{ function_name: functionsList }]);
+            }
+        } catch (error) {
+            console.error('❌ Błąd parsowania JSON:', error);
+            return;
+        }
+    }
+
+    // Upewniamy się, że to tablica
+    if (!Array.isArray(functionsList)) {
+        functionsList = [functionsList];
+    }
+
+    functionsList.forEach(func => {
+        // Jeśli mamy do czynienia z przyciskiem, który wysyła dane z data-type-anwser, użyjmy tych danych
+        if (func && func.do_function) {
+            // Już mamy wszystkie parametry w obiekcie, więc możemy go używać bezpośrednio
+            const rawFunctionName = func.do_function;
+            const functionName = rawFunctionName.replace(/-([a-z])/g, g => g[1].toUpperCase());
+
+            if (typeof window[functionName] === 'function') {
+                try {
+                    console.log(`🚀 Wywołuję ${functionName}() z parametrami:`, func);
+                    window[functionName](func); // Przekazujemy cały obiekt funkcji
+                } catch (err) {
+                    console.error(`❌ Błąd podczas wykonywania ${functionName}():`, err);
+                }
+            } else {
+                console.error(`❌ Funkcja "${functionName}" nie istnieje w window.`);
+            }
+        }
+        // Jeśli mamy do czynienia z obiektem z function_name, który przychodzi np. z NPC z data-target
+        else if (func && func.function_name) {
+            const rawFunctionName = func.function_name;
+            const functionName = rawFunctionName.replace(/-([a-z])/g, g => g[1].toUpperCase());
+
+            if (typeof window[functionName] === 'function') {
+                try {
+                    console.log(`🚀 Wywołuję ${functionName}() z parametrami:`, func);
+                    window[functionName](func); // Przekazujemy cały obiekt funkcji
+                } catch (err) {
+                    console.error(`❌ Błąd podczas wykonywania ${functionName}():`, err);
+                }
+            } else {
+                console.error(`❌ Funkcja "${functionName}" nie istnieje w window.`);
+            }
+        }
+        else {
+            console.error('❌ Nieprawidłowy format funkcji:', func);
+        }
+    });
+}
+
+window.runFunctionNPC = runFunctionNPC;
 
 
 async function SetClass(npc) {
@@ -203,6 +267,55 @@ async function SetClass(npc) {
         avatar.click();
     }
 }
+
+/**
+ * Przekierowuje użytkownika na stronę wskazaną w page_url.
+ * Ignoruje npc_id i inne pola.
+ * @param {Object} options - Obiekt zawierający klucz page_url
+ */
+async function goToPage(options) {
+    console.log("➡️ goToPage uruchomione z:", options);
+
+    try {
+        if (!options || typeof options !== 'object' || !options.page_url) {
+            console.error("❌ Brak page_url w przekazanym obiekcie:", options);
+            return;
+        }
+
+        let targetUrl = options.page_url.trim();
+
+        if (!targetUrl) {
+            console.error("❌ page_url jest pusty.");
+            return;
+        }
+
+        // Jeśli URL zaczyna się od http/https – pełna ścieżka, przekieruj
+        if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+            window.location.href = targetUrl;
+            return;
+        }
+
+        // Dodaj początkowy slash, jeśli nie ma
+        if (!targetUrl.startsWith('/')) {
+            targetUrl = '/' + targetUrl;
+        }
+
+        const fullUrl = window.location.origin + targetUrl;
+
+        console.log(`✅ Przekierowanie na ${fullUrl}`);
+        window.location.href = fullUrl;
+
+    } catch (error) {
+        console.error("❌ Błąd podczas przekierowania:", error);
+        if (typeof showPopup === 'function') {
+            showPopup("Wystąpił błąd podczas przekierowania", "error");
+        }
+    }
+}
+
+window.goToPage = goToPage;
+
+
 
 // **Funkcja do obsługi wyboru avatara**
 function initAvatarSelection() {

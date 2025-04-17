@@ -455,45 +455,4 @@ function initSvgInteractions() {
 // Uruchomienie funkcji po załadowaniu DOM
 document.addEventListener("DOMContentLoaded", initSvgInteractions);
 
-function runFunctionNPC(functionsList) {
-    console.log('runFunctionNPC', functionsList);
-    if (typeof functionsList === "string") {
-        const functionName = functionsList.replace(/-([a-z])/g, g => g[1].toUpperCase());
-        if (typeof window[functionName] === "function") {
-            window[functionName]();
-        } else {
-            console.error(`Błąd: Funkcja "${functionName}" nie istnieje.`);
-        }
-        return;
-    }
 
-    if (typeof functionsList === "string" && (functionsList.trim().startsWith("{") || functionsList.trim().startsWith("["))) {
-        try {
-            functionsList = JSON.parse(functionsList);
-        } catch (error) {
-            console.error("Błąd parsowania JSON:", error);
-            return;
-        }
-    }
-
-    if (!Array.isArray(functionsList) || functionsList.length === 0) {
-        console.error("Błąd: Nieprawidłowa tablica funkcji.");
-        return;
-    }
-
-    functionsList.forEach(funcObj => {
-        if (!funcObj.function_name || !funcObj.npc_id) {
-            console.error("Błąd: Brak wymaganych danych w obiekcie funkcji.", funcObj);
-            return;
-        }
-
-        const functionName = funcObj.function_name.replace(/-([a-z])/g, g => g[1].toUpperCase());
-        const npcId = funcObj.npc_id;
-
-        if (typeof window[functionName] === "function") {
-            window[functionName](npcId);
-        } else {
-            console.error(`Błąd: Funkcja "${functionName}" nie istnieje.`);
-        }
-    });
-}

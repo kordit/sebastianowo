@@ -452,17 +452,47 @@ acf_add_local_field_group(array(
 															),
 															'choices' => array(
 																'SetClass' => 'Wybierz klasę',
+																'go-to-page' => 'Przejdź do podstrony',
 															),
 															'default_value' => false,
 															'return_format' => 'value',
 															'multiple' => 0,
-															'allow_custom' => 0,
-															'search_placeholder' => '',
 															'allow_null' => 0,
 															'allow_in_bindings' => 1,
 															'ui' => 0,
 															'ajax' => 0,
 															'placeholder' => '',
+															'allow_custom' => 0,
+															'search_placeholder' => '',
+														),
+														array(
+															'key' => 'field_68013a77aaa4b',
+															'label' => 'Url po slash',
+															'name' => 'page_url',
+															'aria-label' => '',
+															'type' => 'text',
+															'instructions' => '',
+															'required' => 0,
+															'conditional_logic' => array(
+																array(
+																	array(
+																		'field' => 'field_67b4ef5f6a17f',
+																		'operator' => '==',
+																		'value' => 'go-to-page',
+																	),
+																),
+															),
+															'wrapper' => array(
+																'width' => '',
+																'class' => '',
+																'id' => '',
+															),
+															'default_value' => '',
+															'maxlength' => '',
+															'allow_in_bindings' => 0,
+															'placeholder' => '',
+															'prepend' => '',
+															'append' => '',
 														),
 													),
 													'min' => '',
@@ -590,7 +620,7 @@ acf_add_local_field_group(array(
 	'acfe_form' => 0,
 	'acfe_meta' => '',
 	'acfe_note' => '',
-	'modified' => 1739995719,
+	'modified' => 1744911027,
 ));
 
 endif;

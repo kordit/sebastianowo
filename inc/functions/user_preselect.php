@@ -512,7 +512,8 @@ add_action('init', function () {
                                 'repeater'     => 'Powtarzaj dialog cały czas',
                                 'otworz_chat'  => 'Otwórz chat',
                                 'misja'        => 'Misja',
-                                'stop'         => 'Zatrzymaj na ostatnim'
+                                'stop'         => 'Zatrzymaj na ostatnim',
+                                'auto'         => 'Auto',
                             ],
                             'default_value' => 'nic',
                             'wrapper'       => [

@@ -27,31 +27,7 @@ function scene_generator()
 
     $instance = get_query_var('instance_name');
     $post_title = sanitize_title(get_the_title($post_id));
-    if ($instance == 'kreator') {
-        $background = 135;
-        $selected_paths = [
-            [
-                'select' => 'npc',
-                'npc'    => '142',
-                'title'  => 'Droga skina',
-                'color' => '#008000',
-            ],
-            [
-                'select' => 'npc',
-                'npc'    => '145',
-                'title'  => 'Droga skejta',
-                'color' => '#008000',
-            ],
-            [
-                'select' => 'npc',
-                'npc'    => '143',
-                'title'  => 'Droga dresa',
-                'color' => '#008000',
-            ],
-
-        ];
-        $svg_url = 'wp-content/uploads/2025/02/Nowy-projekt-2.svg';
-    } elseif ($scene_id == $post_id) {
+    if ($scene_id == $post_id) {
         if (isset($get_scenes[0])) {
             $get_scenes = $get_scenes[0];
             $background = $get_scenes['tlo'];
@@ -89,6 +65,7 @@ function scene_generator()
                             'page'  => $link ?: '',
                             'title'  => $name ?: 'brak tytułu',
                             'color'  => $color,
+                            'npc-name'    => get_the_title($npc) ?: NULL,
                             'relation' => $relation,
                         ];
                     }
