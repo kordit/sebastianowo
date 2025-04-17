@@ -139,6 +139,7 @@ function scene_generator()
                             'npc'    => $npc ?: NULL,
                             'title'  => $name ?: 'brak tytułu',
                             'page'  => $link,
+                            'npc-name'    => get_the_title($npc) ?: NULL,
                             'color'  => $color,
                         ];
                     }

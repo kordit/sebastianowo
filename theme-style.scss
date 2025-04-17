@@ -338,7 +338,7 @@ html {
     z-index: 1000;
     font-family: 'Work Sans', sans-serif;
     transition: opacity 0.3s ease;
-    transform: translate(25%, -20px) !important;
+    transform: translate(90%, -20px) !important;
 }
 
 .npc-dialog-bubble::after {
@@ -352,6 +352,21 @@ html {
     border-color: #333 transparent transparent transparent;
 }
 
+.npc-dialog-speaker {
+    color: #111;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: left;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 4px;
+    background-color: rgba(0, 0, 0, 0.03);
+    padding: 3px 6px;
+    border-radius: 4px;
+}
+
 .npc-dialog-content {
     color: #333;
     font-size: 14px;
@@ -363,12 +378,12 @@ html {
 @keyframes dialogFadeIn {
     from {
         opacity: 0;
-        transform: translateY(-10px) translateX(-50%);
+        // transform: translateY(-10px) translateX(-50%);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0) translateX(-50%);
+        // transform: translateY(0) translateX(-50%);
     }
 }
 
@@ -1054,6 +1069,7 @@ body.template-kreator .game-content {
     max-width: 70%;
     margin: 0 auto 20px;
     transition-duration: .5s;
+    background: #30231e;
 
     &.bigger-border {
         border: solid 15px #fff;
@@ -1061,7 +1077,11 @@ body.template-kreator .game-content {
 
     img {
         max-width: 100%;
-        height: auto;
+        height: 100%;
+        object-fit: cover;
+        object-position: bottom;
+        margin-top: auto;
+        margin-bottom: -7px;
     }
 
     &:hover {

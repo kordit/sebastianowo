@@ -343,7 +343,7 @@ add_action('init', function () {
                         ],
                     ],
                     'style'      => 'default',
-                    'menu_order' => 99,
+                    'menu_order' => 999,
                 ]);
             }
         }
@@ -486,8 +486,15 @@ add_action('init', function () {
                                     'key'           => "field_{$post_title}_scene_{$scene_index}_rozmowy_dialogow_wiadomosc",
                                     'label'         => 'Wiadomość',
                                     'name'          => "wiadomosc",
-                                    'type'          => 'textarea',
-                                    'rows'          => 3,
+                                    'type' => 'wysiwyg',
+                                    'instructions' => '',
+                                    'required' => 0,
+                                    'conditional_logic' => 0,
+                                    'allow_in_bindings' => 1,
+                                    'tabs' => 'all',
+                                    'toolbar' => 'basic',
+                                    'media_upload' => 0,
+                                    'delay' => 0,
                                     'wrapper'       => [
                                         'width'     => '70',
                                     ],
@@ -615,7 +622,7 @@ add_action('init', function () {
                         ],
                     ],
                     'style'      => 'default',
-                    'menu_order' => 100,
+                    'menu_order' => 99999,
                 ]);
             }
         }

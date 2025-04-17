@@ -11,7 +11,7 @@ acf_add_local_field_group(array(
 			'label' => 'slug',
 			'name' => 'slug',
 			'aria-label' => '',
-			'type' => 'acfe_slug',
+			'type' => 'wysiwyg',
 			'instructions' => '',
 			'required' => 0,
 			'conditional_logic' => 0,
@@ -21,11 +21,11 @@ acf_add_local_field_group(array(
 				'id' => '',
 			),
 			'default_value' => '',
-			'placeholder' => '',
-			'prepend' => '',
-			'append' => '',
-			'maxlength' => '',
-			'allow_in_bindings' => 0,
+			'allow_in_bindings' => 1,
+			'tabs' => 'all',
+			'toolbar' => 'basic',
+			'media_upload' => 0,
+			'delay' => 0,
 		),
 	),
 	'location' => array(
@@ -53,7 +53,7 @@ acf_add_local_field_group(array(
 	'acfe_form' => 0,
 	'acfe_meta' => '',
 	'acfe_note' => '',
-	'modified' => 1744817563,
+	'modified' => 1744833227,
 ));
 
 endif;

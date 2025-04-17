@@ -470,14 +470,43 @@
             clearTimeout(activeDialogs[npcId].timeout);
         }
 
+        // Pobierz nazwę NPC z atrybutu data-npc-name na ścieżce SVG
+        let npcName = "";
+        const npcPath = document.querySelector(`svg path[data-npc="${npcId}"]`);
+        if (npcPath) {
+            npcName = npcPath.getAttribute('data-npc-name') || `NPC #${npcId}`;
+        } else {
+            npcName = `NPC #${npcId}`;
+        }
+
+        // Wyczyść poprzednią zawartość
+        dialogElement.innerHTML = '';
+
+        // Dodaj nagłówek z imieniem NPC
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'npc-dialog-speaker';
+        nameDiv.textContent = npcName;
+        nameDiv.style.color = '#111';
+        nameDiv.style.fontSize = '12px';
+        nameDiv.style.fontWeight = 'bold';
+        nameDiv.style.textAlign = 'left';
+        nameDiv.style.marginBottom = '6px';
+        nameDiv.style.textTransform = 'uppercase';
+        nameDiv.style.letterSpacing = '0.5px';
+        nameDiv.style.borderBottom = '1px solid #ccc';
+        nameDiv.style.paddingBottom = '4px';
+        nameDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.03)';
+        nameDiv.style.padding = '3px 6px';
+        nameDiv.style.borderRadius = '4px';
+        dialogElement.appendChild(nameDiv);
+
         // Utwórz element zawartości dialogu
         const contentDiv = document.createElement('div');
         contentDiv.className = 'npc-dialog-content';
         contentDiv.innerHTML = message;
-
-        // Wyczyść poprzednią zawartość i dodaj nową
-        dialogElement.innerHTML = '';
         dialogElement.appendChild(contentDiv);
+
+        // Pokaż dymek
         dialogElement.style.display = 'block';
 
         // Oblicz czas wyświetlania na podstawie liczby znaków
