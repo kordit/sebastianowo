@@ -30,9 +30,6 @@ $man_image = get_field('group_man') ?: 87;
                         <div class="item">
                             <input type="text" id="nickname" placeholder="Wpisz pseudonim">
                         </div>
-                        <div class="item">
-                            <textarea id="story" placeholder="Opisz swoją postać..."></textarea>
-                        </div>
                         <button id="save-character"
                             data-user-id="<?= get_current_user_id(); ?>"
                             data-nonce="<?= wp_create_nonce('update_character_nonce'); ?>">

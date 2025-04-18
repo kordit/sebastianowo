@@ -229,8 +229,21 @@ function runFunctionNPC(functionsList) {
 window.runFunctionNPC = runFunctionNPC;
 
 
-async function SetClass(npc) {
-    console.log("Wybrany NPC:", npc);
+async function SetClass(params) {
+    console.log("Wybrany NPC:", params);
+
+    // Obsługa różnych formatów parametrów
+    let npcId;
+    if (params && params.npc_id) {
+        // Jeśli przychodzi jako obiekt z npc_id
+        npcId = params.npc_id;
+    } else if (typeof params === 'string' || typeof params === 'number') {
+        // Jeśli przychodzi jako bezpośrednia wartość
+        npcId = params;
+    } else {
+        console.error("Nieprawidłowy format parametrów:", params);
+        return;
+    }
 
     const containerWorld = document.querySelector('.container-world');
     const stepElement = document.querySelector('.step');
@@ -247,7 +260,9 @@ async function SetClass(npc) {
         77: "kombinator"
     };
 
-    // window.selectedClass = classMap[npc] || '';
+    // Ustawiamy klasę na podstawie ID NPC
+    window.selectedClass = classMap[npcId] || '';
+    console.log("Ustawiam klasę na podstawie NPC ID:", npcId, "->", window.selectedClass);
 
     // Dodanie efektu przejścia
     containerWorld.classList.add('zooming');
@@ -255,7 +270,7 @@ async function SetClass(npc) {
     stepElement.classList.add('active');
 
     if (!window.selectedClass) {
-        console.error("Nieznany NPC:", npc);
+        console.error("Nieznany NPC ID:", npcId, "- nie znaleziono odpowiedniej klasy");
         return;
     }
 
@@ -268,11 +283,6 @@ async function SetClass(npc) {
     }
 }
 
-/**
- * Przekierowuje użytkownika na stronę wskazaną w page_url.
- * Ignoruje npc_id i inne pola.
- * @param {Object} options - Obiekt zawierający klucz page_url
- */
 async function goToPage(options) {
     console.log("➡️ goToPage uruchomione z:", options);
 
@@ -345,7 +355,6 @@ function initAvatarSelection() {
 // **Funkcja do zapisu postaci**
 async function saveCharacter() {
     const nickname = document.getElementById('nickname').value.trim();
-    const story = document.getElementById('story').value.trim();
 
     if (!window.selectedClass || !window.selectedAvatarId || !nickname) {
         showPopup('Uzupełnij wszystkie pola!', 'error');
@@ -353,21 +362,25 @@ async function saveCharacter() {
     }
 
     try {
-        const updateResponse = await updateACFFields({
-            "creator_end": true,
+        // Tworzymy obiekt z danymi
+        const userData = {
             "user_class": window.selectedClass,
             "avatar": window.selectedAvatarId,
             "nick": nickname,
-            "story": story
-        });
+        };
 
-        console.log(updateResponse);
+        console.log("Dane do zapisania:", userData);
+
+        // Bezpośrednie wywołanie funkcji updateACFFields z utworzonym obiektem
+        const updateResponse = await updateACFFields(userData);
+
+        console.log("Odpowiedź z serwera:", updateResponse);
 
         await createCustomPopup({
-            imageId: 12,
+            imageId: 88,
             header: "Twój nowy bohater został utworzony!",
             description: "Gratulacje! Twoje dane zostały zaktualizowane. Przejdź do panelu, aby zobaczyć szczegóły.",
-            link: "/tereny/kolejowa",
+            link: "/tereny/start/krzaki/",
             linkLabel: "Zacznij przygodę!",
             status: "success",
             closeable: false
@@ -387,13 +400,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById('save-character').addEventListener('click', saveCharacter);
 });
-
-// createCustomPopup({
-//     imageId: 149,
-//     header: "Podróż do Sebastianowa",
-//     description: "Jeszcze zanim otwierasz drzwi, już widzisz ich w oknie. Trzech typów. Każdy inny, ale każdy wygląda, jakby nie miał dziś najlepszego dnia. Czuć, że w tym wagonie nie będzie miłej pogawędki. Pociąg rusza, drzwi zamykają się za tobą. Nie masz wyboru – siadasz. Ich spojrzenia już na tobie wiszą. Ktoś pierwszy się odezwie. Porozmawiaj z każdym z nich. Kliknij na ich avatary.",
-//     link: "",
-//     linkLabel: "",
-//     status: "active",
-//     closeable: true
-// });
