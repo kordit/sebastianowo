@@ -18,13 +18,24 @@
     // Interwał rotacji dialogów
     let rotationInterval = null;
 
+    const parts = window.location.pathname.split('/').filter(Boolean);
+
+    // Używamy tylko ostatniego segmentu URL do domyślnego sluga (pociag, peron, itp.)
+    // albo "powitanie" jeśli nie można ustalić z URL
+    let defaultSlugFromUrl = 'powitanie';
+    if (parts.length > 0) {
+        defaultSlugFromUrl = parts[parts.length - 1];
+    }
+
+    console.log('Domyślny slug dialogu ustalony z URL:', defaultSlugFromUrl);
+
     // Domyślne ustawienia
     const settings = {
         intervalTime: 5000,  // Interwał zmiany dialogów (5 sekund)
         minDisplayTime: 1000, // Minimalny czas wyświetlania dialogu (3 sekundy)
         charTime: 50, // Czas na znak (0,1 sekundy)
         dialogClass: 'npc-dialog-bubble',
-        defaultSlug: 'powitanie',
+        defaultSlug: defaultSlugFromUrl,
         fadeTime: 300, // Czas trwania animacji fade (w ms)
         defaultMode: 'manual' // Domyślny tryb: 'manual' (ze strzałkami) lub 'auto' (automatyczny)
     };
@@ -89,7 +100,12 @@
         }
 
         // Pokaż domyślne dialogi powitalne dla wszystkich NPC
+        console.log('Próbuję znaleźć dialog dla sluga:', settings.defaultSlug, 'w scenie:', currentScene);
+        console.log('Dostępne slugi w tej scenie:', Object.keys(dialogs[currentScene]));
+
+        // Najpierw spróbuj użyć domyślnego sluga z ustawień
         if (dialogs[currentScene][settings.defaultSlug]) {
+            console.log('Znaleziono dialog dla sluga:', settings.defaultSlug);
             const dialogData = dialogs[currentScene][settings.defaultSlug];
 
             // Sprawdź nową strukturę danych - teraz mamy obiekt z dialogami i akcją końcową
@@ -100,6 +116,21 @@
                 // Kompatybilność wsteczna - stara struktura
                 startDialogRotation(dialogData);
             }
+        }
+        // Jeśli nie znaleziono sluga z URL, spróbuj użyć 'powitanie' jako fallback
+        else if (dialogs[currentScene]['powitanie']) {
+            console.log('Nie znaleziono dialogu dla sluga:', settings.defaultSlug, ', używam domyślnego "powitanie"');
+            const dialogData = dialogs[currentScene]['powitanie'];
+
+            // Sprawdź nową strukturę danych
+            if (dialogData.dialogi) {
+                startDialogRotation(dialogData.dialogi, dialogData.koniec_dialogu);
+            } else {
+                startDialogRotation(dialogData);
+            }
+        }
+        else {
+            console.warn('Nie znaleziono żadnego dialogu dla sluga', settings.defaultSlug, 'ani dla "powitanie"');
         }
     }
 
@@ -479,29 +510,118 @@
             const pathRect = pathElement.getBBox();
             const svgRect = svgElement.getBoundingClientRect();
 
-            // Obliczamy współczynnik skalowania SVG
-            const scaleX = svgRect.width / svgElement.viewBox.baseVal.width || 1;
+            // Pobierz atrybut d ścieżki
+            const pathData = pathElement.getAttribute('d');
 
-            // Obliczamy pozycję środka górnej krawędzi ścieżki z uwzględnieniem skalowania
-            const centerX = (pathRect.x + (pathRect.width / 2)) * scaleX;
-            const topY = pathRect.y * scaleX - 20; // Umieść dymek nad NPC
+            // Jeśli nie ma atrybutu d, używamy domyślnej pozycji
+            if (!pathData) {
+                console.warn(`Ścieżka NPC ${npcId} nie ma atrybutu d - używamy domyślnej pozycji`);
+                return;
+            }
 
-            // Dodajemy offset SVG - początkową pozycję SVG w dokumencie
-            const svgOffsetLeft = svgRect.left;
-            const svgOffsetTop = svgRect.top;
+            // Parsowanie atrybutu d, aby wyodrębnić pierwszy punkt
+            // Format d to zazwyczaj "M x,y ..." gdzie M to move to, a x,y to współrzędne
+            const matches = pathData.match(/[Mm]\s*([+-]?\d*\.?\d+)[,\s]([+-]?\d*\.?\d+)/);
+
+            if (!matches || matches.length < 3) {
+                console.warn(`Nie udało się sparsować pierwszego punktu z atrybutu d dla NPC ${npcId}`);
+                return;
+            }
+
+            // Pobierz współrzędne pierwszego punktu
+            const firstX = parseFloat(matches[1]);
+            const firstY = parseFloat(matches[2]);
+
+            // Pobierz wymiary viewBox SVG
+            const viewBox = svgElement.viewBox.baseVal;
+            const svgWidth = viewBox.width;
+            const svgHeight = viewBox.height;
+
+            // Przelicz współrzędne na procenty
+            const xPercent = (firstX / svgWidth) * 100;
+            const yPercent = (firstY / svgHeight) * 100;
 
             // Utwórz element dymku
             const dialogElement = document.createElement('div');
             dialogElement.id = `npc-dialog-${npcId}`;
             dialogElement.className = settings.dialogClass;
-            dialogElement.style.left = `${svgOffsetLeft + centerX}px`;
-            dialogElement.style.top = `${svgOffsetTop + topY}px`;
 
-            // Dodaj dymek do dokumentu (jako dziecko SVG lub innego kontenera)
-            svgElement.parentNode.appendChild(dialogElement);
+            // Ustaw pozycję dymku używając procentów
+            dialogElement.style.position = 'absolute';
+            dialogElement.style.left = `${xPercent}%`;
+            dialogElement.style.top = `${yPercent}%`;
+
+            console.log(`Dymek dla NPC ${npcId} - pierwszy punkt: (${firstX}, ${firstY}), pozycja: ${xPercent}%, ${yPercent}%`);
+
+            // Dodaj dymek do dokumentu (zaraz po SVG, a nie wewnątrz)
+            svgElement.parentNode.insertBefore(dialogElement, svgElement.nextSibling);
         } catch (error) {
             console.error(`Błąd podczas tworzenia kontenera dla NPC ${npcId}:`, error);
         }
+    }
+
+    /**
+     * Tworzy czerwoną kropkę na podstawie pierwszej wartości z atrybutu d ścieżki SVG
+     * @param {Element} pathElement - Element ścieżki SVG
+     * @param {string} npcId - ID NPC
+     * @param {Element} svgElement - Element SVG nadrzędny
+     * @param {Object} pathRect - Wymiary ścieżki
+     * @param {Object} svgRect - Wymiary SVG
+     * @param {number} scaleX - Współczynnik skalowania
+     */
+    function createRedDot(pathElement, npcId, svgElement, pathRect, svgRect, scaleX) {
+        // Pobierz atrybut d ścieżki
+        const pathData = pathElement.getAttribute('d');
+
+        // Jeśli nie ma atrybutu d, używamy domyślnej pozycji
+        if (!pathData) {
+            console.warn(`Ścieżka NPC ${npcId} nie ma atrybutu d - używamy domyślnej pozycji`);
+            return;
+        }
+
+        // Parsowanie atrybutu d, aby wyodrębnić pierwszy punkt
+        // Format d to zazwyczaj "M x,y ..." gdzie M to move to, a x,y to współrzędne
+        const matches = pathData.match(/[Mm]\s*([+-]?\d*\.?\d+)[,\s]([+-]?\d*\.?\d+)/);
+
+        if (!matches || matches.length < 3) {
+            console.warn(`Nie udało się sparsować pierwszego punktu z atrybutu d dla NPC ${npcId}`);
+            return;
+        }
+
+        // Pobierz współrzędne pierwszego punktu
+        const firstX = parseFloat(matches[1]);
+        const firstY = parseFloat(matches[2]);
+
+        // Pobierz wymiary viewBox SVG
+        const viewBox = svgElement.viewBox.baseVal;
+        const svgWidth = viewBox.width;
+        const svgHeight = viewBox.height;
+
+        // Przelicz współrzędne na procenty
+        const xPercent = (firstX / svgWidth) * 100;
+        const yPercent = (firstY / svgHeight) * 100;
+
+        // Tworzenie elementu kropki
+        const dotElement = document.createElement('div');
+        dotElement.id = `npc-red-dot-${npcId}`;
+        dotElement.className = 'npc-red-dot';
+
+        // Stylowanie kropki używając procentów dla pozycji
+        dotElement.style.position = 'absolute';
+        dotElement.style.left = `${xPercent}%`;
+        dotElement.style.top = `${yPercent}%`;
+        dotElement.style.width = '10px';
+        dotElement.style.height = '10px';
+        dotElement.style.backgroundColor = 'red';
+        dotElement.style.borderRadius = '50%';
+        dotElement.style.zIndex = '1000';
+
+        // Dodanie kropki bezpośrednio do SVG (a nie do rodzica)
+        // zapewni to właściwe pozycjonowanie względem SVG
+        console.log(`Kropka dla NPC ${npcId} - pierwszy punkt: (${firstX}, ${firstY}), pozycja: ${xPercent}%, ${yPercent}%`);
+
+        // Dodanie kropki do dokumentu (jako dziecko SVG)
+        svgElement.appendChild(dotElement);
     }
 
     /**
@@ -662,7 +782,7 @@
     }
 
     /**
-     * Obsługa kliknięcia przycisku "Dalej"
+     * Obsługuje kliknięcie przycisku "Dalej"
      */
     function handleNextButtonClick() {
         // Zatrzymaj istniejący timer

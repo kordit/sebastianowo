@@ -338,7 +338,7 @@ html {
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     transition: opacity 0.3s ease;
-    transform: translate(-50%, 0%);
+    transform: translate(20%, 0%);
     display: none;
 
     .npc-dialog-next {
@@ -641,6 +641,9 @@ body.post-type-archive-tereny {
     flex-direction: row-reverse;
 
     .npc-conversation-wrapper {
+        max-height: 80vh;
+        overflow-y: auto;
+        overflow-x: hidden;
         width: 75%;
         background: #fff;
         padding: 20px;
