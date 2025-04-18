@@ -221,7 +221,21 @@ async function handleAnswer(input) {
         // Wykonaj funkcje
         for (const func of functionsToExecute) {
             const innernpcId = document.getElementById('npcdatamanager').dataset.id;
-            const functionsArray = [{ function_name: func.do_function, npc_id: innernpcId }];
+            // Przekazujemy wszystkie parametry z obiektu func i dodajemy npc_id
+            const functionData = {
+                do_function: func.do_function,  // Używamy do_function zamiast function_name
+                npc_id: innernpcId,
+                ...func // Kopiujemy wszystkie pozostałe parametry z func (w tym page_url i inne)
+            };
+
+            // Usuń duplikat do_function, który może się pojawić przez spread
+            if (functionData.do_function === func.do_function) {
+                delete functionData.do_function;
+                functionData.do_function = func.do_function;
+            }
+
+            console.log('Przekazuję pełne dane funkcji:', functionData);
+            const functionsArray = [functionData];
             document.getElementById('npc-popup').dataset.functions = JSON.stringify(functionsArray);
         }
 

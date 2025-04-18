@@ -16,7 +16,7 @@ $stats = get_field('stats', 'user_' . $current_user_id);
                 if ($avatar && isset($avatar['ID'])) {
                     echo wp_get_attachment_image($avatar['ID'], 'thumbnail'); // Możesz zmienić 'thumbnail' na inny rozmiar
                 } else {
-                    echo 'Brak avatara';
+                    echo wp_get_attachment_image(78, 'thumbnail'); // Możesz zmienić 'thumbnail' na inny rozmiar
                 }
                 ?>
             </div>

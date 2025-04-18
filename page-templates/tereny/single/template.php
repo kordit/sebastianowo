@@ -2,7 +2,7 @@
 $fields = get_fields(get_the_ID());
 $man_image = get_field('group_man') ?: 87;
 ?>
-<?php if (get_post()->ID == 517): ?>
+<?php if (get_post()->ID == 24): ?>
     <div class="step">
         <div class="inner">
             <div class="container">
@@ -11,11 +11,11 @@ $man_image = get_field('group_man') ?: 87;
                     <div id="avatar-selection">
                         <?php
                         $avatar_pairs = [
-                            [559, 550],
-                            [555, 551],
-                            [556, 552],
-                            [557, 553],
-                            [558, 554]
+                            [78, 83],
+                            [79, 84],
+                            [80, 85],
+                            [81, 86],
+                            [82, 87]
                         ];
                         foreach ($avatar_pairs as $pair) {
                             $avatar_url = wp_get_attachment_image_url($pair[0], 'full');

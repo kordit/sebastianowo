@@ -242,16 +242,16 @@ async function SetClass(npc) {
 
     // Mapowanie NPC na klasy postaci
     const classMap = {
-        530: "skin",
-        521: "blokers",
-        548: "dres"
+        70: "zawijacz",
+        76: "zadymiarz",
+        77: "kombinator"
     };
 
-    window.selectedClass = classMap[npc] || '';
+    // window.selectedClass = classMap[npc] || '';
 
     // Dodanie efektu przejścia
     containerWorld.classList.add('zooming');
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 100));
     stepElement.classList.add('active');
 
     if (!window.selectedClass) {
