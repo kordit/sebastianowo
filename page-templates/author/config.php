@@ -1,19 +1,11 @@
 <?php
-// Pobieranie danych użytkownika
 $current_user = wp_get_current_user();
 $user_id = $current_user->ID;
 
-// Sprawdzenie czy użytkownik jest zalogowany
 if (!is_user_logged_in()) {
     wp_redirect(home_url('/login'));
     exit;
 }
-
-
-
-/**
- * Wyświetla statystyki użytkownika
- */
 function display_user_stats($user_id)
 {
     $output = '<div class="stats-grid">';
@@ -38,12 +30,8 @@ function display_user_stats($user_id)
 
 $user_class = get_field('user_class', 'user_' . $user_id);
 
-/**
- * Pobiera statystyki użytkownika
- */
 function get_user_stats($user_id)
 {
-    // Pobieranie statystyk użytkownika z nowej struktury ACF
     $stats = [];
 
     if (function_exists('get_field')) {
@@ -139,9 +127,6 @@ function display_user_skills($user_id)
     return $output;
 }
 
-/**
- * Pobiera umiejętności użytkownika
- */
 function get_user_skills($user_id)
 {
     $skills = [];

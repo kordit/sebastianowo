@@ -856,12 +856,6 @@ a.btn.back {
     }
 }
 
-
-
-
-
-
-
 .popup-full {
     transition: opacity .5s;
     z-index: 1000;
@@ -940,6 +934,10 @@ body.template-kreator .game-content {
     margin: 0 auto 20px;
     transition-duration: .5s;
     background: #30231e;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
 
     &.bigger-border {
         border: solid 15px #fff;
@@ -951,7 +949,6 @@ body.template-kreator .game-content {
         object-fit: cover;
         object-position: bottom;
         margin-top: auto;
-        margin-bottom: -7px;
     }
 
     &:hover {
