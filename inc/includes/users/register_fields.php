@@ -840,13 +840,7 @@ add_action('acf/include_fields', function () {
                             'class' => '',
                             'id' => '',
                         ),
-                        'choices' => array(
-                            'step1' => 'Krok 1',
-                            'step2' => 'Krok 2',
-                            'step3' => 'Krok 3',
-                            'step4' => 'Krok 4',
-                            'step5' => 'Krok 5',
-                        ),
+                        'choices' => array(), // Puste, ponieważ będą dynamicznie generowane
                         'allow_custom' => 0,
                         'save_custom' => 0,
                         'default_value' => array(),
@@ -855,30 +849,6 @@ add_action('acf/include_fields', function () {
                         'return_format' => 'value',
                     ),
                 ),
-            ),
-
-            array(
-                'key' => 'field_mission_current',
-                'label' => 'Aktualna misja',
-                'name' => 'active_mission',
-                'aria-label' => '',
-                'type' => 'post_object',
-                'instructions' => 'Aktualnie wykonywana misja',
-                'required' => 0,
-                'conditional_logic' => 0,
-                'wrapper' => array(
-                    'width' => '',
-                    'class' => '',
-                    'id' => '',
-                ),
-                'post_type' => array(
-                    0 => 'mission',
-                ),
-                'taxonomy' => '',
-                'allow_null' => 1,
-                'multiple' => 0,
-                'return_format' => 'object',
-                'ui' => 1,
             ),
 
             array(

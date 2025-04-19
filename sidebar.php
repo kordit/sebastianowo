@@ -41,7 +41,7 @@ $stats = get_field('vitality', 'user_' . $current_user_id);
             <a href="/user/me">
                 <img src="<?= esc_url(PNG . '/postac.png'); ?>" alt="">
                 <span class="icon-label">Postać</span>
-            </a> <a href="">
+            </a> <a href="/zadania">
                 <img src="<?= esc_url(PNG . '/interes.png'); ?>" alt="">
                 <span class="icon-label">Zadania</span>
             </a>
