@@ -244,9 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         checkEmptyCategories();
-    }
-
-    /**
+    }    /**
      * Zdejmuje przedmiot
      */
     function unequipItem(itemId, slot) {
@@ -263,8 +261,20 @@ document.addEventListener('DOMContentLoaded', function () {
         // Dodaj przedmiot do plecaka
         addItemToInventory(safeId, slot);
 
-        // Usuń przedmiot ze slotu
-        equipSlot.innerHTML = '';
+        // Utwórz i dodaj domyślny komunikat zamiast czyszczenia slotu
+        let slotNames = {
+            'chest_item': 'Na klatę',
+            'bottom_item': 'Na poślady',
+            'legs_item': 'Na giczuły'
+        };
+
+        equipSlot.innerHTML = `
+            <h4 class="slot-name">${slotNames[slot] || slot}</h4>
+            <div class="empty-slot">
+                <div class="empty-slot-icon"></div>
+                <p>Przejdź do zakładki przedmioty, by założyć przedmiot</p>
+            </div>
+        `;
     }
 
     // INICJALIZACJA UI
@@ -322,11 +332,17 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('.plecak-tab[data-tab="equipped"]').classList.add('active');
     document.querySelector('#tab-equipped').classList.add('active');
 
+    // Flaga do śledzenia czy żądanie AJAX jest w toku
+    let ajaxInProgress = false;
+
     // OBSŁUGA ZDARZEŃ
 
     // Zakładanie przedmiotu
     document.addEventListener('click', function (e) {
         if (e.target.classList.contains('item-equip')) {
+            // Jeśli żądanie jest już w toku, ignoruj kliknięcie
+            if (ajaxInProgress) return;
+
             const itemId = getDataAttribute(e.target, 'item-id');
             const slot = getDataAttribute(e.target, 'slot');
 
@@ -334,6 +350,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Brak wymaganych atrybutów: item-id lub slot');
                 return;
             }
+
+            // Oznacz przycisk jako nieaktywny i zmień jego wygląd
+            e.target.disabled = true;
+            e.target.classList.add('processing');
+
+            // Ustaw flagę, że żądanie jest w toku
+            ajaxInProgress = true;
 
             // Wysyłamy żądanie Ajax do założenia przedmiotu
             const data = {
@@ -356,6 +379,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(error => {
                     console.error('Błąd AJAX:', error);
                     showPopup('Wystąpił błąd podczas zakładania przedmiotu.', 'error');
+                })
+                .finally(() => {
+                    // Reset flagi i stanu przycisku
+                    ajaxInProgress = false;
+
+                    // Przywróć stan wszystkich przycisków "Załóż" dla tego przedmiotu
+                    document.querySelectorAll(`.item-equip[data-item-id="${itemId}"]`).forEach(btn => {
+                        btn.disabled = false;
+                        btn.classList.remove('processing');
+                    });
                 });
         }
     });
@@ -363,6 +396,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Zdejmowanie przedmiotu
     document.addEventListener('click', function (e) {
         if (e.target.classList.contains('item-unequip')) {
+            // Jeśli żądanie jest już w toku, ignoruj kliknięcie
+            if (ajaxInProgress) return;
+
             const itemId = getDataAttribute(e.target, 'item-id');
             const slot = getDataAttribute(e.target, 'slot');
 
@@ -370,6 +406,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Brak wymaganych atrybutów: item-id lub slot');
                 return;
             }
+
+            // Oznacz przycisk jako nieaktywny i zmień jego wygląd
+            e.target.disabled = true;
+            e.target.classList.add('processing');
+
+            // Ustaw flagę, że żądanie jest w toku
+            ajaxInProgress = true;
 
             // Wysyłamy żądanie Ajax do zdjęcia przedmiotu
             const data = {
