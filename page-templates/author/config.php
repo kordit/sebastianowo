@@ -8,8 +8,6 @@ if (!is_user_logged_in()) {
 }
 function display_user_stats($user_id)
 {
-    $output = '<div class="stats-grid">';
-
     // Pobierz statystyki użytkownika
     $stats = get_user_stats($user_id);
 
@@ -17,14 +15,68 @@ function display_user_stats($user_id)
         return '<p class="empty-message">Brak dostępnych statystyk.</p>';
     }
 
-    foreach ($stats as $key => $value) {
-        $output .= '<div class="stat-item">';
-        $output .= '<div class="stat-label">' . esc_html($value['label']) . '</div>';
-        $output .= '<div class="stat-value">' . esc_html($value['value']) . '</div>';
+    // Pobierz punkty nauki
+    $progress = get_field('progress', 'user_' . $user_id);
+    $learning_points = isset($progress['learning_points']) ? $progress['learning_points'] : 0;
+
+    // Określ które statystyki można zwiększać (wszystkie oprócz punktów nauki, życia i energii)
+    $upgradeable_stats = ['strength', 'vitality_stat', 'dexterity', 'perception', 'technical', 'charisma'];
+
+    $output = '';
+
+    // Dodaj informację o dostępnych punktach nauki
+    if ($learning_points > 0) {
+        $output .= '<div class="learning-points-info">';
+        $output .= '<strong>Dostępne punkty nauki:</strong> ' . esc_html($learning_points);
         $output .= '</div>';
     }
 
-    $output .= '</div>';
+    $output .= '<div class="stats-container">';
+    $output .= '<div class="stats-section">';
+    $output .= '<h3>Atrybuty</h3>';
+    $output .= '<div class="stats-grid">';
+
+    // Sortuj statystyki, aby najpierw wyświetlić atrybuty, a później punkty życia i energii
+    $attribute_stats = [];
+    $other_stats = [];
+
+    foreach ($stats as $key => $value) {
+        if (in_array($key, $upgradeable_stats)) {
+            $attribute_stats[$key] = $value;
+        } else if ($key !== 'learning_points') {
+            $other_stats[$key] = $value;
+        }
+    }
+
+    // Wyświetl atrybuty
+    foreach ($attribute_stats as $key => $value) {
+        $output .= '<div class="stat-item" data-stat="' . esc_attr($key) . '">';
+        $output .= '<span class="stat-label">' . esc_html($value['label']) . ':</span>';
+        $output .= '<span class="stat-value">' . esc_html($value['value']) . '</span>';
+
+        // Dodaj przycisk "plus" dla statystyk, które można zwiększyć, jeśli są dostępne punkty nauki
+        if ($learning_points > 0) {
+            $output .= '<button class="stat-upgrade-btn" data-stat="' . esc_attr($key) . '">+</button>';
+        }
+
+        $output .= '</div>';
+    }
+
+    // Wyświetl życie i energię
+    foreach ($other_stats as $key => $value) {
+        $output .= '<div class="stat-item" data-stat="' . esc_attr($key) . '">';
+        $output .= '<span class="stat-label">' . esc_html($value['label']) . ':</span>';
+        $output .= '<span class="stat-value">' . esc_html($value['value']) . '</span>';
+        $output .= '</div>';
+    }
+
+    // Dodaj nonce dla bezpieczeństwa AJAX i ID użytkownika
+    $output .= '</div>'; // .stats-grid
+    $output .= '</div>'; // .stats-section
+    $output .= '</div>'; // .stats-container
+    $output .= '<input type="hidden" id="stats_upgrade_nonce" value="' . wp_create_nonce('stats_upgrade_nonce') . '">';
+    $output .= '<input type="hidden" id="current_user_id" value="' . esc_attr($user_id) . '">';
+
     return $output;
 }
 
@@ -229,6 +281,4 @@ function get_user_skills($user_id)
 
     return $skills;
 }
-
-
 require_once 'template.php';

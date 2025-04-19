@@ -42,13 +42,11 @@
                 $progress = get_field('progress', 'user_' . $user_id);
                 $learning_points = isset($progress['learning_points']) ? $progress['learning_points'] : 0;
 
-                if ($learning_points > 0) :
             ?>
-                    <div class="learning-points-info">
-                        <strong>Dostępne punkty nauki:</strong> <?php echo intval($learning_points); ?>
-                    </div>
+                <div class="learning-points-info">
+                    <strong>Dostępne punkty nauki:</strong> <?php echo intval($learning_points); ?>
+                </div>
             <?php
-                endif;
             }
             ?>
 
@@ -64,29 +62,47 @@
                     <div class="stats-section">
                         <h3>Atrybuty</h3>
                         <div class="stats-grid">
-                            <div class="stat-item">
+                            <div class="stat-item" data-stat="strength">
                                 <span class="stat-label">Siła:</span>
                                 <span class="stat-value"><?php echo isset($stats['strength']) ? intval($stats['strength']) : 0; ?></span>
+                                <?php if ($learning_points > 0): ?>
+                                    <button class="stat-upgrade-btn" data-stat="strength">+</button>
+                                <?php endif; ?>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-item" data-stat="vitality_stat">
                                 <span class="stat-label">Wytrzymałość:</span>
                                 <span class="stat-value"><?php echo isset($stats['vitality']) ? intval($stats['vitality']) : 0; ?></span>
+                                <?php if ($learning_points > 0): ?>
+                                    <button class="stat-upgrade-btn" data-stat="vitality_stat">+</button>
+                                <?php endif; ?>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-item" data-stat="dexterity">
                                 <span class="stat-label">Zręczność:</span>
                                 <span class="stat-value"><?php echo isset($stats['dexterity']) ? intval($stats['dexterity']) : 0; ?></span>
+                                <?php if ($learning_points > 0): ?>
+                                    <button class="stat-upgrade-btn" data-stat="dexterity">+</button>
+                                <?php endif; ?>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-item" data-stat="perception">
                                 <span class="stat-label">Percepcja:</span>
                                 <span class="stat-value"><?php echo isset($stats['perception']) ? intval($stats['perception']) : 0; ?></span>
+                                <?php if ($learning_points > 0): ?>
+                                    <button class="stat-upgrade-btn" data-stat="perception">+</button>
+                                <?php endif; ?>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-item" data-stat="technical">
                                 <span class="stat-label">Zdolności manualne:</span>
                                 <span class="stat-value"><?php echo isset($stats['technical']) ? intval($stats['technical']) : 0; ?></span>
+                                <?php if ($learning_points > 0): ?>
+                                    <button class="stat-upgrade-btn" data-stat="technical">+</button>
+                                <?php endif; ?>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-item" data-stat="charisma">
                                 <span class="stat-label">Cwaniactwo:</span>
                                 <span class="stat-value"><?php echo isset($stats['charisma']) ? intval($stats['charisma']) : 0; ?></span>
+                                <?php if ($learning_points > 0): ?>
+                                    <button class="stat-upgrade-btn" data-stat="charisma">+</button>
+                                <?php endif; ?>
                             </div>
                             <div class="stat-item">
                                 <span class="stat-label">Maksymalne Życie:</span>
@@ -107,6 +123,8 @@
                             </div>
                         </div>
                     </div>
+
+                    <input type="hidden" id="stats_upgrade_nonce" value="<?php echo wp_create_nonce('stats_upgrade_nonce'); ?>">
                 <?php
                 endif; ?>
             </div>

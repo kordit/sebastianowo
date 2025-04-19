@@ -57,7 +57,12 @@ function game_enqueue_scripts_and_styles()
                 'game-author-panel-script',
                 get_stylesheet_directory_uri() . '/page-templates/author/main.js',
                 ['jquery'],
-                filemtime($author_script_path),
+                true
+            );
+            wp_enqueue_script(
+                'game-author-stats-upgrade',
+                get_stylesheet_directory_uri() . '/page-templates/author/stats-upgrade.js',
+                ['jquery'],
                 true
             );
         }

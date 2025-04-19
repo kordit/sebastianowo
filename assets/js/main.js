@@ -192,48 +192,6 @@ function flattenData(data, prefix = '') {
     return flat;
 }
 
-
-// async function createGroupWithCost(title, terenId, costFields) {
-//     try {
-//         const userFields = await fetchLatestACFFields();
-//         if (userFields.przynaleznosc_do_grupy) {
-//             throw new Error("Jesteś już przypisany do grupy. Nie możesz założyć nowej.");
-//         }
-//         const currentGold = userFields.minerals && userFields.minerals.gold ? parseFloat(userFields.minerals.gold) : 0;
-//         if (currentGold < Math.abs(costFields["minerals.gold"])) {
-//             throw new Error("Nie masz wystarczająco złota, aby pokryć koszt.");
-//         }
-//         // Najpierw pobierz hajsy – tylko gdy pobranie się uda, idziemy dalej
-//         await updateACFFieldsWithGui(costFields, ['body'], "Koszt został pobrany.");
-//         // Następnie tworzymy grupę
-//         const groupResponse = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
-//             action: 'create_group',
-//             nonce: global.dataManagerNonce,
-//             title: title,
-//             teren_id: terenId,
-//             request_id: Date.now() + Math.random().toString(36).substring(2, 9)
-//         });
-//         if (!groupResponse.success) {
-//             throw new Error(groupResponse.data?.message || "Nieznany błąd serwera");
-//         }
-//         createCustomPopup({
-//             imageId: 54,
-//             header: "Grupa została utworzona!",
-//             description: "Gratulacje! Twoja grupa została założona. Przejdź do niej, aby zobaczyć szczegóły.",
-//             link: groupResponse.data.post_url,
-//             linkLabel: "Przejdź do grupy",
-//             status: "success",
-//             closeable: false
-//         });
-//         return groupResponse;
-//     } catch (error) {
-//         // console.error("❌ Błąd przy tworzeniu grupy:", error);
-//         showPopup(error.message || "Wystąpił błąd przy tworzeniu grupy", "error");
-//         throw error;
-//     }
-// }
-// window.createGroupWithCost = createGroupWithCost;
-
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('.container-world');
     if (!container) return;

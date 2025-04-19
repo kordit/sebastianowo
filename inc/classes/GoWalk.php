@@ -1,6 +1,5 @@
 <?php
 add_action('wp_ajax_get_random_event', 'get_random_event');
-add_action('wp_ajax_nopriv_get_random_event', 'get_random_event');
 
 function get_random_event()
 {
