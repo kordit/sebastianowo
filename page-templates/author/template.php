@@ -43,9 +43,9 @@
                 $learning_points = isset($progress['learning_points']) ? $progress['learning_points'] : 0;
 
             ?>
-                <div class="learning-points-info">
+                <h3 class="learning-points-info">
                     <strong>Dostępne punkty nauki:</strong> <?php echo intval($learning_points); ?>
-                </div>
+                </h3>
             <?php
             }
             ?>
@@ -54,77 +54,60 @@
                 <?php
                 // Pobierz statystyki
                 if (function_exists('get_field')) {
-                    $vitality_data = get_field('vitality', 'user_' . $user_id);
                     $stats = get_field('stats', 'user_' . $user_id);
                 }
                 if ($stats && is_array($stats)) :
                 ?>
                     <div class="stats-section">
-                        <h3>Atrybuty</h3>
+                        <h3>Statystyki</h3>
                         <div class="stats-grid">
-                            <div class="stat-item" data-stat="strength">
-                                <span class="stat-label">Siła:</span>
-                                <span class="stat-value"><?php echo isset($stats['strength']) ? intval($stats['strength']) : 0; ?></span>
-                                <?php if ($learning_points > 0): ?>
-                                    <button class="stat-upgrade-btn" data-stat="strength">+</button>
-                                <?php endif; ?>
-                            </div>
-                            <div class="stat-item" data-stat="vitality_stat">
-                                <span class="stat-label">Wytrzymałość:</span>
-                                <span class="stat-value"><?php echo isset($stats['vitality']) ? intval($stats['vitality']) : 0; ?></span>
-                                <?php if ($learning_points > 0): ?>
-                                    <button class="stat-upgrade-btn" data-stat="vitality_stat">+</button>
-                                <?php endif; ?>
-                            </div>
-                            <div class="stat-item" data-stat="dexterity">
-                                <span class="stat-label">Zręczność:</span>
-                                <span class="stat-value"><?php echo isset($stats['dexterity']) ? intval($stats['dexterity']) : 0; ?></span>
-                                <?php if ($learning_points > 0): ?>
-                                    <button class="stat-upgrade-btn" data-stat="dexterity">+</button>
-                                <?php endif; ?>
-                            </div>
-                            <div class="stat-item" data-stat="perception">
-                                <span class="stat-label">Percepcja:</span>
-                                <span class="stat-value"><?php echo isset($stats['perception']) ? intval($stats['perception']) : 0; ?></span>
-                                <?php if ($learning_points > 0): ?>
-                                    <button class="stat-upgrade-btn" data-stat="perception">+</button>
-                                <?php endif; ?>
-                            </div>
-                            <div class="stat-item" data-stat="technical">
-                                <span class="stat-label">Zdolności manualne:</span>
-                                <span class="stat-value"><?php echo isset($stats['technical']) ? intval($stats['technical']) : 0; ?></span>
-                                <?php if ($learning_points > 0): ?>
-                                    <button class="stat-upgrade-btn" data-stat="technical">+</button>
-                                <?php endif; ?>
-                            </div>
-                            <div class="stat-item" data-stat="charisma">
-                                <span class="stat-label">Cwaniactwo:</span>
-                                <span class="stat-value"><?php echo isset($stats['charisma']) ? intval($stats['charisma']) : 0; ?></span>
-                                <?php if ($learning_points > 0): ?>
-                                    <button class="stat-upgrade-btn" data-stat="charisma">+</button>
-                                <?php endif; ?>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Maksymalne Życie:</span>
-                                <span class="stat-value">
-                                    <?php
-
-                                    echo isset($vitality_data['max_life']) ? intval($vitality_data['max_life']) : 0;
-                                    ?>
-                                </span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Maksymalna energia:</span>
-                                <span class="stat-value">
-                                    <?php
-                                    echo isset($vitality_data['max_energy']) ? intval($vitality_data['max_energy']) : 0;
-                                    ?>
-                                </span>
-                            </div>
+                            <?php foreach ($attributes_data as $stat_key => $stat_info): ?>
+                                <div class="stat-item" data-stat="<?php echo $stat_key; ?>">
+                                    <span class="stat-label">
+                                        <?php echo $stat_info['label']; ?>:
+                                        <?php if (!empty($stat_info['instructions'])): ?>
+                                            <span class="info-icon tooltip"><?php echo '?'; ?>
+                                                <span class="tooltip-text"><?php echo esc_html($stat_info['instructions']); ?></span>
+                                            </span>
+                                        <?php endif; ?>
+                                    </span>
+                                    <span class="stat-value"><?php echo $stat_info['value']; ?></span>
+                                    <?php if ($learning_points > 0): ?>
+                                        <button class="stat-upgrade-btn" data-stat="<?php echo $stat_key; ?>">+</button>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
-
-                    <input type="hidden" id="stats_upgrade_nonce" value="<?php echo wp_create_nonce('stats_upgrade_nonce'); ?>">
+                <?php
+                endif; ?>
+            </div>
+            <div class="stats-container">
+                <?php
+                // Pobierz statystyki
+                if (function_exists('get_field')) {
+                    $vitality_data = get_field('vitality', 'user_' . $user_id);
+                }
+                if ($vitality_data && is_array($vitality_data)) :
+                ?>
+                    <div class="stats-section">
+                        <h3>Witalność</h3>
+                        <div class="stats-grid">
+                            <?php foreach ($additional_stats as $stat_key => $stat_info): ?>
+                                <div class="stat-item">
+                                    <span class="stat-label">
+                                        <?php echo $stat_info['label']; ?>:
+                                        <?php if (!empty($stat_info['instructions'])): ?>
+                                            <span class="info-icon tooltip"><?php echo '?'; ?>
+                                                <span class="tooltip-text"><?php echo esc_html($stat_info['instructions']); ?></span>
+                                            </span>
+                                        <?php endif; ?>
+                                    </span>
+                                    <span class="stat-value"><?php echo $stat_info['value']; ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
                 <?php
                 endif; ?>
             </div>
@@ -134,48 +117,25 @@
         <div id="umiejetnosci" class="tab-pane">
             <h2>Umiejętności</h2>
             <div class="skills-container">
-                <?php
-                // Pobierz umiejętności
-                if (function_exists('get_field')) {
-                    $skills = get_field('skills', 'user_' . $user_id);
-                    if ($skills && is_array($skills)) :
-                ?>
-                        <div class="stats-grid">
+                <?php if ($skills && is_array($skills)): ?>
+                    <div class="stats-grid">
+                        <?php foreach ($skills_data as $skill_key => $skill_info): ?>
                             <div class="stat-item">
-                                <span class="stat-label">Walka:</span>
-                                <span class="stat-value"><?php echo isset($skills['combat']) ? intval($skills['combat']) : 0; ?></span>
+                                <span class="stat-label">
+                                    <?php echo $skill_info['label']; ?>:
+                                    <?php if (!empty($skill_info['instructions'])): ?>
+                                        <span class="info-icon tooltip"><?php echo '?'; ?>
+                                            <span class="tooltip-text"><?php echo esc_html($skill_info['instructions']); ?></span>
+                                        </span>
+                                    <?php endif; ?>
+                                </span>
+                                <span class="stat-value"><?php echo $skill_info['value']; ?></span>
                             </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Kradzież:</span>
-                                <span class="stat-value"><?php echo isset($skills['steal']) ? intval($skills['steal']) : 0; ?></span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Produkcja:</span>
-                                <span class="stat-value"><?php echo isset($skills['craft']) ? intval($skills['craft']) : 0; ?></span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Handel:</span>
-                                <span class="stat-value"><?php echo isset($skills['trade']) ? intval($skills['trade']) : 0; ?></span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Relacje:</span>
-                                <span class="stat-value"><?php echo isset($skills['relations']) ? intval($skills['relations']) : 0; ?></span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Uliczna wiedza:</span>
-                                <span class="stat-value"><?php echo isset($skills['street']) ? intval($skills['street']) : 0; ?></span>
-                            </div>
-                        </div>
-                    <?php
-                    else:
-                    ?>
-                        <p>Brak umiejętności do wyświetlenia.</p>
-                <?php
-                    endif;
-                } else {
-                    echo '<p>Nie można wyświetlić umiejętności - plugin ACF nie jest aktywny.</p>';
-                }
-                ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p>Brak umiejętności do wyświetlenia.</p>
+                <?php endif; ?>
             </div>
         </div>
     </div>

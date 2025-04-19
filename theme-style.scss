@@ -558,6 +558,7 @@ aside {
         background-repeat: no-repeat;
         background-position: bottom;
         transform: translate(-50%, -70%);
+        filter: invert(1);
     }
 
     .content-sidebar {

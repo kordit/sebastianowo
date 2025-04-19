@@ -111,26 +111,6 @@ add_action('acf/include_fields', function () {
                 'ajax' => 0,
                 'placeholder' => '',
             ),
-            array(
-                'key' => 'field_679a251fed9a5',
-                'label' => 'Kreator ukończony?',
-                'name' => 'creator_end',
-                'aria-label' => '',
-                'type' => 'true_false',
-                'instructions' => '',
-                'required' => 0,
-                'conditional_logic' => 0,
-                'wrapper' => array(
-                    'width' => '',
-                    'class' => '',
-                    'id' => '',
-                ),
-                'message' => '',
-                'default_value' => 0,
-                'ui' => 0,
-                'ui_on_text' => '',
-                'ui_off_text' => '',
-            ),
 
             // STATYSTYKI
             array(
@@ -174,10 +154,10 @@ add_action('acf/include_fields', function () {
                     array(
                         'key' => 'field_stats_vitality',
                         'label' => 'Wytrzymałość',
-                        'name' => 'vitality',
+                        'name' => 'defense',
                         'aria-label' => '',
                         'type' => 'number',
-                        'instructions' => 'Zwiększa maksymalne życie i odporność na używki, obrażenia',
+                        'instructions' => 'Zwiększa liczbę ciosów jakie mozemy przyjąć',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
