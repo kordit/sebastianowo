@@ -23,8 +23,6 @@ define('JS', ASSETS_DIR . "/js/");
 require_once('inc/includes/include-partials.php');
 require_once('inc/includes/global/support.php');
 
-
-
 function et_image($acffield, $size = "full", $url = false, $class = '')
 {
 
