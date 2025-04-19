@@ -335,6 +335,7 @@ function initAvatarSelection() {
             this.parentElement.classList.add('active');
 
             window.selectedAvatarId = this.getAttribute('data-avatar-id');
+            window.selectedFullId = this.getAttribute('data-full-id');
             const previewSrc = this.getAttribute('data-pair-src');
 
             const previewDiv = document.getElementById('preview');
@@ -366,6 +367,7 @@ async function saveCharacter() {
         const userData = {
             "user_class": window.selectedClass,
             "avatar": window.selectedAvatarId,
+            "avatar_full": window.selectedFullId,
             "nick": nickname,
         };
 

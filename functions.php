@@ -119,7 +119,7 @@ add_action('init', function () {
     // Ładowanie wszystkich klas z katalogu 'inc/classes'
     load_all_files_php_from_directory(get_template_directory() . '/inc/classes');
     new InstanceManager('walka', true);
-    new InstanceManager('kreator', true);
+    new InstanceManager('plecak', true);
 
     $all_instance = get_all_instance();
     foreach ($all_instance as $istance) {

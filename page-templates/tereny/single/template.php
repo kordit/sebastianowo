@@ -21,7 +21,7 @@ $man_image = get_field('group_man') ?: 87;
                             $avatar_url = wp_get_attachment_image_url($pair[0], 'full');
                             $preview_url = wp_get_attachment_image_url($pair[1], 'full');
                             echo '<div class="wrapper-image polaroid">';
-                            echo '<img src="' . esc_url($avatar_url) . '" class="avatar-option" data-avatar-id="' . esc_attr($pair[0]) . '" data-pair-src="' . esc_url($preview_url) . '" alt="Avatar ' . esc_attr($pair[0]) . '">';
+                            echo '<img src="' . esc_url($avatar_url) . '" class="avatar-option" data-avatar-id="' . esc_attr($pair[0]) . '" data-full-id="' . esc_attr($pair[1]) . '" data-pair-src="' . esc_url($preview_url) . '" alt="Avatar ' . esc_attr($pair[0]) . '">';
                             echo '</div>';
                         }
                         ?>

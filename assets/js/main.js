@@ -415,7 +415,3 @@ document.addEventListener("DOMContentLoaded", initSvgInteractions);
 
 
 
-const el = document.querySelector('.game-content--inner');
-if (!el.textContent.trim()) {
-    el.style.display = 'none';
-}

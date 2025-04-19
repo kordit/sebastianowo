@@ -1,0 +1,126 @@
+.plecak-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+
+    h1.plecak-title {
+        width: 100%;
+    }
+
+    li.category-item {
+        background: #fff;
+        margin-bottom: 10px;
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+        font-family: var(--ff);
+        border: solid 5px #000;
+        cursor: pointer;
+
+        &.active {
+            background-color: #000;
+            color: #fff;
+
+            .plecak-subcategories {
+                display: flex;
+            }
+        }
+    }
+
+    .plecak-categories {
+        padding: 0;
+        list-style-type: none;
+        margin: 0;
+        width: 25%;
+    }
+
+    .plecak-items-container {
+        width: calc(75% - 30px);
+
+        .category-title {
+            margin-bottom: 10px;
+        }
+    }
+
+    .category-section {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    h2.category-title {
+        width: 100%;
+    }
+
+    p {
+        margin: 0;
+    }
+
+    .subcategory-section,
+    .items-grid {
+        width: 100%;
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .subcategory-section {
+        margin-bottom: 30px;
+        gap: 10px;
+    }
+
+    .subcategory-title {
+        width: 100%;
+    }
+
+    .plecak-subcategories {
+        padding: 0;
+        list-style-type: none;
+        margin: 0;
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        display: none;
+
+        li.subcategory-item {
+            border: solid 1px #fff;
+            padding: 10px;
+            font-size: 14px;
+
+            &.active {
+                background-color: #fff;
+                color: #000;
+            }
+        }
+    }
+
+    .item-card {
+        position: relative;
+        width: calc(25% - 20px);
+        background-color: #fff;
+        padding: 10px;
+
+        .item-actions {
+            position: absolute;
+            top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            right: 10px;
+
+            button {
+                font-size: 12px;
+                padding: 5px 10px;
+            }
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+        }
+    }
+
+    // .main-items {
+    //     display: none;
+    // }
+}
