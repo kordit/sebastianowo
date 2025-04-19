@@ -148,6 +148,7 @@ async function handleAnswer(input) {
     const transactionsToExecute = [];
     const functionsToExecute = [];
     const relationsToUpdate = [];
+    const itemsToManage = []; // Nowa tablica dla operacji na przedmiotach
 
     // Faza 1: Walidacja wszystkich transakcji
     try {
@@ -196,6 +197,43 @@ async function handleAnswer(input) {
                 functionsToExecute.push(singletransaction);
             } else if (singletransaction.acf_fc_layout === "relation") {
                 relationsToUpdate.push(singletransaction);
+            } else if (singletransaction.acf_fc_layout === "item") {
+                // Obsługa przedmiotów
+                const itemId = parseInt(singletransaction.item, 10);
+                const quantity = parseInt(singletransaction.quantity, 10) || 1;
+                const action = singletransaction.item_action || 'give';
+
+                if (action === 'take') {
+                    // Sprawdzamy czy użytkownik ma przedmiot przed próbą jego zabrania
+                    const userItems = userFields.items || [];
+                    const foundItem = userItems.find(item =>
+                        item.item && (item.item.ID === itemId || item.item === itemId)
+                    );
+
+                    if (!foundItem || parseInt(foundItem.quantity, 10) < quantity) {
+                        try {
+                            // Pobierz nazwę przedmiotu, aby pokazać ją w komunikacie błędu
+                            const itemData = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+                                action: 'get_item_name',
+                                item_id: itemId
+                            });
+
+                            const itemName = itemData.data?.name || 'przedmiot';
+                            showPopup(`Nie masz wystarczająco dużo: ${itemName}`, 'error');
+                        } catch (error) {
+                            console.error('Błąd podczas pobierania nazwy przedmiotu:', error);
+                            showPopup('Nie masz wystarczająco dużo tego przedmiotu', 'error');
+                        }
+                        return; // Przerwij całą operację
+                    }
+                }
+
+                // Jeśli walidacja przeszła, dodaj przedmiot do zarządzania
+                itemsToManage.push({
+                    itemId,
+                    quantity,
+                    action
+                });
             }
         }
 
@@ -216,6 +254,48 @@ async function handleAnswer(input) {
                 : bagMessage;
 
             popupstate = 'success';
+        }
+
+        // Wykonaj operacje na przedmiotach
+        for (const itemOperation of itemsToManage) {
+            try {
+                const { itemId, quantity, action } = itemOperation;
+
+                // Pobierz informacje o przedmiocie
+                const itemInfoResponse = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+                    action: 'get_item_name',
+                    item_id: itemId
+                });
+
+                const itemName = itemInfoResponse.data?.name || 'przedmiot';
+
+                // Wykonaj operację na przedmiocie
+                const response = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+                    action: 'handle_item_action',
+                    item_id: itemId,
+                    quantity: quantity,
+                    operation: action
+                });
+
+                if (response.success) {
+                    const itemMessage = action === 'give'
+                        ? `Otrzymano ${quantity} × ${itemName}`
+                        : `Oddano ${quantity} × ${itemName}`;
+
+                    message = message
+                        ? `${message} i ${itemMessage}`
+                        : itemMessage;
+
+                    popupstate = 'success';
+                } else {
+                    console.error('Błąd podczas operacji na przedmiocie:', response.data?.message);
+                    throw new Error(response.data?.message || 'Nieznany błąd');
+                }
+            } catch (error) {
+                console.error('Błąd podczas operacji na przedmiocie:', error);
+                showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
+                return; // Przerwij dalsze operacje
+            }
         }
 
         // Wykonaj funkcje

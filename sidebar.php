@@ -5,7 +5,7 @@ $current_user_id = get_current_user_id();
 $avatar_id = get_field('avatar', 'user_' . $current_user_id);
 $avatar = get_field('avatar', 'user_' . $current_user_id);
 $nick = get_field('nick', 'user_' . $current_user_id);
-$stats = get_field('stats', 'user_' . $current_user_id);
+$stats = get_field('vitality', 'user_' . $current_user_id);
 
 ?>
 <aside>
