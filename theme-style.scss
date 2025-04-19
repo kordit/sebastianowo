@@ -293,6 +293,10 @@ button {
     text-transform: uppercase;
     font-weight: 500;
 
+    &:disabled {
+        background-color: #444;
+    }
+
     &:hover {
         background: #1d1d1d;
     }

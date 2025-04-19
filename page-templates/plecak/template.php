@@ -1,5 +1,6 @@
 <?php
 // Pobierz ID zalogowanego użytkownika
+require_once('functions.php');
 $user_id = get_current_user_id();
 
 // Sprawdź czy użytkownik jest zalogowany
@@ -7,6 +8,8 @@ if (!$user_id) {
     wp_redirect(home_url('/login'));
     exit;
 }
+
+merge_duplicate_items($user_id);
 
 // Pobierz przedmioty użytkownika z pola ACF 'items'
 $user_items = get_field('items', 'user_' . $user_id);
