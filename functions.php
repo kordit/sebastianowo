@@ -24,6 +24,7 @@ require_once('inc/includes/include-partials.php');
 require_once('inc/includes/global/support.php');
 require_once('inc/functions/npc_dialogs.php');
 require_once('inc/functions/item_management.php');
+require_once('inc/functions/inventory.php');
 
 function et_image($acffield, $size = "full", $url = false, $class = '')
 {

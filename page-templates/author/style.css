@@ -1,0 +1,252 @@
+/**
+ * Style dla panelu użytkownika
+ */
+
+.user-info h1 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.user-class {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #333;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Tabs Navigation */
+.tab-navigation {
+    transform: translate(0px, -76px);
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin-bottom: -76px;
+}
+
+.tab-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-weight: 600;
+    border-radius: 4px 4px 0 0;
+    border: solid 5px #000;
+    transition: all 0.3s ease;
+    background-color: #000;
+    color: #fff;
+}
+
+.tab-item:hover {
+    background-color: #333;
+    border-color: #333;
+    border-bottom-color: #000;
+}
+
+.tab-item.active {
+    background-color: #fff;
+    color: #000;
+    margin-bottom: -2px;
+}
+
+/* Tab Content */
+.tab-content-author {
+    position: relative;
+    z-index: 20;
+    margin-top: -2px;
+    border-radius: 0 0 8px 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.tab-pane h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #636363;
+    padding-bottom: 10px;
+    font-size: 24px;
+}
+
+/* Profile Tab */
+.profile-details {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.learning-points-info {
+    margin-top: 30px;
+    font-size: 21px;
+}
+
+h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.profile-field {
+    margin-bottom: 10px;
+    display: flex;
+}
+
+.profile-field .label {
+    font-weight: 600;
+    width: 150px;
+}
+
+.story-content {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #666;
+}
+
+.stats-section {
+    margin-top: 30px;
+}
+
+/* Stats Tab */
+.stats-grid {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(calc(33.333% - 10px), 1fr));
+    gap: 15px;
+}
+
+.stat-item {
+    background: rgba(0, 0, 0, .5);
+    padding: 15px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    color: #fff;
+}
+
+.stat-item:hover {
+    background: rgba(0, 0, 0, .65);
+}
+
+.stat-label {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* Skills Tab */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.skill-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    display: flex;
+    align-items: flex-start;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+.skill-item:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.skill-icon {
+    width: 50px;
+    height: 50px;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.skill-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.skill-details {
+    flex-grow: 1;
+}
+
+.skill-details h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.skill-description {
+    font-size: 14px;
+    color: #666;
+    margin: 5px 0;
+}
+
+.skill-level {
+    margin-top: 5px;
+    font-weight: 600;
+    color: #333;
+    padding: 3px 8px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+/* Missions Tab */
+
+
+.empty-message {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .author-panel-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .avatar-container {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    .tab-navigation {
+        flex-wrap: wrap;
+    }
+
+    .tab-item {
+        flex-grow: 1;
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+    .profile-details {
+        margin-top: 10px;
+        grid-template-columns: 1fr;
+    }
+}

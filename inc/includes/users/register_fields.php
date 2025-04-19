@@ -35,7 +35,7 @@ add_action('acf/include_fields', function () {
                 'required' => 0,
                 'conditional_logic' => 0,
                 'wrapper' => array(
-                    'width' => '',
+                    'width' => '50%',
                     'class' => '',
                     'id' => '',
                 ),
@@ -48,6 +48,25 @@ add_action('acf/include_fields', function () {
                 'max_height' => '',
                 'max_size' => '',
                 'mime_types' => '',
+                'preview_size' => 'medium',
+            ),
+            array(
+                'key' => 'field_6794b4c86bae4_full',
+                'label' => 'Avatar Full',
+                'name' => 'avatar_full',
+                'aria-label' => '',
+                'type' => 'image',
+                'instructions' => 'Pełny obrazek postaci',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'return_format' => 'array',
+                'library' => 'all',
+                'wrapper' => array(
+                    'width' => '50%',
+                    'class' => '',
+                    'id' => '',
+                ),
+
                 'preview_size' => 'medium',
             ),
             array(

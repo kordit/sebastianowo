@@ -37,7 +37,31 @@ function game_enqueue_scripts_and_styles()
     $post_type = get_post_type();
 
     // Ustalenie typu zawartości i widoku
-    if (is_archive()) {
+    if (is_author()) {
+        $current_template = 'author';
+        // Bezpośrednie ładowanie plików dla podstrony autora
+        $author_style_path = get_stylesheet_directory() . '/page-templates/author/style.css';
+        $author_script_path = get_stylesheet_directory() . '/page-templates/author/main.js';
+
+        if (file_exists($author_style_path)) {
+            wp_enqueue_style(
+                'game-author-panel-style',
+                get_stylesheet_directory_uri() . '/page-templates/author/style.css',
+                [],
+                filemtime($author_style_path)
+            );
+        }
+
+        if (file_exists($author_script_path)) {
+            wp_enqueue_script(
+                'game-author-panel-script',
+                get_stylesheet_directory_uri() . '/page-templates/author/main.js',
+                ['jquery'],
+                filemtime($author_script_path),
+                true
+            );
+        }
+    } elseif (is_archive()) {
         $current_template = $post_type;
         $view_type = 'main';
     } elseif (is_single()) {
@@ -52,8 +76,6 @@ function game_enqueue_scripts_and_styles()
         } else {
             $current_template = 'page';
         }
-    } elseif (is_author()) {
-        $current_template = 'author';
     } elseif (is_front_page()) {
         $current_template = 'front-page';
     }
