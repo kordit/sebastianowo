@@ -55,10 +55,10 @@ if ($stats_field_group) {
 
 // Jeśli nie znaleziono definicji pól przez ACF, użyj podstawowych (fallback)
 if (empty($attributes_data)) {
-    $stat_keys = ['strength', 'vitality', 'dexterity', 'perception', 'technical', 'charisma'];
+    $stat_keys = ['strength', 'defense', 'dexterity', 'perception', 'technical', 'charisma'];
     foreach ($stat_keys as $key) {
         $field_object = get_field_object("stats_{$key}", "user_{$user_id}");
-        $display_key = ($key === 'vitality') ? 'vitality_stat' : $key;
+        $display_key = $key;
 
         $attributes_data[$display_key] = [
             'label' => $field_object['label'] ?? ucfirst($key),

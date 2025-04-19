@@ -151,7 +151,8 @@ body {
     height: 100vh;
     background-size: cover;
 
-    &.author {
+    &.author,
+    &.template-plecak {
         .game-content {
             background-image: url(/wp-content/uploads/2025/04/New-Project-2.jpg);
             background-size: cover;

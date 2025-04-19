@@ -1,7 +1,4 @@
 .plecak-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
 
     h1.plecak-title {
         width: 100%;
@@ -27,6 +24,79 @@
         }
     }
 
+    .equipped-items-selected {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .plecak-tabs {
+        transform: translate(0px, -80px);
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin-bottom: -80px;
+        margin-left: -25px;
+        width: 100%;
+
+        .plecak-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-weight: 600;
+            border-radius: 4px 4px 0 0;
+            border: solid 5px #000;
+            transition: all 0.3s ease;
+            background-color: #000;
+            color: #fff;
+
+            &:hover {
+                background-color: #333;
+                border-color: #333;
+                border-bottom-color: #000;
+            }
+
+            &.active {
+                background-color: #fff;
+                color: #000;
+                margin-bottom: -2px;
+            }
+        }
+    }
+
+    p.no-items {
+        display: block;
+        width: 100%;
+    }
+
+    .equipped-items-container {
+        padding-top: 30px;
+        display: flex;
+        gap: 32px;
+    }
+
+    .plecak-tab-content {
+        flex-wrap: wrap;
+        padding: 20px;
+        display: none;
+
+        &.active {
+            display: flex;
+        }
+    }
+
+    .plecak-title {
+        margin-top: 0;
+        border-bottom: 1px solid #636363;
+        padding-bottom: 10px;
+        font-size: 24px;
+        width: 100%;
+    }
+
+    .plecak-tabs-content {
+        width: 100%;
+    }
+
     .plecak-categories {
         padding: 0;
         list-style-type: none;
@@ -34,11 +104,42 @@
         width: 25%;
     }
 
+    div#tab-inventory {
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 30px;
+    }
+
     .plecak-items-container {
         width: calc(75% - 30px);
 
         .category-title {
             margin-bottom: 10px;
+        }
+    }
+
+    .person-image {
+        display: none;
+    }
+
+    #category-2 .person-image {
+        display: block;
+    }
+
+    .person-image {
+        position: absolute;
+        width: 100%;
+        left: 0px;
+        top: 0px;
+        padding: 10px;
+        z-index: 0;
+
+        img {
+            opacity: .85;
+        }
+
+        &+img {
+            position: relative;
         }
     }
 
@@ -96,6 +197,7 @@
     }
 
     .item-card {
+        border: solid 4px #000;
         position: relative;
         width: calc(25% - 20px);
         background-color: #fff;

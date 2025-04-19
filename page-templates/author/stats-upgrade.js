@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', function () {
             this.disabled = true;
             this.classList.add('loading');
 
+            console.log(stat);
+
             // Przygotowujemy dane do wysłania
             const data = {
                 action: 'upgrade_user_stat',

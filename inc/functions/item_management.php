@@ -104,74 +104,8 @@ function ajax_handle_item_action()
         } else {
             wp_send_json_error(['message' => $result['message']]);
         }
-    } elseif ($operation === 'equip') {
-        // Założenie przedmiotu (oznaczenie jako "equipped" = true)
-        $check_result = check_user_has_item($user_id, $item_id);
-        if (!$check_result['exists']) {
-            wp_send_json_error(['message' => 'Nie posiadasz tego przedmiotu']);
-            return;
-        }
-
-        $items = get_field('items', 'user_' . $user_id) ?: [];
-
-        // Sprawdź typ przedmiotu, aby wiedzieć, czy ściągnąć inne założone przedmioty tego typu
-        $item_type = '';
-        $item_terms = get_the_terms($item_id, 'item_type');
-        if (!empty($item_terms)) {
-            $item_type = $item_terms[0]->term_id; // Pobierz pierwszy typ przedmiotu
-        }
-
-        // Jeśli przedmiot ma określony typ, zdejmij wszystkie inne przedmioty tego typu
-        if (!empty($item_type)) {
-            foreach ($items as $key => $item_data) {
-                $curr_item_terms = get_the_terms($item_data['item'], 'item_type');
-                $curr_item_type = '';
-
-                if (!empty($curr_item_terms)) {
-                    $curr_item_type = $curr_item_terms[0]->term_id;
-                }
-
-                // Jeśli to ten sam typ przedmiotu i jest założony, zdejmij go
-                if ($curr_item_type === $item_type && isset($item_data['equipped']) && $item_data['equipped']) {
-                    $items[$key]['equipped'] = false;
-                }
-            }
-        }
-
-        // Oznacz wybrany przedmiot jako założony
-        $items[$check_result['row_index']]['equipped'] = true;
-
-        // Zapisz zmiany
-        update_field('items', $items, 'user_' . $user_id);
-
-        wp_send_json_success([
-            'message' => sprintf('Przedmiot %s został założony', $item->post_title),
-            'item' => $item->post_title,
-            'equipped' => true
-        ]);
-    } elseif ($operation === 'unequip') {
-        // Zdjęcie przedmiotu (oznaczenie jako "equipped" = false)
-        $check_result = check_user_has_item($user_id, $item_id);
-        if (!$check_result['exists']) {
-            wp_send_json_error(['message' => 'Nie posiadasz tego przedmiotu']);
-            return;
-        }
-
-        $items = get_field('items', 'user_' . $user_id) ?: [];
-
-        // Oznacz przedmiot jako niezałożony
-        $items[$check_result['row_index']]['equipped'] = false;
-
-        // Zapisz zmiany
-        update_field('items', $items, 'user_' . $user_id);
-
-        wp_send_json_success([
-            'message' => sprintf('Przedmiot %s został zdjęty', $item->post_title),
-            'item' => $item->post_title,
-            'equipped' => false
-        ]);
     } else {
-        wp_send_json_error(['message' => 'Nieprawidłowa operacja. Dozwolone: give, take, equip, unequip']);
+        wp_send_json_error(['message' => 'Nieprawidłowa operacja. Dozwolone: give, take']);
     }
 }
 
