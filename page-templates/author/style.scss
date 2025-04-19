@@ -104,11 +104,13 @@
 
 /* Tabs Navigation */
 .tab-navigation {
-    transform: translate(0px, -76px);
+    transform: translate(0px, -96px);
     display: flex;
     list-style: none;
     padding: 0;
-    margin-bottom: -76px;
+    margin-bottom: -96px;
+    margin-left: -25px;
+    width: 100%;
 }
 
 .tab-item {
