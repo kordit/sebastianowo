@@ -205,3 +205,18 @@ function redirect_main_segment()
     }
 }
 add_action('template_redirect', 'redirect_main_segment');
+
+
+
+add_action('template_redirect', function () {
+    if (get_query_var('user_me')) {
+        if (is_user_logged_in()) {
+            wp_redirect(get_author_posts_url(get_current_user_id()));
+        } else {
+            wp_redirect(wp_login_url());
+        }
+        exit;
+    }
+});
+
+require_once('inc/includes/svg-group.php');

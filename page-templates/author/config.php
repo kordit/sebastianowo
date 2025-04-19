@@ -53,6 +53,7 @@ if ($stats_field_group) {
     }
 }
 
+
 // Jeśli nie znaleziono definicji pól przez ACF, użyj podstawowych (fallback)
 if (empty($attributes_data)) {
     $stat_keys = ['strength', 'defense', 'dexterity', 'perception', 'technical', 'charisma'];
@@ -67,6 +68,8 @@ if (empty($attributes_data)) {
         ];
     }
 }
+
+
 
 // Pobierz definicje pól dla umiejętności z ACF
 $skills_field_group = acf_get_field_group('group_skills');
