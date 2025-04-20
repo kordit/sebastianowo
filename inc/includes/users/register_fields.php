@@ -829,10 +829,10 @@ add_action('acf/include_fields', function () {
                     ),
                     array(
                         'key' => 'field_mission_progress',
-                        'label' => 'Progres misji',
+                        'label' => 'Zadania misji',
                         'name' => 'progress',
-                        'type' => 'checkbox',
-                        'instructions' => 'Zaznacz ukończone kroki misji',
+                        'type' => 'repeater',
+                        'instructions' => 'Postęp w zadaniach misji',
                         'required' => 0,
                         'conditional_logic' => 0,
                         'wrapper' => array(
@@ -840,13 +840,42 @@ add_action('acf/include_fields', function () {
                             'class' => '',
                             'id' => '',
                         ),
-                        'choices' => array(), // Puste, ponieważ będą dynamicznie generowane
-                        'allow_custom' => 0,
-                        'save_custom' => 0,
-                        'default_value' => array(),
-                        'layout' => 'vertical',
-                        'toggle' => 0,
-                        'return_format' => 'value',
+                        'layout' => 'table',
+                        'button_label' => '',
+                        'min' => 0,
+                        'max' => 0,
+                        'sub_fields' => array(
+                            array(
+                                'key' => 'field_mission_task_id',
+                                'label' => 'ID zadania',
+                                'name' => 'task_id',
+                                'type' => 'text',
+                                'instructions' => '',
+                                'required' => 0,
+                                'wrapper' => array(
+                                    'width' => '30',
+                                    'class' => '',
+                                    'id' => '',
+                                ),
+                                'readonly' => 1,
+                            ),
+                            array(
+                                'key' => 'field_mission_task_completed',
+                                'label' => 'Ukończone',
+                                'name' => 'completed',
+                                'type' => 'true_false',
+                                'instructions' => '',
+                                'required' => 0,
+                                'wrapper' => array(
+                                    'width' => '70',
+                                    'class' => '',
+                                    'id' => '',
+                                ),
+                                'message' => '',
+                                'default_value' => 0,
+                                'ui' => 1,
+                            ),
+                        ),
                     ),
                 ),
             ),
@@ -1064,3 +1093,128 @@ add_action('acf/include_fields', function () {
         'show_in_rest' => 0,
     ));
 });
+
+
+function get_mission_tasks($mission_id)
+{
+    $choices = array();
+    $tasks = get_field('tasks', $mission_id);
+
+    if (is_array($tasks) && !empty($tasks)) {
+        foreach ($tasks as $index => $task) {
+            // Używam indeksu zadania jako klucza
+            $task_key = 'task_' . $index;
+
+            // Tworzymy etykietę na podstawie tytułu zadania
+            $task_label = '';
+            if (!empty($task['title'])) {
+                $task_label = $task['title'];
+            } else if (!empty($task['description'])) {
+                // Fallback na opis jeśli tytuł jest pusty
+                $description = strip_tags($task['description']);
+                $task_label = (strlen($description) > 40) ?
+                    substr($description, 0, 40) . '...' :
+                    $description;
+            } else {
+                $task_label = 'Zadanie ' . ($index + 1);
+            }
+
+            $choices[$task_key] = $task_label;
+        }
+    }
+
+    return $choices;
+}
+
+// Dodajemy również akcję dla zapisywania
+add_action('acf/save_post', 'update_mission_tasks_in_repeater', 10);
+
+function update_mission_tasks_in_repeater($post_id)
+{
+    // Sprawdzamy czy edytujemy użytkownika
+    if (strpos($post_id, 'user_') !== 0) {
+        return;
+    }
+
+    // Pobieramy aktywne misje użytkownika
+    $active_missions = get_field('active_missions', $post_id);
+
+    if (empty($active_missions) || !is_array($active_missions)) {
+        return;
+    }
+
+    $updated = false;
+
+    // Dla każdej aktywnej misji
+    foreach ($active_missions as $key => $mission_data) {
+        // Jeśli mamy obiekt misji
+        if (empty($mission_data['mission'])) {
+            continue;
+        }
+
+        // Pobieramy ID misji
+        $mission = $mission_data['mission'];
+        if (is_object($mission)) {
+            $mission_id = $mission->ID;
+        } elseif (is_numeric($mission)) {
+            $mission_id = intval($mission);
+        } else {
+            continue;
+        }
+
+        // Pobieramy zadania dla tej misji
+        $mission_tasks = get_mission_tasks($mission_id);
+
+        if (empty($mission_tasks)) {
+            continue;
+        }
+
+        // Sprawdzamy, czy aktualne zadania (progress) odzwierciedlają zadania misji
+        // Jeśli nie, aktualizujemy
+
+        $current_progress = $mission_data['progress'] ?? array();
+        $missing_tasks = false;
+        $task_ids = array();
+
+        // Budujemy tablicę z wszystkimi zadaniami, które powinny być w repeaterze
+        $new_progress = array();
+
+        foreach ($mission_tasks as $task_id => $task_title) {
+            // Sprawdzamy czy to zadanie już istnieje w progress
+            $task_exists = false;
+            $completed = false;
+
+            if (is_array($current_progress)) {
+                foreach ($current_progress as $progress_item) {
+                    if (isset($progress_item['task_id']) && $progress_item['task_id'] === $task_id) {
+                        $task_exists = true;
+                        $completed = !empty($progress_item['completed']);
+                        break;
+                    }
+                }
+            }
+
+            // Dodajemy zadanie do nowej tablicy, zachowując status ukończenia jeśli istnieje
+            $new_progress[] = array(
+                'task_id' => $task_id,
+                'task_title' => $task_title,
+                'completed' => $completed ? 1 : 0
+            );
+
+            if (!$task_exists) {
+                $missing_tasks = true;
+            }
+        }
+
+        // Jeśli brakuje zadań, aktualizujemy progress
+        if ($missing_tasks || count($new_progress) != count($current_progress)) {
+            $active_missions[$key]['progress'] = $new_progress;
+            $updated = true;
+        }
+    }
+
+    // Jeśli dokonaliśmy zmian, aktualizujemy pole
+    if ($updated) {
+        update_field('active_missions', $active_missions, $post_id);
+    }
+}
