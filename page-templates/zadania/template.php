@@ -15,8 +15,8 @@ $completed_missions = get_field('completed_missions', 'user_' . $current_user_id
 
 <div class="zadania-container">
     <div class="tab-controls">
-        <button class="tab-btn active" data-tab="aktywne">Aktywne Misje</button>
-        <button class="tab-btn" data-tab="ukonczone">Zrealizowane Misje</button>
+        <div class="tab-btn active" data-tab="aktywne">Aktywne Misje</div>
+        <div class="tab-btn" data-tab="ukonczone">Zrealizowane Misje</div>
     </div>
 
     <div class="tabs-content">
@@ -53,7 +53,7 @@ $completed_missions = get_field('completed_missions', 'user_' . $current_user_id
                 ?>
                     <div class="mission-card">
                         <div class="mission-header">
-                            <h3><?php echo esc_html($mission_title); ?></h3>
+                            <h3>Misja "<?php echo esc_html($mission_title); ?>"</h3>
                             <div class="mission-progress">
                                 <div class="progress-bar">
                                     <div class="progress-fill" style="width: <?php echo esc_attr($completion_percent); ?>%"></div>
@@ -68,12 +68,11 @@ $completed_missions = get_field('completed_missions', 'user_' . $current_user_id
 
                         <?php if (!empty($mission_tasks)) : ?>
                             <div class="mission-tasks">
-                                <h4>Zadania:</h4>
                                 <ul>
                                     <?php foreach ($mission_tasks as $index => $task_details) :
                                         $task_id = 'task_' . $index;
                                         $is_completed = isset($completed_task_map[$task_id]);
-                                        $task_title = isset($task_details['title']) ? $task_details['title'] : '';
+                                        $task_title = 'Zadanie "' . (isset($task_details['title']) ? $task_details['title'] : '') . '"';
 
                                         // Jeśli tytuł jest pusty, spróbuj użyć opisu
                                         if (empty($task_title) && isset($task_details['description'])) {
@@ -90,8 +89,7 @@ $completed_missions = get_field('completed_missions', 'user_' . $current_user_id
                                     ?>
                                         <li class="task-item <?php echo $is_completed ? 'task-completed' : ''; ?>">
                                             <div class="task-header">
-                                                <span class="task-status-icon"><?php echo $is_completed ? '✓' : '◯'; ?></span>
-                                                <h4 class="task-title"><?php echo esc_html($task_title); ?></h4>
+                                                <div class="bold"><?php echo esc_html($task_title); ?></div>
                                             </div>
 
                                             <?php if (!empty($task_details['description'])) : ?>
@@ -101,10 +99,9 @@ $completed_missions = get_field('completed_missions', 'user_' . $current_user_id
                                             <?php endif; ?>
 
                                             <?php
-                                            // Wyświetl wymagania do zrealizowania zadania
                                             if (!empty($task_details['requirements'])) : ?>
                                                 <div class="task-requirements">
-                                                    <h5>Wymagania:</h5>
+                                                    <div class="bold">Wymagania:</div>
                                                     <ul>
                                                         <?php foreach ($task_details['requirements'] as $requirement) :
                                                             $req_text = '';
@@ -162,66 +159,6 @@ $completed_missions = get_field('completed_missions', 'user_' . $current_user_id
                                                 </div>
                                             <?php endif; ?>
 
-                                            <?php
-                                            // Wyświetl nagrody za zadanie
-                                            if (!empty($task_details['rewards'])) : ?>
-                                                <div class="task-rewards">
-                                                    <h5>Nagrody:</h5>
-                                                    <ul>
-                                                        <?php foreach ($task_details['rewards'] as $reward) :
-                                                            $reward_text = '';
-
-                                                            // Określ typ nagrody
-                                                            if (isset($reward['acf_fc_layout'])) {
-                                                                switch ($reward['acf_fc_layout']) {
-                                                                    case 'add_item':
-                                                                        $item_type = isset($reward['item_type']) ? $reward['item_type'] : '';
-                                                                        $amount = isset($reward['amount']) ? $reward['amount'] : 1;
-                                                                        $items_names = [
-                                                                            'gold' => 'Złote',
-                                                                            'cigarettes' => 'Papierosy',
-                                                                            'beer' => 'Piwo',
-                                                                            'moonshine' => 'Bimber',
-                                                                            'weed' => 'Zioło',
-                                                                            'mushrooms' => 'Grzyby',
-                                                                            'glue' => 'Klej',
-                                                                        ];
-                                                                        $item_name = isset($items_names[$item_type]) ? $items_names[$item_type] : $item_type;
-                                                                        $reward_text = "<strong>$item_name</strong>: $amount szt.";
-                                                                        break;
-                                                                    case 'add_relation_with_npc':
-                                                                        $npc_id = isset($reward['npc_id']) ? $reward['npc_id'] : 0;
-                                                                        $npc_name = get_the_title($npc_id);
-                                                                        $relation_change = isset($reward['relation_change']) ? $reward['relation_change'] : '';
-                                                                        $reward_text = 'Relacja z <strong>' . ($npc_name ? $npc_name : 'NPC') . '</strong>: ' . ($relation_change > 0 ? '+' : '') . $relation_change;
-                                                                        break;
-                                                                    case 'add_perk':
-                                                                        $perk_id = isset($reward['perk_id']) ? $reward['perk_id'] : 0;
-                                                                        $perk_name = get_the_title($perk_id);
-                                                                        $amount = isset($reward['amount']) ? $reward['amount'] : 1;
-                                                                        $reward_text = 'Przedmiot: <strong>' . ($perk_name ? $perk_name : 'ID: ' . $perk_id) . '</strong> (' . $amount . ' szt.)';
-                                                                        break;
-                                                                    case 'add_exp':
-                                                                        $exp_amount = isset($reward['exp_amount']) ? $reward['exp_amount'] : 0;
-                                                                        $reward_text = 'Doświadczenie: <strong>' . $exp_amount . ' EXP</strong>';
-                                                                        break;
-                                                                    case 'add_reputation':
-                                                                        $rep_change = isset($reward['reputation_change']) ? $reward['reputation_change'] : 0;
-                                                                        $reward_text = 'Reputacja: <strong>' . ($rep_change > 0 ? '+' : '') . $rep_change . '</strong>';
-                                                                        break;
-                                                                    default:
-                                                                        $reward_text = 'Nagroda: ' . $reward['acf_fc_layout'];
-                                                                }
-                                                            }
-
-                                                            if ($reward_text) :
-                                                        ?>
-                                                                <li class="reward-item"><?php echo $reward_text; ?></li>
-                                                        <?php endif;
-                                                        endforeach; ?>
-                                                    </ul>
-                                                </div>
-                                            <?php endif; ?>
                                         </li>
                                     <?php endforeach; ?>
                                 </ul>
@@ -245,7 +182,7 @@ $completed_missions = get_field('completed_missions', 'user_' . $current_user_id
                         $mission_content = wp_trim_words(strip_tags($mission->post_content), 20, '...');
                     ?>
                         <div class="completed-mission-card">
-                            <h3><?php echo esc_html($mission_title); ?></h3>
+                            <h3>Misja "<?php echo esc_html($mission_title); ?>"</h3>
                             <div class="mission-description">
                                 <p><?php echo esc_html($mission_content); ?></p>
                             </div>
@@ -263,30 +200,3 @@ $completed_missions = get_field('completed_missions', 'user_' . $current_user_id
         </div>
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabPanels = document.querySelectorAll('.tab-panel');
-
-        // Obsługa zakładek
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Usuń klasę active ze wszystkich przycisków
-                tabBtns.forEach(b => b.classList.remove('active'));
-
-                // Dodaj klasę active do klikniętego przycisku
-                btn.classList.add('active');
-
-                // Ukryj wszystkie panele
-                tabPanels.forEach(panel => panel.classList.remove('active'));
-
-                // Pokaż panel powiązany z klikniętym przyciskiem
-                const tabId = btn.getAttribute('data-tab') + '-tab';
-                document.getElementById(tabId).classList.add('active');
-            });
-        });
-    });
-</script>
-
-<?php get_footer(); ?>
