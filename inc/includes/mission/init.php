@@ -17,7 +17,7 @@ add_action('init', function () {
         'public'              => true,
         'menu_position'       => 5,
         'menu_icon'           => 'dashicons-yes-alt',
-        'supports'            => ['title', 'editor'],
+        'supports'            => ['title'],
         'has_archive'         => true,
         'rewrite'             => ['slug' => 'missions'],
         'show_in_rest'        => false,
@@ -26,4 +26,4 @@ add_action('init', function () {
 });
 
 require_once('register_fields.php');
-// require_once('admin_viewer.php');
+require_once('mission_helper.php');
