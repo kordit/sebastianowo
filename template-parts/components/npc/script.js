@@ -149,6 +149,7 @@ async function handleAnswer(input) {
     const functionsToExecute = [];
     const relationsToUpdate = [];
     const itemsToManage = []; // Nowa tablica dla operacji na przedmiotach
+    const missionsToStart = []; // Nowa tablica dla misji do uruchomienia
 
     // Faza 1: Walidacja wszystkich transakcji
     try {
@@ -197,6 +198,9 @@ async function handleAnswer(input) {
                 functionsToExecute.push(singletransaction);
             } else if (singletransaction.acf_fc_layout === "relation") {
                 relationsToUpdate.push(singletransaction);
+            } else if (singletransaction.acf_fc_layout === "mission") {
+                // Obsługa misji - dodajemy misję do uruchomienia
+                missionsToStart.push(singletransaction);
             } else if (singletransaction.acf_fc_layout === "item") {
                 // Obsługa przedmiotów
                 const itemId = parseInt(singletransaction.item, 10);
@@ -342,6 +346,53 @@ async function handleAnswer(input) {
             const finalNpcId = npcId || tempnpcId;
 
             updatePostACFFields(finalNpcId, { [fieldName]: relationChange });
+        }
+
+        // Uruchom misje
+        for (const missionConfig of missionsToStart) {
+            try {
+                const missionId = missionConfig.mission_id;
+                if (!missionId) {
+                    console.error('Brak ID misji w konfiguracji:', missionConfig);
+                    continue;
+                }
+
+                // Pobierz ID NPC, który daje misję
+                const npcId = document.getElementById('npcdatamanager')?.dataset?.id;
+
+                // Sprawdź, czy funkcja startMission jest dostępna
+                if (typeof window.startMission === 'function') {
+                    console.log('Uruchamiam misję:', missionId, 'od NPC:', npcId);
+
+                    // Parametry dla funkcji startMission
+                    const missionParams = {
+                        mission_id: missionId,
+                        npc_id: npcId,
+                        show_confirmation: missionConfig.show_confirmation !== undefined ? missionConfig.show_confirmation : true,
+                        success_message: missionConfig.success_message || 'Otrzymano nową misję!',
+                        // Opcjonalne parametry
+                        auto_complete_first_task: missionConfig.auto_complete_first_task || false,
+                        redirect_after: missionConfig.redirect_after || false,
+                        item_id: missionConfig.item_id,
+                        item_quantity: missionConfig.item_quantity
+                    };
+
+                    // Uruchom misję
+                    await window.startMission(missionParams);
+
+                    // Ustaw komunikat potwierdzający (jeśli nie pokazujemy osobnego potwierdzenia)
+                    if (!missionConfig.show_confirmation && !message) {
+                        message = 'Misja została przypisana!';
+                        popupstate = 'success';
+                    }
+                } else {
+                    console.error('Funkcja startMission nie jest dostępna');
+                    showPopup('Wystąpił błąd podczas uruchamiania misji', 'error');
+                }
+            } catch (error) {
+                console.error('Błąd podczas uruchamiania misji:', error);
+                showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
+            }
         }
 
         // Wyświetl komunikat podsumowujący

@@ -21,7 +21,7 @@ function register_cpt_npc()
         'show_in_menu'  => true,
         'supports'      => array('title', 'thumbnail'),
         'has_archive'   => false,
-        'menu_position' => 5,
+        'menu_position' => 19,
         'menu_icon'     => 'dashicons-admin-users',
         'show_in_rest'  => false,
     ));

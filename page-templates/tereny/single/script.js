@@ -400,5 +400,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     initAvatarSelection();
 
-    document.getElementById('save-character').addEventListener('click', saveCharacter);
+    const saveButton = document.getElementById('save-character');
+    if (saveButton) {
+        saveButton.addEventListener('click', saveCharacter);
+    }
 });

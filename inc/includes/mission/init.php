@@ -15,7 +15,7 @@ add_action('init', function () {
             'not_found_in_trash' => 'Nie znaleziono misji w koszu'
         ],
         'public'              => true,
-        'menu_position'       => 5,
+        'menu_position'       => 20,
         'menu_icon'           => 'dashicons-yes-alt',
         'supports'            => ['title'],
         'has_archive'         => true,
@@ -25,5 +25,6 @@ add_action('init', function () {
     ]);
 });
 
+// Załącz pliki misji
 require_once('register_fields.php');
-require_once('mission_helper.php');
+require_once('ajax_tasks.php');

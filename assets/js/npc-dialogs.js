@@ -27,7 +27,7 @@
         defaultSlugFromUrl = parts[parts.length - 1];
     }
 
-    console.log('Domyślny slug dialogu ustalony z URL:', defaultSlugFromUrl);
+    // console.log('Domyślny slug dialogu ustalony z URL:', defaultSlugFromUrl);
 
     // Domyślne ustawienia
     const settings = {
@@ -46,7 +46,7 @@
     function initNpcDialogs() {
         // Znajdź wszystkie ścieżki SVG z atrybutem data-npc
         const npcPaths = document.querySelectorAll('svg path[data-npc]');
-        console.log('Znalezione ścieżki NPC:', npcPaths.length, npcPaths);
+        // console.log('Znalezione ścieżki NPC:', npcPaths.length, npcPaths);
 
         if (!npcPaths.length) {
             console.warn('Nie znaleziono ścieżek NPC w dokumencie');
@@ -55,7 +55,7 @@
 
         // Pobierz ID strony z klasy body
         const postId = getPostIdFromBody();
-        console.log('Pobrane ID podstrony:', postId);
+        // console.log('Pobrane ID podstrony:', postId);
 
         if (!postId) {
             console.warn('Nie można określić ID podstrony z klasy body');
@@ -74,7 +74,7 @@
 
         // Pobierz wszystkie dialogi dla podstrony przez AJAX
         loadDialogsFromPostId(postId, function (dialogs) {
-            console.log('Pobrane dialogi:', dialogs);
+            // console.log('Pobrane dialogi:', dialogs);
             // Tu można zainicjalizować dialogi, np. pokazać powitalne
             initializeDialogs(npcPaths, dialogs);
         });
@@ -88,24 +88,24 @@
     function initializeDialogs(npcPaths, dialogs) {
         // Pobierz identyfikator sceny z URL zamiast używać pierwszej dostępnej sceny
         const sceneId = getSceneIdFromUrl();
-        console.log('Inicjalizacja dialogów dla sceny:', sceneId);
+        // console.log('Inicjalizacja dialogów dla sceny:', sceneId);
 
         // Sprawdź czy mamy dialogi dla tej sceny, jeśli nie, użyj sceny "main" jako zapasowej
         const currentScene = dialogs[sceneId] ? sceneId : Object.keys(dialogs)[0];
-        console.log('Używana scena dla dialogów:', currentScene);
+        // console.log('Używana scena dla dialogów:', currentScene);
 
         if (!currentScene || !dialogs[currentScene]) {
-            console.warn('Brak dialogów dla aktywnej sceny');
+            // console.warn('Brak dialogów dla aktywnej sceny');
             return;
         }
 
         // Pokaż domyślne dialogi powitalne dla wszystkich NPC
-        console.log('Próbuję znaleźć dialog dla sluga:', settings.defaultSlug, 'w scenie:', currentScene);
-        console.log('Dostępne slugi w tej scenie:', Object.keys(dialogs[currentScene]));
+        // console.log('Próbuję znaleźć dialog dla sluga:', settings.defaultSlug, 'w scenie:', currentScene);
+        // console.log('Dostępne slugi w tej scenie:', Object.keys(dialogs[currentScene]));
 
         // Najpierw spróbuj użyć domyślnego sluga z ustawień
         if (dialogs[currentScene][settings.defaultSlug]) {
-            console.log('Znaleziono dialog dla sluga:', settings.defaultSlug);
+            // console.log('Znaleziono dialog dla sluga:', settings.defaultSlug);
             const dialogData = dialogs[currentScene][settings.defaultSlug];
 
             // Sprawdź nową strukturę danych - teraz mamy obiekt z dialogami i akcją końcową
@@ -119,7 +119,7 @@
         }
         // Jeśli nie znaleziono sluga z URL, spróbuj użyć 'powitanie' jako fallback
         else if (dialogs[currentScene]['powitanie']) {
-            console.log('Nie znaleziono dialogu dla sluga:', settings.defaultSlug, ', używam domyślnego "powitanie"');
+            // console.log('Nie znaleziono dialogu dla sluga:', settings.defaultSlug, ', używam domyślnego "powitanie"');
             const dialogData = dialogs[currentScene]['powitanie'];
 
             // Sprawdź nową strukturę danych
@@ -239,7 +239,7 @@
             const textLength = currentDialog.message.replace(/<[^>]*>/g, '').length; // Usuń tagi HTML przy liczeniu
             const displayDuration = settings.minDisplayTime + (textLength * settings.charTime);
 
-            console.log('Auto przejście do następnego dialogu za', displayDuration, 'ms');
+            // console.log('Auto przejście do następnego dialogu za', displayDuration, 'ms');
 
             // Ustawienie timera dla automatycznego przejścia
             rotationInterval = setTimeout(() => {
@@ -256,7 +256,7 @@
      * @param {Object} koniecDialogu - Obiekt zawierający informacje o akcji po zakończeniu dialogu
      */
     function handleDialogEndAction(koniecDialogu) {
-        console.log('Wykonywanie akcji po zakończeniu dialogu:', koniecDialogu);
+        // console.log('Wykonywanie akcji po zakończeniu dialogu:', koniecDialogu);
 
         if (!koniecDialogu || !koniecDialogu.akcja) {
             return; // Brak akcji do wykonania
@@ -266,7 +266,7 @@
         switch (koniecDialogu.akcja) {
             case 'nic':
                 // Zatrzymaj rotację i zakończ dialog
-                console.log('Akcja: Nic nie rób - zakończ dialog');
+                // console.log('Akcja: Nic nie rób - zakończ dialog');
                 if (rotationInterval) {
                     clearInterval(rotationInterval);
                     rotationInterval = null;
@@ -283,7 +283,7 @@
 
             case 'stop':
                 // Zatrzymaj rotację ale zachowaj ostatni dialog na ekranie
-                console.log('Akcja: Zatrzymaj na ostatnim dialogu');
+                // console.log('Akcja: Zatrzymaj na ostatnim dialogu');
                 if (rotationInterval) {
                     clearInterval(rotationInterval);
                     rotationInterval = null;
@@ -293,14 +293,14 @@
 
             case 'repeater':
                 // Kontynuuj rotację dialogów - nie przerywaj
-                console.log('Akcja: Powtarzaj dialogi');
+                // console.log('Akcja: Powtarzaj dialogi');
                 // Nie robimy nic, rotacja będzie kontynuowana
                 return;
 
             case 'otworz_chat':
                 // Otwórz chat z wybranym NPC
                 if (koniecDialogu.npc_id) {
-                    console.log('Akcja: Otwórz chat z NPC ID:', koniecDialogu.npc_id);
+                    // console.log('Akcja: Otwórz chat z NPC ID:', koniecDialogu.npc_id);
 
                     // Zatrzymaj rotację
                     if (rotationInterval) {
@@ -335,7 +335,7 @@
                                 }
                                 const userId = npcData.user_id;
                                 buildNpcPopup(npcData, userId);
-                                console.log(pageData);
+                                // console.log(pageData);
                             })
                             .catch(error => {
                                 console.log(error);
@@ -343,33 +343,6 @@
                             });
                     } else {
                         console.error('AjaxHelper not available for opening NPC chat');
-                    }
-                }
-                break;
-
-            case 'misja':
-                // Uruchom funkcję misji z parametrami
-                if (koniecDialogu.funkcja) {
-                    console.log('Akcja: Uruchom funkcję misji:', koniecDialogu.funkcja, 'z parametrami:', koniecDialogu.parametry);
-
-                    // Przygotuj parametry funkcji - przekazujemy je jako obiekt
-                    const params = koniecDialogu.parametry || {};
-
-                    // Sprawdź czy funkcja istnieje w globalnym scope
-                    const functionName = koniecDialogu.funkcja.replace(/-([a-z])/g, g => g[1].toUpperCase());
-
-                    if (typeof window[functionName] === 'function') {
-                        // Wywołaj funkcję z parametrami
-                        window[functionName](params);
-                    } else if (typeof window.runFunctionNPC === 'function') {
-                        // Alternatywnie użyj istniejącej funkcji runFunctionNPC, jeśli istnieje
-                        const functionData = {
-                            function_name: koniecDialogu.funkcja,
-                            npc_id: params.npc_id || null
-                        };
-                        window.runFunctionNPC([functionData]);
-                    } else {
-                        console.error(`Funkcja ${functionName} nie istnieje`);
                     }
                 }
                 break;
@@ -384,7 +357,7 @@
      * @returns {number} ID podstrony
      */
     function getPostIdFromBody() {
-        console.log('Próba pobrania ID podstrony z klasy body...');
+        // console.log('Próba pobrania ID podstrony z klasy body...');
 
         // Próba pobrania z klasy postid-XXX na body
         const bodyClasses = document.body.className;
@@ -392,11 +365,11 @@
 
         if (postIdMatch && postIdMatch[1]) {
             const postId = parseInt(postIdMatch[1], 10);
-            console.log('Znaleziono ID podstrony z klasy body:', postId);
+            // console.log('Znaleziono ID podstrony z klasy body:', postId);
             return postId;
         }
 
-        console.log('Nie znaleziono ID podstrony w klasie body');
+        // console.log('Nie znaleziono ID podstrony w klasie body');
         return null;
     }
 
@@ -405,7 +378,7 @@
      * @returns {string|null} Identyfikator sceny lub null, jeśli nie znaleziono
      */
     function getSceneIdFromUrl() {
-        console.log('Próba pobrania identyfikatora sceny z URL...');
+        // console.log('Próba pobrania identyfikatora sceny z URL...');
 
         // Pobierz pełny URL strony
         const url = window.location.pathname;
@@ -418,13 +391,13 @@
             // Ostatni niepusty segment to nazwa sceny
             const lastSegment = segments[segments.length - 1];
             if (lastSegment && lastSegment !== '') {
-                console.log('Znaleziono identyfikator sceny w URL:', lastSegment);
+                // console.log('Znaleziono identyfikator sceny w URL:', lastSegment);
                 return lastSegment;
             }
         }
 
         // Jeśli nie znaleziono sceny, zwróć domyślną wartość 'main'
-        console.log('Nie znaleziono identyfikatora sceny w URL, używam domyślnej wartości: main');
+        // console.log('Nie znaleziono identyfikatora sceny w URL, używam domyślnej wartości: main');
         return 'main';
     }
 
@@ -434,7 +407,7 @@
      * @param {Function} callback - Funkcja callback do wywołania po pobraniu dialogów
      */
     function loadDialogsFromPostId(postId, callback) {
-        console.log('Pobieranie dialogów dla ID podstrony:', postId);
+        // console.log('Pobieranie dialogów dla ID podstrony:', postId);
 
         if (!postId) {
             console.error('Nie podano ID podstrony');
@@ -449,7 +422,7 @@
 
         // Pobierz identyfikator sceny z URL
         const sceneId = getSceneIdFromUrl() || 'main';
-        console.log('Pobrano identyfikator sceny z URL:', sceneId);
+        // console.log('Pobrano identyfikator sceny z URL:', sceneId);
 
         // Utwórz obiekt FormData
         const formData = new FormData();
@@ -470,7 +443,7 @@
                 return response.json();
             })
             .then(response => {
-                console.log('Odpowiedź z AJAX dla dialogów:', response);
+                // console.log('Odpowiedź z AJAX dla dialogów:', response);
 
                 if (response.success && response.data && response.data.dialogs) {
                     // Przekaż dane dialogów do funkcji callback
@@ -496,11 +469,11 @@
      * @param {string} npcId - ID NPC
      */
     function createDialogContainer(pathElement, npcId) {
-        console.log(`Tworzenie kontenera dialogowego dla NPC: ${npcId}`);
+        // console.log(`Tworzenie kontenera dialogowego dla NPC: ${npcId}`);
 
         // Sprawdź czy kontener już istnieje
         if (document.getElementById(`npc-dialog-${npcId}`)) {
-            console.log(`Kontener dla NPC: ${npcId} już istnieje`);
+            // console.log(`Kontener dla NPC: ${npcId} już istnieje`);
             return;
         }
 
@@ -551,7 +524,7 @@
             dialogElement.style.left = `${xPercent}%`;
             dialogElement.style.top = `${yPercent}%`;
 
-            console.log(`Dymek dla NPC ${npcId} - pierwszy punkt: (${firstX}, ${firstY}), pozycja: ${xPercent}%, ${yPercent}%`);
+            // console.log(`Dymek dla NPC ${npcId} - pierwszy punkt: (${firstX}, ${firstY}), pozycja: ${xPercent}%, ${yPercent}%`);
 
             // Dodaj dymek do dokumentu (zaraz po SVG, a nie wewnątrz)
             svgElement.parentNode.insertBefore(dialogElement, svgElement.nextSibling);
@@ -618,7 +591,7 @@
 
         // Dodanie kropki bezpośrednio do SVG (a nie do rodzica)
         // zapewni to właściwe pozycjonowanie względem SVG
-        console.log(`Kropka dla NPC ${npcId} - pierwszy punkt: (${firstX}, ${firstY}), pozycja: ${xPercent}%, ${yPercent}%`);
+        // console.log(`Kropka dla NPC ${npcId} - pierwszy punkt: (${firstX}, ${firstY}), pozycja: ${xPercent}%, ${yPercent}%`);
 
         // Dodanie kropki do dokumentu (jako dziecko SVG)
         svgElement.appendChild(dotElement);
@@ -807,7 +780,7 @@
 
     // Uruchom inicjalizację po załadowaniu dokumentu
     document.addEventListener('DOMContentLoaded', function () {
-        console.log('Inicjalizacja dialogów NPC...');
+        // console.log('Inicjalizacja dialogów NPC...');
         initNpcDialogs();
     });
 

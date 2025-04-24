@@ -28,8 +28,15 @@ function game_enqueue_scripts_and_styles()
     $main_js_version = filemtime(get_stylesheet_directory() . '/assets/js/main.js');
     wp_enqueue_script('game-main-js', get_stylesheet_directory_uri() . '/assets/js/main.js', ['jquery', 'game-ajax-helper'], $main_js_version, true);
 
+    // Załaduj obsługę misji
+    $mission_handler_path = get_stylesheet_directory() . '/assets/js/mission-handler.js';
+    if (file_exists($mission_handler_path)) {
+        $mission_handler_version = filemtime($mission_handler_path);
+        wp_enqueue_script('game-mission-handler', get_stylesheet_directory_uri() . '/assets/js/mission-handler.js', ['jquery', 'game-ajax-helper', 'game-main-js'], $mission_handler_version, true);
+    }
+
     // Globalne zależności dla skryptów
-    $script_dependencies = ['jquery', 'game-ajax-helper', 'game-main-js'];
+    $script_dependencies = ['jquery', 'game-ajax-helper', 'game-main-js', 'game-mission-handler'];
 
     // Określenie aktualnego szablonu i typu widoku (main/archive vs single)
     $current_template = '';

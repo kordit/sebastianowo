@@ -485,7 +485,7 @@ if (function_exists('acf_add_local_field_group')):
                                                                                 'name' => 'condition_mission_id',
                                                                                 'type' => 'select',
                                                                                 'instructions' => '',
-                                                                                'required' => 1,
+                                                                                'required' => 0,
                                                                                 'choices' => array(),
                                                                                 'ui' => 1,
                                                                                 'ajax' => 1,

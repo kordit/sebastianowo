@@ -11,7 +11,12 @@ if ($instance != 'kreator'): ?>
         <?php scene_generator(); ?>
     </div>
     <div class="game-content--inner">
+
         <?php
+
+        // $current_user_id = get_current_user_id();
+        // $fields = get_fields('user_' . $current_user_id);
+        // et_r($fields);
         $request_uri = trim($_SERVER['REQUEST_URI'], '/'); // Usuwamy początkowe i końcowe "/"
         $slash_count = substr_count($request_uri, '/');
         $post_id = get_the_ID();
@@ -23,7 +28,6 @@ if ($instance != 'kreator'): ?>
         }
         if ($slash_count === 1 || $scene == 'spacer') {
         ?>
-            <!-- <button id="go-to-a-walk">Idź na spacer</button> -->
 
         <?php
         }
