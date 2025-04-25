@@ -543,13 +543,14 @@ if (function_exists('acf_add_local_field_group')):
 																	'class' => '',
 																	'id' => '',
 																),
-																'choices' => array(), // Choices będą dynamicznie ładowane przez JS na podstawie wybranej misji
+																'choices' => array(),
 																'default_value' => '',
 																'allow_null' => 1,
 																'multiple' => 0,
 																'ui' => 0,
-																'ajax' => 1, // umożliwia dynamiczne ładowanie
-																'placeholder' => 'Najpierw wybierz misję',
+																'ajax' => 0,
+																'save_custom' => 1,
+																'placeholder' => 'Najpierw wybierz zadanie z misji',
 															),
 														),
 														'min' => '',

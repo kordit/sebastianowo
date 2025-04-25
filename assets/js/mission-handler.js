@@ -21,9 +21,6 @@ async function startMission(params) {
             console.warn('Uwaga: Nie określono NPC, który daje misję');
         }
 
-        // Pokaż loader lub komunikat
-        showPopup('Trwa przypisywanie misji...', 'info');
-
         // Wywołaj endpoint AJAX
         const response = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
             action: 'assign_mission_to_user',
@@ -84,14 +81,30 @@ async function startMission(params) {
 
             return true;
         } else {
-            // Wystąpił błąd
-            const errorMessage = response.data?.message || 'Wystąpił błąd podczas przypisywania misji';
-            showPopup(errorMessage, 'error');
+            // Wystąpił błąd - pobierz dokładny komunikat błędu z odpowiedzi serwera
+            // WordPress API może zwracać komunikaty błędów w różnych formatach
+            let errorMessage = 'Wystąpił błąd podczas przypisywania misji';
+
+            // Sprawdź wszystkie możliwe lokalizacje komunikatu błędu
+            if (response.data) {
+                if (typeof response.data === 'string') {
+                    errorMessage = response.data;
+                } else if (response.data.message) {
+                    errorMessage = response.data.message;
+                } else if (typeof response.data === 'object' && Object.keys(response.data).length > 0) {
+                    // Jeśli data jest obiektem, spróbuj wyciągnąć pierwszy komunikat
+                    const firstKey = Object.keys(response.data)[0];
+                    errorMessage = response.data[firstKey] || errorMessage;
+                }
+            }
+
+            console.error('Błąd podczas uruchamiania misji:', error);
+            showPopup(error, 'error');
             return false;
         }
     } catch (error) {
         console.error('Błąd podczas uruchamiania misji:', error);
-        showPopup(`Wystąpił błąd: ${error.message || 'Nieznany błąd'}`, 'error');
+        showPopup(error, 'error');
         return false;
     }
 }

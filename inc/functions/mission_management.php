@@ -84,12 +84,21 @@ function assign_mission_to_user($user_id, $mission_id)
     $user_missions = get_field('user_missions', 'user_' . $user_id);
     if (!is_array($user_missions)) $user_missions = [];
     if (!isset($user_missions['active_missions']) || !is_array($user_missions['active_missions'])) $user_missions['active_missions'] = [];
+    if (!isset($user_missions['completed']) || !is_array($user_missions['completed'])) $user_missions['completed'] = [];
 
-    // Sprawdź czy misja już jest przypisana
+    // Sprawdź czy misja już jest przypisana jako aktywna
     if (in_array($mission_id, $user_missions['active_missions'])) {
         return [
             'success' => false,
-            'message' => 'Misja jest już przypisana do tego użytkownika'
+            'message' => 'Misja jest już aktywna'
+        ];
+    }
+
+    // Sprawdź czy misja została już ukończona
+    if (in_array($mission_id, $user_missions['completed'])) {
+        return [
+            'success' => false,
+            'message' => 'Ta misja została już ukończona'
         ];
     }
 

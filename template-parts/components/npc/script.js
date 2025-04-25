@@ -348,50 +348,62 @@ async function handleAnswer(input) {
             updatePostACFFields(finalNpcId, { [fieldName]: relationChange });
         }
 
-        // Uruchom misje
-        for (const missionConfig of missionsToStart) {
-            try {
-                const missionId = missionConfig.mission_id;
-                if (!missionId) {
-                    console.error('Brak ID misji w konfiguracji:', missionConfig);
-                    continue;
-                }
-
-                // Pobierz ID NPC, który daje misję
-                const npcId = document.getElementById('npcdatamanager')?.dataset?.id;
-
-                // Sprawdź, czy funkcja startMission jest dostępna
-                if (typeof window.startMission === 'function') {
-                    console.log('Uruchamiam misję:', missionId, 'od NPC:', npcId);
-
-                    // Parametry dla funkcji startMission
-                    const missionParams = {
-                        mission_id: missionId,
-                        npc_id: npcId,
-                        show_confirmation: missionConfig.show_confirmation !== undefined ? missionConfig.show_confirmation : true,
-                        success_message: missionConfig.success_message || 'Otrzymano nową misję!',
-                        // Opcjonalne parametry
-                        auto_complete_first_task: missionConfig.auto_complete_first_task || false,
-                        redirect_after: missionConfig.redirect_after || false,
-                        item_id: missionConfig.item_id,
-                        item_quantity: missionConfig.item_quantity
-                    };
-
-                    // Uruchom misję
-                    await window.startMission(missionParams);
-
-                    // Ustaw komunikat potwierdzający (jeśli nie pokazujemy osobnego potwierdzenia)
-                    if (!missionConfig.show_confirmation && !message) {
-                        message = 'Misja została przypisana!';
-                        popupstate = 'success';
+        // Uruchom misje - musimy wykonać misje PRZED przedmiotami
+        // Wykonujemy misje pierwsze, ponieważ jeśli misja nie może być przydzielona (np. już istnieje),
+        // nie powinniśmy przyznawać przedmiotów związanych z nią
+        if (missionsToStart.length > 0) {
+            for (const missionConfig of missionsToStart) {
+                try {
+                    const missionId = missionConfig.mission_id;
+                    if (!missionId) {
+                        console.error('Brak ID misji w konfiguracji:', missionConfig);
+                        continue;
                     }
-                } else {
-                    console.error('Funkcja startMission nie jest dostępna');
-                    showPopup('Wystąpił błąd podczas uruchamiania misji', 'error');
+
+                    // Pobierz ID NPC, który daje misję
+                    const npcId = document.getElementById('npcdatamanager')?.dataset?.id;
+
+                    // Sprawdź, czy funkcja startMission jest dostępna
+                    if (typeof window.startMission === 'function') {
+                        console.log('Uruchamiam misję:', missionId, 'od NPC:', npcId);
+
+                        // Parametry dla funkcji startMission
+                        const missionParams = {
+                            mission_id: missionId,
+                            npc_id: npcId,
+                            show_confirmation: missionConfig.show_confirmation !== undefined ? missionConfig.show_confirmation : true,
+                            success_message: missionConfig.success_message || 'Otrzymano nową misję!',
+                            // Opcjonalne parametry
+                            auto_complete_first_task: missionConfig.auto_complete_first_task || false,
+                            redirect_after: missionConfig.redirect_after || false
+                            // Nie przekazujemy tutaj item_id i item_quantity - będziemy zarządzać przedmiotami osobno
+                        };
+
+                        // Uruchom misję i sprawdź status
+                        const missionResult = await window.startMission(missionParams);
+
+                        // Jeśli wystąpił błąd podczas uruchamiania misji, 
+                        // przerwij całą funkcję handleAnswer - nie wykonuj kolejnych operacji
+                        if (missionResult === false) {
+                            // Nie musimy tu nic robić, ponieważ showPopup został już wywołany w startMission
+                            return; // Przerwij całą operację
+                        }
+
+                        // Ustaw komunikat potwierdzający (jeśli nie pokazujemy osobnego potwierdzenia)
+                        if (!missionConfig.show_confirmation && !message) {
+                            message = 'Misja została przypisana!';
+                            popupstate = 'success';
+                        }
+                    } else {
+                        console.error('Funkcja startMission nie jest dostępna');
+                        showPopup('Wystąpił błąd podczas uruchamiania misji', 'error');
+                        return; // Przerwij całą operację
+                    }
+                } catch (error) {
+                    console.error('Błąd podczas uruchamiania misji:', error);
+                    showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
+                    return; // Przerwij całą operację
                 }
-            } catch (error) {
-                console.error('Błąd podczas uruchamiania misji:', error);
-                showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
             }
         }
 

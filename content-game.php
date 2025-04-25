@@ -13,7 +13,7 @@ if ($instance != 'kreator'): ?>
     <div class="game-content--inner">
 
         <?php
-
+        et_r(get_fields(76));
         // $current_user_id = get_current_user_id();
         // $fields = get_fields('user_' . $current_user_id);
         // et_r($fields);

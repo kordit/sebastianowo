@@ -15,13 +15,44 @@
         }
 
         console.log('[MISSION JS] Wysyłanie zapytania AJAX o zadania');
-        $.post(ajaxurl, { action: 'get_mission_tasks', mission_id: missionId }, function (response) {
+        // Pobierz aktualną wartość przed usunięciem opcji
+        const currentSelectedValue = $taskSelect.val();
+        console.log('[MISSION JS] Aktualna wartość przed AJAX:', currentSelectedValue);
+
+        // Pobierz ID postu (jeśli jesteśmy na stronie edycji)
+        const currentPostId = $('#post_ID').val() || 0;
+
+        // Pobierz ścieżkę pola (nazwę bez "acf")
+        const fieldPath = $taskSelect.attr('name')
+            ? $taskSelect.attr('name').replace('acf', '').replace(/\]\[/g, '][')
+            : '';
+
+        console.log('[MISSION JS] ID postu:', currentPostId, 'Ścieżka pola:', fieldPath);
+
+        $.post(ajaxurl, {
+            action: 'get_mission_tasks',
+            mission_id: missionId,
+            selected_task: currentSelectedValue, // Przekaż aktualnie wybraną wartość
+            post_id: currentPostId, // Przekaż ID aktualnego postu
+            field_path: fieldPath // Przekaż ścieżkę pola
+        }, function (response) {
             console.log('[MISSION JS] Odpowiedź AJAX:', response);
 
             if (response.success && response.data && response.data.tasks && Object.keys(response.data.tasks).length) {
                 $.each(response.data.tasks, function (id, title) {
                     console.log('[MISSION JS] Dodaję zadanie:', id, title);
-                    $taskSelect.append($('<option>', { value: id, text: title }));
+                    // Ustaw atrybut selected jeśli to wybrana wartość
+                    const isSelected = (id === response.data.selected_task);
+                    if (isSelected) {
+                        console.log('[MISSION JS] Znaleziono wybraną wartość:', id);
+                        $taskSelect.append($('<option>', {
+                            value: id,
+                            text: title,
+                            selected: 'selected'
+                        }));
+                    } else {
+                        $taskSelect.append($('<option>', { value: id, text: title }));
+                    }
                 });
             } else {
                 $taskSelect.append($('<option>', { value: '', text: 'Brak dostępnych zadań' }));
@@ -68,9 +99,50 @@
         });
     }
 
+    // Funkcja do sprawdzania i załadowania zadań dla aktualnie wybranej misji
+    function initializeTasksForSelectedMission() {
+        console.log('[MISSION JS] Inicjalizacja zadań dla wybranych misji po załadowaniu strony');
+
+        // Sprawdź wszystkie selecty misji na stronie
+        $('[name$="[mission_id]"]').each(function () {
+            const $missionSelect = $(this);
+            const missionId = $missionSelect.val();
+            const missionName = $missionSelect.attr('name');
+
+            if (missionId) {
+                console.log('[MISSION JS] Znaleziono wybraną misję:', missionId, 'w selekcie:', missionName);
+
+                // Wyciągnij prefix
+                const rowPrefix = missionName.replace(/\[mission_id\]$/, '');
+
+                // Znajdź select zadania z tym samym prefixem
+                const $taskSelect = $('[name="' + rowPrefix + '[mission_task_id]"]');
+
+                if ($taskSelect.length) {
+                    // Zachowaj aktualną wartość przed ładowaniem nowych opcji
+                    const savedValue = $taskSelect.val();
+                    console.log('[MISSION JS] Zapisana wartość zadania:', savedValue);
+
+                    // Załaduj zadania dla tej misji (jeśli jest wybrana)
+                    loadTasksIntoSelect(missionId, $taskSelect);
+
+                    // Przywróć zapisaną wartość po załadowaniu zadań
+                    if (savedValue) {
+                        setTimeout(function () {
+                            $taskSelect.val(savedValue);
+                            console.log('[MISSION JS] Przywrócono zapisaną wartość zadania:', savedValue);
+                        }, 1000);
+                    }
+                }
+            }
+        });
+    }
+
     $(function () {
         console.log('[MISSION JS] Document ready - inicjalizacja bindings');
         bindMissionSelects(document);
+        // Dodane: inicjalizacja zadań dla już wybranych misji
+        initializeTasksForSelectedMission();
     });
 
     // Obsługa dynamicznego dodawania przez ACF
@@ -131,12 +203,14 @@
                                     if (currentTaskValue) {
                                         // Używamy setTimeout aby dać czas na załadowanie opcji przez AJAX
                                         setTimeout(function () {
-                                            // Sprawdź czy wybrana wartość istnieje wśród opcji
-                                            if ($taskSelect.find('option[value="' + currentTaskValue + '"]').length > 0) {
-                                                $taskSelect.val(currentTaskValue);
-                                                console.log('[MISSION JS] Przywrócono wybraną wartość zadania:', currentTaskValue);
+                                            $taskSelect.val(currentTaskValue);
+                                            console.log('[MISSION JS] Przywrócono zapisaną wartość zadania w modalu:', currentTaskValue);
+
+                                            // Sprawdzenie czy udało się ustawić wartość
+                                            if ($taskSelect.val() !== currentTaskValue) {
+                                                console.log('[MISSION JS] Uwaga: Nie udało się przywrócić wartości zadania w modalu');
                                             }
-                                        }, 500); // Poczekaj 500ms na odpowiedź AJAX
+                                        }, 1000); // Dłuższy czas na odpowiedź AJAX
                                     }
                                 }
 
@@ -150,7 +224,7 @@
                         });
                     }
                 }
-            }, 500);
+            }, 50);
         });
     } else {
         console.log('[MISSION JS] ACF nie jest dostępny!');
