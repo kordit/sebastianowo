@@ -8,233 +8,228 @@ add_action('acf/include_fields', function () {
         return;
     }
 
+    // Standardowe statusy dla misji i zadań
+    $status_choices = array(
+        'not_started' => 'Niezaczęta',
+        'in_progress' => 'Rozpoczęta',
+        'completed' => 'Ukończona',
+        'failed' => 'Oblana',
+    );
+
+    // Przygotowanie pól dla misji użytkownika
+    $mission_fields = [];
+
+    // Pobieranie wszystkich misji
+    $missions = get_posts([
+        'post_type' => 'mission',
+        'numberposts' => -1,
+        'post_status' => 'publish',
+        'orderby' => 'title',
+        'order' => 'ASC'
+    ]);
+
+    // Jeśli istnieją misje, tworzymy dla każdej grupę
+    if (!empty($missions)) {
+        foreach ($missions as $mission) {
+            // Pobierz zadania przypisane do tej misji
+            $mission_tasks = get_field('mission_tasks', $mission->ID);
+            $task_fields = [];
+
+            // Przygotuj pola dla każdego zadania w misji
+            if (!empty($mission_tasks)) {
+                foreach ($mission_tasks as $task_index => $task) {
+                    if (isset($task['task_title'])) {
+                        // Jeśli task_id nie istnieje, wygeneruj go na podstawie tytułu zadania
+                        $task_id = isset($task['task_id']) ? $task['task_id'] : sanitize_title($task['task_title']) . '_' . $task_index;
+                        $task_title = $task['task_title'];
+
+                        // Określenie typu zadania
+                        $task_type = isset($task['task_type']) ? $task['task_type'] : 'checkpoint';
+
+                        // Specjalne traktowanie dla zadań typu checkpoint_npc
+                        if ($task_type == 'checkpoint_npc' && !empty($task['task_checkpoint_npc']) && is_array($task['task_checkpoint_npc'])) {
+                            // Dla zadań z NPC, tworzymy grupę z checkbox dla każdego NPC
+                            $npc_sub_fields = [];
+
+                            foreach ($task['task_checkpoint_npc'] as $npc_index => $npc_info) {
+                                if (!empty($npc_info['npc'])) {
+                                    $npc_id = $npc_info['npc'];
+                                    $npc_post = get_post($npc_id);
+                                    $npc_name = $npc_post ? $npc_post->post_title : 'NPC #' . $npc_id;                                    // Pobierz status NPC z danych zadania
+                                    $npc_status = isset($npc_info['status']) ? $npc_info['status'] : 'not_started';
+
+                                    $npc_sub_fields[] = array(
+                                        'key' => 'field_task_npc_status_' . $mission->ID . '_' . $task_id . '_' . $npc_id,
+                                        'label' => $npc_name . ' (status oryginalny)',
+                                        'name' => 'npc_status_' . $npc_id,
+                                        'type' => 'select',
+                                        'instructions' => '',
+                                        'choices' => array(
+                                            'not_started' => 'Niezaczęte',
+                                            'in_progress' => 'Rozpoczęte',
+                                            'completed' => 'Ukończone',
+                                            'failed' => 'Niepowodzenie',
+                                        ),
+                                        'default_value' => $npc_status,
+                                        'readonly' => 1,
+                                        'disabled' => 1,
+                                        'ui' => 1,
+                                        'ajax' => 0,
+                                        'allow_null' => 0,
+                                        'return_format' => 'value',
+                                        'wrapper' => array(
+                                            'width' => '50',
+                                            'class' => '',
+                                            'id' => '',
+                                        ),
+                                    );
+
+                                    $npc_sub_fields[] = array(
+                                        'key' => 'field_task_npc_' . $mission->ID . '_' . $task_id . '_' . $npc_id,
+                                        'label' => $npc_name . ' (wykonane)',
+                                        'name' => 'npc_' . $npc_id,
+                                        'type' => 'true_false',
+                                        'instructions' => '',
+                                        'default_value' => 0,
+                                        'ui' => 1,
+                                        'ui_on_text' => 'Wykonane',
+                                        'ui_off_text' => 'Niewykonane',
+                                        'wrapper' => array(
+                                            'width' => '50',
+                                            'class' => '',
+                                            'id' => '',
+                                        ),
+                                    );
+                                }
+                            }
+
+                            $task_fields[] = array(
+                                'key' => 'field_task_' . $mission->ID . '_' . $task_id,
+                                'label' => $task_title,
+                                'name' => $task_id,
+                                'type' => 'group',
+                                'instructions' => $task['task_description'] ?? '',
+                                'layout' => 'block',
+                                'sub_fields' => $npc_sub_fields
+                            );
+                        } else {
+                            // Dla standardowych zadań (checkpoint, place) - pojedynczy przełącznik true/false
+                            $task_fields[] = array(
+                                'key' => 'field_task_' . $mission->ID . '_' . $task_id,
+                                'label' => $task_title,
+                                'name' => $task_id,
+                                'type' => 'true_false',
+                                'instructions' => $task['task_description'] ?? '',
+                                'default_value' => 0,
+                                'ui' => 1,
+                                'ui_on_text' => 'Wykonane',
+                                'ui_off_text' => 'Niewykonane',
+                            );
+                        }
+                    }
+                }
+            }
+
+            // Tworzenie grupy dla misji z jej zadaniami
+            $mission_fields[] = array(
+                'key' => 'field_mission_' . $mission->ID,
+                'label' => $mission->post_title,
+                'name' => 'mission_' . $mission->ID,
+                'type' => 'group',
+                'instructions' => '',
+                'required' => 0,
+                'layout' => 'block',
+                'sub_fields' => array_merge(
+                    [
+                        array(
+                            'key' => 'field_mission_status_' . $mission->ID,
+                            'label' => 'Status misji',
+                            'name' => 'status',
+                            'type' => 'select',
+                            'instructions' => 'Status misji',
+                            'required' => 1,
+                            'choices' => $status_choices,
+                            'default_value' => 'not_started',
+                            'allow_null' => 0,
+                            'multiple' => 0,
+                            'ui' => 1,
+                            'ajax' => 0,
+                            'search_placeholder' => 'Wybierz status',
+                            'allow_custom' => 0,
+                            'return_format' => 'value',
+                            'wrapper' => array(
+                                'width' => '30',
+                                'class' => '',
+                                'id' => '',
+                            ),
+                        ),
+                        array(
+                            'key' => 'field_mission_assigned_date_' . $mission->ID,
+                            'label' => 'Data przypisania',
+                            'name' => 'assigned_date',
+                            'type' => 'date_time_picker',
+                            'instructions' => 'Data przypisania misji',
+                            'required' => 0,
+                            'display_format' => 'd/m/Y g:i a',
+                            'return_format' => 'Y-m-d H:i:s',
+                            'wrapper' => array(
+                                'width' => '35',
+                                'class' => '',
+                                'id' => '',
+                            ),
+                        ),
+                        array(
+                            'key' => 'field_mission_completion_date_' . $mission->ID,
+                            'label' => 'Data zakończenia',
+                            'name' => 'completion_date',
+                            'type' => 'date_time_picker',
+                            'instructions' => 'Data ukończenia lub oblania misji',
+                            'required' => 0,
+                            'conditional_logic' => array(
+                                array(
+                                    array(
+                                        'field' => 'field_mission_status_' . $mission->ID,
+                                        'operator' => '==',
+                                        'value' => 'completed',
+                                    ),
+                                ),
+                                array(
+                                    array(
+                                        'field' => 'field_mission_status_' . $mission->ID,
+                                        'operator' => '==',
+                                        'value' => 'failed',
+                                    ),
+                                ),
+                            ),
+                            'display_format' => 'd/m/Y g:i a',
+                            'return_format' => 'Y-m-d H:i:s',
+                            'wrapper' => array(
+                                'width' => '35',
+                                'class' => '',
+                                'id' => '',
+                            ),
+                        ),
+                        array(
+                            'key' => 'field_mission_tasks_' . $mission->ID,
+                            'label' => 'Zadania',
+                            'name' => 'tasks',
+                            'type' => 'group',
+                            'instructions' => 'Zadania w misji',
+                            'required' => 0,
+                            'layout' => 'block',
+                            'sub_fields' => $task_fields,
+                        ),
+                    ]
+                ),
+            );
+        }
+    }
+
     // Grupa pól do zarządzania misjami użytkownika
     acf_add_local_field_group(array(
         'key' => 'group_user_missions',
         'title' => 'Misje Użytkownika',
-        'fields' => array(
-            // Status misji (aktywne/ukończone/nieudane)
-            array(
-                'key' => 'field_user_missions',
-                'label' => 'Status misji',
-                'name' => 'user_missions',
-                'type' => 'group',
-                'instructions' => 'Status misji użytkownika',
-                'required' => 0,
-                'layout' => 'block',
-                'sub_fields' => array(
-                    array(
-                        'key' => 'field_active_missions',
-                        'label' => 'Aktywne misje',
-                        'name' => 'active_missions',
-                        'type' => 'relationship',
-                        'instructions' => 'Misje aktualnie aktywne dla gracza',
-                        'required' => 0,
-                        'post_type' => array(
-                            0 => 'mission',
-                        ),
-                        'filters' => array(
-                            0 => 'search',
-                        ),
-                        'return_format' => 'id',
-                        'wrapper' => array(
-                            'width' => '100',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                    ),
-                    array(
-                        'key' => 'field_completed_missions',
-                        'label' => 'Ukończone misje',
-                        'name' => 'completed',
-                        'type' => 'relationship',
-                        'instructions' => 'Misje ukończone przez gracza',
-                        'required' => 0,
-                        'post_type' => array(
-                            0 => 'mission',
-                        ),
-                        'filters' => array(
-                            0 => 'search',
-                        ),
-                        'return_format' => 'id',
-                        'wrapper' => array(
-                            'width' => '50',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                    ),
-                    array(
-                        'key' => 'field_failed_missions',
-                        'label' => 'Nieudane misje',
-                        'name' => 'failed',
-                        'type' => 'relationship',
-                        'instructions' => 'Misje, których gracz nie ukończył',
-                        'required' => 0,
-                        'post_type' => array(
-                            0 => 'mission',
-                        ),
-                        'filters' => array(
-                            0 => 'search',
-                        ),
-                        'return_format' => 'id',
-                        'wrapper' => array(
-                            'width' => '50',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                    ),
-                ),
-            ),
-
-            // Postęp w zadaniach misji
-            array(
-                'key' => 'field_mission_tasks_progress',
-                'label' => 'Postęp w zadaniach',
-                'name' => 'mission_tasks_progress',
-                'type' => 'repeater',
-                'instructions' => 'Status ukończenia zadań w misjach',
-                'required' => 0,
-                'layout' => 'block',
-                'button_label' => 'Dodaj postęp zadania',
-                'sub_fields' => array(
-                    array(
-                        'key' => 'field_task_mission_id',
-                        'label' => 'ID Misji',
-                        'name' => 'mission_id',
-                        'type' => 'post_object',
-                        'instructions' => '',
-                        'required' => 1,
-                        'post_type' => array('mission'),
-                        'return_format' => 'id',
-                        'wrapper' => array(
-                            'width' => '25',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                    ),
-
-                    array(
-                        'key' => 'field_task_key',
-                        'label' => 'ID Zadania',
-                        'name' => 'task_id',
-                        'type' => 'text',
-                        'instructions' => 'np. task_0, task_1, itp.',
-                        'required' => 1,
-                        'wrapper' => array(
-                            'width' => '25',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                    ),
-                    array(
-                        'key' => 'field_task_status',
-                        'label' => 'Status zadania',
-                        'name' => 'status',
-                        'type' => 'select',
-                        'instructions' => 'Status zadania: niezaczęta, rozpoczęta, ukończona',
-                        'required' => 1,
-                        'choices' => array(
-                            'not_started' => 'Niezaczęta',
-                            'in_progress' => 'Rozpoczęta',
-                            'completed' => 'Ukończona',
-                        ),
-                        'default_value' => array('not_started'),
-                        'allow_null' => 0,
-                        'multiple' => 0,
-                        'ui' => 1,
-                        'ajax' => 0,
-                        'return_format' => 'value',
-                        'placeholder' => '',
-                        'wrapper' => array(
-                            'width' => '30',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                    ),
-
-                    array(
-                        'key' => 'field_task_completion_date',
-                        'label' => 'Data ukończenia',
-                        'name' => 'completion_date',
-                        'type' => 'date_time_picker',
-                        'instructions' => '',
-                        'required' => 0,
-                        'conditional_logic' => array(
-                            array(
-                                array(
-                                    'field' => 'field_task_status',
-                                    'operator' => '==',
-                                    'value' => 'completed',
-                                ),
-                            ),
-                        ),
-                        'display_format' => 'd/m/Y g:i a',
-                        'return_format' => 'Y-m-d H:i:s',
-                        'wrapper' => array(
-                            'width' => '15',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                    ),
-                    array(
-                        'key' => 'field_task_type',
-                        'label' => 'Typ zadania',
-                        'name' => 'task_type',
-                        'type' => 'text',
-                        'instructions' => 'np. dialog, item, sell, place, custom',
-                        'required' => 0,
-                        'wrapper' => array(
-                            'width' => '40',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                    ),
-                    array(
-                        'key' => 'field_task_details',
-                        'label' => 'Szczegóły zadania',
-                        'name' => 'task_details',
-                        'type' => 'repeater',
-                        'instructions' => 'Szczegółowy stan zadania',
-                        'required' => 0,
-                        'layout' => 'table',
-                        'button_label' => 'Dodaj szczegół',
-                        'wrapper' => array(
-                            'width' => '100',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                        'sub_fields' => array(
-                            array(
-                                'key' => 'field_detail_key',
-                                'label' => 'Klucz',
-                                'name' => 'key',
-                                'type' => 'text',
-                                'instructions' => 'np. npc_id, item_count, etc.',
-                                'required' => 1,
-                                'wrapper' => array(
-                                    'width' => '30',
-                                    'class' => '',
-                                    'id' => '',
-                                ),
-                            ),
-                            array(
-                                'key' => 'field_detail_value',
-                                'label' => 'Wartość',
-                                'name' => 'value',
-                                'type' => 'text',
-                                'instructions' => 'Stan (wartość) danego szczegółu',
-                                'required' => 1,
-                                'wrapper' => array(
-                                    'width' => '70',
-                                    'class' => '',
-                                    'id' => '',
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        ),
+        'fields' => $mission_fields,
         'location' => array(
             array(
                 array(

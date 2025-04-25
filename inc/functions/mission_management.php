@@ -121,11 +121,8 @@ function assign_mission_to_user($user_id, $mission_id)
                 'task_type' => $task['task_type'] ?? '',
                 'completed' => 0,
                 'completion_date' => '',
+                'status' => $index === 0 ? 'in_progress' : 'not_started',
                 'task_details' => [
-                    [
-                        'key' => 'active',
-                        'value' => $index === 0 ? '1' : '0'
-                    ],
                     [
                         'key' => 'assigned_at',
                         'value' => current_time('mysql')
@@ -228,7 +225,7 @@ function complete_mission_task($user_id, $mission_id, $task_id)
     foreach ($mission_data['progress'] as $index => &$task) {
         if ($task['task_id'] == $task_id) {
             $task['completed'] = 1;
-            $task['active'] = 0;
+            $task['status'] = 'completed';
             $task['completed_at'] = current_time('mysql');
             $task_found = true;
             $task_index = $index;
@@ -238,7 +235,7 @@ function complete_mission_task($user_id, $mission_id, $task_id)
             // Jeśli to następne zadanie po ukończonym, oznacz jako aktywne
             if ($task_found && $next_task_id === null) {
                 $next_task_id = $task['task_id'];
-                $task['active'] = 1;
+                $task['status'] = 'in_progress';
             }
         }
     }

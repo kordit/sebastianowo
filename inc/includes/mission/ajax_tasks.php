@@ -82,5 +82,14 @@ add_action('admin_enqueue_scripts', function ($hook) {
             filemtime(get_template_directory() . '/inc/includes/mission/mission-tasks-select.js'),
             true
         );
+
+        // Dodatkowy skrypt dla obsługi warunków startu rozmowy
+        wp_enqueue_script(
+            'mission-tasks-conditions',
+            get_template_directory_uri() . '/assets/js/mission-tasks-conditions.js',
+            ['jquery'],
+            filemtime(get_template_directory() . '/assets/js/mission-tasks-conditions.js'),
+            true
+        );
     }
 });

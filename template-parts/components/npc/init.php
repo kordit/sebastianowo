@@ -53,14 +53,21 @@ function evaluate_condition($conv, $npc_relation_value, $npc_relation_meet, $con
             }
             return false;
         case 'mission':
-            if (!isset($conv['mission_select']['mission'])) {
-                return false;
-            }
-            $mission_field = $conv['mission_select']['mission'];
-            if (is_object($mission_field)) {
-                $mission_field = $mission_field->ID;
-            }
-            return $mission_field == ($conditions['mission'] ?? '');
+            // ob_start();
+            // $active_user_missions = get_field('user_missions', 'user_' . get_current_user_id())['active_missions'];
+            // $selected_missions = $conv['mission_select']['mission'];
+            // $mission_status = $conv['mission_select']['mission_status'];
+            // if ($mission_status) {
+            // }
+            // print_r($conv['mission_select']);
+            // print_r($active_missions);
+            $dump = ob_get_clean();
+
+            file_put_contents(
+                '/Users/kordiansasiela/localhost/seb.soeasy.it/public_html/wp-content/themes/game/temp-log.log',
+                $dump,
+                FILE_APPEND
+            );
         case 'instance':
             if (isset($conv['instation'])) {
                 return trim($conv['instation']) === trim($conditions['value'] ?? '');
