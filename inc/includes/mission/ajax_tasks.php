@@ -9,60 +9,237 @@ add_action('wp_ajax_nopriv_get_mission_tasks', 'ajax_get_mission_tasks');
 add_action('wp_ajax_get_selected_mission_data', 'ajax_get_selected_mission_data');
 add_action('wp_ajax_nopriv_get_selected_mission_data', 'ajax_get_selected_mission_data');
 
-function ajax_get_mission_tasks()
+/**
+ * Funkcja rekurencyjnego przeszukiwania danych ACF w poszukiwaniu wybranego zadania dla misji
+ */
+function find_selected_task_recursive($data, $mission_id)
 {
-    $mission_id = isset($_POST['mission_id']) ? intval($_POST['mission_id']) : 0;
-    if (!$mission_id) {
-        wp_send_json_error(['message' => 'Brak ID misji']);
+    if (!is_array($data)) {
+        return '';
     }
 
-    // Pobierz wybraną wartość z parametru POST (tylko dla odświeżenia selecta przy zmianie misji)
-    $posted_selected_task = isset($_POST['selected_task']) ? sanitize_text_field($_POST['selected_task']) : '';
+    // Sprawdź czy mamy bezpośrednie dopasowanie
+    if (isset($data['mission_id']) && $data['mission_id'] == $mission_id && isset($data['mission_task_id'])) {
+        return $data['mission_task_id'];
+    }
 
-    // Pobierz obiekt postu, z którego pochodzi zapytanie
-    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
-    $field_path = isset($_POST['field_path']) ? sanitize_text_field($_POST['field_path']) : '';
+    // Sprawdź czy mamy mission_select z dopasowaniem
+    if (isset($data['mission_select']) && is_array($data['mission_select'])) {
+        if (
+            isset($data['mission_select']['mission_id']) &&
+            $data['mission_select']['mission_id'] == $mission_id &&
+            isset($data['mission_select']['mission_task_id'])
+        ) {
+            return $data['mission_select']['mission_task_id'];
+        }
+    }
 
-    // Zmienna do przechowania wybranego zadania
-    $selected_task = $posted_selected_task; // Na początek ustaw wartość z POST (dla przypadków zmiany misji)
-
-    // Jeśli mamy ID postu i ścieżkę pola, spróbuj odczytać wartość z bazy
-    if ($post_id && $field_path) {
-        // Pobierz pełne dane pola
-        $post_data = get_field('anwser', $post_id);
-
-        // Odczytaj wartość z określonej ścieżki
-        // Przykład: [row-5][field_67b4e72eec415][row-0][field_67b4ea1e2acbb][row-0][field_mission_task_id]
-        if ($post_data && $field_path) {
-            $path_components = explode('][', trim($field_path, '[]'));
-
-            $current_data = $post_data;
-            $found_value = false;
-
-            // Nawiguj przez zagnieżdżone tablice według ścieżki
-            foreach ($path_components as $component) {
-                if (isset($current_data[$component])) {
-                    $current_data = $current_data[$component];
-                    $found_value = true;
-                } else {
-                    $found_value = false;
-                    break;
-                }
-            }
-
-            if ($found_value && !empty($current_data)) {
-                $selected_task = $current_data;
+    // Przeszukaj wszystkie pola rekurencyjnie
+    foreach ($data as $key => $value) {
+        if (is_array($value)) {
+            $result = find_selected_task_recursive($value, $mission_id);
+            if (!empty($result)) {
+                return $result;
             }
         }
     }
 
-    // Pobierz zadania misji z uwzględnieniem nowej struktury zadań
-    $tasks = get_field('mission_tasks', $mission_id);
-    $result = array();
+    return '';
+}
 
-    if ($tasks && is_array($tasks)) {
+function ajax_get_mission_tasks()
+{
+    $mission_id = isset($_POST['mission_id']) ? $_POST['mission_id'] : '';
+    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
+    $field_path = isset($_POST['field_path']) ? $_POST['field_path'] : '';
+    $selected_task = isset($_POST['selected_task']) ? $_POST['selected_task'] : '';
+    $content_index = isset($_POST['content_index']) ? $_POST['content_index'] : null;
+
+    $missions = array();
+    $results = array();
+    $current_selected_task = '';
+
+    // Debug logging
+    error_log('MISSION TASKS REQUEST - Mission ID: ' . $mission_id . ', Post ID: ' . $post_id . ', Field Path: ' . $field_path);
+
+    // Jeśli mamy post_id i field_path, spróbuj pobrać zapisaną wartość zadania
+    if ($post_id && $field_path) {
+        // Pobierz dane z posta dla tego pola
+        $post_data = get_post_meta($post_id, '_' . $field_path, true);
+        if (empty($post_data)) {
+            // Spróbuj pobrać dane z tablic ACF
+            $acf_data = get_field($field_path, $post_id);
+            if (!empty($acf_data)) {
+                $post_data = $acf_data;
+            }
+        }
+
+        // Sprawdź czy field_path zawiera mission_id, jeśli tak, znajdź powiązane mission_task_id
+        if (strpos($field_path, 'mission_id') !== false) {
+            $task_path = str_replace('mission_id', 'mission_task_id', $field_path);
+            $task_data = get_post_meta($post_id, '_' . $task_path, true);
+            if (!empty($task_data)) {
+                $current_selected_task = $task_data;
+            }
+        }
+
+        // Dodatkowe sprawdzenie dla wybranej misji - próba znalezienia w tablicy anwsers
+        if (empty($current_selected_task)) {
+            // Wyczyść cache ACF, żeby upewnić się, że mamy najświeższe dane
+            wp_cache_delete('acf_get_post_meta_' . $post_id);
+
+            // 1. Najpierw spróbuj znaleźć bezpośrednio w meta danych postu bez cache ACF
+            global $wpdb;
+            $search_mission_id = $wpdb->prepare('%s', $mission_id);
+            $direct_query = $wpdb->prepare(
+                "SELECT pm1.meta_value 
+                FROM {$wpdb->postmeta} pm1 
+                JOIN {$wpdb->postmeta} pm2 ON pm1.post_id = pm2.post_id
+                WHERE pm1.post_id = %d 
+                AND pm1.meta_key LIKE %s 
+                AND pm2.meta_key LIKE %s 
+                AND pm2.meta_value = %s",
+                $post_id,
+                '%mission_task_id%',
+                '%mission_id%',
+                $mission_id
+            );
+
+            $direct_task = $wpdb->get_var($direct_query);
+            if (!empty($direct_task)) {
+                $current_selected_task = $direct_task;
+                error_log('MISSION TASKS - Found task directly in database: ' . $current_selected_task);
+            } else {
+                // 2. Pobierz dane bezpośrednio z meta bez cache ACF
+                $all_fields = get_fields($post_id, false);
+
+                // Logowanie całej struktury dla debugowania
+                error_log('MISSION DEBUG - Post ID: ' . $post_id . ', Mission ID: ' . $mission_id);
+                if (isset($all_fields['content'])) {
+                    foreach ($all_fields['content'] as $index => $row) {
+                        if (isset($row['mission_id'])) {
+                            error_log('MISSION DEBUG - Found mission at index ' . $index . ': ' .
+                                'mission_id=' . $row['mission_id'] .
+                                ', task_id=' . (isset($row['mission_task_id']) ? $row['mission_task_id'] : 'not set'));
+                        }
+                    }
+                }
+
+                // Rekurencyjnie przeszukaj dane w poszukiwaniu dopasowania misji i zadania
+                $current_selected_task = find_selected_task_recursive($all_fields, $mission_id);
+                error_log('MISSION TASKS - Recursive search result: ' . $current_selected_task);
+
+                // 2. Jeśli nie znaleźliśmy, spróbujmy bardziej bezpośrednio - bez użycia cache
+                if (empty($current_selected_task)) {
+                    // Użyj bezpośredniego zapytania SQL aby pobrać dane "content"
+                    global $wpdb;
+                    $meta_key = '_content';
+                    $meta_value = $wpdb->get_var(
+                        $wpdb->prepare(
+                            "SELECT meta_value FROM $wpdb->postmeta 
+                         WHERE post_id = %d AND meta_key = %s",
+                            $post_id,
+                            $meta_key
+                        )
+                    );
+
+                    if (!empty($meta_value)) {
+                        $content_data = maybe_unserialize($meta_value);
+                        error_log('MISSION TASKS - Fetched content data directly from database');
+                    } else {
+                        // Jeśli nie znaleziono w bezpośrednim meta, spróbuj przez ACF ale z wyłączonym cache
+                        $content = get_field('content', $post_id, false);
+                        $content_data = $content;
+                        error_log('MISSION TASKS - Using ACF get_field without cache');
+                    }
+
+                    // Teraz przeszukaj dane content
+                    if (!empty($content_data) && is_array($content_data)) {
+                        // Jeśli mamy konkretny indeks content, sprawdźmy go bezpośrednio
+                        if (!is_null($content_index) && isset($content_data[$content_index])) {
+                            // Sprawdzamy bezpośrednio w tym indeksie
+                            $row = $content_data[$content_index];
+                            if (isset($row['mission_id']) && $row['mission_id'] == $mission_id && isset($row['mission_task_id'])) {
+                                $current_selected_task = $row['mission_task_id'];
+                                error_log('MISSION TASKS - Found direct task match at index: ' . $content_index . ' = ' . $current_selected_task);
+                            }
+                        }
+
+                        // Przeszukaj wszystkie elementy content niezależnie od tego czy mamy indeks
+                        foreach ($content_data as $index => $row) {
+                            // Zapisuj każdą znalezioną parę mission_id/mission_task_id do logów dla diagnostyki
+                            if (isset($row['mission_id']) && isset($row['mission_task_id'])) {
+                                error_log('MISSION TASKS - Content[' . $index . ']: mission_id=' . $row['mission_id'] . ', task=' . $row['mission_task_id']);
+
+                                if ($row['mission_id'] == $mission_id) {
+                                    $current_selected_task = $row['mission_task_id'];
+                                    error_log('MISSION TASKS - Found task in content row: ' . $index . ' = ' . $current_selected_task);
+                                    break;
+                                }
+                            }
+
+                            // Sprawdź głębiej w strukturze odpowiedzi
+                            if (isset($row['anwsers']) && is_array($row['anwsers'])) {
+                                foreach ($row['anwsers'] as $answer_index => $answer) {
+                                    if (isset($answer['mission_id']) && $answer['mission_id'] == $mission_id && isset($answer['mission_task_id'])) {
+                                        $current_selected_task = $answer['mission_task_id'];
+                                        error_log('MISSION TASKS - Found task in answer row: ' . $index . ', answer: ' . $answer_index);
+                                        break 2;
+                                    }
+                                }
+                            }
+
+                            // Sprawdź w layout_settings
+                            if (isset($row['layout_settings']) && is_array($row['layout_settings'])) {
+                                if (isset($row['layout_settings']['conversation_start']) && is_array($row['layout_settings']['conversation_start'])) {
+                                    foreach ($row['layout_settings']['conversation_start'] as $warunek) {
+                                        if (
+                                            isset($warunek['mission_select']['mission_id']) &&
+                                            $warunek['mission_select']['mission_id'] == $mission_id &&
+                                            isset($warunek['mission_select']['mission_task_id'])
+                                        ) {
+                                            $current_selected_task = $warunek['mission_select']['mission_task_id'];
+                                            error_log('MISSION TASKS - Found task in conversation_start: ' . $index);
+                                            break 2;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Logowanie do debugowania
+        error_log('MISSION TASKS - Post ID: ' . $post_id . ', Path: ' . $field_path . ', Found Task: ' . $current_selected_task);
+    }
+
+    // Użyj przekazanego selected_task, jeśli current_selected_task jest pusty
+    if (empty($current_selected_task) && !empty($selected_task)) {
+        $current_selected_task = $selected_task;
+    }
+
+    if ($mission_id) {
+        $ids = is_array($mission_id) ? array_map('intval', $mission_id) : [intval($mission_id)];
+    } else {
+        $ids = get_posts([
+            'post_type' => 'mission',
+            'post_status' => 'publish',
+            'numberposts' => -1,
+            'fields' => 'ids'
+        ]);
+    }
+
+    foreach ($ids as $id) {
+        $tasks = get_field('mission_tasks', $id);
+        if (!$tasks || !is_array($tasks)) {
+            continue;
+        }
+
+        $results[$id]['tasks'] = array();
+
         foreach ($tasks as $task) {
-            // Sprawdź czy task_id istnieje lub wygeneruj go na podstawie tytułu i indeksu
             $task_id = isset($task['task_id']) && !empty($task['task_id'])
                 ? $task['task_id']
                 : (isset($task['task_title']) ? sanitize_title($task['task_title']) . '_' . array_search($task, $tasks) : '');
@@ -70,179 +247,26 @@ function ajax_get_mission_tasks()
             $task_title = isset($task['task_title']) ? $task['task_title'] : '';
 
             if ($task_id && $task_title) {
-                // Dodaj informację o typie zadania (może być przydatne dla interfejsu)
                 $task_type = isset($task['task_type']) ? $task['task_type'] : 'checkpoint';
+                $title = ($task_type == 'checkpoint_npc' && !empty($task['task_checkpoint_npc']))
+                    ? $task_title . ' (NPC)'
+                    : $task_title;
 
-                // Obsługa zadań typu checkpoint_npc - możemy dodać znacznik
-                if ($task_type == 'checkpoint_npc' && !empty($task['task_checkpoint_npc'])) {
-                    $result[$task_id] = $task_title . ' (NPC)';
-                } else {
-                    $result[$task_id] = $task_title;
-                }
-            }
-        }
-    }
+                // Sprawdź czy to zadanie jest wybrane
+                $is_selected = ($current_selected_task == $task_id);
 
-    // Zwróć zarówno zadania jak i wybraną wartość
-    wp_send_json_success([
-        'tasks' => $result,
-        'selected_task' => $selected_task
-    ]);
-}
-
-/**
- * Funkcja obsługująca endpoint pobierania danych misji i zadań z tablicy anwser
- */
-function ajax_get_selected_mission_data()
-{
-    // Sprawdź wymagane parametry
-    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
-    $field_path = isset($_POST['field_path']) ? sanitize_text_field($_POST['field_path']) : '';
-
-    if (!$post_id) {
-        wp_send_json_error(['message' => 'Brak ID postu']);
-    }
-
-    // Domyślna pusta odpowiedź
-    $result = array(
-        'mission_id' => '',
-        'mission_status' => '',
-        'mission_task_id' => '',
-        'mission_task_status' => ''
-    );
-
-    // Bezpośrednie pozyskanie metadanych postu dla lepszego debugowania
-    $all_meta = get_post_meta($post_id);
-
-    // 1. METODA STANDARDOWA: Poszukaj danych anwser przy użyciu get_field
-    $anwser_data = get_field('anwser', $post_id);
-
-    // Logowanie do debugowania
-    error_log('POST_ID: ' . $post_id);
-    error_log('FIELD_PATH: ' . $field_path);
-
-    // 2. METODA BEZPOŚREDNIA: Szukaj w tablicy type_anwser
-    // Iteruj po wszystkich meta polach postu
-    foreach ($all_meta as $meta_key => $meta_value) {
-        if (strpos($meta_key, 'type_anwser') !== false) {
-            $type_anwser_data = maybe_unserialize($meta_value[0]);
-            if (is_array($type_anwser_data)) {
-                foreach ($type_anwser_data as $entry) {
-                    if (isset($entry['acf_fc_layout']) && $entry['acf_fc_layout'] === 'mission') {
-                        if (isset($entry['mission_id'])) $result['mission_id'] = $entry['mission_id'];
-                        if (isset($entry['mission_status'])) $result['mission_status'] = $entry['mission_status'];
-                        if (isset($entry['mission_task_id'])) $result['mission_task_id'] = $entry['mission_task_id'];
-                        if (isset($entry['mission_task_status'])) $result['mission_task_status'] = $entry['mission_task_status'];
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    // 3. METODA ANWSER: Szukaj w standardowej tablicy anwser
-    // Jeśli mamy dane anwser z get_field
-    if ($anwser_data && is_array($anwser_data) && empty($result['mission_id'])) {
-        // Sprawdź czy istnieje klucz type_anwser
-        if (isset($anwser_data['type_anwser']) && is_array($anwser_data['type_anwser'])) {
-            foreach ($anwser_data['type_anwser'] as $anwser_entry) {
-                if (isset($anwser_entry['acf_fc_layout']) && $anwser_entry['acf_fc_layout'] === 'mission') {
-                    if (isset($anwser_entry['mission_id'])) $result['mission_id'] = $anwser_entry['mission_id'];
-                    if (isset($anwser_entry['mission_status'])) $result['mission_status'] = $anwser_entry['mission_status'];
-                    if (isset($anwser_entry['mission_task_id'])) $result['mission_task_id'] = $anwser_entry['mission_task_id'];
-                    if (isset($anwser_entry['mission_task_status'])) $result['mission_task_status'] = $anwser_entry['mission_task_status'];
-                    break;
-                }
+                // Dodaj zadanie do tablicy z dodatkową informacją o wybraniu
+                $results[$id]['tasks'][$task_id] = array(
+                    'title' => $title,
+                    'selected' => $is_selected
+                );
             }
         }
 
-        // Jeśli nie znaleziono, przeszukaj rekurencyjnie całą strukturę
-        if (empty($result['mission_id'])) {
-            find_mission_recursive($anwser_data, $result);
-        }
+        $results[$id]['title'] = get_the_title($id);
     }
 
-    // 4. METODA STAREJ ŚCIEŻKI: Próbuj wykorzystać przekazaną ścieżkę (dla kompatybilności)
-    if (empty($result['mission_id']) && $anwser_data && $field_path) {
-        $is_acf_path = (strpos($field_path, 'acf') === 0);
-        if ($is_acf_path) {
-            $path_components = explode('][', trim($field_path, '[]'));
-            array_shift($path_components); // Usuń pierwszy element 'acf'
-
-            $current_data = $anwser_data;
-
-            // Próbuj nawigować przez komponenty ścieżki
-            foreach ($path_components as $component) {
-                if (isset($current_data[$component])) {
-                    $current_data = $current_data[$component];
-                } else {
-                    $current_data = null;
-                    break;
-                }
-            }
-
-            // Jeśli udało się dotrzeć do wartości, sprawdź czy to misja
-            if (is_array($current_data) && isset($current_data['mission_id'])) {
-                $result['mission_id'] = $current_data['mission_id'];
-                if (isset($current_data['mission_status'])) $result['mission_status'] = $current_data['mission_status'];
-                if (isset($current_data['mission_task_id'])) $result['mission_task_id'] = $current_data['mission_task_id'];
-                if (isset($current_data['mission_task_status'])) $result['mission_task_status'] = $current_data['mission_task_status'];
-            }
-        }
-    }
-
-    // Logowanie do debugowania
-    error_log('GET_SELECTED_MISSION_DATA RESULT: ' . json_encode($result));
-
-    // Zwróć znalezione dane
-    wp_send_json_success($result);
-}
-
-/**
- * Funkcja pomocnicza do rekurencyjnego przeszukiwania struktury danych w poszukiwaniu misji
- * 
- * @param array $data_array Tablica danych do przeszukania
- * @param array &$result Tablica z wynikami do wypełnienia (przekazana przez referencję)
- * @return bool True jeśli znaleziono dane, false w przeciwnym wypadku
- */
-function find_mission_recursive($data_array, &$result)
-{
-    // Podstawowa walidacja
-    if (!is_array($data_array)) {
-        return false;
-    }
-
-    // Sprawdź czy bieżący element zawiera informacje o misji
-    if (isset($data_array['mission_id']) && !empty($data_array['mission_id'])) {
-        $result['mission_id'] = $data_array['mission_id'];
-        if (isset($data_array['mission_status'])) $result['mission_status'] = $data_array['mission_status'];
-        if (isset($data_array['mission_task_id'])) $result['mission_task_id'] = $data_array['mission_task_id'];
-        if (isset($data_array['mission_task_status'])) $result['mission_task_status'] = $data_array['mission_task_status'];
-        return true;
-    }
-
-    // Sprawdź czy to jest wpis misji w flexible content
-    if (isset($data_array['acf_fc_layout']) && $data_array['acf_fc_layout'] === 'mission') {
-        if (isset($data_array['mission_id'])) {
-            $result['mission_id'] = $data_array['mission_id'];
-            if (isset($data_array['mission_status'])) $result['mission_status'] = $data_array['mission_status'];
-            if (isset($data_array['mission_task_id'])) $result['mission_task_id'] = $data_array['mission_task_id'];
-            if (isset($data_array['mission_task_status'])) $result['mission_task_status'] = $data_array['mission_task_status'];
-            return true;
-        }
-    }
-
-    // Przeszukaj wszystkie elementy tablicy rekurencyjnie
-    foreach ($data_array as $key => $value) {
-        if (is_array($value)) {
-            $found = find_mission_recursive($value, $result);
-            if ($found) {
-                return true;
-            }
-        }
-    }
-
-    return false;
+    wp_send_json_success($results);
 }
 
 // Automatyczne ładowanie JS do selecta z zadaniami misji w panelu admina

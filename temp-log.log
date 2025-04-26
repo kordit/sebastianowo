@@ -1,1017 +1,546 @@
-[2025-04-26 10:42:18] ===== ROZPOCZĘTO AJAX get_mission_info =====
-
-[2025-04-26 10:42:18] WEJŚCIOWE DANE POST
 Array
 (
-    [action] => get_mission_info
-    [mission_id] => 247
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:42:18] Przetwarzanie misji ID: 247
-
-[2025-04-26 10:42:18] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
-
-[2025-04-26 10:42:18] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
-
-[2025-04-26 10:42:18] Odpowiedź JSON dla get_mission_info
-Array
-(
-    [mission_id] => 247
-    [mission_title] => Flaszki od Dziadzi
-    [mission_description] => 
-    [task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [task_name] => Zidentyfikuj potencjalnych klientów 
-)
-
-
-[2025-04-26 10:42:18] ===== ZAKOŃCZONO AJAX get_mission_info =====
-
-[2025-04-26 10:42:18] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:42:18] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => assign_mission_to_user
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:42:18] Przetworzone parametry
-Array
-(
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:42:18] ID użytkownika: 1
-
-[2025-04-26 10:42:18] Tytuł misji: Flaszki od Dziadzi
-
-[2025-04-26 10:42:18] Wywołanie funkcji assign_mission_to_user z parametrami
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:42:18] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
-
-[2025-04-26 10:42:18] Parametry wejściowe
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:42:18] Istniejąca misja w bazie
-Array
-(
-    [status] => not_started
-    [assigned_date] => 
-    [completion_date] => 
-    [tasks] => Array
+    [anwser] => Array
         (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
+            [0] => Array
                 (
-                    [status] => not_started
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
+                    [acf_fc_layout] => question
+                    [layout_settings] => Array
+                        (
+                            [conversation_start] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => warunek
+                                            [if] => scena
+                                            [mission_select] => Array
+                                                (
+                                                    [mission_id] => 
+                                                    [mission_status] => not_started
+                                                    [mission_task_id] => 
+                                                    [mission_task_status] => not_started
+                                                )
+
+                                            [scena] => start/peron
+                                            [instation] => 
+                                            [relation_select] => Array
+                                                (
+                                                    [relacja] => 
+                                                    [operator] => 
+                                                    [value] => 
+                                                )
+
+                                        )
+
+                                )
+
+                        )
+
+                    [acfe_flexible_toggle] => 
+                    [acfe_flexible_layout_title] => witaj
+                    [id_pola] => witaj
+                    [question] => 
+zaciąga się szlugiem, patrzy na ciebie spode łba:
+
+
+– Zadymiarz to ktoś, kto nie unika konfrontacji. To siła, zdecydowanie i obecność, która potrafi uciszyć całą ławkę jednym spojrzeniem. Jeśli wybierzesz tę drogę, musisz być gotów działać – nie gadać.
+
+
+Masz naturalną przewagę w bezpośrednich starciach – bonus do Siły i Wytrzymałości daje ci przewagę w walce i pozwala dłużej utrzymać się na nogach, szybciej też uczysz się walczyć. Konflikty rozwiązujesz szybko i skutecznie, a relacje budujesz przez dominację – respekt zdobywasz pięściami, nie słowami.
+
+
+Ale są rzeczy, których nie ogarniasz sam. Z handlem ci nie po drodze – kombinacje, przeliczenia, gadki przy bramie… to nie twoje podwórko. Dlatego dobrze mieć kogoś, kto potrafi – kumpla, co załatwi, co się da, zanim jeszcze otworzysz usta.
+
+
+Ja mam brata – Toworisha. Kombinator jak się patrzy. On gada, ja stoję. On planuje, ja wykonuję. Ty też pomyśl, z kim się trzymać. Bo sam, nawet jak jesteś silny, nie zrobisz wszystkiego.
+
+
+Zadymiarz to siła dzielnicy. Ale dzielnica to układ ludzi – bez nich, żadna siła nie wystarczy.
+
+
+
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [conversation_start] => 
+                                        )
+
+                                    [anwser_text] => Zostaję zadymiarzem
+                                    [type_anwser] => 
+                                    [go_to_id] => zadyma
+                                )
+
+                            [1] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [conversation_start] => 
+                                        )
+
+                                    [anwser_text] => Daj pomyśleć
+                                    [type_anwser] => 
+                                    [go_to_id] => daj-pomyslec
+                                )
+
+                        )
+
                 )
 
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
-        )
-
-)
-
-
-[2025-04-26 10:42:18] Zapisuję misję: mission_247 dla użytkownika user_1
-
-[2025-04-26 10:42:18] Wynik zapisu misji: BŁĄD
-
-[2025-04-26 10:42:18] Wynik funkcji assign_mission_to_user
-Array
-(
-    [success] => 
-    [message] => Błąd podczas przypisywania misji
-)
-
-
-[2025-04-26 10:42:18] BŁĄD: Błąd podczas przypisywania misji
-
-[2025-04-26 10:42:18] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:44:56] ===== ROZPOCZĘTO AJAX get_mission_info =====
-
-[2025-04-26 10:44:56] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => get_mission_info
-    [mission_id] => 247
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:44:56] Przetwarzanie misji ID: 247
-
-[2025-04-26 10:44:56] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
-
-[2025-04-26 10:44:56] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
-
-[2025-04-26 10:44:56] Odpowiedź JSON dla get_mission_info
-Array
-(
-    [mission_id] => 247
-    [mission_title] => Flaszki od Dziadzi
-    [mission_description] => 
-    [task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [task_name] => Zidentyfikuj potencjalnych klientów 
-)
-
-
-[2025-04-26 10:44:56] ===== ZAKOŃCZONO AJAX get_mission_info =====
-
-[2025-04-26 10:44:56] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:44:56] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => assign_mission_to_user
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:44:56] Przetworzone parametry
-Array
-(
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:44:56] ID użytkownika: 1
-
-[2025-04-26 10:44:56] Tytuł misji: Flaszki od Dziadzi
-
-[2025-04-26 10:44:56] Wywołanie funkcji assign_mission_to_user z parametrami
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:44:56] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
-
-[2025-04-26 10:44:56] Parametry wejściowe
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:44:56] Istniejąca misja w bazie
-Array
-(
-    [status] => not_started
-    [assigned_date] => 
-    [completion_date] => 
-    [tasks] => Array
-        (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
+            [1] => Array
                 (
-                    [status] => not_started
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
+                    [acf_fc_layout] => question
+                    [layout_settings] => Array
+                        (
+                            [conversation_start] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => warunek
+                                            [if] => scena
+                                            [mission_select] => Array
+                                                (
+                                                    [mission_id] => 
+                                                    [mission_status] => not_started
+                                                    [mission_task_id] => 
+                                                    [mission_task_status] => not_started
+                                                )
+
+                                            [scena] => start/peron
+                                            [instation] => 
+                                            [relation_select] => Array
+                                                (
+                                                    [relacja] => 
+                                                    [operator] => 
+                                                    [value] => 
+                                                )
+
+                                        )
+
+                                )
+
+                        )
+
+                    [acfe_flexible_toggle] => 
+                    [acfe_flexible_layout_title] => zadyma
+                    [id_pola] => zadyma
+                    [question] => 
+przytakuje głową, ale nie zmienia wyrazu twarzy:
+
+
+Dobrze. Nie licz na litość, nie licz na odpoczynek.
+
+Od teraz każdy cień może być ciosem, każda chwila ciszy – próbą siły.
+
+Ale jak wytrzymasz… to nikt ci się nie spojrzy w oczy bez strachu.
+
+
+
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [conversation_start] => 
+                                        )
+
+                                    [anwser_text] => Pewnie mordo
+                                    [type_anwser] => 
+                                    [go_to_id] => wybor-klasy
+                                )
+
+                            [1] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [conversation_start] => 
+                                        )
+
+                                    [anwser_text] => Jednak daj chwilę
+                                    [type_anwser] => 
+                                    [go_to_id] => daj-pomyslec
+                                )
+
+                        )
+
                 )
 
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
-        )
-
-)
-
-
-[2025-04-26 10:44:56] Zapisuję misję: mission_247 dla użytkownika user_1
-
-[2025-04-26 10:44:56] Wynik zapisu misji: BŁĄD
-
-[2025-04-26 10:44:56] Wynik funkcji assign_mission_to_user
-Array
-(
-    [success] => 
-    [message] => Błąd podczas przypisywania misji
-    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:44:56] BŁĄD: Błąd podczas przypisywania misji
-
-[2025-04-26 10:44:56] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:46:50] ===== ROZPOCZĘTO AJAX get_mission_info =====
-
-[2025-04-26 10:46:50] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => get_mission_info
-    [mission_id] => 247
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:46:50] Przetwarzanie misji ID: 247
-
-[2025-04-26 10:46:50] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
-
-[2025-04-26 10:46:50] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
-
-[2025-04-26 10:46:50] Odpowiedź JSON dla get_mission_info
-Array
-(
-    [mission_id] => 247
-    [mission_title] => Flaszki od Dziadzi
-    [mission_description] => 
-    [task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [task_name] => Zidentyfikuj potencjalnych klientów 
-)
-
-
-[2025-04-26 10:46:50] ===== ZAKOŃCZONO AJAX get_mission_info =====
-
-[2025-04-26 10:46:50] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:46:50] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => assign_mission_to_user
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:46:50] Przetworzone parametry
-Array
-(
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:46:50] ID użytkownika: 1
-
-[2025-04-26 10:46:50] Tytuł misji: Flaszki od Dziadzi
-
-[2025-04-26 10:46:50] Wywołanie funkcji assign_mission_to_user z parametrami
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:46:50] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
-
-[2025-04-26 10:46:50] Parametry wejściowe
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:46:50] Istniejąca misja w bazie
-Array
-(
-    [status] => not_started
-    [assigned_date] => 
-    [completion_date] => 
-    [tasks] => Array
-        (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
+            [2] => Array
                 (
-                    [status] => not_started
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
+                    [acf_fc_layout] => question
+                    [layout_settings] => Array
+                        (
+                            [conversation_start] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => warunek
+                                            [if] => scena
+                                            [mission_select] => Array
+                                                (
+                                                    [mission_id] => 
+                                                    [mission_status] => not_started
+                                                    [mission_task_id] => 
+                                                    [mission_task_status] => not_started
+                                                )
+
+                                            [scena] => start/peron
+                                            [instation] => 
+                                            [relation_select] => Array
+                                                (
+                                                    [relacja] => 
+                                                    [operator] => 
+                                                    [value] => 
+                                                )
+
+                                        )
+
+                                )
+
+                        )
+
+                    [acfe_flexible_toggle] => 
+                    [acfe_flexible_layout_title] => daj-pomyslec
+                    [id_pola] => daj-pomyslec
+                    [question] => 
+(prycha, patrzy na ciebie z politowaniem):
+
+
+No to idź się zastanów.
+
+Może ci się jeszcze zachce życia bez siniaków.
+
+Tylko pamiętaj — respektu się nie rozkminia, respekt się zdobywa.
+
+
+
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [conversation_start] => 
+                                        )
+
+                                    [anwser_text] => Spoko
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                        )
+
                 )
 
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
-        )
-
-)
-
-
-[2025-04-26 10:46:50] Dane misji do zapisania
-Array
-(
-    [status] => in_progress
-    [assigned_date] => 2025-04-26 10:46:50
-    [completion_date] => 
-    [tasks] => Array
-        (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
+            [3] => Array
                 (
-                    [status] => in_progress
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
-                    [start_date] => 2025-04-26 10:46:50
+                    [acf_fc_layout] => question
+                    [layout_settings] => Array
+                        (
+                            [conversation_start] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => warunek
+                                            [if] => instance
+                                            [mission_select] => Array
+                                                (
+                                                    [mission_id] => 
+                                                    [mission_status] => not_started
+                                                    [mission_task_id] => 
+                                                    [mission_task_status] => not_started
+                                                )
+
+                                            [scena] => 
+                                            [instation] => start/peron
+                                            [relation_select] => Array
+                                                (
+                                                    [relacja] => 
+                                                    [operator] => 
+                                                    [value] => 
+                                                )
+
+                                        )
+
+                                )
+
+                        )
+
+                    [acfe_flexible_toggle] => 
+                    [acfe_flexible_layout_title] => wybor-klasy
+                    [id_pola] => wybor-klasy
+                    [question] => 
+Spoko, dobry wybór. A i jeszcze jedno… co to za koszulka? Olimpia Adrianowo?
+
+
+Zdejmuj te barwy, zanim ktoś Ci je ściągnie razem ze skórą.
+
+
+Tu są inne zasady, inna ziemia, rozumiesz?
+
+
+Masz minutę. Potem nie ręczę za nic.
+
+
+
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [conversation_start] => Array
+                                                (
+                                                    [0] => Array
+                                                        (
+                                                            [acf_fc_layout] => warunek
+                                                            [if] => mission
+                                                            [mission_select] => Array
+                                                                (
+                                                                    [mission_id] => 247
+                                                                    [mission_status] => not_started
+                                                                    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+                                                                    [mission_task_status] => not_started
+                                                                )
+
+                                                            [scena] => 
+                                                            [instation] => 
+                                                            [relation_select] => Array
+                                                                (
+                                                                    [relacja] => 
+                                                                    [operator] => 
+                                                                    [value] => 
+                                                                )
+
+                                                        )
+
+                                                )
+
+                                        )
+
+                                    [anwser_text] => Już się przebieram
+                                    [type_anwser] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => function
+                                                    [acfe_flexible_toggle] => 
+                                                    [do_function] => SetClass
+                                                    [page_url] => 
+                                                )
+
+                                        )
+
+                                    [go_to_id] => 0
+                                )
+
+                        )
+
                 )
 
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
-        )
-
-)
-
-
-[2025-04-26 10:46:50] Zapisuję misję: mission_247 dla użytkownika user_1
-
-[2025-04-26 10:46:50] Wynik zapisu misji: BŁĄD
-
-[2025-04-26 10:46:50] Wynik funkcji assign_mission_to_user
-Array
-(
-    [success] => 
-    [message] => Błąd podczas przypisywania misji
-    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:46:50] BŁĄD: Błąd podczas przypisywania misji
-
-[2025-04-26 10:46:50] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:47:44] ===== ROZPOCZĘTO AJAX get_mission_info =====
-
-[2025-04-26 10:47:44] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => get_mission_info
-    [mission_id] => 247
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:47:44] Przetwarzanie misji ID: 247
-
-[2025-04-26 10:47:44] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
-
-[2025-04-26 10:47:44] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
-
-[2025-04-26 10:47:44] Odpowiedź JSON dla get_mission_info
-Array
-(
-    [mission_id] => 247
-    [mission_title] => Flaszki od Dziadzi
-    [mission_description] => 
-    [task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [task_name] => Zidentyfikuj potencjalnych klientów 
-)
-
-
-[2025-04-26 10:47:44] ===== ZAKOŃCZONO AJAX get_mission_info =====
-
-[2025-04-26 10:47:44] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:47:44] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => assign_mission_to_user
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:47:44] Przetworzone parametry
-Array
-(
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:47:44] ID użytkownika: 1
-
-[2025-04-26 10:47:44] Tytuł misji: Flaszki od Dziadzi
-
-[2025-04-26 10:47:44] Wywołanie funkcji assign_mission_to_user z parametrami
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:47:44] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
-
-[2025-04-26 10:47:44] Parametry wejściowe
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:47:44] Istniejąca misja w bazie
-Array
-(
-    [status] => not_started
-    [assigned_date] => 
-    [completion_date] => 
-    [tasks] => Array
-        (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
+            [4] => Array
                 (
-                    [status] => not_started
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
+                    [acf_fc_layout] => question
+                    [layout_settings] => Array
+                        (
+                            [conversation_start] => 
+                        )
+
+                    [acfe_flexible_toggle] => 
+                    [acfe_flexible_layout_title] => siemanko-w-parku
+                    [id_pola] => siemanko-w-parku
+                    [question] => 
+Ooo, patrz kto idzie. Mówiłem ostatnio Toworishowi, że długo cię nie widziałem.
+Co tam, nudzisz się, czy znowu coś kombinujesz?
+
+
+
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [conversation_start] => Array
+                                                (
+                                                    [0] => Array
+                                                        (
+                                                            [acf_fc_layout] => warunek
+                                                            [if] => mission
+                                                            [mission_select] => Array
+                                                                (
+                                                                    [mission_id] => 247
+                                                                    [mission_status] => not_started
+                                                                    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+                                                                    [mission_task_status] => not_started
+                                                                )
+
+                                                            [scena] => 
+                                                            [instation] => 
+                                                            [relation_select] => Array
+                                                                (
+                                                                    [relacja] => 
+                                                                    [operator] => 
+                                                                    [value] => 
+                                                                )
+
+                                                        )
+
+                                                )
+
+                                        )
+
+                                    [anwser_text] => Masz może jakąś robotę dla mnie?
+                                    [type_anwser] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => mission
+                                                    [acfe_flexible_toggle] => 
+                                                    [mission_id] => 247
+                                                    [mission_status] => in_progress
+                                                    [mission_task_id] => odwiedz-sqout_1
+                                                    [mission_task_status] => completed
+                                                )
+
+                                            [1] => Array
+                                                (
+                                                    [acf_fc_layout] => item
+                                                    [acfe_flexible_toggle] => 
+                                                    [item_action] => give
+                                                    [item] => 212
+                                                    [quantity] => 3
+                                                )
+
+                                        )
+
+                                    [go_to_id] => moze-cos-by-sie-zarobilo
+                                )
+
+                            [1] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [conversation_start] => 
+                                        )
+
+                                    [anwser_text] => Śpieszy mi się, na razie!
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                        )
+
                 )
 
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
-        )
-
-)
-
-
-[2025-04-26 10:47:44] Dane misji do zapisania
-Array
-(
-    [status] => in_progress
-    [assigned_date] => 2025-04-26 10:47:44
-    [completion_date] => 
-    [tasks] => Array
-        (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
+            [5] => Array
                 (
-                    [status] => in_progress
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
-                    [start_date] => 2025-04-26 10:47:44
+                    [acf_fc_layout] => question
+                    [layout_settings] => Array
+                        (
+                            [conversation_start] => 
+                        )
+
+                    [acfe_flexible_toggle] => 
+                    [acfe_flexible_layout_title] => moze-cos-by-sie-zarobilo
+                    [id_pola] => moze-cos-by-sie-zarobilo
+                    [question] => 
+A no tak się składa, że mam idealną robotę dla świeżaka. Mam bimber od dziadzi. Ale nie taki, co się go popija do śledzia w galarecie. Taki, co zżera farbę z metalu, rozumiesz? Jeden łyk i już widzisz własne myśli od tyłu.
+
+
+Tego nie można dać pierwszemu z brzegu. Nie jakimś chłoptasiom z bloku obok, co jeszcze chodzą na WF. Nie tym, co mają mamę, która zrobi kanapki, jak im się głowa zakręci.
+
+
+Ty masz to dać tym, co już dawno przepili wstyd. Takim, co śpią pod śmietnikiem i jak się zesrają, to nawet nie wstają.
+
+
+Rozprowadź to, ale z łbem. Jak któryś zacznie się pluć, że coś mu się dzieje, to zgadnij kto będzie winny?
+
+Ja? Nie. Ty.
+
+
+
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [conversation_start] => 
+                                        )
+
+                                    [anwser_text] => Spoko, daj te 5 flaszek to je pogonie
+                                    [type_anwser] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => item
+                                                    [acfe_flexible_toggle] => 
+                                                    [item_action] => give
+                                                    [item] => 212
+                                                    [quantity] => 5
+                                                )
+
+                                        )
+
+                                    [go_to_id] => active-moze-cos-by-sie-zarobilo
+                                )
+
+                        )
+
                 )
 
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
-        )
-
-)
-
-
-[2025-04-26 10:47:44] Zapisuję misję: mission_247 dla użytkownika user_1
-
-[2025-04-26 10:47:44] Wynik zapisu misji: BŁĄD
-
-[2025-04-26 10:47:44] Wynik funkcji assign_mission_to_user
-Array
-(
-    [success] => 
-    [message] => Błąd podczas przypisywania misji
-    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:47:44] BŁĄD: Błąd podczas przypisywania misji
-
-[2025-04-26 10:47:44] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:48:37] ===== ROZPOCZĘTO AJAX get_mission_info =====
-
-[2025-04-26 10:48:37] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => get_mission_info
-    [mission_id] => 247
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:48:37] Przetwarzanie misji ID: 247
-
-[2025-04-26 10:48:37] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
-
-[2025-04-26 10:48:37] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
-
-[2025-04-26 10:48:37] Odpowiedź JSON dla get_mission_info
-Array
-(
-    [mission_id] => 247
-    [mission_title] => Flaszki od Dziadzi
-    [mission_description] => 
-    [task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [task_name] => Zidentyfikuj potencjalnych klientów 
-)
-
-
-[2025-04-26 10:48:37] ===== ZAKOŃCZONO AJAX get_mission_info =====
-
-[2025-04-26 10:48:37] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:48:37] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => assign_mission_to_user
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:48:37] Przetworzone parametry
-Array
-(
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:48:37] ID użytkownika: 1
-
-[2025-04-26 10:48:37] Tytuł misji: Flaszki od Dziadzi
-
-[2025-04-26 10:48:37] Wywołanie funkcji assign_mission_to_user z parametrami
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:48:37] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
-
-[2025-04-26 10:48:37] Parametry wejściowe
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:48:37] Istniejąca misja w bazie
-Array
-(
-    [status] => not_started
-    [assigned_date] => 
-    [completion_date] => 
-    [tasks] => Array
-        (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
+            [6] => Array
                 (
-                    [status] => not_started
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
+                    [acf_fc_layout] => question
+                    [layout_settings] => Array
+                        (
+                            [conversation_start] => 
+                        )
+
+                    [acfe_flexible_toggle] => 
+                    [acfe_flexible_layout_title] => active-moze-cos-by-sie-zarobilo
+                    [id_pola] => active-moze-cos-by-sie-zarobilo
+                    [question] => 
+Masz pięć flach, rozprowadź to – tak, żeby nikt nie płakał, nikt nie doniósł.
+
+A jak zrobisz to dobrze… to może wreszcie pogadamy o czymś większym niż alkohol dla bezdomnych.
+
+
+
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [conversation_start] => 
+                                        )
+
+                                    [anwser_text] => Spoko, odezwę się jak to pogonię
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                        )
+
                 )
 
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
         )
 
+    [npc-relation-user-1] => 0
+    [npc-meet-user-1] => 
 )
-
-
-[2025-04-26 10:48:37] Dane misji do zapisania
-Array
-(
-    [status] => in_progress
-    [assigned_date] => 2025-04-26 10:48:37
-    [completion_date] => 
-    [tasks] => Array
-        (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
-                (
-                    [status] => in_progress
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
-                    [start_date] => 2025-04-26 10:48:37
-                )
-
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
-        )
-
-)
-
-
-[2025-04-26 10:48:37] Zapisuję misję: mission_247 dla użytkownika user_1
-
-[2025-04-26 10:48:37] Wynik zapisu misji: BŁĄD
-
-[2025-04-26 10:48:37] Wynik funkcji assign_mission_to_user
-Array
-(
-    [success] => 
-    [message] => Błąd podczas przypisywania misji
-    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:48:37] BŁĄD: Błąd podczas przypisywania misji
-
-[2025-04-26 10:48:37] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:50:02] ===== ROZPOCZĘTO AJAX get_mission_info =====
-
-[2025-04-26 10:50:02] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => get_mission_info
-    [mission_id] => 247
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:50:02] Przetwarzanie misji ID: 247
-
-[2025-04-26 10:50:02] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
-
-[2025-04-26 10:50:02] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
-
-[2025-04-26 10:50:02] Odpowiedź JSON dla get_mission_info
-Array
-(
-    [mission_id] => 247
-    [mission_title] => Flaszki od Dziadzi
-    [mission_description] => 
-    [task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [task_name] => Zidentyfikuj potencjalnych klientów 
-)
-
-
-[2025-04-26 10:50:02] ===== ZAKOŃCZONO AJAX get_mission_info =====
-
-[2025-04-26 10:50:02] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:50:02] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => assign_mission_to_user
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:50:02] Przetworzone parametry
-Array
-(
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:50:02] ID użytkownika: 1
-
-[2025-04-26 10:50:02] Tytuł misji: Flaszki od Dziadzi
-
-[2025-04-26 10:50:02] Wywołanie funkcji assign_mission_to_user z parametrami
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:50:02] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
-
-[2025-04-26 10:50:02] Parametry wejściowe
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:50:02] Istniejąca misja w bazie
-Array
-(
-    [status] => not_started
-    [assigned_date] => 
-    [completion_date] => 
-    [tasks] => Array
-        (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
-                (
-                    [status] => not_started
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
-                )
-
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
-        )
-
-)
-
-
-[2025-04-26 10:50:02] Dane misji do zapisania
-Array
-(
-    [status] => in_progress
-    [assigned_date] => 2025-04-26 10:50:02
-    [completion_date] => 
-    [tasks] => Array
-        (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
-                (
-                    [status] => in_progress
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
-                    [start_date] => 2025-04-26 10:50:02
-                )
-
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
-        )
-
-)
-
-
-[2025-04-26 10:50:02] Zapisuję misję: mission_247 dla użytkownika user_1
-
-[2025-04-26 10:50:02] Wynik zapisu misji: 
-
-[2025-04-26 10:50:02] Wynik funkcji assign_mission_to_user
-Array
-(
-    [success] => 
-    [message] => Błąd podczas przypisywania misji
-    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:50:02] BŁĄD: Błąd podczas przypisywania misji
-
-[2025-04-26 10:50:02] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:51:12] ===== ROZPOCZĘTO AJAX get_mission_info =====
-
-[2025-04-26 10:51:12] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => get_mission_info
-    [mission_id] => 247
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:51:12] Przetwarzanie misji ID: 247
-
-[2025-04-26 10:51:12] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
-
-[2025-04-26 10:51:12] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
-
-[2025-04-26 10:51:12] Odpowiedź JSON dla get_mission_info
-Array
-(
-    [mission_id] => 247
-    [mission_title] => Flaszki od Dziadzi
-    [mission_description] => 
-    [task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [task_name] => Zidentyfikuj potencjalnych klientów 
-)
-
-
-[2025-04-26 10:51:12] ===== ZAKOŃCZONO AJAX get_mission_info =====
-
-[2025-04-26 10:51:12] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
-
-[2025-04-26 10:51:12] WEJŚCIOWE DANE POST
-Array
-(
-    [action] => assign_mission_to_user
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:51:12] Przetworzone parametry
-Array
-(
-    [mission_id] => 247
-    [npc_id] => 76
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:51:12] ID użytkownika: 1
-
-[2025-04-26 10:51:12] Tytuł misji: Flaszki od Dziadzi
-
-[2025-04-26 10:51:12] Wywołanie funkcji assign_mission_to_user z parametrami
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:51:12] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
-
-[2025-04-26 10:51:12] Parametry wejściowe
-Array
-(
-    [user_id] => 1
-    [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => in_progress
-)
-
-
-[2025-04-26 10:51:12] Istniejąca misja w bazie
-Array
-(
-    [status] => not_started
-    [assigned_date] => 
-    [completion_date] => 
-    [tasks] => Array
-        (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
-                (
-                    [status] => not_started
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
-                )
-
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
-        )
-
-)
-
-
-[2025-04-26 10:51:12] Dane misji do zapisania
-Array
-(
-    [status] => in_progress
-    [assigned_date] => 2025-04-26 10:51:12
-    [completion_date] => 
-    [tasks] => Array
-        (
-            [zidentyfikuj-potencjalnych-klientow_0] => Array
-                (
-                    [status] => in_progress
-                    [npc_70] => not_started
-                    [npc_77] => not_started
-                    [npc_250] => not_started
-                    [npc_215] => not_started
-                    [npc_252] => not_started
-                    [start_date] => 2025-04-26 10:51:12
-                )
-
-            [odwiedz-sqout_1] => not_started
-            [pogadaj-z-irasem_2] => not_started
-        )
-
-)
-
-
-[2025-04-26 10:51:12] Wynik zapisu ACF: 
-
-[2025-04-26 10:51:12] Zapisano używając metody alternatywnej poprzez update_user_meta
-
-[2025-04-26 10:51:12] Zapisuję misję: mission_247 dla użytkownika user_1
-
-[2025-04-26 10:51:12] Wynik zapisu misji: SUKCES
-
-[2025-04-26 10:51:12] Wynik funkcji assign_mission_to_user
-Array
-(
-    [success] => 1
-    [message] => Misja została przypisana
-    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
-)
-
-
-[2025-04-26 10:51:12] SUKCES: Odpowiedź JSON
-Array
-(
-    [message] => Misja została przypisana do użytkownika
-    [mission_id] => 247
-    [mission_title] => Flaszki od Dziadzi
-    [task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [npc_id] => 76
-)
-
-
-[2025-04-26 10:51:12] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
-
