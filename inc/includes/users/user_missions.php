@@ -61,6 +61,37 @@ add_action('acf/include_fields', function () {
                                     $npc_status = isset($npc_info['status']) ? $npc_info['status'] : 'not_started';
                                     $is_completed = ($npc_status == 'completed');
 
+                                    // Przygotowanie statusu docelowego do wyświetlenia
+                                    $status_labels = array(
+                                        'not_started' => 'Niezaczęte',
+                                        'in_progress' => 'Rozpoczęte',
+                                        'completed' => 'Ukończone',
+                                        'failed' => 'Niepowodzenie',
+                                    );
+                                    $target_status_label = isset($status_labels[$npc_status]) ? $status_labels[$npc_status] : $npc_status;
+
+                                    // Dodanie pola readonly z docelowym statusem
+                                    $npc_sub_fields[] = array(
+                                        'key' => 'field_task_npc_target_' . $mission->ID . '_' . $task_id . '_' . $npc_id,
+                                        'label' => 'Docelowo powinieneś uzupełnić to pole jako:',
+                                        'name' => 'npc_target_' . $npc_id,
+                                        'type' => 'select',
+                                        'instructions' => '',
+                                        'choices' => array(
+                                            $npc_status => $target_status_label
+                                        ),
+                                        'default_value' => $npc_status,
+                                        'ui' => 1,
+                                        'disabled' => 1,
+                                        'allow_null' => 0,
+                                        'return_format' => 'value',
+                                        'wrapper' => array(
+                                            'width' => '50',
+                                            'class' => '',
+                                            'id' => '',
+                                        ),
+                                    );
+
                                     // Pojedyncze pole select dla statusu zadania NPC
                                     $npc_sub_fields[] = array(
                                         'key' => 'field_task_npc_' . $mission->ID . '_' . $task_id . '_' . $npc_id,
@@ -80,7 +111,7 @@ add_action('acf/include_fields', function () {
                                         'allow_null' => 0,
                                         'return_format' => 'value',
                                         'wrapper' => array(
-                                            'width' => '100',
+                                            'width' => '50',
                                             'class' => '',
                                             'id' => '',
                                         ),

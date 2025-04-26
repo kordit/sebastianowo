@@ -245,54 +245,42 @@ function assign_mission_to_user($user_id, $mission_id, $mission_status = 'in_pro
     // 6. Obsługa zadania
     $first_task_id = null;
 
+    // Sprawdzanie statusów NPC
+    $npc_status = null;
+    $updated_npc = false;
+
+    if ($mission_task_status === 'completed_npc' || $mission_task_status === 'failed_npc') {
+        if ($npc_id > 0) {
+            $npc_status = ($mission_task_status === 'completed_npc') ? 'completed' : 'failed';
+            $updated_npc = true;
+            $mission_task_status = 'in_progress'; // Zadanie pozostaje in_progress
+            mission_debug_log('Aktualizacja statusu NPC ' . $npc_id . ' na ' . $npc_status . ' dla zadania ' . $mission_task_id);
+        } else {
+            $mission_task_status = 'in_progress';
+            mission_debug_log('Zmieniono status z ' . $mission_task_status . ' na in_progress dla zadania ' . $mission_task_id . ' (brak ID NPC)');
+        }
+    }
+
     if ($mission_task_id) {
         // Jeśli podano ID zadania, aktualizujemy je
         if (!isset($mission_data['tasks']) || !is_array($mission_data['tasks'])) {
             $mission_data['tasks'] = [];
         }
 
-        // Specjalna obsługa statusów NPC (completed_npc i failed_npc)
-        if ($mission_task_status === 'completed_npc' || $mission_task_status === 'failed_npc') {
-            if (!isset($mission_data['tasks'][$mission_task_id])) {
-                $mission_data['tasks'][$mission_task_id] = [
-                    'status' => 'in_progress',  // Główny status zadania pozostaje in_progress
-                    'start_date' => current_time('mysql')
-                ];
-            }
-
-            // Ustaw status dla konkretnego NPC
-            if ($npc_id) {
-                $npc_key = 'npc_' . $npc_id;
-
-                // Mapowanie statusów
-                $npc_status = ($mission_task_status === 'completed_npc') ? 'completed' : 'failed';
-                $mission_data['tasks'][$mission_task_id][$npc_key] = $npc_status;
-
-                // Sprawdź, czy wszystkie wymagane NPC są ukończone i odpowiednio zaktualizuj główny status zadania
-                $all_completed = true;
-
-                // Szukaj wszystkich kluczy NPC w zadaniu
-                foreach ($mission_data['tasks'][$mission_task_id] as $key => $value) {
-                    if (strpos($key, 'npc_') === 0 && $value !== 'completed') {
-                        $all_completed = false;
-                        break;
-                    }
-                }
-
-                // Jeśli wszystkie NPC są ukończone, zmień główny status zadania
-                if ($all_completed) {
-                    $mission_data['tasks'][$mission_task_id]['status'] = 'completed';
-                }
-            }
+        // Aktualizacja lub dodanie zadania
+        if (!isset($mission_data['tasks'][$mission_task_id])) {
+            $mission_data['tasks'][$mission_task_id] = [
+                'status' => $mission_task_status,
+                'start_date' => current_time('mysql')
+            ];
         } else {
-            // Standardowa obsługa statusu zadania
-            if (!isset($mission_data['tasks'][$mission_task_id])) {
-                $mission_data['tasks'][$mission_task_id] = [
-                    'status' => $mission_task_status,
-                    'start_date' => current_time('mysql')
-                ];
-            } else {
-                $mission_data['tasks'][$mission_task_id]['status'] = $mission_task_status;
+            $mission_data['tasks'][$mission_task_id]['status'] = $mission_task_status;
+
+            // Aktualizacja statusu dla konkretnego NPC, jeśli potrzebne
+            if ($updated_npc && $npc_id > 0) {
+                $npc_key = 'npc_' . $npc_id;
+                $mission_data['tasks'][$mission_task_id][$npc_key] = $npc_status;
+                mission_debug_log('Zaktualizowano status NPC ' . $npc_id . ' na ' . $npc_status . ' dla zadania ' . $mission_task_id, $mission_data['tasks'][$mission_task_id]);
             }
         }
 

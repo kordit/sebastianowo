@@ -277,7 +277,7 @@ Array
                             [filter] => raw
                         )
 
-                    [quantity] => 59
+                    [quantity] => 8
                 )
 
         )
@@ -385,16 +385,21 @@ Array
         (
             [status] => not_started
             [assigned_date] => 
-            [completion_date] => 
+            [completion_date] => 2025-04-26 15:12:36
             [tasks] => Array
                 (
                     [zidentyfikuj-potencjalnych-klientow_0] => Array
                         (
                             [status] => not_started
+                            [npc_target_70] => 
                             [npc_70] => not_started
+                            [npc_target_77] => 
                             [npc_77] => not_started
+                            [npc_target_250] => 
                             [npc_250] => not_started
+                            [npc_target_215] => 
                             [npc_215] => not_started
+                            [npc_target_252] => 
                             [npc_252] => not_started
                         )
 
@@ -409,15 +414,38 @@ Array
 (
     [wynik_warunku] => 1
 )
-[2025-04-26 15:09:31] Przetwarzanie misji ID: 247
+[2025-04-26 15:31:45] Przetwarzanie misji ID: 247
 
-[2025-04-26 15:09:48] Przetwarzanie misji ID: 247
+[2025-04-26 15:32:12] Przetwarzanie misji ID: 247
 
-[2025-04-26 15:12:36] Przetwarzanie misji ID: 247
+[2025-04-26 15:32:12] Zmieniono status z completed_npc na in_progress dla zadania zidentyfikuj-potencjalnych-klientow_0
 
-[2025-04-26 15:13:13] Przetwarzanie misji ID: 247
+[2025-04-26 15:32:42] Przetwarzanie misji ID: 247
 
-[2025-04-26 15:13:52] Przetwarzanie misji ID: 247
+[2025-04-26 15:32:42] Zmieniono status z completed_npc na in_progress dla zadania zidentyfikuj-potencjalnych-klientow_0
 
-[2025-04-26 15:16:11] Przetwarzanie misji ID: 247
+[2025-04-26 15:35:13] Przetwarzanie misji ID: 247
+
+[2025-04-26 15:35:13] Aktualizacja statusu NPC 250 na completed dla zadania zidentyfikuj-potencjalnych-klientow_0
+
+[2025-04-26 15:38:44] Przetwarzanie misji ID: 247
+
+[2025-04-26 15:38:44] Aktualizacja statusu NPC 250 na completed dla zadania zidentyfikuj-potencjalnych-klientow_0
+
+[2025-04-26 15:38:44] Zaktualizowano status NPC 250 na completed dla zadania zidentyfikuj-potencjalnych-klientow_0
+Array
+(
+    [status] => in_progress
+    [npc_target_70] => 
+    [npc_70] => not_started
+    [npc_target_77] => 
+    [npc_77] => not_started
+    [npc_target_250] => 
+    [npc_250] => completed
+    [npc_target_215] => 
+    [npc_215] => not_started
+    [npc_target_252] => 
+    [npc_252] => not_started
+)
+
 
