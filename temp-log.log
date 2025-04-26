@@ -1,9 +1,9 @@
-Array
+252Array
 (
     [mission_id] => 247
     [mission_status] => in_progress
     [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => not_started
+    [mission_task_status] => not_started_npc
 )
 Array
 (
@@ -91,11 +91,6 @@ Array
         (
             [gold] => 0
             [cigarettes] => 0
-            [beer] => 0
-            [moonshine] => 0
-            [weed] => 0
-            [mushrooms] => 0
-            [glue] => 0
         )
 
     [vitality] => Array
@@ -247,39 +242,6 @@ Array
                     [quantity] => 1
                 )
 
-            [4] => Array
-                (
-                    [item] => WP_Post Object
-                        (
-                            [ID] => 212
-                            [post_author] => 1
-                            [post_date] => 2025-04-24 18:02:45
-                            [post_date_gmt] => 2025-04-24 18:02:45
-                            [post_content] => 
-                            [post_title] => Bimber Dziadzi
-                            [post_excerpt] => 
-                            [post_status] => publish
-                            [comment_status] => closed
-                            [ping_status] => closed
-                            [post_password] => 
-                            [post_name] => bimber-od-irasa
-                            [to_ping] => 
-                            [pinged] => 
-                            [post_modified] => 2025-04-24 18:07:55
-                            [post_modified_gmt] => 2025-04-24 18:07:55
-                            [post_content_filtered] => 
-                            [post_parent] => 0
-                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=212
-                            [menu_order] => 0
-                            [post_type] => item
-                            [post_mime_type] => 
-                            [comment_count] => 0
-                            [filter] => raw
-                        )
-
-                    [quantity] => 16
-                )
-
         )
 
     [avatar_full] => Array
@@ -384,33 +346,28 @@ Array
     [mission_247] => Array
         (
             [status] => in_progress
-            [assigned_date] => 2025-04-26 15:31:45
+            [assigned_date] => 2025-04-26 17:09:54
             [completion_date] => 2025-04-26 15:12:36
             [tasks] => Array
                 (
                     [zidentyfikuj-potencjalnych-klientow_0] => Array
                         (
-                            [status] => in_progress
-                            [npc_target_70] => 
-                            [npc_70] => not_started
-                            [npc_target_77] => 
-                            [npc_77] => not_started
-                            [npc_target_250] => 
+                            [status] => completed
+                            [npc_target_70] => failed
+                            [npc_70] => failed
+                            [npc_target_77] => failed
+                            [npc_77] => failed
+                            [npc_target_250] => completed
                             [npc_250] => completed
-                            [npc_target_215] => 
+                            [npc_target_215] => completed
                             [npc_215] => completed
-                            [npc_target_252] => 
-                            [npc_252] => not_started
+                            [npc_target_252] => completed
+                            [npc_252] => completed
                         )
 
-                    [odwiedz-sqout_1] => in_progress
-                    [pogadaj-z-irasem_2] => not_started
+                    [rozlicz-sie-z-irasem_1] => not_started
                 )
 
         )
 
-)
-Array
-(
-    [wynik_warunku] => 
 )

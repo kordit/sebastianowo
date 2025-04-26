@@ -212,7 +212,7 @@ if (function_exists('acf_add_local_field_group')):
 															array(
 																'key' => 'field_67b4f2784d5e1',
 																'label' => 'Waluta',
-																'name' => 'bag',
+																'name' => 'backpack',
 																'aria-label' => '',
 																'type' => 'select',
 																'instructions' => '',
@@ -226,11 +226,6 @@ if (function_exists('acf_add_local_field_group')):
 																'choices' => array(
 																	'gold' => 'Hajs',
 																	'papierosy' => 'Szlugi',
-																	'piwo' => 'Browar',
-																	'bimber' => 'Bimber',
-																	'marihuana' => 'Marihuana',
-																	'grzyby' => 'Grzyby',
-																	'klej' => 'Klej',
 																),
 																'default_value' => false,
 																'return_format' => '',
@@ -625,6 +620,7 @@ if (function_exists('acf_add_local_field_group')):
 																	'completed_npc' => 'Zalicz NPC',
 																	'failed_npc' => 'oblej NPC',
 																	'progress_npc' => 'w trakcie NPC',
+																	'not_started_npc' => 'Niezaczęte NPC',
 																),
 																'default_value' => 'not_started',
 																'allow_null' => 0,

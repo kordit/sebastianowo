@@ -12,7 +12,7 @@ function clean_array($data, $keysToRemove = ['layout_settings', 'acfe_flexible_t
     return $data;
 }
 
-function evaluate_condition($conv, $npc_relation_value, $npc_relation_meet, $conditions)
+function evaluate_condition($conv, $npc_relation_value, $npc_relation_meet, $conditions, $npc_id)
 {
     if (isset($conv['conversation_start']) && is_array($conv['conversation_start'])) {
         $conv = $conv['conversation_start'][0];
@@ -63,6 +63,7 @@ function evaluate_condition($conv, $npc_relation_value, $npc_relation_meet, $con
             $mission_select_task_id = $mission_select['mission_task_id'] ?? null;
             $mission_select_task_status = $mission_select['mission_task_status'] ?? null;
 
+
             // Logika sprawdzania misji
             $result = false;
 
@@ -89,16 +90,32 @@ function evaluate_condition($conv, $npc_relation_value, $npc_relation_meet, $con
                     } else {
                         $task = $user_mission['tasks'][$mission_select_task_id];
 
-                        // Sprawdź czy zadanie jest tablicą z kluczem 'status' czy prostą wartością
-                        if (is_array($task) && isset($task['status'])) {
-                            // Zadanie jest tablicą - sprawdź status w tablicy
-                            if ($task['status'] !== $mission_select_task_status) {
+                        // Sprawdź czy status zadania kończy się na "_npc"
+                        if (preg_match('/_npc$/', $mission_select_task_status)) {
+                            // Jeśli tak, sprawdź status dla konkretnego NPC
+                            if (is_array($task) && isset($task['npc_' . $npc_id])) {
+                                // Uzyskaj właściwy status NPC (bez "_npc" na końcu)
+                                $npc_status_type = str_replace('_npc', '', $mission_select_task_status);
+                                // Porównaj status NPC
+                                if ($task['npc_' . $npc_id] !== $npc_status_type) {
+                                    $result = false;
+                                }
+                            } else {
+                                // Brak statusu dla tego NPC
                                 $result = false;
                             }
                         } else {
-                            // Zadanie jest prostą wartością - bezpośrednie porównanie
-                            if ($task !== $mission_select_task_status) {
-                                $result = false;
+                            // Standardowa logika dla zwykłych statusów zadań
+                            if (is_array($task) && isset($task['status'])) {
+                                // Zadanie jest tablicą - sprawdź status w tablicy
+                                if ($task['status'] !== $mission_select_task_status) {
+                                    $result = false;
+                                }
+                            } else {
+                                // Zadanie jest prostą wartością - bezpośrednie porównanie
+                                if ($task !== $mission_select_task_status) {
+                                    $result = false;
+                                }
                             }
                         }
                     }
@@ -106,9 +123,9 @@ function evaluate_condition($conv, $npc_relation_value, $npc_relation_meet, $con
             }
 
             // Zapisz dane do logów
+            print_r($npc_id);
             print_r($mission_select);
             print_r($active_user_missions);
-            print_r(['wynik_warunku' => $result]);
             $dump = ob_get_clean();
 
             file_put_contents(
@@ -144,7 +161,7 @@ function get_conversation_element($conversation, $npc_id, $conditions)
         // Jeśli conversation_start jest tablicą, iteruj po warunkach
         if (is_array($item['layout_settings']['conversation_start'])) {
             foreach ($item['layout_settings']['conversation_start'] as $conv) {
-                if (evaluate_condition($conv, $npc_relation_value, $npc_relation_meet, $conditions)) {
+                if (evaluate_condition($conv, $npc_relation_value, $npc_relation_meet, $conditions, $npc_id)) {
                     return $item;
                 }
             }
@@ -168,7 +185,7 @@ function get_filtered_answers($conversation_item, $npc_id, $conditions)
                 if (is_array($start)) {
                     $include = false;
                     foreach ($start as $ans_conv) {
-                        if (evaluate_condition($ans_conv, $npc_relation_value, $npc_relation_meet, $conditions)) {
+                        if (evaluate_condition($ans_conv, $npc_relation_value, $npc_relation_meet, $conditions, $npc_id)) {
                             $include = true;
                             break;
                         }

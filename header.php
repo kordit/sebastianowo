@@ -29,7 +29,7 @@
             <div class="nowt-display">
                 <?php
                 $user_id = get_current_user_id();
-                $minerals = get_field('bag', 'user_' . $user_id);
+                $minerals = get_field('backpack', 'user_' . $user_id);
 
                 $resources = [
                     ['name' => 'gold', 'icon' => '&#128176;', 'name_pl' => 'Hajs', 'icon_url' => PNG . '/hajs.png'],
@@ -43,7 +43,7 @@
                         <img src="<?= esc_url($resource['icon_url']) ?>" alt="<?= esc_attr($resource['name']) ?>" class="resource-icon" />
                         <div class="wrap">
                             <span><?= '<strong>' . $resource['name_pl'] . ': </strong>'; ?></span>
-                            <span class="ud-bag-<?= $resource['name'] ?>">
+                            <span class="ud-backpack-<?= $resource['name'] ?>">
                                 <?= isset($minerals[$resource['name']]) ? esc_html($minerals[$resource['name']]) : 0 ?>
                             </span>
                         </div>

@@ -230,20 +230,30 @@ async function handleAnswer(input) {
 
         for (const singletransaction of transactions) {
             if (singletransaction.acf_fc_layout === "transaction") {
-                const bagType = singletransaction.bag;
+                const bagType = singletransaction.backpack;
                 const value = parseInt(singletransaction.value, 10);
 
                 // Sprawdzenie czy gracz ma wystarczająco dużo zasobów
                 if (value < 0) {
-                    const currentValue = userFields.bag && userFields.bag[bagType] ?
-                        parseInt(userFields.bag[bagType], 10) : 0;
+                    // Mapowanie nazw z UI na nazwy pól w bazie danych
+                    const fieldMapping = {
+                        'gold': 'gold',
+                        'papierosy': 'cigarettes'
+                        // dodaj inne mapowania jeśli pojawią się nowe waluty
+                    };
+
+                    // Pobierz właściwą nazwę pola
+                    const fieldName = fieldMapping[bagType] || bagType;
+
+                    // Sprawdź wartość w userFields.backpack
+                    const currentValue = userFields.backpack && userFields.backpack[fieldName] !== undefined ?
+                        parseInt(userFields.backpack[fieldName], 10) : 0;
 
                     if (currentValue < Math.abs(value)) {
                         let friendly;
                         switch (bagType) {
                             case 'gold': friendly = 'złote'; break;
                             case 'papierosy': friendly = 'szlug'; break;
-                            case 'piwo': friendly = 'browara'; break;
                             default: friendly = bagType;
                         }
 
@@ -261,7 +271,6 @@ async function handleAnswer(input) {
                         switch (bagType) {
                             case 'gold': return 'złote';
                             case 'papierosy': return 'szlug';
-                            case 'piwo': return 'browara';
                             default: return bagType;
                         }
                     })()
@@ -316,10 +325,15 @@ async function handleAnswer(input) {
         // Faza 2: Wykonanie wszystkich transakcji
         // Wykonaj transakcje
         for (const transaction of transactionsToExecute) {
-            await updateACFFieldsWithGui(
-                { [`bag.${transaction.bagType}`]: transaction.value },
+            console.log('Wykonuję transakcję:', transaction);
+            console.log('Wysyłam dane:', { [`backpack.${transaction.bagType}`]: transaction.value });
+
+            const response = await updateACFFieldsWithGui(
+                { [`backpack.${transaction.bagType}`]: transaction.value },
                 ['body']
             );
+
+            console.log('Odpowiedź z serwera:', response);
 
             const bagMessage = transaction.value < 0
                 ? `Wydano ${Math.abs(transaction.value)} ${transaction.friendly}`

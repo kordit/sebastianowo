@@ -253,8 +253,6 @@ class DynamicACFUpdater
             return "piw";
         } elseif (stripos($field_name, 'papierosy') !== false) {
             return "szlugów";
-        } elseif (stripos($field_name, 'stone') !== false) {
-            return "kamienia";
         }
         return $field_name;
     }

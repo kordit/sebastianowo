@@ -82,7 +82,7 @@ add_action('acf/include_fields', function () {
                                         ),
                                         'default_value' => $npc_status,
                                         'ui' => 1,
-                                        'disabled' => 1,
+                                        // 'disabled' => 1,
                                         'allow_null' => 0,
                                         'return_format' => 'value',
                                         'wrapper' => array(
