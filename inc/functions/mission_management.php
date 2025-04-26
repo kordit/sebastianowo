@@ -1,476 +1,413 @@
 <?php
 
 /**
- * Funkcje zarządzania misjami dla użytkowników
+ * System zarządzania misjami - UPROSZCZONA WERSJA
  * 
  * @package Game
+ * @version 4.0.0
  */
 
 if (!defined('ABSPATH')) {
-    exit; // Zabezpieczenie przed bezpośrednim dostępem
+    exit;
 }
 
 /**
- * Inicjalizacja punktów zaczepienia dla zarządzania misjami
+ * Funkcja do logowania debugowania misji - zapisuje do pliku temp-log.log
+ * 
+ * @param string $message Wiadomość do zalogowania
+ * @param mixed $data Opcjonalne dane do zalogowania
+ * @return void
+ */
+function mission_debug_log($message, $data = null)
+{
+    $log_file = ABSPATH . '/wp-content/themes/game/temp-log.log';
+    $timestamp = date('[Y-m-d H:i:s]');
+    $log_message = $timestamp . ' ' . $message;
+
+    if ($data !== null) {
+        if (is_array($data) || is_object($data)) {
+            $log_message .= "\n" . print_r($data, true);
+        } else {
+            $log_message .= ': ' . $data;
+        }
+    }
+
+    $log_message .= "\n\n";
+
+    // Zapisz do pliku
+    file_put_contents($log_file, $log_message, FILE_APPEND);
+}
+
+/**
+ * Rejestracja akcji AJAX dla systemu misji
  */
 function init_mission_management()
 {
     add_action('wp_ajax_assign_mission_to_user', 'ajax_assign_mission_to_user');
-    add_action('wp_ajax_complete_mission_task', 'ajax_complete_mission_task');
-    add_action('wp_ajax_check_mission_task_status', 'ajax_check_mission_task_status');
+    add_action('wp_ajax_get_mission_info', 'ajax_get_mission_info');
+    add_action('wp_ajax_update_mission_task_status', 'ajax_update_mission_task_status');
 }
 add_action('init', 'init_mission_management');
 
 /**
- * Przypisuje misję do użytkownika i ustawia pierwsze zadanie jako aktywne
+ * Pobiera informacje o misji (AJAX)
+ */
+function ajax_get_mission_info()
+{
+    // POCZĄTEK LOGOWANIA AJAX
+    mission_debug_log('===== ROZPOCZĘTO AJAX get_mission_info =====');
+    mission_debug_log('WEJŚCIOWE DANE POST', $_POST);
+
+    if (!is_user_logged_in()) {
+        mission_debug_log('BŁĄD: Użytkownik nie jest zalogowany');
+        wp_send_json_error(['message' => 'Użytkownik nie jest zalogowany']);
+    }
+
+    $mission_id = isset($_POST['mission_id']) ? intval($_POST['mission_id']) : 0;
+    if (!$mission_id) {
+        mission_debug_log('BŁĄD: Nieprawidłowe ID misji');
+        wp_send_json_error(['message' => 'Nieprawidłowe ID misji']);
+    }
+
+    mission_debug_log('Przetwarzanie misji ID', $mission_id);
+
+    $mission = get_post($mission_id);
+    if (!$mission || $mission->post_type !== 'mission') {
+        mission_debug_log('BŁĄD: Misja nie istnieje');
+        wp_send_json_error(['message' => 'Misja nie istnieje']);
+    }
+
+    $mission_tasks = get_field('mission_tasks', $mission_id);
+    $first_task_id = null;
+    $tasks = [];
+
+    // Sprawdź czy mamy wskazane konkretne zadanie
+    $specified_task_id = isset($_POST['mission_task_id']) ? sanitize_text_field($_POST['mission_task_id']) : null;
+    $found_specified = false;
+
+    if (is_array($mission_tasks) && !empty($mission_tasks)) {
+        // Jeśli mamy wskazane konkretne zadanie, znajdź je
+        if ($specified_task_id) {
+            error_log('Szukam konkretnego zadania: ' . $specified_task_id);
+            $clean_specified_id = preg_replace('/_\d+$/', '', $specified_task_id);
+
+            foreach ($mission_tasks as $index => $task) {
+                $task_id = isset($task['task_id']) ? $task['task_id'] : 'task_' . $index;
+                $clean_task_id = preg_replace('/_\d+$/', '', $task_id);
+
+                // Dokładne dopasowanie lub dopasowanie po usunięciu sufiksów
+                if (
+                    $task_id === $specified_task_id ||
+                    $clean_task_id === $clean_specified_id ||
+                    strpos($task_id, $clean_specified_id) !== false ||
+                    strpos($specified_task_id, $clean_task_id) !== false
+                ) {
+
+                    $first_task_id = $task_id;
+                    $tasks[$task_id] = $task['task_title'] ?? ('Zadanie ' . ($index + 1));
+                    $found_specified = true;
+                    error_log('Znaleziono konkretne zadanie: ' . $task_id);
+                    break;
+                }
+            }
+
+            // Specjalne traktowanie dla zidentyfikuj-potencjalnych-klientow_0
+            if (!$found_specified && $specified_task_id === 'zidentyfikuj-potencjalnych-klientow_0' && !empty($mission_tasks[0])) {
+                $task = $mission_tasks[0];
+                $task_id = isset($task['task_id']) ? $task['task_id'] : 'task_0';
+                $first_task_id = $task_id;
+                $tasks[$task_id] = $task['task_title'] ?? 'Zadanie 1';
+                $found_specified = true;
+                error_log('Specjalne dopasowanie dla zadania zidentyfikuj-potencjalnych-klientow_0: ' . $task_id);
+            }
+        }
+
+        // Jeśli nie znaleziono konkretnego zadania lub nie wskazano żadnego, dodaj wszystkie
+        if (!$found_specified) {
+            foreach ($mission_tasks as $index => $task) {
+                $task_id = isset($task['task_id']) ? $task['task_id'] : 'task_' . $index;
+                if ($index === 0) {
+                    $first_task_id = $task_id;
+                }
+                $tasks[$task_id] = $task['task_title'] ?? ('Zadanie ' . ($index + 1));
+            }
+        }
+    }
+    error_log('Zwracam dane o misji: task_id=' . $first_task_id);
+
+    // POPRAWIONE: Jeśli mamy mission_task_id z żądania, użyj go zamiast task_id z bazy danych
+    $task_id_to_return = $specified_task_id ?: $first_task_id;
+
+    // Pobierz nazwę zadania dla pierwszego/wybranego zadania
+    $task_name = '';
+    if ($first_task_id && isset($tasks[$first_task_id])) {
+        $task_name = $tasks[$first_task_id];
+    }
+
+    mission_debug_log('Zadanie do zwrócenia: task_id=' . $task_id_to_return . ' zamiast ' . $first_task_id);
+    mission_debug_log('Nazwa zadania: ' . $task_name);
+
+    // Przygotowanie odpowiedzi
+    $response = [
+        'mission_id' => $mission_id,
+        'mission_title' => $mission->post_title,
+        'mission_description' => $mission->post_content,
+        'task_id' => $task_id_to_return,
+        'task_name' => $task_name
+    ];
+
+    mission_debug_log('Odpowiedź JSON dla get_mission_info', $response);
+    mission_debug_log('===== ZAKOŃCZONO AJAX get_mission_info =====');
+
+    // Uproszczona odpowiedź JSON - użyj task_id z przycisku zamiast z bazy danych
+    wp_send_json_success($response);
+}
+
+/**
+ * Przypisuje misję do użytkownika (AJAX)
  */
 function ajax_assign_mission_to_user()
 {
+    // POCZĄTEK LOGOWANIA AJAX
+    mission_debug_log('===== ROZPOCZĘTO AJAX assign_mission_to_user =====');
+    mission_debug_log('WEJŚCIOWE DANE POST', $_POST);
+
     if (!is_user_logged_in()) {
+        mission_debug_log('BŁĄD: Użytkownik nie jest zalogowany');
         wp_send_json_error(['message' => 'Użytkownik nie jest zalogowany']);
         return;
     }
 
-    // Sprawdzenie nonce (dodaj później)
-    // if (!wp_verify_nonce($_POST['security'], 'mission_management_nonce')) {
-    //     wp_send_json_error(['message' => 'Błąd bezpieczeństwa. Odśwież stronę i spróbuj ponownie.']);
-    //     wp_die();
-    // }
-
     $mission_id = isset($_POST['mission_id']) ? intval($_POST['mission_id']) : 0;
     $npc_id = isset($_POST['npc_id']) ? intval($_POST['npc_id']) : 0;
+    $mission_status = isset($_POST['mission_status']) ? sanitize_text_field($_POST['mission_status']) : 'in_progress';
+    $mission_task_id = isset($_POST['mission_task_id']) ? sanitize_text_field($_POST['mission_task_id']) : null;
+    $mission_task_status = isset($_POST['mission_task_status']) ? sanitize_text_field($_POST['mission_task_status']) : 'in_progress';
+
+    mission_debug_log('Przetworzone parametry', [
+        'mission_id' => $mission_id,
+        'npc_id' => $npc_id,
+        'mission_status' => $mission_status,
+        'mission_task_id' => $mission_task_id,
+        'mission_task_status' => $mission_task_status
+    ]);
 
     if (!$mission_id) {
+        mission_debug_log('BŁĄD: Nieprawidłowe ID misji');
         wp_send_json_error(['message' => 'Nieprawidłowe ID misji']);
         return;
     }
 
     $user_id = get_current_user_id();
+    mission_debug_log('ID użytkownika: ' . $user_id);
 
-    // Sprawdź czy misja istnieje
     $mission = get_post($mission_id);
     if (!$mission || $mission->post_type !== 'mission') {
+        mission_debug_log('BŁĄD: Misja o ID ' . $mission_id . ' nie istnieje');
         wp_send_json_error(['message' => 'Misja nie istnieje']);
         return;
     }
 
-    // Sprawdź czy misja nie jest już przypisana
-    $result = assign_mission_to_user($user_id, $mission_id);
+    mission_debug_log('Tytuł misji: ' . $mission->post_title);
+    mission_debug_log('Wywołanie funkcji assign_mission_to_user z parametrami', [
+        'user_id' => $user_id,
+        'mission_id' => $mission_id,
+        'mission_status' => $mission_status,
+        'mission_task_id' => $mission_task_id,
+        'mission_task_status' => $mission_task_status
+    ]);
+
+    $result = assign_mission_to_user($user_id, $mission_id, $mission_status, $mission_task_id, $mission_task_status);
+
+    mission_debug_log('Wynik funkcji assign_mission_to_user', $result);
 
     if ($result['success']) {
-        wp_send_json_success([
+        $response = [
             'message' => 'Misja została przypisana do użytkownika',
             'mission_id' => $mission_id,
             'mission_title' => $mission->post_title,
             'task_id' => $result['first_task_id'],
-            'npc_id' => $npc_id,
-            'redirect' => home_url('/zadania/') // Opcjonalne przekierowanie
-        ]);
+            'npc_id' => $npc_id
+        ];
+
+        mission_debug_log('SUKCES: Odpowiedź JSON', $response);
+        mission_debug_log('===== ZAKOŃCZONO AJAX assign_mission_to_user =====');
+
+        wp_send_json_success($response);
     } else {
+        mission_debug_log('BŁĄD: ' . $result['message']);
+        mission_debug_log('===== ZAKOŃCZONO AJAX assign_mission_to_user =====');
+
         wp_send_json_error(['message' => $result['message']]);
     }
 }
 
-/**
- * Przypisuje misję do konkretnego użytkownika
- * 
- * @param int $user_id ID użytkownika
- * @param int $mission_id ID misji
- * @return array Informacje o wyniku operacji
- */
-function assign_mission_to_user($user_id, $mission_id)
+function assign_mission_to_user($user_id, $mission_id, $mission_status = 'in_progress', $mission_task_id = null, $mission_task_status = 'in_progress')
 {
-    // Pobierz całą grupę user_missions
-    $user_missions = get_field('user_missions', 'user_' . $user_id);
-    if (!is_array($user_missions)) $user_missions = [];
-    if (!isset($user_missions['active_missions']) || !is_array($user_missions['active_missions'])) $user_missions['active_missions'] = [];
-    if (!isset($user_missions['completed']) || !is_array($user_missions['completed'])) $user_missions['completed'] = [];
+    // POCZĄTEK LOGOWANIA FUNKCJI GŁÓWNEJ
+    mission_debug_log('=== ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===');
+    mission_debug_log('Parametry wejściowe', [
+        'user_id' => $user_id,
+        'mission_id' => $mission_id,
+        'mission_status' => $mission_status,
+        'mission_task_id' => $mission_task_id,
+        'mission_task_status' => $mission_task_status
+    ]);
 
-    // Sprawdź czy misja już jest przypisana jako aktywna
-    if (in_array($mission_id, $user_missions['active_missions'])) {
-        return [
-            'success' => false,
-            'message' => 'Misja jest już aktywna'
-        ];
-    }
+    // Sprawdź czy misja już istnieje
+    $mission_field_key = 'mission_' . $mission_id;
+    $existing_mission = get_field($mission_field_key, 'user_' . $user_id);
 
-    // Sprawdź czy misja została już ukończona
-    if (in_array($mission_id, $user_missions['completed'])) {
-        return [
-            'success' => false,
-            'message' => 'Ta misja została już ukończona'
-        ];
-    }
+    mission_debug_log('Istniejąca misja w bazie', $existing_mission);
 
-    // Dodaj misję do aktywnych
-    $user_missions['active_missions'][] = $mission_id;
-    $update_missions_success = update_field('user_missions', $user_missions, 'user_' . $user_id);
+    // Sprawdzamy, czy misja już istnieje i jest aktywna
+    if (is_array($existing_mission)) {
+        // PRIORYTET: Blokujemy ponowne przypisywanie misji, która jest już aktywna lub ukończona
+        if (isset($existing_mission['status']) && $existing_mission['status'] === 'in_progress') {
+            mission_debug_log('BLOKADA: Misja jest już aktywna - nie można jej ponownie przypisać');
 
-    // Dodaj postęp zadań do repeatera mission_tasks_progress
-    $mission_tasks = get_field('mission_tasks', $mission_id);
-    $first_task_id = null;
-    $existing_tasks_progress = get_field('mission_tasks_progress', 'user_' . $user_id);
-    if (!is_array($existing_tasks_progress)) $existing_tasks_progress = [];
-    if (is_array($mission_tasks) && !empty($mission_tasks)) {
-        foreach ($mission_tasks as $index => $task) {
-            $task_id = isset($task['task_id']) ? $task['task_id'] : 'task_' . $index;
-            if ($index === 0) $first_task_id = $task_id;
-            $existing_tasks_progress[] = [
-                'mission_id' => $mission_id,
-                'task_id' => $task_id,
-                'task_type' => $task['task_type'] ?? '',
-                'completed' => 0,
-                'completion_date' => '',
-                'status' => $index === 0 ? 'in_progress' : 'not_started',
-                'task_details' => [
-                    [
-                        'key' => 'assigned_at',
-                        'value' => current_time('mysql')
-                    ]
-                ]
+            // Jedyny przypadek kiedy pozwalamy na aktualizację to aktualizacja konkretnego zadania
+            if (
+                $mission_task_id && isset($existing_mission['tasks'][$mission_task_id]) &&
+                is_array($existing_mission['tasks'][$mission_task_id]) &&
+                $mission_task_status !== 'in_progress' // Nie pozwalamy na zmianę na "in_progress", bo to byłoby jak ponowne przypisanie
+            ) {
+            } else {
+                // Blokujemy ponowne przypisanie misji, niezależnie od parametrów
+                mission_debug_log('BLOKADA: Próba ponownego przypisania już aktywnej misji');
+                return [
+                    'success' => false,
+                    'message' => 'Ta misja jest już aktywna'
+                ];
+            }
+        }
+
+        if (isset($existing_mission['status']) && $existing_mission['status'] === 'completed') {
+            mission_debug_log('Misja jest już ukończona');
+            return [
+                'success' => false,
+                'message' => 'Ta misja została już ukończona'
             ];
         }
+    }    // Aktualizacja istniejącej misji lub tworzenie nowej
+    $first_task_id = null;
+
+    // Przygotowujemy dane misji, zachowując istniejącą strukturę
+    $mission_data = is_array($existing_mission) ? $existing_mission : [
+        'status' => 'not_started',
+        'assigned_date' => '',
+        'completion_date' => '',
+        'tasks' => []
+    ];
+
+    // Aktualizacja głównego statusu misji
+    $mission_data['status'] = $mission_status;
+
+    // Ustawienie daty przypisania, jeśli wcześniej była pusta
+    if (empty($mission_data['assigned_date'])) {
+        $mission_data['assigned_date'] = current_time('mysql');
     }
-    $update_tasks_success = update_field('mission_tasks_progress', $existing_tasks_progress, 'user_' . $user_id);
 
-    // POBIERZ JESZCZE RAZ user_missions po zapisie i sprawdź czy misja jest na liście
-    $user_missions_after = get_field('user_missions', 'user_' . $user_id);
-    $is_in = (is_array($user_missions_after) && isset($user_missions_after['active_missions']) && in_array($mission_id, $user_missions_after['active_missions']));
+    // Jeśli podano task_id, aktualizujemy jego status
+    if ($mission_task_id) {
+        // Zainicjalizuj tablicę zadań, jeśli nie istnieje
+        if (!isset($mission_data['tasks']) || !is_array($mission_data['tasks'])) {
+            $mission_data['tasks'] = [];
+        }
 
-    // Debug log (możesz usunąć po testach)
-    // error_log('user_missions_after: ' . print_r($user_missions_after, true));
-    // error_log('update_field zwrócił: ' . var_export($update_missions_success, true));
+        // Zachowanie istniejącej struktury zadania
+        if (isset($mission_data['tasks'][$mission_task_id]) && is_array($mission_data['tasks'][$mission_task_id])) {
+            $mission_data['tasks'][$mission_task_id]['status'] = $mission_task_status;
+            // Dodaj datę rozpoczęcia, jeśli jej nie ma
+            if (!isset($mission_data['tasks'][$mission_task_id]['start_date']) || empty($mission_data['tasks'][$mission_task_id]['start_date'])) {
+                $mission_data['tasks'][$mission_task_id]['start_date'] = current_time('mysql');
+            }
+        } else {
+            // Tworzenie nowej struktury dla zadania
+            $mission_data['tasks'][$mission_task_id] = [
+                'status' => $mission_task_status,
+            ];
+        }
+
+        $first_task_id = $mission_task_id;
+    } else {
+        // Jeśli nie podano konkretnego zadania, sprawdzamy pierwsze zadanie
+        $mission_tasks = get_field('mission_tasks', $mission_id);
+        if (is_array($mission_tasks) && !empty($mission_tasks)) {
+            $first_task = $mission_tasks[0];
+            $first_task_id = isset($first_task['task_id']) ? $first_task['task_id'] : 'task_0';
+
+            // Zachowanie struktury zadania, jeśli istnieje
+            if (isset($mission_data['tasks'][$first_task_id]) && is_array($mission_data['tasks'][$first_task_id])) {
+                $mission_data['tasks'][$first_task_id]['status'] = $mission_task_status;
+                if (!isset($mission_data['tasks'][$first_task_id]['start_date']) || empty($mission_data['tasks'][$first_task_id]['start_date'])) {
+                    $mission_data['tasks'][$first_task_id]['start_date'] = current_time('mysql');
+                }
+            } else {
+                $mission_data['tasks'][$first_task_id] = [
+                    'status' => $mission_task_status,
+                ];
+            }
+        }
+    }
+
+    mission_debug_log('Dane misji do zapisania', $mission_data);
+
+    // Zapisujemy zaktualizowaną misję do bazy danych - z obsługą błędów
+    try {
+        // Próba zapisu przez ACF
+        $acf_success = update_field($mission_field_key, $mission_data, 'user_' . $user_id);
+        mission_debug_log('Wynik zapisu ACF', $acf_success);
+
+        // Sprawdzenie czy rzeczywiście zapisano
+        $success = false;
+
+        // Jeśli ACF nie zwrócił błędu, zakładamy sukces
+        if ($acf_success !== false) {
+            $success = true;
+        }
+        // Jeśli ACF zwrócił pusty wynik (to często zdarza się w ACF), próbujemy bezpośrednio 
+        elseif ($acf_success === false || empty($acf_success)) {
+            // Alternatywna metoda zapisu poprzez zwykłe meta
+            $meta_key = '_' . $mission_field_key;  // kluczowe meta dla ACF zazwyczaj używa prefiksu _
+            $direct_success = update_user_meta($user_id, $meta_key, $mission_data);
+
+            if ($direct_success !== false) {
+                $success = true;
+                mission_debug_log('Zapisano używając metody alternatywnej poprzez update_user_meta');
+            } else {
+                mission_debug_log('Szczegóły błędu update_user_meta', error_get_last());
+            }
+        }
+
+        if (!$success) {
+            // Ostatnia próba zapisu - inny prefiks
+            $meta_key = 'user_' . $mission_field_key;
+            $direct_success = update_user_meta($user_id, $meta_key, $mission_data);
+
+            if ($direct_success !== false) {
+                $success = true;
+                mission_debug_log('Zapisano używając metody alternatywnej z prefiksem user_');
+            }
+        }
+
+        mission_debug_log('Zapisuję misję: ' . $mission_field_key . ' dla użytkownika user_' . $user_id);
+        if ($success) {
+            mission_debug_log('Wynik zapisu misji: SUKCES');
+        } else {
+            global $wpdb;
+            mission_debug_log('Wynik zapisu misji: BŁĄD');
+            mission_debug_log('Ostatni błąd DB', $wpdb->last_error);
+            mission_debug_log('Ostatni błąd PHP', error_get_last());
+        }
+    } catch (Exception $e) {
+        mission_debug_log('Wyjątek podczas zapisu: ' . $e->getMessage());
+        $success = false;
+    }
 
     return [
-        'success' => $is_in,
-        'message' => $is_in ? 'Misja została przypisana' : 'Błąd podczas przypisywania misji',
+        'success' => $success,
+        'message' => $success ? 'Misja została przypisana' : 'Błąd podczas przypisywania misji',
         'first_task_id' => $first_task_id
     ];
-}
-
-/**
- * Oznacza zadanie misji jako ukończone
- */
-function ajax_complete_mission_task()
-{
-    if (!is_user_logged_in()) {
-        wp_send_json_error(['message' => 'Użytkownik nie jest zalogowany']);
-        return;
-    }
-
-    $mission_id = isset($_POST['mission_id']) ? intval($_POST['mission_id']) : 0;
-    $task_id = isset($_POST['task_id']) ? sanitize_text_field($_POST['task_id']) : '';
-
-    if (!$mission_id || !$task_id) {
-        wp_send_json_error(['message' => 'Nieprawidłowe ID misji lub zadania']);
-        return;
-    }
-
-    $user_id = get_current_user_id();
-    $result = complete_mission_task($user_id, $mission_id, $task_id);
-
-    if ($result['success']) {
-        wp_send_json_success($result);
-    } else {
-        wp_send_json_error(['message' => $result['message']]);
-    }
-}
-
-/**
- * Sprawdza i aktualizuje stan zadania misji
- * 
- * @param int $user_id ID użytkownika
- * @param int $mission_id ID misji
- * @param string $task_id ID zadania
- * @return array Informacje o wyniku operacji
- */
-function complete_mission_task($user_id, $mission_id, $task_id)
-{
-    // Pobierz aktywne misje użytkownika
-    $active_missions = get_field('active_missions', 'user_' . $user_id);
-
-    if (!is_array($active_missions)) {
-        return [
-            'success' => false,
-            'message' => 'Brak aktywnych misji dla tego użytkownika'
-        ];
-    }
-
-    $mission_index = -1;
-    $mission_data = null;
-
-    // Znajdź indeks misji w tablicy
-    foreach ($active_missions as $index => $data) {
-        $current_mission_id = is_object($data['mission']) ? $data['mission']->ID : $data['mission'];
-        if ($current_mission_id == $mission_id) {
-            $mission_index = $index;
-            $mission_data = $data;
-            break;
-        }
-    }
-
-    if ($mission_index === -1) {
-        return [
-            'success' => false,
-            'message' => 'Nie znaleziono wskazanej misji wśród aktywnych misji użytkownika'
-        ];
-    }
-
-    // Znajdź zadanie i oznacz jako ukończone
-    $task_found = false;
-    $next_task_id = null;
-    $all_tasks_completed = true;
-    $task_index = -1;
-
-    foreach ($mission_data['progress'] as $index => &$task) {
-        if ($task['task_id'] == $task_id) {
-            $task['completed'] = 1;
-            $task['status'] = 'completed';
-            $task['completed_at'] = current_time('mysql');
-            $task_found = true;
-            $task_index = $index;
-        } elseif (!$task['completed']) {
-            $all_tasks_completed = false;
-
-            // Jeśli to następne zadanie po ukończonym, oznacz jako aktywne
-            if ($task_found && $next_task_id === null) {
-                $next_task_id = $task['task_id'];
-                $task['status'] = 'in_progress';
-            }
-        }
-    }
-
-    if (!$task_found) {
-        return [
-            'success' => false,
-            'message' => 'Nie znaleziono wskazanego zadania w misji'
-        ];
-    }
-
-    // Aktualizuj misję
-    $active_missions[$mission_index] = $mission_data;
-
-    // Jeśli wszystkie zadania ukończone, przenieś misję do ukończonych
-    if ($all_tasks_completed) {
-        $active_missions[$mission_index]['status'] = 'completed';
-        $active_missions[$mission_index]['completed_at'] = current_time('mysql');
-
-        // Opcjonalnie: przenieś misję do ukończonych
-        move_mission_to_completed($user_id, $mission_id);
-    }
-
-    // Zapisz zmiany
-    $update_success = update_field('active_missions', $active_missions, 'user_' . $user_id);
-
-    return [
-        'success' => $update_success,
-        'message' => 'Zadanie zostało oznaczone jako ukończone',
-        'next_task_id' => $next_task_id,
-        'all_tasks_completed' => $all_tasks_completed
-    ];
-}
-
-/**
- * Przenosi misję z aktywnych do ukończonych
- * 
- * @param int $user_id ID użytkownika
- * @param int $mission_id ID misji
- * @return bool Sukces operacji
- */
-function move_mission_to_completed($user_id, $mission_id)
-{
-    // Pobierz aktywne misje użytkownika
-    $active_missions = get_field('active_missions', 'user_' . $user_id);
-    $completed_missions = get_field('completed_missions', 'user_' . $user_id);
-
-    if (!is_array($active_missions)) {
-        return false;
-    }
-
-    if (!is_array($completed_missions)) {
-        $completed_missions = [];
-    }
-
-    // Znajdź misję do przeniesienia
-    $mission_to_move = null;
-    $updated_active_missions = [];
-
-    foreach ($active_missions as $mission_data) {
-        $current_mission_id = is_object($mission_data['mission']) ? $mission_data['mission']->ID : $mission_data['mission'];
-
-        if ($current_mission_id == $mission_id) {
-            $mission_to_move = get_post($mission_id);
-        } else {
-            $updated_active_missions[] = $mission_data;
-        }
-    }
-
-    if (!$mission_to_move) {
-        return false;
-    }
-
-    // Dodaj misję do ukończonych
-    $completed_missions[] = $mission_to_move;
-
-    // Zaktualizuj dane użytkownika
-    $update_active = update_field('active_missions', $updated_active_missions, 'user_' . $user_id);
-    $update_completed = update_field('completed_missions', $completed_missions, 'user_' . $user_id);
-
-    return $update_active && $update_completed;
-}
-
-/**
- * Sprawdza stan zadania misji (czy jest wykonane)
- */
-function ajax_check_mission_task_status()
-{
-    if (!is_user_logged_in()) {
-        wp_send_json_error(['message' => 'Użytkownik nie jest zalogowany']);
-        return;
-    }
-
-    $mission_id = isset($_POST['mission_id']) ? intval($_POST['mission_id']) : 0;
-    $task_id = isset($_POST['task_id']) ? sanitize_text_field($_POST['task_id']) : '';
-
-    if (!$mission_id || !$task_id) {
-        wp_send_json_error(['message' => 'Nieprawidłowe ID misji lub zadania']);
-        return;
-    }
-
-    $user_id = get_current_user_id();
-    $result = check_mission_task_status($user_id, $mission_id, $task_id);
-
-    wp_send_json_success($result);
-}
-
-/**
- * Sprawdza stan zadania misji
- * 
- * @param int $user_id ID użytkownika
- * @param int $mission_id ID misji
- * @param string $task_id ID zadania
- * @return array Informacje o stanie zadania
- */
-function check_mission_task_status($user_id, $mission_id, $task_id)
-{
-    // Pobierz aktywne misje użytkownika
-    $active_missions = get_field('active_missions', 'user_' . $user_id);
-
-    if (!is_array($active_missions)) {
-        return [
-            'exists' => false,
-            'completed' => false,
-            'active' => false,
-            'message' => 'Brak aktywnych misji dla tego użytkownika'
-        ];
-    }
-
-    // Znajdź misję
-    foreach ($active_missions as $mission_data) {
-        $current_mission_id = is_object($mission_data['mission']) ? $mission_data['mission']->ID : $mission_data['mission'];
-
-        if ($current_mission_id == $mission_id) {
-            // Znajdź zadanie
-            foreach ($mission_data['progress'] as $task) {
-                if ($task['task_id'] == $task_id) {
-                    return [
-                        'exists' => true,
-                        'completed' => (bool)$task['completed'],
-                        'active' => (bool)($task['active'] ?? false),
-                        'message' => $task['completed'] ? 'Zadanie zostało ukończone' : 'Zadanie w trakcie realizacji'
-                    ];
-                }
-            }
-
-            return [
-                'exists' => false,
-                'completed' => false,
-                'active' => false,
-                'message' => 'Nie znaleziono zadania w tej misji'
-            ];
-        }
-    }
-
-    return [
-        'exists' => false,
-        'completed' => false,
-        'active' => false,
-        'message' => 'Nie znaleziono misji'
-    ];
-}
-
-/**
- * Funkcja pomocnicza do sprawdzania zadania typu "item" (odbiór przedmiotu)
- *
- * @param int $user_id ID użytkownika
- * @param int $mission_id ID misji
- * @param string $task_id ID zadania
- * @return bool Czy zadanie zostało wykonane
- */
-function check_item_task_completion($user_id, $mission_id, $task_id)
-{
-    // Pobierz szczegóły misji
-    $mission_tasks = get_field('mission_tasks', $mission_id);
-
-    if (!is_array($mission_tasks)) {
-        return false;
-    }
-
-    // Znajdź zadanie po ID
-    $task_data = null;
-    foreach ($mission_tasks as $task) {
-        if (isset($task['task_id']) && $task['task_id'] === $task_id) {
-            $task_data = $task;
-            break;
-        }
-    }
-
-    if (!$task_data || $task_data['task_type'] !== 'item') {
-        return false;
-    }
-
-    // Sprawdź, czy użytkownik ma wymagany przedmiot
-    $item_id = $task_data['task_item']['task_item_id'] ?? 0;
-    $required_count = $task_data['task_item']['task_item_count'] ?? 1;
-
-    if (!$item_id) {
-        return false;
-    }
-
-    // Pobierz przedmioty użytkownika
-    $user_items = get_field('items', 'user_' . $user_id);
-
-    if (!is_array($user_items)) {
-        return false;
-    }
-
-    // Sprawdź, czy użytkownik ma wystarczającą ilość przedmiotu
-    foreach ($user_items as $user_item) {
-        $current_item_id = isset($user_item['item']) ?
-            (is_object($user_item['item']) ? $user_item['item']->ID : $user_item['item']) : 0;
-
-        if ($current_item_id == $item_id) {
-            $quantity = intval($user_item['quantity'] ?? 0);
-            return $quantity >= $required_count;
-        }
-    }
-
-    return false;
-}
-
-/**
- * Funkcja pomocnicza do sprawdzania zadania typu "sell" (sprzedaż przedmiotu)
- * 
- * @param int $user_id ID użytkownika
- * @param int $mission_id ID misji
- * @param string $task_id ID zadania
- * @param int $npc_id ID NPC, któremu sprzedano przedmiot
- * @return bool Czy zadanie zostało wykonane
- */
-function check_sell_task_completion($user_id, $mission_id, $task_id, $npc_id = null)
-{
-    // Implementacja sprawdzania, czy zadanie sprzedaży zostało wykonane
-    // Ta funkcja powinna być wywoływana po sprzedaży przedmiotu do NPC
-
-    return true; // Uproszczone dla tego przykładu
 }

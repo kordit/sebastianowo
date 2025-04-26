@@ -1,14 +1,1017 @@
+[2025-04-26 10:42:18] ===== ROZPOCZĘTO AJAX get_mission_info =====
+
+[2025-04-26 10:42:18] WEJŚCIOWE DANE POST
 Array
 (
-    [mission] => 162
-    [mission_task_id] => 
-    [task_status] => in_progress
-    [mission_status] => not_started
+    [action] => get_mission_info
+    [mission_id] => 247
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
 )
+
+
+[2025-04-26 10:42:18] Przetwarzanie misji ID: 247
+
+[2025-04-26 10:42:18] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
+
+[2025-04-26 10:42:18] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
+
+[2025-04-26 10:42:18] Odpowiedź JSON dla get_mission_info
 Array
 (
-    [mission] => 162
-    [mission_task_id] => 
-    [task_status] => in_progress
-    [mission_status] => not_started
+    [mission_id] => 247
+    [mission_title] => Flaszki od Dziadzi
+    [mission_description] => 
+    [task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [task_name] => Zidentyfikuj potencjalnych klientów 
 )
+
+
+[2025-04-26 10:42:18] ===== ZAKOŃCZONO AJAX get_mission_info =====
+
+[2025-04-26 10:42:18] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:42:18] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:42:18] Przetworzone parametry
+Array
+(
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:42:18] ID użytkownika: 1
+
+[2025-04-26 10:42:18] Tytuł misji: Flaszki od Dziadzi
+
+[2025-04-26 10:42:18] Wywołanie funkcji assign_mission_to_user z parametrami
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:42:18] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
+
+[2025-04-26 10:42:18] Parametry wejściowe
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:42:18] Istniejąca misja w bazie
+Array
+(
+    [status] => not_started
+    [assigned_date] => 
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => not_started
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:42:18] Zapisuję misję: mission_247 dla użytkownika user_1
+
+[2025-04-26 10:42:18] Wynik zapisu misji: BŁĄD
+
+[2025-04-26 10:42:18] Wynik funkcji assign_mission_to_user
+Array
+(
+    [success] => 
+    [message] => Błąd podczas przypisywania misji
+)
+
+
+[2025-04-26 10:42:18] BŁĄD: Błąd podczas przypisywania misji
+
+[2025-04-26 10:42:18] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:44:56] ===== ROZPOCZĘTO AJAX get_mission_info =====
+
+[2025-04-26 10:44:56] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => get_mission_info
+    [mission_id] => 247
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:44:56] Przetwarzanie misji ID: 247
+
+[2025-04-26 10:44:56] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
+
+[2025-04-26 10:44:56] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
+
+[2025-04-26 10:44:56] Odpowiedź JSON dla get_mission_info
+Array
+(
+    [mission_id] => 247
+    [mission_title] => Flaszki od Dziadzi
+    [mission_description] => 
+    [task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [task_name] => Zidentyfikuj potencjalnych klientów 
+)
+
+
+[2025-04-26 10:44:56] ===== ZAKOŃCZONO AJAX get_mission_info =====
+
+[2025-04-26 10:44:56] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:44:56] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:44:56] Przetworzone parametry
+Array
+(
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:44:56] ID użytkownika: 1
+
+[2025-04-26 10:44:56] Tytuł misji: Flaszki od Dziadzi
+
+[2025-04-26 10:44:56] Wywołanie funkcji assign_mission_to_user z parametrami
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:44:56] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
+
+[2025-04-26 10:44:56] Parametry wejściowe
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:44:56] Istniejąca misja w bazie
+Array
+(
+    [status] => not_started
+    [assigned_date] => 
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => not_started
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:44:56] Zapisuję misję: mission_247 dla użytkownika user_1
+
+[2025-04-26 10:44:56] Wynik zapisu misji: BŁĄD
+
+[2025-04-26 10:44:56] Wynik funkcji assign_mission_to_user
+Array
+(
+    [success] => 
+    [message] => Błąd podczas przypisywania misji
+    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:44:56] BŁĄD: Błąd podczas przypisywania misji
+
+[2025-04-26 10:44:56] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:46:50] ===== ROZPOCZĘTO AJAX get_mission_info =====
+
+[2025-04-26 10:46:50] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => get_mission_info
+    [mission_id] => 247
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:46:50] Przetwarzanie misji ID: 247
+
+[2025-04-26 10:46:50] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
+
+[2025-04-26 10:46:50] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
+
+[2025-04-26 10:46:50] Odpowiedź JSON dla get_mission_info
+Array
+(
+    [mission_id] => 247
+    [mission_title] => Flaszki od Dziadzi
+    [mission_description] => 
+    [task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [task_name] => Zidentyfikuj potencjalnych klientów 
+)
+
+
+[2025-04-26 10:46:50] ===== ZAKOŃCZONO AJAX get_mission_info =====
+
+[2025-04-26 10:46:50] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:46:50] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:46:50] Przetworzone parametry
+Array
+(
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:46:50] ID użytkownika: 1
+
+[2025-04-26 10:46:50] Tytuł misji: Flaszki od Dziadzi
+
+[2025-04-26 10:46:50] Wywołanie funkcji assign_mission_to_user z parametrami
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:46:50] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
+
+[2025-04-26 10:46:50] Parametry wejściowe
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:46:50] Istniejąca misja w bazie
+Array
+(
+    [status] => not_started
+    [assigned_date] => 
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => not_started
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:46:50] Dane misji do zapisania
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-26 10:46:50
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => in_progress
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                    [start_date] => 2025-04-26 10:46:50
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:46:50] Zapisuję misję: mission_247 dla użytkownika user_1
+
+[2025-04-26 10:46:50] Wynik zapisu misji: BŁĄD
+
+[2025-04-26 10:46:50] Wynik funkcji assign_mission_to_user
+Array
+(
+    [success] => 
+    [message] => Błąd podczas przypisywania misji
+    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:46:50] BŁĄD: Błąd podczas przypisywania misji
+
+[2025-04-26 10:46:50] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:47:44] ===== ROZPOCZĘTO AJAX get_mission_info =====
+
+[2025-04-26 10:47:44] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => get_mission_info
+    [mission_id] => 247
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:47:44] Przetwarzanie misji ID: 247
+
+[2025-04-26 10:47:44] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
+
+[2025-04-26 10:47:44] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
+
+[2025-04-26 10:47:44] Odpowiedź JSON dla get_mission_info
+Array
+(
+    [mission_id] => 247
+    [mission_title] => Flaszki od Dziadzi
+    [mission_description] => 
+    [task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [task_name] => Zidentyfikuj potencjalnych klientów 
+)
+
+
+[2025-04-26 10:47:44] ===== ZAKOŃCZONO AJAX get_mission_info =====
+
+[2025-04-26 10:47:44] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:47:44] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:47:44] Przetworzone parametry
+Array
+(
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:47:44] ID użytkownika: 1
+
+[2025-04-26 10:47:44] Tytuł misji: Flaszki od Dziadzi
+
+[2025-04-26 10:47:44] Wywołanie funkcji assign_mission_to_user z parametrami
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:47:44] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
+
+[2025-04-26 10:47:44] Parametry wejściowe
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:47:44] Istniejąca misja w bazie
+Array
+(
+    [status] => not_started
+    [assigned_date] => 
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => not_started
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:47:44] Dane misji do zapisania
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-26 10:47:44
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => in_progress
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                    [start_date] => 2025-04-26 10:47:44
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:47:44] Zapisuję misję: mission_247 dla użytkownika user_1
+
+[2025-04-26 10:47:44] Wynik zapisu misji: BŁĄD
+
+[2025-04-26 10:47:44] Wynik funkcji assign_mission_to_user
+Array
+(
+    [success] => 
+    [message] => Błąd podczas przypisywania misji
+    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:47:44] BŁĄD: Błąd podczas przypisywania misji
+
+[2025-04-26 10:47:44] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:48:37] ===== ROZPOCZĘTO AJAX get_mission_info =====
+
+[2025-04-26 10:48:37] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => get_mission_info
+    [mission_id] => 247
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:48:37] Przetwarzanie misji ID: 247
+
+[2025-04-26 10:48:37] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
+
+[2025-04-26 10:48:37] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
+
+[2025-04-26 10:48:37] Odpowiedź JSON dla get_mission_info
+Array
+(
+    [mission_id] => 247
+    [mission_title] => Flaszki od Dziadzi
+    [mission_description] => 
+    [task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [task_name] => Zidentyfikuj potencjalnych klientów 
+)
+
+
+[2025-04-26 10:48:37] ===== ZAKOŃCZONO AJAX get_mission_info =====
+
+[2025-04-26 10:48:37] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:48:37] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:48:37] Przetworzone parametry
+Array
+(
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:48:37] ID użytkownika: 1
+
+[2025-04-26 10:48:37] Tytuł misji: Flaszki od Dziadzi
+
+[2025-04-26 10:48:37] Wywołanie funkcji assign_mission_to_user z parametrami
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:48:37] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
+
+[2025-04-26 10:48:37] Parametry wejściowe
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:48:37] Istniejąca misja w bazie
+Array
+(
+    [status] => not_started
+    [assigned_date] => 
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => not_started
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:48:37] Dane misji do zapisania
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-26 10:48:37
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => in_progress
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                    [start_date] => 2025-04-26 10:48:37
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:48:37] Zapisuję misję: mission_247 dla użytkownika user_1
+
+[2025-04-26 10:48:37] Wynik zapisu misji: BŁĄD
+
+[2025-04-26 10:48:37] Wynik funkcji assign_mission_to_user
+Array
+(
+    [success] => 
+    [message] => Błąd podczas przypisywania misji
+    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:48:37] BŁĄD: Błąd podczas przypisywania misji
+
+[2025-04-26 10:48:37] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:50:02] ===== ROZPOCZĘTO AJAX get_mission_info =====
+
+[2025-04-26 10:50:02] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => get_mission_info
+    [mission_id] => 247
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:50:02] Przetwarzanie misji ID: 247
+
+[2025-04-26 10:50:02] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
+
+[2025-04-26 10:50:02] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
+
+[2025-04-26 10:50:02] Odpowiedź JSON dla get_mission_info
+Array
+(
+    [mission_id] => 247
+    [mission_title] => Flaszki od Dziadzi
+    [mission_description] => 
+    [task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [task_name] => Zidentyfikuj potencjalnych klientów 
+)
+
+
+[2025-04-26 10:50:02] ===== ZAKOŃCZONO AJAX get_mission_info =====
+
+[2025-04-26 10:50:02] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:50:02] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:50:02] Przetworzone parametry
+Array
+(
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:50:02] ID użytkownika: 1
+
+[2025-04-26 10:50:02] Tytuł misji: Flaszki od Dziadzi
+
+[2025-04-26 10:50:02] Wywołanie funkcji assign_mission_to_user z parametrami
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:50:02] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
+
+[2025-04-26 10:50:02] Parametry wejściowe
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:50:02] Istniejąca misja w bazie
+Array
+(
+    [status] => not_started
+    [assigned_date] => 
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => not_started
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:50:02] Dane misji do zapisania
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-26 10:50:02
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => in_progress
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                    [start_date] => 2025-04-26 10:50:02
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:50:02] Zapisuję misję: mission_247 dla użytkownika user_1
+
+[2025-04-26 10:50:02] Wynik zapisu misji: 
+
+[2025-04-26 10:50:02] Wynik funkcji assign_mission_to_user
+Array
+(
+    [success] => 
+    [message] => Błąd podczas przypisywania misji
+    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:50:02] BŁĄD: Błąd podczas przypisywania misji
+
+[2025-04-26 10:50:02] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:51:12] ===== ROZPOCZĘTO AJAX get_mission_info =====
+
+[2025-04-26 10:51:12] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => get_mission_info
+    [mission_id] => 247
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:51:12] Przetwarzanie misji ID: 247
+
+[2025-04-26 10:51:12] Zadanie do zwrócenia: task_id=zidentyfikuj-potencjalnych-klientow_0 zamiast task_0
+
+[2025-04-26 10:51:12] Nazwa zadania: Zidentyfikuj potencjalnych klientów 
+
+[2025-04-26 10:51:12] Odpowiedź JSON dla get_mission_info
+Array
+(
+    [mission_id] => 247
+    [mission_title] => Flaszki od Dziadzi
+    [mission_description] => 
+    [task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [task_name] => Zidentyfikuj potencjalnych klientów 
+)
+
+
+[2025-04-26 10:51:12] ===== ZAKOŃCZONO AJAX get_mission_info =====
+
+[2025-04-26 10:51:12] ===== ROZPOCZĘTO AJAX assign_mission_to_user =====
+
+[2025-04-26 10:51:12] WEJŚCIOWE DANE POST
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:51:12] Przetworzone parametry
+Array
+(
+    [mission_id] => 247
+    [npc_id] => 76
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:51:12] ID użytkownika: 1
+
+[2025-04-26 10:51:12] Tytuł misji: Flaszki od Dziadzi
+
+[2025-04-26 10:51:12] Wywołanie funkcji assign_mission_to_user z parametrami
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:51:12] === ROZPOCZĘTO FUNKCJĘ assign_mission_to_user ===
+
+[2025-04-26 10:51:12] Parametry wejściowe
+Array
+(
+    [user_id] => 1
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-26 10:51:12] Istniejąca misja w bazie
+Array
+(
+    [status] => not_started
+    [assigned_date] => 
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => not_started
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:51:12] Dane misji do zapisania
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-26 10:51:12
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                (
+                    [status] => in_progress
+                    [npc_70] => not_started
+                    [npc_77] => not_started
+                    [npc_250] => not_started
+                    [npc_215] => not_started
+                    [npc_252] => not_started
+                    [start_date] => 2025-04-26 10:51:12
+                )
+
+            [odwiedz-sqout_1] => not_started
+            [pogadaj-z-irasem_2] => not_started
+        )
+
+)
+
+
+[2025-04-26 10:51:12] Wynik zapisu ACF: 
+
+[2025-04-26 10:51:12] Zapisano używając metody alternatywnej poprzez update_user_meta
+
+[2025-04-26 10:51:12] Zapisuję misję: mission_247 dla użytkownika user_1
+
+[2025-04-26 10:51:12] Wynik zapisu misji: SUKCES
+
+[2025-04-26 10:51:12] Wynik funkcji assign_mission_to_user
+Array
+(
+    [success] => 1
+    [message] => Misja została przypisana
+    [first_task_id] => zidentyfikuj-potencjalnych-klientow_0
+)
+
+
+[2025-04-26 10:51:12] SUKCES: Odpowiedź JSON
+Array
+(
+    [message] => Misja została przypisana do użytkownika
+    [mission_id] => 247
+    [mission_title] => Flaszki od Dziadzi
+    [task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [npc_id] => 76
+)
+
+
+[2025-04-26 10:51:12] ===== ZAKOŃCZONO AJAX assign_mission_to_user =====
+

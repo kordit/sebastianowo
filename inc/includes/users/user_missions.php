@@ -248,6 +248,7 @@ add_action('acf/include_fields', function () {
     // Grupa pól do zarządzania misjami użytkownika
     acf_add_local_field_group(array(
         'key' => 'group_user_missions',
+        'name' => 'user_missions',
         'title' => 'Misje Użytkownika',
         'fields' => $mission_fields,
         'location' => array(

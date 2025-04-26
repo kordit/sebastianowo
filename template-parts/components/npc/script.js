@@ -10,6 +10,81 @@ function fetchDialogue(npcData, idConversation, conditions, userId) {
         .then(response => response.data);
 }
 
+// Funkcja globalna do obsługi uruchamiania misji
+window.startMission = async function (params) {
+    // Sprawdź, czy otrzymaliśmy wymagane parametry
+    if (!params || !params.mission_id) {
+        console.error('Błąd: brak wymaganych parametrów misji');
+        showPopup('Nie można uruchomić misji: brak identyfikatora misji', 'error');
+        return false;
+    }
+
+    console.log('[Mission Manager] Uruchamianie misji:', params.mission_id);
+
+    try {
+        // Pobierz informacje o misji przed próbą jej przypisania - przekazując identyfikator zadania z przycisku!
+        const missionInfoResponse = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+            action: 'get_mission_info',
+            mission_id: params.mission_id,
+            mission_task_id: params.mission_task_id || null // Dodajemy task_id z przycisku!
+        });
+
+        if (!missionInfoResponse.success) {
+            console.error('Błąd podczas pobierania informacji o misji:', missionInfoResponse.data?.message);
+            showPopup('Nie można znaleźć misji', 'error');
+            return false;
+        }
+
+        // Pobierz dane misji
+        const missionInfo = missionInfoResponse.data;
+        console.log('[Mission Manager] Informacje o misji:', missionInfo);
+
+        // Koniecznie wykorzystaj mission_task_id z przycisku NPC, a nie z odpowiedzi serwera!
+        const task_id_to_use = params.mission_task_id || missionInfo.first_task_id;
+        console.log('[Mission Manager] Używam zadania:', task_id_to_use);
+
+        // Przygotuj dane do zapisania misji
+        const missionData = {
+            action: 'assign_mission_to_user',
+            mission_id: params.mission_id,
+            npc_id: params.npc_id || null,
+            mission_status: 'in_progress',
+            mission_task_id: task_id_to_use, // Używamy ID zadania z przycisku!
+            mission_task_status: params.auto_complete_first_task ? 'completed' : 'in_progress'
+        };
+
+        // Przypisz misję do użytkownika
+        const assignResponse = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', missionData);
+
+        if (!assignResponse.success) {
+            console.error('Błąd podczas przypisywania misji:', assignResponse.data?.message);
+            showPopup(assignResponse.data?.message || 'Nie można przypisać misji', 'error');
+            return false;
+        }
+
+        // Pokaż komunikat potwierdzający, jeśli wymagany
+        if (params.show_confirmation) {
+            const message = params.success_message || 'Otrzymano nową misję!';
+            showPopup(message, 'success');
+        }
+
+        // Opcjonalne przekierowanie
+        if (params.redirect_after) {
+            setTimeout(() => {
+                window.location.href = params.redirect_after;
+            }, 1500);
+        }
+
+        // Zwróć dane odpowiedzi
+        return assignResponse.data;
+
+    } catch (error) {
+        console.error('Wystąpił błąd podczas uruchamiania misji:', error);
+        showPopup('Wystąpił nieoczekiwany błąd podczas przypisywania misji', 'error');
+        return false;
+    }
+};
+
 function buildNpcPopup(npcData, userId) {
     if (!userId) {
         const userElem = document.getElementById('get-user-id');
@@ -378,6 +453,14 @@ async function handleAnswer(input) {
                             redirect_after: missionConfig.redirect_after || false
                             // Nie przekazujemy tutaj item_id i item_quantity - będziemy zarządzać przedmiotami osobno
                         };
+
+                        // NAPRAWIONY KOD: Przekaż prawidłowe ID zadania misji
+                        // Sprawdź czy misja zawiera mission_task_id
+                        if (missionConfig.mission_task_id) {
+                            // Dodaj mission_task_id do parametrów misji
+                            missionParams.mission_task_id = missionConfig.mission_task_id;
+                            console.log('[NAPRAWA] Przekazuję mission_task_id:', missionConfig.mission_task_id);
+                        }
 
                         // Uruchom misję i sprawdź status
                         const missionResult = await window.startMission(missionParams);
