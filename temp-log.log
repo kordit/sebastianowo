@@ -277,7 +277,7 @@ Array
                             [filter] => raw
                         )
 
-                    [quantity] => 16
+                    [quantity] => 59
                 )
 
         )
@@ -381,8 +381,43 @@ Array
 
         )
 
+    [mission_247] => Array
+        (
+            [status] => not_started
+            [assigned_date] => 
+            [completion_date] => 
+            [tasks] => Array
+                (
+                    [zidentyfikuj-potencjalnych-klientow_0] => Array
+                        (
+                            [status] => not_started
+                            [npc_70] => not_started
+                            [npc_77] => not_started
+                            [npc_250] => not_started
+                            [npc_215] => not_started
+                            [npc_252] => not_started
+                        )
+
+                    [odwiedz-sqout_1] => in_progress
+                    [pogadaj-z-irasem_2] => not_started
+                )
+
+        )
+
 )
 Array
 (
-    [wynik_warunku] => 
+    [wynik_warunku] => 1
 )
+[2025-04-26 15:09:31] Przetwarzanie misji ID: 247
+
+[2025-04-26 15:09:48] Przetwarzanie misji ID: 247
+
+[2025-04-26 15:12:36] Przetwarzanie misji ID: 247
+
+[2025-04-26 15:13:13] Przetwarzanie misji ID: 247
+
+[2025-04-26 15:13:52] Przetwarzanie misji ID: 247
+
+[2025-04-26 15:16:11] Przetwarzanie misji ID: 247
+

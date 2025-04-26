@@ -622,6 +622,8 @@ if (function_exists('acf_add_local_field_group')):
 																	'in_progress' => 'Rozpoczęte',
 																	'completed' => 'Ukończone',
 																	'failed' => 'Niepowodzenie',
+																	'completed_npc' => 'Zalicz NPC',
+																	'failed_npc' => 'oblej NPC',
 																),
 																'default_value' => 'not_started',
 																'allow_null' => 0,

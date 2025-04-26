@@ -12,6 +12,8 @@ function fetchDialogue(npcData, idConversation, conditions, userId) {
 
 // Funkcja globalna do obsługi uruchamiania misji
 window.startMission = async function (params) {
+
+    console.log('parametry misji:', params);
     // Sprawdź, czy otrzymaliśmy wymagane parametry
     if (!params || !params.mission_id) {
         console.error('Błąd: brak wymaganych parametrów misji');
@@ -19,7 +21,6 @@ window.startMission = async function (params) {
         return false;
     }
 
-    console.log('[Mission Manager] Uruchamianie misji:', params.mission_id);
 
     try {
         // Pobierz informacje o misji przed próbą jej przypisania - przekazując identyfikator zadania z przycisku!
@@ -37,20 +38,17 @@ window.startMission = async function (params) {
 
         // Pobierz dane misji
         const missionInfo = missionInfoResponse.data;
-        console.log('[Mission Manager] Informacje o misji:', missionInfo);
 
         // Koniecznie wykorzystaj mission_task_id z przycisku NPC, a nie z odpowiedzi serwera!
         const task_id_to_use = params.mission_task_id || missionInfo.first_task_id;
-        console.log('[Mission Manager] Używam zadania:', task_id_to_use);
-
         // Przygotuj dane do zapisania misji
         const missionData = {
             action: 'assign_mission_to_user',
             mission_id: params.mission_id,
             npc_id: params.npc_id || null,
-            mission_status: 'in_progress',
+            mission_status: params.mission_status,
             mission_task_id: task_id_to_use, // Używamy ID zadania z przycisku!
-            mission_task_status: params.auto_complete_first_task ? 'completed' : 'in_progress'
+            mission_task_status: params.mission_task_status
         };
 
         // Przypisz misję do użytkownika
@@ -80,7 +78,7 @@ window.startMission = async function (params) {
 
     } catch (error) {
         console.error('Wystąpił błąd podczas uruchamiania misji:', error);
-        showPopup('Wystąpił nieoczekiwany błąd podczas przypisywania misji', 'error');
+        showPopup('Wystąpił błąd podczas uruchamiania misji: ' + error, 'error');
         return false;
     }
 };
@@ -211,7 +209,6 @@ async function handleAnswer(input) {
         }
         answerObj[key] = value;
     });
-    console.log(dataset);
     let message = null;
     let popupstate = null;
 
@@ -393,7 +390,6 @@ async function handleAnswer(input) {
                 functionData.do_function = func.do_function;
             }
 
-            console.log('Przekazuję pełne dane funkcji:', functionData);
             const functionsArray = [functionData];
             document.getElementById('npc-popup').dataset.functions = JSON.stringify(functionsArray);
         }
@@ -427,6 +423,7 @@ async function handleAnswer(input) {
         // Wykonujemy misje pierwsze, ponieważ jeśli misja nie może być przydzielona (np. już istnieje),
         // nie powinniśmy przyznawać przedmiotów związanych z nią
         if (missionsToStart.length > 0) {
+            console.log('Uruchamiam misje:', missionsToStart);
             for (const missionConfig of missionsToStart) {
                 try {
                     const missionId = missionConfig.mission_id;
@@ -440,18 +437,16 @@ async function handleAnswer(input) {
 
                     // Sprawdź, czy funkcja startMission jest dostępna
                     if (typeof window.startMission === 'function') {
-                        console.log('Uruchamiam misję:', missionId, 'od NPC:', npcId);
+
 
                         // Parametry dla funkcji startMission
                         const missionParams = {
                             mission_id: missionId,
                             npc_id: npcId,
-                            show_confirmation: missionConfig.show_confirmation !== undefined ? missionConfig.show_confirmation : true,
+                            mission_status: missionConfig.mission_status || 'active',
+                            mission_task_status: missionConfig.mission_task_status || 'active',
+
                             success_message: missionConfig.success_message || 'Otrzymano nową misję!',
-                            // Opcjonalne parametry
-                            auto_complete_first_task: missionConfig.auto_complete_first_task || false,
-                            redirect_after: missionConfig.redirect_after || false
-                            // Nie przekazujemy tutaj item_id i item_quantity - będziemy zarządzać przedmiotami osobno
                         };
 
                         // NAPRAWIONY KOD: Przekaż prawidłowe ID zadania misji
@@ -459,7 +454,6 @@ async function handleAnswer(input) {
                         if (missionConfig.mission_task_id) {
                             // Dodaj mission_task_id do parametrów misji
                             missionParams.mission_task_id = missionConfig.mission_task_id;
-                            console.log('[NAPRAWA] Przekazuję mission_task_id:', missionConfig.mission_task_id);
                         }
 
                         // Uruchom misję i sprawdź status
@@ -474,7 +468,7 @@ async function handleAnswer(input) {
 
                         // Ustaw komunikat potwierdzający (jeśli nie pokazujemy osobnego potwierdzenia)
                         if (!missionConfig.show_confirmation && !message) {
-                            message = 'Misja została przypisana!';
+                            message = 'Misja została zaktualizowana!';
                             popupstate = 'success';
                         }
                     } else {
