@@ -1,9 +1,9 @@
-252Array
+76Array
 (
     [mission_id] => 247
     [mission_status] => in_progress
     [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => not_started_npc
+    [mission_task_status] => completed
 )
 Array
 (
@@ -89,7 +89,7 @@ Array
 
     [backpack] => Array
         (
-            [gold] => 0
+            [gold] => 6
             [cigarettes] => 0
         )
 
@@ -242,6 +242,39 @@ Array
                     [quantity] => 1
                 )
 
+            [4] => Array
+                (
+                    [item] => WP_Post Object
+                        (
+                            [ID] => 212
+                            [post_author] => 1
+                            [post_date] => 2025-04-24 18:02:45
+                            [post_date_gmt] => 2025-04-24 18:02:45
+                            [post_content] => 
+                            [post_title] => Bimber Dziadzi
+                            [post_excerpt] => 
+                            [post_status] => publish
+                            [comment_status] => closed
+                            [ping_status] => closed
+                            [post_password] => 
+                            [post_name] => bimber-od-irasa
+                            [to_ping] => 
+                            [pinged] => 
+                            [post_modified] => 2025-04-24 18:07:55
+                            [post_modified_gmt] => 2025-04-24 18:07:55
+                            [post_content_filtered] => 
+                            [post_parent] => 0
+                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=212
+                            [menu_order] => 0
+                            [post_type] => item
+                            [post_mime_type] => 
+                            [comment_count] => 0
+                            [filter] => raw
+                        )
+
+                    [quantity] => 3
+                )
+
         )
 
     [avatar_full] => Array
@@ -345,9 +378,9 @@ Array
 
     [mission_247] => Array
         (
-            [status] => in_progress
-            [assigned_date] => 2025-04-26 17:09:54
-            [completion_date] => 2025-04-26 15:12:36
+            [status] => completed
+            [assigned_date] => 2025-04-26 18:14:52
+            [completion_date] => 2025-04-26 18:16:40
             [tasks] => Array
                 (
                     [zidentyfikuj-potencjalnych-klientow_0] => Array

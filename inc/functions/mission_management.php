@@ -153,7 +153,7 @@ function ajax_get_mission_info()
 }
 
 /**
- * Przypisuje misję lub misje do użytkownika (AJAX)
+ * Przypisuje misję do użytkownika (AJAX)
  */
 function ajax_assign_mission_to_user()
 {
@@ -162,82 +162,21 @@ function ajax_assign_mission_to_user()
         return;
     }
 
-    $user_id = get_current_user_id();
-    $npc_id = isset($_POST['npc_id']) ? intval($_POST['npc_id']) : 0;
-
-    // Sprawdzamy czy mamy dane w JSONie (tablica misji)
-    $raw_data = file_get_contents('php://input');
-    $json_data = json_decode($raw_data, true);
-
-    // Jeśli mamy tablicę misji w JSONie
-    if (is_array($json_data) && !empty($json_data)) {
-        mission_debug_log('Przetwarzam tablicę misji', $json_data);
-        $results = [];
-        $success = true;
-
-        foreach ($json_data as $mission_data) {
-            $mission_id = isset($mission_data['mission_id']) ? intval($mission_data['mission_id']) : 0;
-            $mission_status = isset($mission_data['mission_status']) ? sanitize_text_field($mission_data['mission_status']) : 'in_progress';
-            $mission_task_id = isset($mission_data['mission_task_id']) ? sanitize_text_field($mission_data['mission_task_id']) : null;
-            $mission_task_status = isset($mission_data['mission_task_status']) ? sanitize_text_field($mission_data['mission_task_status']) : 'in_progress';
-
-            if (!$mission_id) {
-                mission_debug_log('BŁĄD: Nieprawidłowe ID misji w tablicy');
-                continue;
-            }
-
-            $mission = get_post($mission_id);
-            if (!$mission || $mission->post_type !== 'mission') {
-                mission_debug_log('BŁĄD: Misja o ID ' . $mission_id . ' nie istnieje');
-                continue;
-            }
-
-            $result = assign_mission_to_user($user_id, $mission_id, $mission_status, $mission_task_id, $mission_task_status, $npc_id);
-
-            if ($result['success']) {
-                $results[] = [
-                    'mission_id' => $mission_id,
-                    'mission_title' => $mission->post_title,
-                    'task_id' => $result['first_task_id'],
-                    'success' => true
-                ];
-            } else {
-                $success = false;
-                $results[] = [
-                    'mission_id' => $mission_id,
-                    'success' => false,
-                    'message' => $result['message']
-                ];
-            }
-        }
-
-        if ($success) {
-            wp_send_json_success([
-                'message' => 'Misje zostały zaktualizowane',
-                'results' => $results,
-                'npc_id' => $npc_id
-            ]);
-        } else {
-            wp_send_json_error([
-                'message' => 'Wystąpiły błędy podczas aktualizacji misji',
-                'results' => $results
-            ]);
-        }
-
-        return;
-    }
-
-    // Obsługa pojedynczej misji (stara metoda)
     $mission_id = isset($_POST['mission_id']) ? intval($_POST['mission_id']) : 0;
+    $npc_id = isset($_POST['npc_id']) ? intval($_POST['npc_id']) : 0;
     $mission_status = isset($_POST['mission_status']) ? sanitize_text_field($_POST['mission_status']) : 'in_progress';
     $mission_task_id = isset($_POST['mission_task_id']) ? sanitize_text_field($_POST['mission_task_id']) : null;
     $mission_task_status = isset($_POST['mission_task_status']) ? sanitize_text_field($_POST['mission_task_status']) : 'in_progress';
+
 
     if (!$mission_id) {
         mission_debug_log('BŁĄD: Nieprawidłowe ID misji');
         wp_send_json_error(['message' => 'Nieprawidłowe ID misji']);
         return;
     }
+
+    $user_id = get_current_user_id();
+
 
     $mission = get_post($mission_id);
     if (!$mission || $mission->post_type !== 'mission') {
@@ -250,15 +189,17 @@ function ajax_assign_mission_to_user()
 
     if ($result['success']) {
         $response = [
-            'message' => 'Misja została zaktualizowana',
+            'message' => 'Misja została przypisana do użytkownika',
             'mission_id' => $mission_id,
             'mission_title' => $mission->post_title,
             'task_id' => $result['first_task_id'],
             'npc_id' => $npc_id
         ];
 
+
         wp_send_json_success($response);
     } else {
+
         wp_send_json_error(['message' => $result['message']]);
     }
 }
@@ -304,19 +245,17 @@ function assign_mission_to_user($user_id, $mission_id, $mission_status = 'in_pro
     // 6. Obsługa zadania
     $first_task_id = null;
 
-    // Sprawdzanie statusów NPC
-    $npc_status = null;
+    // Obsługa specjalnych statusów NPC
     $updated_npc = false;
+    $npc_status = null;
 
+    // Sprawdzanie statusów NPC
     if ($mission_task_status === 'completed_npc' || $mission_task_status === 'failed_npc') {
+        $mission_task_status = ($mission_task_status === 'completed_npc') ? 'completed' : 'failed';
         if ($npc_id > 0) {
-            $npc_status = ($mission_task_status === 'completed_npc') ? 'completed' : 'failed';
+            $npc_status = $mission_task_status;
             $updated_npc = true;
-            $mission_task_status = 'in_progress'; // Zadanie pozostaje in_progress
             mission_debug_log('Aktualizacja statusu NPC ' . $npc_id . ' na ' . $npc_status . ' dla zadania ' . $mission_task_id);
-        } else {
-            $mission_task_status = 'in_progress';
-            mission_debug_log('Zmieniono status z ' . $mission_task_status . ' na in_progress dla zadania ' . $mission_task_id . ' (brak ID NPC)');
         }
     }
 
@@ -332,14 +271,55 @@ function assign_mission_to_user($user_id, $mission_id, $mission_status = 'in_pro
                 'status' => $mission_task_status,
                 'start_date' => current_time('mysql')
             ];
+
+            // Jeśli tworzymy nowe zadanie i podany jest NPC, ustawiamy status NPC
+            if ($npc_id > 0) {
+                if ($updated_npc) {
+                    // Użyj określonego statusu NPC
+                    $npc_key = 'npc_' . $npc_id;
+                    $mission_data['tasks'][$mission_task_id][$npc_key] = $npc_status;
+                    mission_debug_log('Utworzono nowe zadanie, ustawiono status NPC ' . $npc_id . ' na ' . $npc_status);
+                } else {
+                    // Domyślnie ustaw not_started dla nowego NPC
+                    $npc_key = 'npc_' . $npc_id;
+                    $mission_data['tasks'][$mission_task_id][$npc_key] = 'not_started';
+                    mission_debug_log('Utworzono nowe zadanie, ustawiono status NPC ' . $npc_id . ' na not_started');
+                }
+            }
+
+            // Pobierz informacje o misji, aby sprawdzić czy zadanie ma innych NPC
+            $mission_tasks = get_field('mission_tasks', $mission_id);
+            if (is_array($mission_tasks)) {
+                foreach ($mission_tasks as $task) {
+                    $task_id = isset($task['task_id']) ? $task['task_id'] : '';
+                    if ($task_id === $mission_task_id && isset($task['task_type']) && $task['task_type'] === 'checkpoint_npc') {
+                        if (!empty($task['task_checkpoint_npc']) && is_array($task['task_checkpoint_npc'])) {
+                            // Ustaw status wszystkich NPC w zadaniu jako not_started
+                            foreach ($task['task_checkpoint_npc'] as $npc_info) {
+                                if (!empty($npc_info['npc'])) {
+                                    $task_npc_id = $npc_info['npc'];
+                                    $task_npc_key = 'npc_' . $task_npc_id;
+                                    // Nie nadpisujemy już ustawionego NPC
+                                    if (!isset($mission_data['tasks'][$mission_task_id][$task_npc_key])) {
+                                        $mission_data['tasks'][$mission_task_id][$task_npc_key] = 'not_started';
+                                        mission_debug_log('Ustawiono status NPC ' . $task_npc_id . ' na not_started w nowym zadaniu');
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         } else {
+            // Jeśli zadanie już istnieje, aktualizujemy jego status
             $mission_data['tasks'][$mission_task_id]['status'] = $mission_task_status;
 
-            // Aktualizacja statusu dla konkretnego NPC, jeśli potrzebne
-            if ($updated_npc && $npc_id > 0) {
+            // Jeśli podano NPC, zaktualizuj jego status
+            if ($npc_id > 0 && $updated_npc) {
                 $npc_key = 'npc_' . $npc_id;
                 $mission_data['tasks'][$mission_task_id][$npc_key] = $npc_status;
-                mission_debug_log('Zaktualizowano status NPC ' . $npc_id . ' na ' . $npc_status . ' dla zadania ' . $mission_task_id, $mission_data['tasks'][$mission_task_id]);
+                mission_debug_log('Zaktualizowano status NPC ' . $npc_id . ' na ' . $npc_status . ' dla zadania ' . $mission_task_id);
             }
         }
 
@@ -370,121 +350,14 @@ function assign_mission_to_user($user_id, $mission_id, $mission_status = 'in_pro
     // 8. Zapewnienie kompatybilności z ACF i czyszczenie cache
     update_field($mission_meta_key, $mission_data, 'user_' . $user_id);
 
-    // 9. Sprawdzenie, czy wszystkie cele NPC zostały osiągnięte
-    $mission_data = check_npc_mission_completion($user_id, $mission_id, $mission_data);
-
-    // 10. Usuwamy cache, by zmiany były od razu widoczne
+    // 9. Usuwamy cache, by zmiany były od razu widoczne
     clean_user_cache($user_id);
     wp_cache_delete($user_id, 'user_meta');
 
-    // 11. Zwracamy wynik
+    // 10. Zwracamy wynik
     return [
         'success' => $success,
         'message' => $success ? 'Misja została zaktualizowana' : 'Błąd podczas aktualizacji misji',
         'first_task_id' => $first_task_id
     ];
-}
-
-/**
- * Sprawdza, czy wszystkie cele NPC w zadaniu zostały osiągnięte
- * i automatycznie aktualizuje status zadania jeśli tak
- * 
- * @param int    $user_id    ID użytkownika
- * @param int    $mission_id ID misji
- * @param array  $mission_data Dane misji
- * @return array Zaktualizowane dane misji
- */
-function check_npc_mission_completion($user_id, $mission_id, $mission_data)
-{
-    if (!is_array($mission_data) || !isset($mission_data['tasks']) || !is_array($mission_data['tasks'])) {
-        return $mission_data;
-    }
-
-    $updated = false;
-    $mission_debug_prefix = "Misja ID:{$mission_id} - ";
-
-    // Sprawdź każde zadanie w misji
-    foreach ($mission_data['tasks'] as $task_id => &$task_data) {
-        if (!is_array($task_data) || $task_data['status'] !== 'in_progress') {
-            continue;
-        }
-
-        $all_targets_completed = true;
-        $npc_target_pairs = [];
-
-        // Zbierz wszystkie pary target/npc
-        foreach ($task_data as $key => $value) {
-            // Jeśli to jest cel NPC (npc_target_XXX)
-            if (strpos($key, 'npc_target_') === 0) {
-                $npc_id = substr($key, strlen('npc_target_'));
-                $npc_key = 'npc_' . $npc_id;
-
-                // Dodaj parę do sprawdzenia
-                if (isset($task_data[$npc_key])) {
-                    $npc_target_pairs[$key] = [
-                        'target_key' => $key,
-                        'target_status' => $value,
-                        'npc_key' => $npc_key,
-                        'npc_status' => $task_data[$npc_key]
-                    ];
-                }
-            }
-        }
-
-        // Jeśli nie ma par do sprawdzenia, przejdź do następnego zadania
-        if (empty($npc_target_pairs)) {
-            continue;
-        }
-
-        mission_debug_log($mission_debug_prefix . "Sprawdzam pary NPC dla zadania {$task_id}:", $npc_target_pairs);        // Inicjalizacja zmiennych do sprawdzania misji
-        $completed_pairs = 0;
-        $failed_pairs = 0;
-        $total_pairs = count($npc_target_pairs);
-
-        // Sprawdź każdą parę target/npc
-        foreach ($npc_target_pairs as $pair) {
-            // Jeśli status celu to 'completed', a status NPC to 'not_started',
-            // oznacza to, że cel został osiągnięty, ale NPC jeszcze nie został zaktualizowany
-            if ($pair['target_status'] === 'completed' && $pair['npc_status'] === 'not_started') {
-                // Ustaw status NPC na 'completed'
-                $task_data[$pair['npc_key']] = 'completed';
-                mission_debug_log($mission_debug_prefix . "Automatycznie zaktualizowano status {$pair['npc_key']} na completed");
-                $updated = true;
-            }
-
-            // Zliczamy ukończone i nieudane pary
-            if ($pair['target_status'] === 'completed' && $pair['npc_status'] === 'completed') {
-                $completed_pairs++;
-            } elseif ($pair['target_status'] === 'failed' && $pair['npc_status'] === 'failed') {
-                $failed_pairs++;
-            }
-        }
-
-        // Jeśli wszystkie pary są albo completed albo failed (czyli wszystkie pary są obsłużone)
-        // i co najmniej jedna para jest completed, to uznajemy zadanie za ukończone
-        if (($completed_pairs + $failed_pairs === $total_pairs) && $completed_pairs > 0) {
-            $task_data['status'] = 'completed';
-            $task_data['completion_date'] = current_time('mysql');
-            mission_debug_log($mission_debug_prefix . "Automatycznie zaktualizowano status zadania {$task_id} na completed. Ukończone pary: {$completed_pairs}, nieudane pary: {$failed_pairs}, wszystkie pary: {$total_pairs}");
-            $updated = true;
-        }
-    }
-
-    // Jeśli dane zostały zaktualizowane, zapisz je
-    if ($updated) {
-        // Używamy bezpośrednio update_user_meta
-        $mission_meta_key = 'mission_' . $mission_id;
-        update_user_meta($user_id, $mission_meta_key, $mission_data);
-
-        // Zapewnienie kompatybilności z ACF i czyszczenie cache
-        update_field($mission_meta_key, $mission_data, 'user_' . $user_id);
-
-        // Usuwamy cache, by zmiany były od razu widoczne
-        clean_user_cache($user_id);
-        wp_cache_delete($user_id, 'user_meta');
-
-        mission_debug_log($mission_debug_prefix . "Zapisano zaktualizowane dane misji");
-    }
-
-    return $mission_data;
 }
