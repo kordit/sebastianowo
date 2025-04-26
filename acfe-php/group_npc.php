@@ -515,7 +515,7 @@ if (function_exists('acf_add_local_field_group')):
 																'required' => 1,
 																'conditional_logic' => 0,
 																'wrapper' => array(
-																	'width' => '',
+																	'width' => '25',
 																	'class' => '',
 																	'id' => '',
 																),
@@ -526,7 +526,43 @@ if (function_exists('acf_add_local_field_group')):
 																'allow_null' => 1,
 																'multiple' => 0,
 																'return_format' => 'id',
-																'ui' => 0,
+																'ui' => 1,
+															),
+															// Dodane pole statusu misji
+															array(
+																'key' => 'field_mission_status',
+																'label' => 'Status misji',
+																'name' => 'mission_status',
+																'aria-label' => '',
+																'type' => 'select',
+																'instructions' => 'Wybierz status misji',
+																'required' => 0,
+																'conditional_logic' => array(
+																	array(
+																		array(
+																			'field' => 'field_mission_id',
+																			'operator' => '!=empty',
+																		),
+																	),
+																),
+																'wrapper' => array(
+																	'width' => '25',
+																	'class' => '',
+																	'id' => '',
+																),
+																'choices' => array(
+																	'not_started' => 'Niezaczęte',
+																	'in_progress' => 'Rozpoczęte',
+																	'completed' => 'Ukończone',
+																	'failed' => 'Niepowodzenie',
+																),
+																'default_value' => 'not_started',
+																'allow_null' => 0,
+																'multiple' => 0,
+																'ui' => 1,
+																'ajax' => 0,
+																'return_format' => 'value',
+																'placeholder' => '',
 															),
 															// Dodane pole wyboru zadania powiązanego z misją
 															array(
@@ -536,10 +572,17 @@ if (function_exists('acf_add_local_field_group')):
 																'aria-label' => '',
 																'type' => 'select',
 																'instructions' => 'Wybierz zadanie powiązane z wybraną misją',
-																'required' => 1,
-																'conditional_logic' => 0,
+																'required' => 0,
+																'conditional_logic' => array(
+																	array(
+																		array(
+																			'field' => 'field_mission_id',
+																			'operator' => '!=empty',
+																		),
+																	),
+																),
 																'wrapper' => array(
-																	'width' => '',
+																	'width' => '25',
 																	'class' => '',
 																	'id' => '',
 																),
@@ -550,7 +593,43 @@ if (function_exists('acf_add_local_field_group')):
 																'ui' => 0,
 																'ajax' => 0,
 																'save_custom' => 1,
-																'placeholder' => 'Najpierw wybierz zadanie z misji',
+																'placeholder' => 'Wybierz zadanie z misji',
+															),
+															// Dodane pole statusu zadania
+															array(
+																'key' => 'field_mission_task_status',
+																'label' => 'Status zadania',
+																'name' => 'mission_task_status',
+																'aria-label' => '',
+																'type' => 'select',
+																'instructions' => 'Wybierz status zadania',
+																'required' => 0,
+																'conditional_logic' => array(
+																	array(
+																		array(
+																			'field' => 'field_mission_task_id',
+																			'operator' => '!=empty',
+																		),
+																	),
+																),
+																'wrapper' => array(
+																	'width' => '25',
+																	'class' => '',
+																	'id' => '',
+																),
+																'choices' => array(
+																	'not_started' => 'Niezaczęte',
+																	'in_progress' => 'Rozpoczęte',
+																	'completed' => 'Ukończone',
+																	'failed' => 'Niepowodzenie',
+																),
+																'default_value' => 'not_started',
+																'allow_null' => 0,
+																'multiple' => 0,
+																'ui' => 0,
+																'ajax' => 0,
+																'return_format' => 'value',
+																'placeholder' => '',
 															),
 														),
 														'min' => '',

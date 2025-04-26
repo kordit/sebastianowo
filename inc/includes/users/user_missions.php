@@ -55,13 +55,17 @@ add_action('acf/include_fields', function () {
                                 if (!empty($npc_info['npc'])) {
                                     $npc_id = $npc_info['npc'];
                                     $npc_post = get_post($npc_id);
-                                    $npc_name = $npc_post ? $npc_post->post_title : 'NPC #' . $npc_id;                                    // Pobierz status NPC z danych zadania
-                                    $npc_status = isset($npc_info['status']) ? $npc_info['status'] : 'not_started';
+                                    $npc_name = $npc_post ? $npc_post->post_title : 'NPC #' . $npc_id;
 
+                                    // Pobranie statusu z danych zadania
+                                    $npc_status = isset($npc_info['status']) ? $npc_info['status'] : 'not_started';
+                                    $is_completed = ($npc_status == 'completed');
+
+                                    // Pojedyncze pole select dla statusu zadania NPC
                                     $npc_sub_fields[] = array(
-                                        'key' => 'field_task_npc_status_' . $mission->ID . '_' . $task_id . '_' . $npc_id,
-                                        'label' => $npc_name . ' (status oryginalny)',
-                                        'name' => 'npc_status_' . $npc_id,
+                                        'key' => 'field_task_npc_' . $mission->ID . '_' . $task_id . '_' . $npc_id,
+                                        'label' => $npc_name . ' (status zadania)',
+                                        'name' => 'npc_' . $npc_id,
                                         'type' => 'select',
                                         'instructions' => '',
                                         'choices' => array(
@@ -71,31 +75,12 @@ add_action('acf/include_fields', function () {
                                             'failed' => 'Niepowodzenie',
                                         ),
                                         'default_value' => $npc_status,
-                                        'readonly' => 1,
-                                        'disabled' => 1,
                                         'ui' => 1,
-                                        'ajax' => 0,
+                                        'search_placeholder' => 'Status',
                                         'allow_null' => 0,
                                         'return_format' => 'value',
                                         'wrapper' => array(
-                                            'width' => '50',
-                                            'class' => '',
-                                            'id' => '',
-                                        ),
-                                    );
-
-                                    $npc_sub_fields[] = array(
-                                        'key' => 'field_task_npc_' . $mission->ID . '_' . $task_id . '_' . $npc_id,
-                                        'label' => $npc_name . ' (wykonane)',
-                                        'name' => 'npc_' . $npc_id,
-                                        'type' => 'true_false',
-                                        'instructions' => '',
-                                        'default_value' => 0,
-                                        'ui' => 1,
-                                        'ui_on_text' => 'Wykonane',
-                                        'ui_off_text' => 'Niewykonane',
-                                        'wrapper' => array(
-                                            'width' => '50',
+                                            'width' => '100',
                                             'class' => '',
                                             'id' => '',
                                         ),
@@ -103,6 +88,7 @@ add_action('acf/include_fields', function () {
                                 }
                             }
 
+                            // Dodanie pola statusu dla całej grupy zadań z NPC
                             $task_fields[] = array(
                                 'key' => 'field_task_' . $mission->ID . '_' . $task_id,
                                 'label' => $task_title,
@@ -110,20 +96,54 @@ add_action('acf/include_fields', function () {
                                 'type' => 'group',
                                 'instructions' => $task['task_description'] ?? '',
                                 'layout' => 'block',
-                                'sub_fields' => $npc_sub_fields
+                                'sub_fields' => array_merge(
+                                    [
+                                        array(
+                                            'key' => 'field_task_status_' . $mission->ID . '_' . $task_id,
+                                            'label' => 'Status zadania',
+                                            'name' => 'status',
+                                            'type' => 'select',
+                                            'instructions' => '',
+                                            'choices' => array(
+                                                'not_started' => 'Niezaczęte',
+                                                'in_progress' => 'Rozpoczęte',
+                                                'completed' => 'Ukończone',
+                                                'failed' => 'Niepowodzenie',
+                                            ),
+                                            'default_value' => 'not_started',
+                                            'ui' => 1,
+                                            'search_placeholder' => 'Status',
+                                            'allow_null' => 0,
+                                            'return_format' => 'value',
+                                            'wrapper' => array(
+                                                'width' => '100',
+                                                'class' => '',
+                                                'id' => '',
+                                            ),
+                                        ),
+                                    ],
+                                    $npc_sub_fields
+                                )
                             );
                         } else {
-                            // Dla standardowych zadań (checkpoint, place) - pojedynczy przełącznik true/false
+                            // Dla standardowych zadań (checkpoint, place) - pole select zamiast przełącznika true/false
                             $task_fields[] = array(
                                 'key' => 'field_task_' . $mission->ID . '_' . $task_id,
                                 'label' => $task_title,
                                 'name' => $task_id,
-                                'type' => 'true_false',
+                                'type' => 'select',
                                 'instructions' => $task['task_description'] ?? '',
-                                'default_value' => 0,
+                                'choices' => array(
+                                    'not_started' => 'Niezaczęte',
+                                    'in_progress' => 'Rozpoczęte',
+                                    'completed' => 'Ukończone',
+                                    'failed' => 'Niepowodzenie',
+                                ),
+                                'default_value' => 'not_started',
                                 'ui' => 1,
-                                'ui_on_text' => 'Wykonane',
-                                'ui_off_text' => 'Niewykonane',
+                                'search_placeholder' => 'Status',
+                                'allow_null' => 0,
+                                'return_format' => 'value',
                             );
                         }
                     }

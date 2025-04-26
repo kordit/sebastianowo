@@ -13,7 +13,7 @@ if ($instance != 'kreator'): ?>
     <div class="game-content--inner">
 
         <?php
-        et_r(get_fields(247));
+        et_r(get_fields(76));
         $request_uri = trim($_SERVER['REQUEST_URI'], '/'); // Usuwamy początkowe i końcowe "/"
         $slash_count = substr_count($request_uri, '/');
         $post_id = get_the_ID();
