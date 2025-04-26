@@ -1,546 +1,388 @@
 Array
 (
-    [anwser] => Array
+    [mission_id] => 247
+    [mission_status] => not_started
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => not_started
+)
+Array
+(
+    [user_class] => Array
         (
-            [0] => Array
+            [value] => zadymiarz
+            [label] => Zadymiarz
+        )
+
+    [avatar] => Array
+        (
+            [ID] => 81
+            [id] => 81
+            [title] => human_a_4
+            [filename] => human_a_4.png
+            [filesize] => 246506
+            [url] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+            [link] => http://seb.soeasy.it/human_a_4/
+            [alt] => 
+            [author] => 1
+            [description] => 
+            [caption] => 
+            [name] => human_a_4
+            [status] => inherit
+            [uploaded_to] => 0
+            [date] => 2025-04-17 20:14:49
+            [modified] => 2025-04-17 20:14:49
+            [menu_order] => 0
+            [mime_type] => image/png
+            [type] => image
+            [subtype] => png
+            [icon] => http://seb.soeasy.it/wp-includes/images/media/default.png
+            [width] => 430
+            [height] => 430
+            [sizes] => Array
                 (
-                    [acf_fc_layout] => question
-                    [layout_settings] => Array
-                        (
-                            [conversation_start] => Array
-                                (
-                                    [0] => Array
-                                        (
-                                            [acf_fc_layout] => warunek
-                                            [if] => scena
-                                            [mission_select] => Array
-                                                (
-                                                    [mission_id] => 
-                                                    [mission_status] => not_started
-                                                    [mission_task_id] => 
-                                                    [mission_task_status] => not_started
-                                                )
-
-                                            [scena] => start/peron
-                                            [instation] => 
-                                            [relation_select] => Array
-                                                (
-                                                    [relacja] => 
-                                                    [operator] => 
-                                                    [value] => 
-                                                )
-
-                                        )
-
-                                )
-
-                        )
-
-                    [acfe_flexible_toggle] => 
-                    [acfe_flexible_layout_title] => witaj
-                    [id_pola] => witaj
-                    [question] => 
-zaciąga się szlugiem, patrzy na ciebie spode łba:
-
-
-– Zadymiarz to ktoś, kto nie unika konfrontacji. To siła, zdecydowanie i obecność, która potrafi uciszyć całą ławkę jednym spojrzeniem. Jeśli wybierzesz tę drogę, musisz być gotów działać – nie gadać.
-
-
-Masz naturalną przewagę w bezpośrednich starciach – bonus do Siły i Wytrzymałości daje ci przewagę w walce i pozwala dłużej utrzymać się na nogach, szybciej też uczysz się walczyć. Konflikty rozwiązujesz szybko i skutecznie, a relacje budujesz przez dominację – respekt zdobywasz pięściami, nie słowami.
-
-
-Ale są rzeczy, których nie ogarniasz sam. Z handlem ci nie po drodze – kombinacje, przeliczenia, gadki przy bramie… to nie twoje podwórko. Dlatego dobrze mieć kogoś, kto potrafi – kumpla, co załatwi, co się da, zanim jeszcze otworzysz usta.
-
-
-Ja mam brata – Toworisha. Kombinator jak się patrzy. On gada, ja stoję. On planuje, ja wykonuję. Ty też pomyśl, z kim się trzymać. Bo sam, nawet jak jesteś silny, nie zrobisz wszystkiego.
-
-
-Zadymiarz to siła dzielnicy. Ale dzielnica to układ ludzi – bez nich, żadna siła nie wystarczy.
-
-
-
-                    [anwsers] => Array
-                        (
-                            [0] => Array
-                                (
-                                    [acf_fc_layout] => anwser
-                                    [layout_settings] => Array
-                                        (
-                                            [conversation_start] => 
-                                        )
-
-                                    [anwser_text] => Zostaję zadymiarzem
-                                    [type_anwser] => 
-                                    [go_to_id] => zadyma
-                                )
-
-                            [1] => Array
-                                (
-                                    [acf_fc_layout] => anwser
-                                    [layout_settings] => Array
-                                        (
-                                            [conversation_start] => 
-                                        )
-
-                                    [anwser_text] => Daj pomyśleć
-                                    [type_anwser] => 
-                                    [go_to_id] => daj-pomyslec
-                                )
-
-                        )
-
-                )
-
-            [1] => Array
-                (
-                    [acf_fc_layout] => question
-                    [layout_settings] => Array
-                        (
-                            [conversation_start] => Array
-                                (
-                                    [0] => Array
-                                        (
-                                            [acf_fc_layout] => warunek
-                                            [if] => scena
-                                            [mission_select] => Array
-                                                (
-                                                    [mission_id] => 
-                                                    [mission_status] => not_started
-                                                    [mission_task_id] => 
-                                                    [mission_task_status] => not_started
-                                                )
-
-                                            [scena] => start/peron
-                                            [instation] => 
-                                            [relation_select] => Array
-                                                (
-                                                    [relacja] => 
-                                                    [operator] => 
-                                                    [value] => 
-                                                )
-
-                                        )
-
-                                )
-
-                        )
-
-                    [acfe_flexible_toggle] => 
-                    [acfe_flexible_layout_title] => zadyma
-                    [id_pola] => zadyma
-                    [question] => 
-przytakuje głową, ale nie zmienia wyrazu twarzy:
-
-
-Dobrze. Nie licz na litość, nie licz na odpoczynek.
-
-Od teraz każdy cień może być ciosem, każda chwila ciszy – próbą siły.
-
-Ale jak wytrzymasz… to nikt ci się nie spojrzy w oczy bez strachu.
-
-
-
-                    [anwsers] => Array
-                        (
-                            [0] => Array
-                                (
-                                    [acf_fc_layout] => anwser
-                                    [layout_settings] => Array
-                                        (
-                                            [conversation_start] => 
-                                        )
-
-                                    [anwser_text] => Pewnie mordo
-                                    [type_anwser] => 
-                                    [go_to_id] => wybor-klasy
-                                )
-
-                            [1] => Array
-                                (
-                                    [acf_fc_layout] => anwser
-                                    [layout_settings] => Array
-                                        (
-                                            [conversation_start] => 
-                                        )
-
-                                    [anwser_text] => Jednak daj chwilę
-                                    [type_anwser] => 
-                                    [go_to_id] => daj-pomyslec
-                                )
-
-                        )
-
-                )
-
-            [2] => Array
-                (
-                    [acf_fc_layout] => question
-                    [layout_settings] => Array
-                        (
-                            [conversation_start] => Array
-                                (
-                                    [0] => Array
-                                        (
-                                            [acf_fc_layout] => warunek
-                                            [if] => scena
-                                            [mission_select] => Array
-                                                (
-                                                    [mission_id] => 
-                                                    [mission_status] => not_started
-                                                    [mission_task_id] => 
-                                                    [mission_task_status] => not_started
-                                                )
-
-                                            [scena] => start/peron
-                                            [instation] => 
-                                            [relation_select] => Array
-                                                (
-                                                    [relacja] => 
-                                                    [operator] => 
-                                                    [value] => 
-                                                )
-
-                                        )
-
-                                )
-
-                        )
-
-                    [acfe_flexible_toggle] => 
-                    [acfe_flexible_layout_title] => daj-pomyslec
-                    [id_pola] => daj-pomyslec
-                    [question] => 
-(prycha, patrzy na ciebie z politowaniem):
-
-
-No to idź się zastanów.
-
-Może ci się jeszcze zachce życia bez siniaków.
-
-Tylko pamiętaj — respektu się nie rozkminia, respekt się zdobywa.
-
-
-
-                    [anwsers] => Array
-                        (
-                            [0] => Array
-                                (
-                                    [acf_fc_layout] => anwser
-                                    [layout_settings] => Array
-                                        (
-                                            [conversation_start] => 
-                                        )
-
-                                    [anwser_text] => Spoko
-                                    [type_anwser] => 
-                                    [go_to_id] => 0
-                                )
-
-                        )
-
-                )
-
-            [3] => Array
-                (
-                    [acf_fc_layout] => question
-                    [layout_settings] => Array
-                        (
-                            [conversation_start] => Array
-                                (
-                                    [0] => Array
-                                        (
-                                            [acf_fc_layout] => warunek
-                                            [if] => instance
-                                            [mission_select] => Array
-                                                (
-                                                    [mission_id] => 
-                                                    [mission_status] => not_started
-                                                    [mission_task_id] => 
-                                                    [mission_task_status] => not_started
-                                                )
-
-                                            [scena] => 
-                                            [instation] => start/peron
-                                            [relation_select] => Array
-                                                (
-                                                    [relacja] => 
-                                                    [operator] => 
-                                                    [value] => 
-                                                )
-
-                                        )
-
-                                )
-
-                        )
-
-                    [acfe_flexible_toggle] => 
-                    [acfe_flexible_layout_title] => wybor-klasy
-                    [id_pola] => wybor-klasy
-                    [question] => 
-Spoko, dobry wybór. A i jeszcze jedno… co to za koszulka? Olimpia Adrianowo?
-
-
-Zdejmuj te barwy, zanim ktoś Ci je ściągnie razem ze skórą.
-
-
-Tu są inne zasady, inna ziemia, rozumiesz?
-
-
-Masz minutę. Potem nie ręczę za nic.
-
-
-
-                    [anwsers] => Array
-                        (
-                            [0] => Array
-                                (
-                                    [acf_fc_layout] => anwser
-                                    [layout_settings] => Array
-                                        (
-                                            [conversation_start] => Array
-                                                (
-                                                    [0] => Array
-                                                        (
-                                                            [acf_fc_layout] => warunek
-                                                            [if] => mission
-                                                            [mission_select] => Array
-                                                                (
-                                                                    [mission_id] => 247
-                                                                    [mission_status] => not_started
-                                                                    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-                                                                    [mission_task_status] => not_started
-                                                                )
-
-                                                            [scena] => 
-                                                            [instation] => 
-                                                            [relation_select] => Array
-                                                                (
-                                                                    [relacja] => 
-                                                                    [operator] => 
-                                                                    [value] => 
-                                                                )
-
-                                                        )
-
-                                                )
-
-                                        )
-
-                                    [anwser_text] => Już się przebieram
-                                    [type_anwser] => Array
-                                        (
-                                            [0] => Array
-                                                (
-                                                    [acf_fc_layout] => function
-                                                    [acfe_flexible_toggle] => 
-                                                    [do_function] => SetClass
-                                                    [page_url] => 
-                                                )
-
-                                        )
-
-                                    [go_to_id] => 0
-                                )
-
-                        )
-
-                )
-
-            [4] => Array
-                (
-                    [acf_fc_layout] => question
-                    [layout_settings] => Array
-                        (
-                            [conversation_start] => 
-                        )
-
-                    [acfe_flexible_toggle] => 
-                    [acfe_flexible_layout_title] => siemanko-w-parku
-                    [id_pola] => siemanko-w-parku
-                    [question] => 
-Ooo, patrz kto idzie. Mówiłem ostatnio Toworishowi, że długo cię nie widziałem.
-Co tam, nudzisz się, czy znowu coś kombinujesz?
-
-
-
-                    [anwsers] => Array
-                        (
-                            [0] => Array
-                                (
-                                    [acf_fc_layout] => anwser
-                                    [layout_settings] => Array
-                                        (
-                                            [conversation_start] => Array
-                                                (
-                                                    [0] => Array
-                                                        (
-                                                            [acf_fc_layout] => warunek
-                                                            [if] => mission
-                                                            [mission_select] => Array
-                                                                (
-                                                                    [mission_id] => 247
-                                                                    [mission_status] => not_started
-                                                                    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-                                                                    [mission_task_status] => not_started
-                                                                )
-
-                                                            [scena] => 
-                                                            [instation] => 
-                                                            [relation_select] => Array
-                                                                (
-                                                                    [relacja] => 
-                                                                    [operator] => 
-                                                                    [value] => 
-                                                                )
-
-                                                        )
-
-                                                )
-
-                                        )
-
-                                    [anwser_text] => Masz może jakąś robotę dla mnie?
-                                    [type_anwser] => Array
-                                        (
-                                            [0] => Array
-                                                (
-                                                    [acf_fc_layout] => mission
-                                                    [acfe_flexible_toggle] => 
-                                                    [mission_id] => 247
-                                                    [mission_status] => in_progress
-                                                    [mission_task_id] => odwiedz-sqout_1
-                                                    [mission_task_status] => completed
-                                                )
-
-                                            [1] => Array
-                                                (
-                                                    [acf_fc_layout] => item
-                                                    [acfe_flexible_toggle] => 
-                                                    [item_action] => give
-                                                    [item] => 212
-                                                    [quantity] => 3
-                                                )
-
-                                        )
-
-                                    [go_to_id] => moze-cos-by-sie-zarobilo
-                                )
-
-                            [1] => Array
-                                (
-                                    [acf_fc_layout] => anwser
-                                    [layout_settings] => Array
-                                        (
-                                            [conversation_start] => 
-                                        )
-
-                                    [anwser_text] => Śpieszy mi się, na razie!
-                                    [type_anwser] => 
-                                    [go_to_id] => 0
-                                )
-
-                        )
-
-                )
-
-            [5] => Array
-                (
-                    [acf_fc_layout] => question
-                    [layout_settings] => Array
-                        (
-                            [conversation_start] => 
-                        )
-
-                    [acfe_flexible_toggle] => 
-                    [acfe_flexible_layout_title] => moze-cos-by-sie-zarobilo
-                    [id_pola] => moze-cos-by-sie-zarobilo
-                    [question] => 
-A no tak się składa, że mam idealną robotę dla świeżaka. Mam bimber od dziadzi. Ale nie taki, co się go popija do śledzia w galarecie. Taki, co zżera farbę z metalu, rozumiesz? Jeden łyk i już widzisz własne myśli od tyłu.
-
-
-Tego nie można dać pierwszemu z brzegu. Nie jakimś chłoptasiom z bloku obok, co jeszcze chodzą na WF. Nie tym, co mają mamę, która zrobi kanapki, jak im się głowa zakręci.
-
-
-Ty masz to dać tym, co już dawno przepili wstyd. Takim, co śpią pod śmietnikiem i jak się zesrają, to nawet nie wstają.
-
-
-Rozprowadź to, ale z łbem. Jak któryś zacznie się pluć, że coś mu się dzieje, to zgadnij kto będzie winny?
-
-Ja? Nie. Ty.
-
-
-
-                    [anwsers] => Array
-                        (
-                            [0] => Array
-                                (
-                                    [acf_fc_layout] => anwser
-                                    [layout_settings] => Array
-                                        (
-                                            [conversation_start] => 
-                                        )
-
-                                    [anwser_text] => Spoko, daj te 5 flaszek to je pogonie
-                                    [type_anwser] => Array
-                                        (
-                                            [0] => Array
-                                                (
-                                                    [acf_fc_layout] => item
-                                                    [acfe_flexible_toggle] => 
-                                                    [item_action] => give
-                                                    [item] => 212
-                                                    [quantity] => 5
-                                                )
-
-                                        )
-
-                                    [go_to_id] => active-moze-cos-by-sie-zarobilo
-                                )
-
-                        )
-
-                )
-
-            [6] => Array
-                (
-                    [acf_fc_layout] => question
-                    [layout_settings] => Array
-                        (
-                            [conversation_start] => 
-                        )
-
-                    [acfe_flexible_toggle] => 
-                    [acfe_flexible_layout_title] => active-moze-cos-by-sie-zarobilo
-                    [id_pola] => active-moze-cos-by-sie-zarobilo
-                    [question] => 
-Masz pięć flach, rozprowadź to – tak, żeby nikt nie płakał, nikt nie doniósł.
-
-A jak zrobisz to dobrze… to może wreszcie pogadamy o czymś większym niż alkohol dla bezdomnych.
-
-
-
-                    [anwsers] => Array
-                        (
-                            [0] => Array
-                                (
-                                    [acf_fc_layout] => anwser
-                                    [layout_settings] => Array
-                                        (
-                                            [conversation_start] => 
-                                        )
-
-                                    [anwser_text] => Spoko, odezwę się jak to pogonię
-                                    [type_anwser] => 
-                                    [go_to_id] => 0
-                                )
-
-                        )
-
+                    [thumbnail] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4-150x150.png
+                    [thumbnail-width] => 150
+                    [thumbnail-height] => 150
+                    [medium] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4-300x300.png
+                    [medium-width] => 300
+                    [medium-height] => 300
+                    [medium_large] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+                    [medium_large-width] => 430
+                    [medium_large-height] => 430
+                    [large] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+                    [large-width] => 430
+                    [large-height] => 430
+                    [1536x1536] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+                    [1536x1536-width] => 430
+                    [1536x1536-height] => 430
+                    [2048x2048] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+                    [2048x2048-width] => 430
+                    [2048x2048-height] => 430
+                    [full] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+                    [full-width] => 430
+                    [full-height] => 430
                 )
 
         )
 
-    [npc-relation-user-1] => 0
-    [npc-meet-user-1] => 
+    [nick] => Adam
+    [story] => 
+    [stats] => Array
+        (
+            [strength] => 6
+            [defense] => 3
+            [dexterity] => 1
+            [perception] => 6
+            [technical] => 2
+            [charisma] => 1
+        )
+
+    [skills] => Array
+        (
+            [combat] => 0
+            [steal] => 0
+            [craft] => 0
+            [trade] => 0
+            [relations] => 0
+            [street] => 0
+        )
+
+    [backpack] => Array
+        (
+            [gold] => 0
+            [cigarettes] => 0
+            [beer] => 0
+            [moonshine] => 0
+            [weed] => 0
+            [mushrooms] => 0
+            [glue] => 0
+        )
+
+    [vitality] => Array
+        (
+            [life] => 100
+            [max_life] => 100
+            [energy] => 100
+            [max_energy] => 100
+        )
+
+    [progress] => Array
+        (
+            [exp] => 0
+            [learning_points] => 0
+            [reputation] => 1
+        )
+
+    [items] => Array
+        (
+            [0] => Array
+                (
+                    [item] => WP_Post Object
+                        (
+                            [ID] => 128
+                            [post_author] => 1
+                            [post_date] => 2025-04-19 14:10:42
+                            [post_date_gmt] => 2025-04-19 14:10:42
+                            [post_content] => 
+                            [post_title] => fant
+                            [post_excerpt] => 
+                            [post_status] => publish
+                            [comment_status] => closed
+                            [ping_status] => closed
+                            [post_password] => 
+                            [post_name] => fant
+                            [to_ping] => 
+                            [pinged] => 
+                            [post_modified] => 2025-04-19 14:10:42
+                            [post_modified_gmt] => 2025-04-19 14:10:42
+                            [post_content_filtered] => 
+                            [post_parent] => 0
+                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=128
+                            [menu_order] => 0
+                            [post_type] => item
+                            [post_mime_type] => 
+                            [comment_count] => 0
+                            [filter] => raw
+                        )
+
+                    [quantity] => 3
+                )
+
+            [1] => Array
+                (
+                    [item] => WP_Post Object
+                        (
+                            [ID] => 121
+                            [post_author] => 1
+                            [post_date] => 2025-04-19 10:16:04
+                            [post_date_gmt] => 2025-04-19 10:16:04
+                            [post_content] => 
+                            [post_title] => Spodenki
+                            [post_excerpt] => 
+                            [post_status] => publish
+                            [comment_status] => closed
+                            [ping_status] => closed
+                            [post_password] => 
+                            [post_name] => spodenki
+                            [to_ping] => 
+                            [pinged] => 
+                            [post_modified] => 2025-04-19 10:16:04
+                            [post_modified_gmt] => 2025-04-19 10:16:04
+                            [post_content_filtered] => 
+                            [post_parent] => 0
+                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=121
+                            [menu_order] => 0
+                            [post_type] => item
+                            [post_mime_type] => 
+                            [comment_count] => 0
+                            [filter] => raw
+                        )
+
+                    [quantity] => 4
+                )
+
+            [2] => Array
+                (
+                    [item] => WP_Post Object
+                        (
+                            [ID] => 122
+                            [post_author] => 1
+                            [post_date] => 2025-04-19 11:37:56
+                            [post_date_gmt] => 2025-04-19 11:37:56
+                            [post_content] => 
+                            [post_title] => Koszula flanelowa
+                            [post_excerpt] => 
+                            [post_status] => publish
+                            [comment_status] => closed
+                            [ping_status] => closed
+                            [post_password] => 
+                            [post_name] => koszula-flanelowa
+                            [to_ping] => 
+                            [pinged] => 
+                            [post_modified] => 2025-04-19 11:37:56
+                            [post_modified_gmt] => 2025-04-19 11:37:56
+                            [post_content_filtered] => 
+                            [post_parent] => 0
+                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=122
+                            [menu_order] => 0
+                            [post_type] => item
+                            [post_mime_type] => 
+                            [comment_count] => 0
+                            [filter] => raw
+                        )
+
+                    [quantity] => 1
+                )
+
+            [3] => Array
+                (
+                    [item] => WP_Post Object
+                        (
+                            [ID] => 118
+                            [post_author] => 1
+                            [post_date] => 2025-04-19 09:40:01
+                            [post_date_gmt] => 2025-04-19 09:40:01
+                            [post_content] => 
+                            [post_title] => Kurtka puchowa
+                            [post_excerpt] => 
+                            [post_status] => publish
+                            [comment_status] => closed
+                            [ping_status] => closed
+                            [post_password] => 
+                            [post_name] => kurtka-puchowa
+                            [to_ping] => 
+                            [pinged] => 
+                            [post_modified] => 2025-04-19 09:43:20
+                            [post_modified_gmt] => 2025-04-19 09:43:20
+                            [post_content_filtered] => 
+                            [post_parent] => 0
+                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=118
+                            [menu_order] => 0
+                            [post_type] => item
+                            [post_mime_type] => 
+                            [comment_count] => 0
+                            [filter] => raw
+                        )
+
+                    [quantity] => 1
+                )
+
+            [4] => Array
+                (
+                    [item] => WP_Post Object
+                        (
+                            [ID] => 212
+                            [post_author] => 1
+                            [post_date] => 2025-04-24 18:02:45
+                            [post_date_gmt] => 2025-04-24 18:02:45
+                            [post_content] => 
+                            [post_title] => Bimber Dziadzi
+                            [post_excerpt] => 
+                            [post_status] => publish
+                            [comment_status] => closed
+                            [ping_status] => closed
+                            [post_password] => 
+                            [post_name] => bimber-od-irasa
+                            [to_ping] => 
+                            [pinged] => 
+                            [post_modified] => 2025-04-24 18:07:55
+                            [post_modified_gmt] => 2025-04-24 18:07:55
+                            [post_content_filtered] => 
+                            [post_parent] => 0
+                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=212
+                            [menu_order] => 0
+                            [post_type] => item
+                            [post_mime_type] => 
+                            [comment_count] => 0
+                            [filter] => raw
+                        )
+
+                    [quantity] => 16
+                )
+
+        )
+
+    [avatar_full] => Array
+        (
+            [ID] => 86
+            [id] => 86
+            [title] => human_4
+            [filename] => human_4.png
+            [filesize] => 572165
+            [url] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+            [link] => http://seb.soeasy.it/human_4/
+            [alt] => 
+            [author] => 1
+            [description] => 
+            [caption] => 
+            [name] => human_4
+            [status] => inherit
+            [uploaded_to] => 0
+            [date] => 2025-04-17 20:15:00
+            [modified] => 2025-04-17 20:15:00
+            [menu_order] => 0
+            [mime_type] => image/png
+            [type] => image
+            [subtype] => png
+            [icon] => http://seb.soeasy.it/wp-includes/images/media/default.png
+            [width] => 430
+            [height] => 979
+            [sizes] => Array
+                (
+                    [thumbnail] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4-150x150.png
+                    [thumbnail-width] => 150
+                    [thumbnail-height] => 150
+                    [medium] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4-132x300.png
+                    [medium-width] => 132
+                    [medium-height] => 300
+                    [medium_large] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+                    [medium_large-width] => 430
+                    [medium_large-height] => 979
+                    [large] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+                    [large-width] => 430
+                    [large-height] => 979
+                    [1536x1536] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+                    [1536x1536-width] => 430
+                    [1536x1536-height] => 979
+                    [2048x2048] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+                    [2048x2048-width] => 430
+                    [2048x2048-height] => 979
+                    [full] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+                    [full-width] => 430
+                    [full-height] => 979
+                )
+
+        )
+
+    [equipped_items] => Array
+        (
+            [chest_item] => 
+            [bottom_item] => WP_Post Object
+                (
+                    [ID] => 121
+                    [post_author] => 1
+                    [post_date] => 2025-04-19 10:16:04
+                    [post_date_gmt] => 2025-04-19 10:16:04
+                    [post_content] => 
+                    [post_title] => Spodenki
+                    [post_excerpt] => 
+                    [post_status] => publish
+                    [comment_status] => closed
+                    [ping_status] => closed
+                    [post_password] => 
+                    [post_name] => spodenki
+                    [to_ping] => 
+                    [pinged] => 
+                    [post_modified] => 2025-04-19 10:16:04
+                    [post_modified_gmt] => 2025-04-19 10:16:04
+                    [post_content_filtered] => 
+                    [post_parent] => 0
+                    [guid] => http://seb.soeasy.it/?post_type=item&#038;p=121
+                    [menu_order] => 0
+                    [post_type] => item
+                    [post_mime_type] => 
+                    [comment_count] => 0
+                    [filter] => raw
+                )
+
+            [legs_item] => 
+        )
+
+    [mission_258] => Array
+        (
+            [status] => not_started
+            [assigned_date] => 
+            [completion_date] => 
+            [tasks] => Array
+                (
+                    [zadanie-1_0] => not_started
+                    [zadanie-2_1] => not_started
+                )
+
+        )
+
+)
+Array
+(
+    [wynik_warunku] => 
 )

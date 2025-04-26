@@ -53,21 +53,70 @@ function evaluate_condition($conv, $npc_relation_value, $npc_relation_meet, $con
             }
             return false;
         case 'mission':
-            // ob_start();
-            // $active_user_missions = get_field('user_missions', 'user_' . get_current_user_id())['active_missions'];
-            // $selected_missions = $conv['mission_select']['mission'];
-            // $mission_status = $conv['mission_select']['mission_status'];
-            // if ($mission_status) {
-            // }
-            // print_r($conv['mission_select']);
-            // print_r($active_missions);
+            ob_start();
+            $active_user_missions = get_fields('user_' . get_current_user_id());
+
+            // Pobierz dane warunku misji
+            $mission_select = $conv['mission_select'];
+            $mission_select_id = $mission_select['mission_id'] ?? null;
+            $mission_select_status = $mission_select['mission_status'] ?? null;
+            $mission_select_task_id = $mission_select['mission_task_id'] ?? null;
+            $mission_select_task_status = $mission_select['mission_task_status'] ?? null;
+
+            // Logika sprawdzania misji
+            $result = false;
+
+            // Sprawdź czy podano ID misji i czy istnieje w danych użytkownika
+            if ($mission_select_id && isset($active_user_missions['mission_' . $mission_select_id])) {
+                $user_mission = $active_user_missions['mission_' . $mission_select_id];
+
+                // Domyślnie zakładamy, że warunek jest spełniony
+                $result = true;
+
+                // Sprawdź status misji jeśli został określony w warunku
+                if ($mission_select_status && isset($user_mission['status'])) {
+                    // Możliwe statusy: not_started, in_progress, completed, failed
+                    if ($user_mission['status'] !== $mission_select_status) {
+                        $result = false;
+                    }
+                }
+
+                // Sprawdź status zadania jeśli został określony w warunku
+                if ($result && $mission_select_task_id && $mission_select_task_status) {
+                    // Sprawdź czy zadanie istnieje w misji
+                    if (!isset($user_mission['tasks'][$mission_select_task_id])) {
+                        $result = false;
+                    } else {
+                        $task = $user_mission['tasks'][$mission_select_task_id];
+
+                        // Sprawdź czy zadanie jest tablicą z kluczem 'status' czy prostą wartością
+                        if (is_array($task) && isset($task['status'])) {
+                            // Zadanie jest tablicą - sprawdź status w tablicy
+                            if ($task['status'] !== $mission_select_task_status) {
+                                $result = false;
+                            }
+                        } else {
+                            // Zadanie jest prostą wartością - bezpośrednie porównanie
+                            if ($task !== $mission_select_task_status) {
+                                $result = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Zapisz dane do logów
+            print_r($mission_select);
+            print_r($active_user_missions);
+            print_r(['wynik_warunku' => $result]);
             $dump = ob_get_clean();
 
             file_put_contents(
                 '/Users/kordiansasiela/localhost/seb.soeasy.it/public_html/wp-content/themes/game/temp-log.log',
-                $dump,
-                FILE_APPEND
+                $dump
             );
+
+            return $result;
         case 'instance':
             if (isset($conv['instation'])) {
                 return trim($conv['instation']) === trim($conditions['value'] ?? '');
