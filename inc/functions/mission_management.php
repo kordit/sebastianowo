@@ -157,16 +157,31 @@ function ajax_get_mission_info()
  */
 function ajax_assign_mission_to_user()
 {
+    mission_debug_log('====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======');
+    mission_debug_log('Wszystkie dane POST: ', $_POST);
+
     if (!is_user_logged_in()) {
+        mission_debug_log('BŁĄD: Użytkownik nie jest zalogowany');
         wp_send_json_error(['message' => 'Użytkownik nie jest zalogowany']);
         return;
     }
 
     $mission_id = isset($_POST['mission_id']) ? intval($_POST['mission_id']) : 0;
     $npc_id = isset($_POST['npc_id']) ? intval($_POST['npc_id']) : 0;
+
+    // Dodajemy logowanie wartości npc_id dla łatwiejszego debugowania
+    mission_debug_log('Otrzymana wartość mission_id: ', $_POST['mission_id'] ?? 'brak');
+    mission_debug_log('Po konwersji mission_id: ', $mission_id);
+    mission_debug_log('Otrzymana wartość npc_id: ', $_POST['npc_id'] ?? 'brak');
+    mission_debug_log('Po konwersji npc_id: ', $npc_id);
+
     $mission_status = isset($_POST['mission_status']) ? sanitize_text_field($_POST['mission_status']) : 'in_progress';
     $mission_task_id = isset($_POST['mission_task_id']) ? sanitize_text_field($_POST['mission_task_id']) : null;
     $mission_task_status = isset($_POST['mission_task_status']) ? sanitize_text_field($_POST['mission_task_status']) : 'in_progress';
+
+    mission_debug_log('mission_status: ', $mission_status);
+    mission_debug_log('mission_task_id: ', $mission_task_id);
+    mission_debug_log('mission_task_status: ', $mission_task_status);
 
 
     if (!$mission_id) {
@@ -217,9 +232,19 @@ function ajax_assign_mission_to_user()
  */
 function assign_mission_to_user($user_id, $mission_id, $mission_status = 'in_progress', $mission_task_id = null, $mission_task_status = 'in_progress', $npc_id = 0)
 {
+    mission_debug_log('====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======');
+    mission_debug_log('Parametry: user_id=' . $user_id . ', mission_id=' . $mission_id . ', mission_status=' . $mission_status . ', mission_task_id=' . $mission_task_id . ', mission_task_status=' . $mission_task_status . ', npc_id=' . $npc_id);
+
+    // Sprawdzenie typów parametrów
+    mission_debug_log('Typy parametrów: user_id=' . gettype($user_id) . ', mission_id=' . gettype($mission_id) .
+        ', mission_task_id=' . gettype($mission_task_id) . ', npc_id=' . gettype($npc_id));
+
     // 1. Klucz misji i pobieranie istniejącej misji
     $mission_meta_key = 'mission_' . $mission_id;
+    mission_debug_log('Klucz meta dla misji: ' . $mission_meta_key);
+
     $existing_mission = get_field($mission_meta_key, 'user_' . $user_id);
+    mission_debug_log('Istniejąca misja: ', $existing_mission);
 
     // 2. Przygotowanie podstawowej struktury misji
     $mission_data = is_array($existing_mission) ? $existing_mission : [
@@ -228,6 +253,13 @@ function assign_mission_to_user($user_id, $mission_id, $mission_status = 'in_pro
         'completion_date' => '',
         'tasks' => []
     ];
+    mission_debug_log('Przygotowana struktura misji: ', $mission_data);
+
+    // Zapewnienie, że tablica tasks istnieje
+    if (!isset($mission_data['tasks']) || !is_array($mission_data['tasks'])) {
+        $mission_data['tasks'] = [];
+        mission_debug_log('Zainicjowano pustą tablicę tasks dla misji ' . $mission_id);
+    }
 
     // 3. Ustawienie statusu misji
     $mission_data['status'] = $mission_status;
@@ -263,6 +295,21 @@ function assign_mission_to_user($user_id, $mission_id, $mission_status = 'in_pro
         // Jeśli podano ID zadania, aktualizujemy je
         if (!isset($mission_data['tasks']) || !is_array($mission_data['tasks'])) {
             $mission_data['tasks'] = [];
+        }
+
+        // Debugowanie struktury zadania
+        if (isset($mission_data['tasks'][$mission_task_id])) {
+            mission_debug_log('Struktura istniejącego zadania ' . $mission_task_id . ':', $mission_data['tasks'][$mission_task_id]);
+        }
+
+        // Sprawdzanie czy zadanie jest stringiem zamiast tablicy i naprawianie
+        if (isset($mission_data['tasks'][$mission_task_id]) && !is_array($mission_data['tasks'][$mission_task_id])) {
+            $old_status = $mission_data['tasks'][$mission_task_id];
+            mission_debug_log('Naprawianie nieprawidłowej struktury zadania ' . $mission_task_id . ' (było: ' . $old_status . ')');
+            $mission_data['tasks'][$mission_task_id] = [
+                'status' => $old_status,
+                'start_date' => current_time('mysql')
+            ];
         }
 
         // Aktualizacja lub dodanie zadania

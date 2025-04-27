@@ -1,2 +1,373 @@
-[2025-04-27 11:04:38] Przetwarzanie misji ID: 247
+76Array
+(
+    [mission_id] => 247
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => completed
+)
+Array
+(
+    [user_class] => Array
+        (
+            [value] => zadymiarz
+            [label] => Zadymiarz
+        )
 
+    [avatar] => Array
+        (
+            [ID] => 81
+            [id] => 81
+            [title] => human_a_4
+            [filename] => human_a_4.png
+            [filesize] => 246506
+            [url] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+            [link] => http://seb.soeasy.it/human_a_4/
+            [alt] => 
+            [author] => 1
+            [description] => 
+            [caption] => 
+            [name] => human_a_4
+            [status] => inherit
+            [uploaded_to] => 0
+            [date] => 2025-04-17 20:14:49
+            [modified] => 2025-04-17 20:14:49
+            [menu_order] => 0
+            [mime_type] => image/png
+            [type] => image
+            [subtype] => png
+            [icon] => http://seb.soeasy.it/wp-includes/images/media/default.png
+            [width] => 430
+            [height] => 430
+            [sizes] => Array
+                (
+                    [thumbnail] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4-150x150.png
+                    [thumbnail-width] => 150
+                    [thumbnail-height] => 150
+                    [medium] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4-300x300.png
+                    [medium-width] => 300
+                    [medium-height] => 300
+                    [medium_large] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+                    [medium_large-width] => 430
+                    [medium_large-height] => 430
+                    [large] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+                    [large-width] => 430
+                    [large-height] => 430
+                    [1536x1536] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+                    [1536x1536-width] => 430
+                    [1536x1536-height] => 430
+                    [2048x2048] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+                    [2048x2048-width] => 430
+                    [2048x2048-height] => 430
+                    [full] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_a_4.png
+                    [full-width] => 430
+                    [full-height] => 430
+                )
+
+        )
+
+    [nick] => Adam
+    [story] => 
+    [stats] => Array
+        (
+            [strength] => 6
+            [defense] => 3
+            [dexterity] => 1
+            [perception] => 6
+            [technical] => 2
+            [charisma] => 1
+        )
+
+    [skills] => Array
+        (
+            [combat] => 0
+            [steal] => 0
+            [craft] => 0
+            [trade] => 0
+            [relations] => 0
+            [street] => 0
+        )
+
+    [backpack] => Array
+        (
+            [gold] => 41
+            [cigarettes] => 0
+        )
+
+    [vitality] => Array
+        (
+            [life] => 100
+            [max_life] => 100
+            [energy] => 100
+            [max_energy] => 100
+        )
+
+    [progress] => Array
+        (
+            [exp] => 0
+            [learning_points] => 0
+            [reputation] => 1
+        )
+
+    [items] => Array
+        (
+            [0] => Array
+                (
+                    [item] => WP_Post Object
+                        (
+                            [ID] => 128
+                            [post_author] => 1
+                            [post_date] => 2025-04-19 14:10:42
+                            [post_date_gmt] => 2025-04-19 14:10:42
+                            [post_content] => 
+                            [post_title] => fant
+                            [post_excerpt] => 
+                            [post_status] => publish
+                            [comment_status] => closed
+                            [ping_status] => closed
+                            [post_password] => 
+                            [post_name] => fant
+                            [to_ping] => 
+                            [pinged] => 
+                            [post_modified] => 2025-04-19 14:10:42
+                            [post_modified_gmt] => 2025-04-19 14:10:42
+                            [post_content_filtered] => 
+                            [post_parent] => 0
+                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=128
+                            [menu_order] => 0
+                            [post_type] => item
+                            [post_mime_type] => 
+                            [comment_count] => 0
+                            [filter] => raw
+                        )
+
+                    [quantity] => 3
+                )
+
+            [1] => Array
+                (
+                    [item] => WP_Post Object
+                        (
+                            [ID] => 121
+                            [post_author] => 1
+                            [post_date] => 2025-04-19 10:16:04
+                            [post_date_gmt] => 2025-04-19 10:16:04
+                            [post_content] => 
+                            [post_title] => Spodenki
+                            [post_excerpt] => 
+                            [post_status] => publish
+                            [comment_status] => closed
+                            [ping_status] => closed
+                            [post_password] => 
+                            [post_name] => spodenki
+                            [to_ping] => 
+                            [pinged] => 
+                            [post_modified] => 2025-04-19 10:16:04
+                            [post_modified_gmt] => 2025-04-19 10:16:04
+                            [post_content_filtered] => 
+                            [post_parent] => 0
+                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=121
+                            [menu_order] => 0
+                            [post_type] => item
+                            [post_mime_type] => 
+                            [comment_count] => 0
+                            [filter] => raw
+                        )
+
+                    [quantity] => 4
+                )
+
+            [2] => Array
+                (
+                    [item] => WP_Post Object
+                        (
+                            [ID] => 122
+                            [post_author] => 1
+                            [post_date] => 2025-04-19 11:37:56
+                            [post_date_gmt] => 2025-04-19 11:37:56
+                            [post_content] => 
+                            [post_title] => Koszula flanelowa
+                            [post_excerpt] => 
+                            [post_status] => publish
+                            [comment_status] => closed
+                            [ping_status] => closed
+                            [post_password] => 
+                            [post_name] => koszula-flanelowa
+                            [to_ping] => 
+                            [pinged] => 
+                            [post_modified] => 2025-04-19 11:37:56
+                            [post_modified_gmt] => 2025-04-19 11:37:56
+                            [post_content_filtered] => 
+                            [post_parent] => 0
+                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=122
+                            [menu_order] => 0
+                            [post_type] => item
+                            [post_mime_type] => 
+                            [comment_count] => 0
+                            [filter] => raw
+                        )
+
+                    [quantity] => 1
+                )
+
+            [3] => Array
+                (
+                    [item] => WP_Post Object
+                        (
+                            [ID] => 118
+                            [post_author] => 1
+                            [post_date] => 2025-04-19 09:40:01
+                            [post_date_gmt] => 2025-04-19 09:40:01
+                            [post_content] => 
+                            [post_title] => Kurtka puchowa
+                            [post_excerpt] => 
+                            [post_status] => publish
+                            [comment_status] => closed
+                            [ping_status] => closed
+                            [post_password] => 
+                            [post_name] => kurtka-puchowa
+                            [to_ping] => 
+                            [pinged] => 
+                            [post_modified] => 2025-04-19 09:43:20
+                            [post_modified_gmt] => 2025-04-19 09:43:20
+                            [post_content_filtered] => 
+                            [post_parent] => 0
+                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=118
+                            [menu_order] => 0
+                            [post_type] => item
+                            [post_mime_type] => 
+                            [comment_count] => 0
+                            [filter] => raw
+                        )
+
+                    [quantity] => 1
+                )
+
+        )
+
+    [avatar_full] => Array
+        (
+            [ID] => 86
+            [id] => 86
+            [title] => human_4
+            [filename] => human_4.png
+            [filesize] => 572165
+            [url] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+            [link] => http://seb.soeasy.it/human_4/
+            [alt] => 
+            [author] => 1
+            [description] => 
+            [caption] => 
+            [name] => human_4
+            [status] => inherit
+            [uploaded_to] => 0
+            [date] => 2025-04-17 20:15:00
+            [modified] => 2025-04-17 20:15:00
+            [menu_order] => 0
+            [mime_type] => image/png
+            [type] => image
+            [subtype] => png
+            [icon] => http://seb.soeasy.it/wp-includes/images/media/default.png
+            [width] => 430
+            [height] => 979
+            [sizes] => Array
+                (
+                    [thumbnail] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4-150x150.png
+                    [thumbnail-width] => 150
+                    [thumbnail-height] => 150
+                    [medium] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4-132x300.png
+                    [medium-width] => 132
+                    [medium-height] => 300
+                    [medium_large] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+                    [medium_large-width] => 430
+                    [medium_large-height] => 979
+                    [large] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+                    [large-width] => 430
+                    [large-height] => 979
+                    [1536x1536] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+                    [1536x1536-width] => 430
+                    [1536x1536-height] => 979
+                    [2048x2048] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+                    [2048x2048-width] => 430
+                    [2048x2048-height] => 979
+                    [full] => http://seb.soeasy.it/wp-content/uploads/2025/04/human_4.png
+                    [full-width] => 430
+                    [full-height] => 979
+                )
+
+        )
+
+    [equipped_items] => Array
+        (
+            [chest_item] => 
+            [bottom_item] => WP_Post Object
+                (
+                    [ID] => 121
+                    [post_author] => 1
+                    [post_date] => 2025-04-19 10:16:04
+                    [post_date_gmt] => 2025-04-19 10:16:04
+                    [post_content] => 
+                    [post_title] => Spodenki
+                    [post_excerpt] => 
+                    [post_status] => publish
+                    [comment_status] => closed
+                    [ping_status] => closed
+                    [post_password] => 
+                    [post_name] => spodenki
+                    [to_ping] => 
+                    [pinged] => 
+                    [post_modified] => 2025-04-19 10:16:04
+                    [post_modified_gmt] => 2025-04-19 10:16:04
+                    [post_content_filtered] => 
+                    [post_parent] => 0
+                    [guid] => http://seb.soeasy.it/?post_type=item&#038;p=121
+                    [menu_order] => 0
+                    [post_type] => item
+                    [post_mime_type] => 
+                    [comment_count] => 0
+                    [filter] => raw
+                )
+
+            [legs_item] => 
+        )
+
+    [mission_258] => Array
+        (
+            [status] => not_started
+            [assigned_date] => 
+            [completion_date] => 
+            [tasks] => Array
+                (
+                    [zadanie-1_0] => not_started
+                    [zadanie-2_1] => not_started
+                )
+
+        )
+
+    [mission_247] => Array
+        (
+            [status] => completed
+            [assigned_date] => 2025-04-27 10:58:14
+            [completion_date] => 2025-04-27 11:17:16
+            [tasks] => Array
+                (
+                    [zidentyfikuj-potencjalnych-klientow_0] => Array
+                        (
+                            [status] => completed
+                            [npc_target_70] => failed
+                            [npc_70] => failed
+                            [npc_target_77] => failed
+                            [npc_77] => failed
+                            [npc_target_250] => completed
+                            [npc_250] => completed
+                            [npc_target_215] => completed
+                            [npc_215] => completed
+                            [npc_target_252] => completed
+                            [npc_252] => completed
+                        )
+
+                    [rozlicz-sie-z-irasem_1] => completed
+                )
+
+        )
+
+)
