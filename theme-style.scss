@@ -270,6 +270,14 @@ textarea {
     cursor: pointer;
 }
 
+a.walk {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    //pulse animation css
+    animation: pulse 2s infinite;
+}
+
 .btn,
 input[type=submit],
 button {
