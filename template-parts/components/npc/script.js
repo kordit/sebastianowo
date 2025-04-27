@@ -224,6 +224,7 @@ async function handleAnswer(input) {
     const missionsToStart = []; // Nowa tablica dla misji do uruchomienia
     const skillsToUpdate = []; // Nowa tablica dla aktualizacji umiejętności
     const expRepToUpdate = []; // Nowa tablica dla aktualizacji doświadczenia i reputacji
+    const areasToUnlock = []; // Nowa tablica dla odblokowywania rejonów
 
     // Faza 1: Walidacja wszystkich transakcji
     try {
@@ -304,6 +305,15 @@ async function handleAnswer(input) {
                     type,
                     value
                 });
+            } else if (singletransaction.acf_fc_layout === "unlock_area") {
+                // Obsługa odblokowywania rejonu
+                const areaId = parseInt(singletransaction.area, 10);
+                if (areaId) {
+                    // Dodaj rejon do listy rejonów do odblokowania
+                    areasToUnlock.push({
+                        areaId
+                    });
+                }
             } else if (singletransaction.acf_fc_layout === "item") {
                 // Obsługa przedmiotów
                 const itemId = parseInt(singletransaction.item, 10);
@@ -619,6 +629,47 @@ async function handleAnswer(input) {
                     console.error('Błąd podczas uruchamiania misji:', error);
                     showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
                     return; // Przerwij całą operację
+                }
+            }
+        }
+
+        // Odblokuj rejony
+        if (areasToUnlock.length > 0) {
+            console.log('Odblokowuję rejony:', areasToUnlock);
+            for (const areaOperation of areasToUnlock) {
+                try {
+                    const { areaId } = areaOperation;
+
+                    // Pobierz informacje o rejonie
+                    const areaInfoResponse = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+                        action: 'get_area_info',
+                        area_id: areaId
+                    });
+
+                    const areaName = areaInfoResponse.success ? areaInfoResponse.data?.name : 'nowy rejon';
+
+                    // Aktualizuj dostęp do rejonu
+                    const response = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+                        action: 'unlock_area_for_user',
+                        area_id: areaId
+                    });
+
+                    if (response.success) {
+                        const areaMessage = `Odblokowano dostęp do rejonu: ${areaName}`;
+
+                        message = message
+                            ? `${message} i ${areaMessage}`
+                            : areaMessage;
+
+                        popupstate = 'success';
+                    } else {
+                        console.error('Błąd podczas odblokowywania rejonu:', response.data?.message);
+                        throw new Error(response.data?.message || 'Nieznany błąd');
+                    }
+                } catch (error) {
+                    console.error('Błąd podczas odblokowywania rejonu:', error);
+                    showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
+                    return; // Przerwij dalsze operacje
                 }
             }
         }

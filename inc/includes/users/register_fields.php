@@ -671,10 +671,79 @@ add_action('acf/include_fields', function () {
                         'prepend' => '',
                         'append' => '',
                     ),
+                    array(
+                        'key' => 'field_progress_unlocked_areas',
+                        'label' => 'Odblokowane rejony',
+                        'name' => 'unlocked_areas',
+                        'aria-label' => '',
+                        'type' => 'post_object',
+                        'instructions' => 'Lista rejonów odblokowanych przez gracza',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'post_type' => array(
+                            0 => 'tereny',
+                        ),
+                        'taxonomy' => '',
+                        'allow_null' => 1,
+                        'multiple' => 1,
+                        'return_format' => 'id',
+                        'ui' => 1,
+                    ),
                 ),
             ),
 
+            // LOKALIZACJA
+            array(
+                'key' => 'field_current_area',
+                'label' => 'Aktualny rejon',
+                'name' => 'current_area',
+                'aria-label' => '',
+                'type' => 'post_object',
+                'instructions' => 'Aktualna lokalizacja gracza',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'post_type' => array(
+                    0 => 'tereny',
+                ),
+                'taxonomy' => '',
+                'allow_null' => 1,
+                'multiple' => 0,
+                'return_format' => 'object',
+                'ui' => 1,
+            ),
 
+            array(
+                'key' => 'field_available_areas',
+                'label' => 'Dostępne rejony',
+                'name' => 'available_areas',
+                'aria-label' => '',
+                'type' => 'checkbox',
+                'instructions' => 'Zaznacz rejony dostępne dla gracza',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'choices' => array(),
+                'default_value' => array(),
+                'return_format' => 'value',
+                'allow_custom' => 0,
+                'layout' => 'vertical',
+                'save_custom' => 0,
+                'custom_choice_button_text' => 'Dodaj nowy wybór',
+            ),
 
             // PRZEDMIOTY ZAŁOŻONE PRZEZ GRACZA
             array(
@@ -860,3 +929,39 @@ add_action('acf/include_fields', function () {
         'show_in_rest' => 0,
     ));
 });
+
+/**
+ * Dynamicznie wypełnia pole "Dostępne rejony" wszystkimi istniejącymi terenami
+ */
+function dynamically_populate_areas_field($field)
+{
+    // Sprawdź czy to odpowiednie pole
+    if ($field['key'] != 'field_available_areas') {
+        return $field;
+    }
+
+    // Pobierz wszystkie tereny
+    $args = array(
+        'post_type' => 'tereny',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'orderby' => 'title',
+        'order' => 'ASC'
+    );
+
+    $areas = get_posts($args);
+    $choices = array();
+
+    // Tworzenie opcji wyboru w formacie "Dostępny rejon [nazwa rejonu]"
+    if ($areas) {
+        foreach ($areas as $area) {
+            $choices[$area->ID] = 'Dostępny rejon ' . $area->post_title;
+        }
+    }
+
+    // Aktualizacja pola z nowymi wyborami
+    $field['choices'] = $choices;
+
+    return $field;
+}
+add_filter('acf/load_field/key=field_available_areas', 'dynamically_populate_areas_field');

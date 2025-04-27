@@ -1,5 +1,5 @@
 <?php
-function et_svg_with_data($linksvg, $tereny = [])
+function et_svg_with_data($linksvg, $data = [])
 {
     $link = preg_replace('/https?\:\/\/[^\/]*\//', '', $linksvg);
     if (!file_exists($link)) {
@@ -33,11 +33,11 @@ function et_svg_with_data($linksvg, $tereny = [])
 
     // Iteracja i dodawanie `data-*` z tablicy terenów
     foreach ($paths as $index => $path) {
-        if (!isset($tereny[$index])) {
+        if (!isset($data[$index])) {
             break;
         }
 
-        $teren = $tereny[$index];
+        $teren = $data[$index];
 
         foreach ($teren as $key => $value) {
             if (!empty($value)) {

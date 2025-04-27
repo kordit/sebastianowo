@@ -25,7 +25,7 @@ function getRelationColor($relation)
  * @param int $current_user_id ID bieżącego użytkownika
  * @return array Tablica z danymi ścieżek
  */
-function process_svg_paths($svg_url, $post_id, $post_title, $scene_index, $current_user_id, $post_type, $post_name)
+function process_svg_paths($svg_url, $post_id, $post_title, $scene_index, $current_user_id, $post_type, $post_name, $autostart = false)
 {
     if (!$svg_url) {
         return [];
@@ -65,6 +65,7 @@ function process_svg_paths($svg_url, $post_id, $post_title, $scene_index, $curre
                 'title'  => $name ?: 'brak tytułu',
                 'color'  => $color,
                 'npc-name' => get_the_title($npc) ?: NULL,
+                'autostart' => $autostart,
             ];
 
             // Dodaj pole relacji tylko dla głównej sceny (indeks 0)
@@ -98,10 +99,6 @@ function scene_generator()
             $background = $spacer_data['background'];
             $svg_url = $spacer_data['svg_url'];
             $selected_paths = $spacer_data['selected_paths'];
-
-            // Tutaj możemy przekierować na znalezione wydarzenie jeśli to potrzebne
-            // wp_redirect(get_permalink($spacer_data['event_id']));
-            // exit;
         }
     } elseif ($scene_id == $post_id) {
         // Obsługa pierwszej sceny
@@ -115,7 +112,6 @@ function scene_generator()
         // Obsługa innych scen
         $found_scene = null;
         $found_index = null;
-
         foreach ($get_scenes as $index => $scene) {
             if ($scene['id_sceny'] === $scene_id) {
                 $found_scene = $scene;
@@ -135,7 +131,7 @@ function scene_generator()
                 $found_index,
                 $current_user_id,
                 $post_type,
-                $post_name
+                $post_name,
             );
         } else {
             // Możesz obsłużyć przypadek, gdy scena o danym id_sceny nie zostanie znaleziona.

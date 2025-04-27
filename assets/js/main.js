@@ -345,69 +345,91 @@ function getPageData() {
 window.pageData = window.pageData || getPageData();
 
 function initSvgInteractions() {
-    document.querySelectorAll('.container-world svg path').forEach(el => {
-        el.addEventListener('click', e => {
-            e.preventDefault();
+    const paths = document.querySelectorAll('.container-world svg path');
 
-            const selectType = el.getAttribute('data-select');
+    // Funkcja do obsługi kliknięcia lub auto-startu
+    const handlePathInteraction = (el, isAutoStart = false) => {
+        const selectType = el.getAttribute('data-select');
 
-            if (selectType === 'npc') {
-                const npcId = el.getAttribute('data-npc');
-                if (!npcId) {
-                    console.error("No data-npc attribute found on element.");
-                    return;
-                }
+        if (selectType === 'npc') {
+            const npcId = el.getAttribute('data-npc');
+            if (!npcId) {
+                console.error("No data-npc attribute found on element.");
+                return;
+            }
 
-                AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
-                    action: 'get_npc_popup',
-                    npc_id: npcId,
-                    page_id: JSON.stringify(pageData),
-                    current_url: window.location.href
+            AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+                action: 'get_npc_popup',
+                npc_id: npcId,
+                page_id: JSON.stringify(pageData),
+                current_url: window.location.href
+            })
+                .then(response => {
+                    const npcData = response?.data?.npc_data;
+                    if (!npcData) {
+                        console.error("No npc_data in the AJAX response:", response);
+                        return;
+                    }
+                    const userId = npcData.user_id;
+                    buildNpcPopup(npcData, userId);
+                    console.log(pageData);
                 })
-                    .then(response => {
-                        const npcData = response?.data?.npc_data;
-                        if (!npcData) {
-                            console.error("No npc_data in the AJAX response:", response);
-                            return;
-                        }
-                        const userId = npcData.user_id;
-                        buildNpcPopup(npcData, userId);
-                        console.log(pageData);
-                    })
-                    .catch(error => {
-                        console.log(error);
-                        console.error("AJAX request error:", error);
-                    });
+                .catch(error => {
+                    console.log(error);
+                    console.error("AJAX request error:", error);
+                });
 
-            }
-            else if (selectType === 'scena') {
-                const target = el.getAttribute('data-target');
-                if (!target) return;
-                const container = document.querySelector('.container-world');
-                if (container) {
-                    container.style.animation = 'fadeZoomBlur .5s ease-in forwards';
-                    setTimeout(() => {
-                        window.location.href = target;
-                    }, 500);
-                } else {
+        }
+        else if (selectType === 'scena') {
+            const target = el.getAttribute('data-target');
+            if (!target) return;
+            const container = document.querySelector('.container-world');
+            if (container) {
+                container.style.animation = 'fadeZoomBlur .5s ease-in forwards';
+                setTimeout(() => {
                     window.location.href = target;
-                }
+                }, 500);
+            } else {
+                window.location.href = target;
             }
-            else if (selectType === 'page') {
-                const target = el.getAttribute('data-page');
-                if (!target) return;
-                const container = document.querySelector('.container-world');
-                if (container) {
-                    container.style.animation = 'fadeZoomBlur 1s ease-in forwards';
-                    setTimeout(() => {
-                        window.location.href = target;
-                    }, 500);
-                } else {
+        }
+        else if (selectType === 'page') {
+            const target = el.getAttribute('data-page');
+            if (!target) return;
+            const container = document.querySelector('.container-world');
+            if (container) {
+                container.style.animation = 'fadeZoomBlur 1s ease-in forwards';
+                setTimeout(() => {
                     window.location.href = target;
-                }
+                }, 500);
+            } else {
+                window.location.href = target;
             }
+        }
+    };
+
+    // Dodaj obsługę kliknięć dla każdej ścieżki
+    paths.forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            handlePathInteraction(el);
         });
     });
+
+    // Sprawdź, czy jest jakaś ścieżka z atrybutem data-autostart="1" i automatycznie ją aktywuj
+    setTimeout(() => {
+        paths.forEach(el => {
+            const autoStart = el.getAttribute('data-autostart');
+            if (autoStart === "1") {
+                handlePathInteraction(el, true);
+                const svgElement = document.querySelector('.container-world svg');
+                if (svgElement) {
+                    svgElement.style.display = 'none';
+                }
+            }
+
+        });
+    }, 500); // Opóźnienie, aby strona mogła się w pełni załadować
 }
 
 // Uruchomienie funkcji po załadowaniu DOM

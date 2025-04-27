@@ -41,7 +41,6 @@ function handle_spacer_parameter($post_id)
 
     // Pobierz dane sceny z losowo wybranego wydarzenia
     $event_scenes = get_field('scenes', $event_id);
-
     if (!isset($event_scenes[0])) {
         return false;
     }
@@ -49,14 +48,16 @@ function handle_spacer_parameter($post_id)
     $scene = $event_scenes[0];
     $background = isset($scene['tlo']) ? $scene['tlo'] : null;
     $svg_url = isset($scene['maska']) ? $scene['maska'] : null;
+    $autostart = isset($scene['autostart']) ? $scene['autostart'] : null;
+
 
     // Przetwarzaj ścieżki SVG tylko jeśli URL maski jest dostępny
-    $selected_paths = $svg_url ? process_svg_paths($svg_url, $event_id, sanitize_title(get_the_title($event_id)), 0, $current_user_id, $post_type, $post_name) : [];
+    $selected_paths = $svg_url ? process_svg_paths($svg_url, $event_id, sanitize_title(get_the_title($event_id)), 0, $current_user_id, $post_type, $post_name, $autostart) : [];
 
     return [
         'event_id' => $event_id,
         'background' => $background,
         'svg_url' => $svg_url,
-        'selected_paths' => $selected_paths
+        'selected_paths' => $selected_paths,
     ];
 }

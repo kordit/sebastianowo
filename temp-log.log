@@ -1,9 +1,9 @@
-76Array
+252Array
 (
     [mission_id] => 247
-    [mission_status] => not_started
-    [mission_task_id] => 
-    [mission_task_status] => not_started
+    [mission_status] => in_progress
+    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
+    [mission_task_status] => not_started_npc
 )
 Array
 (
@@ -106,6 +106,7 @@ Array
             [exp] => 0
             [learning_points] => 0
             [reputation] => 0
+            [unlocked_areas] => 
         )
 
     [items] => Array
@@ -395,6 +396,11 @@ Array
                     [rozlicz-sie-z-irasem_1] => completed
                 )
 
+        )
+
+    [current_area] => 
+    [available_areas] => Array
+        (
         )
 
 )
