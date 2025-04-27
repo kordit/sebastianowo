@@ -125,7 +125,7 @@ add_action('acf/include_fields', function () {
                                 'label' => $task_title,
                                 'name' => $task_id,
                                 'type' => 'group',
-                                'instructions' => $task['task_description'] ?? '',
+                                'instructions' => 'Slug zadania "' . $task_id . '"',
                                 'layout' => 'block',
                                 'sub_fields' => array_merge(
                                     [
@@ -160,10 +160,10 @@ add_action('acf/include_fields', function () {
                             // Dla standardowych zadań (checkpoint, place) - pole select zamiast przełącznika true/false
                             $task_fields[] = array(
                                 'key' => 'field_task_' . $mission->ID . '_' . $task_id,
-                                'label' => $task_title,
+                                'label' => $task_title . ' - slug zadania - "' . $task_id . '"',
                                 'name' => $task_id,
                                 'type' => 'select',
-                                'instructions' => $task['task_description'] ?? '',
+                                'instructions' => 'Slug zadania "' . $task_id . '"',
                                 'choices' => array(
                                     'not_started' => 'Niezaczęte',
                                     'in_progress' => 'Rozpoczęte',
@@ -184,7 +184,7 @@ add_action('acf/include_fields', function () {
             // Tworzenie grupy dla misji z jej zadaniami
             $mission_fields[] = array(
                 'key' => 'field_mission_' . $mission->ID,
-                'label' => $mission->post_title,
+                'label' => $mission->post_titlew,
                 'name' => 'mission_' . $mission->ID,
                 'type' => 'group',
                 'instructions' => '',
