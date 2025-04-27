@@ -27,4 +27,3 @@ add_action('init', function () {
 
 // Załącz pliki misji
 require_once('register_fields.php');
-require_once('ajax_tasks.php');

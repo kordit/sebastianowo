@@ -565,7 +565,7 @@ if (function_exists('acf_add_local_field_group')):
 																'label' => 'Wybierz zadanie z misji',
 																'name' => 'mission_task_id',
 																'aria-label' => '',
-																'type' => 'select',
+																'type' => 'text',
 																'instructions' => 'Wybierz zadanie powiązane z wybraną misją',
 																'required' => 0,
 																'conditional_logic' => array(
@@ -581,14 +581,6 @@ if (function_exists('acf_add_local_field_group')):
 																	'class' => '',
 																	'id' => '',
 																),
-																'choices' => array(),
-																'default_value' => '',
-																'allow_null' => 1,
-																'multiple' => 0,
-																'ui' => 0,
-																'ajax' => 0,
-																'save_custom' => 1,
-																'placeholder' => 'Wybierz zadanie z misji',
 															),
 															// Dodane pole statusu zadania
 															array(
