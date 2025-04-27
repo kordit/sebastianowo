@@ -13,11 +13,11 @@ if ($instance != 'kreator'): ?>
     </div>
     <div class="game-content--inner">
         <?php
-        if (is_single()) {
-
+        if (is_single() && get_the_ID() !== 24) {
             $post = get_post();
             echo '<a class="walk btn btn-green" href="' . esc_url(get_permalink($post)) . '?spacer=true">Idź na spacer</a>';
         }
+
 
         $request_uri = trim($_SERVER['REQUEST_URI'], '/'); // Usuwamy początkowe i końcowe "/"
         $slash_count = substr_count($request_uri, '/');

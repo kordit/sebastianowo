@@ -1,9 +1,9 @@
 76Array
 (
     [mission_id] => 247
-    [mission_status] => in_progress
-    [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => completed
+    [mission_status] => not_started
+    [mission_task_id] => 
+    [mission_task_status] => not_started
 )
 Array
 (
@@ -71,10 +71,10 @@ Array
         (
             [strength] => 6
             [defense] => 3
-            [dexterity] => 1
+            [dexterity] => 4
             [perception] => 6
             [technical] => 2
-            [charisma] => 1
+            [charisma] => 3
         )
 
     [skills] => Array
@@ -84,12 +84,12 @@ Array
             [craft] => 0
             [trade] => 0
             [relations] => 0
-            [street] => 10
+            [street] => 0
         )
 
     [backpack] => Array
         (
-            [gold] => 41
+            [gold] => 1
             [cigarettes] => 0
         )
 
@@ -103,9 +103,9 @@ Array
 
     [progress] => Array
         (
-            [exp] => 100
+            [exp] => 0
             [learning_points] => 0
-            [reputation] => 101
+            [reputation] => 0
         )
 
     [items] => Array
@@ -213,25 +213,25 @@ Array
                 (
                     [item] => WP_Post Object
                         (
-                            [ID] => 118
+                            [ID] => 212
                             [post_author] => 1
-                            [post_date] => 2025-04-19 09:40:01
-                            [post_date_gmt] => 2025-04-19 09:40:01
+                            [post_date] => 2025-04-24 18:02:45
+                            [post_date_gmt] => 2025-04-24 18:02:45
                             [post_content] => 
-                            [post_title] => Kurtka puchowa
+                            [post_title] => Bimber Dziadzi
                             [post_excerpt] => 
                             [post_status] => publish
                             [comment_status] => closed
                             [ping_status] => closed
                             [post_password] => 
-                            [post_name] => kurtka-puchowa
+                            [post_name] => bimber-od-irasa
                             [to_ping] => 
                             [pinged] => 
-                            [post_modified] => 2025-04-19 09:43:20
-                            [post_modified_gmt] => 2025-04-19 09:43:20
+                            [post_modified] => 2025-04-24 18:07:55
+                            [post_modified_gmt] => 2025-04-24 18:07:55
                             [post_content_filtered] => 
                             [post_parent] => 0
-                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=118
+                            [guid] => http://seb.soeasy.it/?post_type=item&#038;p=212
                             [menu_order] => 0
                             [post_type] => item
                             [post_mime_type] => 
@@ -298,7 +298,34 @@ Array
 
     [equipped_items] => Array
         (
-            [chest_item] => 
+            [chest_item] => WP_Post Object
+                (
+                    [ID] => 118
+                    [post_author] => 1
+                    [post_date] => 2025-04-19 09:40:01
+                    [post_date_gmt] => 2025-04-19 09:40:01
+                    [post_content] => 
+                    [post_title] => Kurtka puchowa
+                    [post_excerpt] => 
+                    [post_status] => publish
+                    [comment_status] => closed
+                    [ping_status] => closed
+                    [post_password] => 
+                    [post_name] => kurtka-puchowa
+                    [to_ping] => 
+                    [pinged] => 
+                    [post_modified] => 2025-04-19 09:43:20
+                    [post_modified_gmt] => 2025-04-19 09:43:20
+                    [post_content_filtered] => 
+                    [post_parent] => 0
+                    [guid] => http://seb.soeasy.it/?post_type=item&#038;p=118
+                    [menu_order] => 0
+                    [post_type] => item
+                    [post_mime_type] => 
+                    [comment_count] => 0
+                    [filter] => raw
+                )
+
             [bottom_item] => WP_Post Object
                 (
                     [ID] => 121
@@ -346,8 +373,8 @@ Array
     [mission_247] => Array
         (
             [status] => completed
-            [assigned_date] => 2025-04-27 10:58:14
-            [completion_date] => 2025-04-27 11:17:16
+            [assigned_date] => 2025-04-27 13:05:30
+            [completion_date] => 2025-04-27 13:06:42
             [tasks] => Array
                 (
                     [zidentyfikuj-potencjalnych-klientow_0] => Array
@@ -360,7 +387,7 @@ Array
                             [npc_target_250] => completed
                             [npc_250] => completed
                             [npc_target_215] => completed
-                            [npc_215] => completed
+                            [npc_215] => not_started
                             [npc_target_252] => completed
                             [npc_252] => completed
                         )
