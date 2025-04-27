@@ -222,6 +222,8 @@ async function handleAnswer(input) {
     const relationsToUpdate = [];
     const itemsToManage = []; // Nowa tablica dla operacji na przedmiotach
     const missionsToStart = []; // Nowa tablica dla misji do uruchomienia
+    const skillsToUpdate = []; // Nowa tablica dla aktualizacji umiejętności
+    const expRepToUpdate = []; // Nowa tablica dla aktualizacji doświadczenia i reputacji
 
     // Faza 1: Walidacja wszystkich transakcji
     try {
@@ -282,6 +284,26 @@ async function handleAnswer(input) {
             } else if (singletransaction.acf_fc_layout === "mission") {
                 // Obsługa misji - dodajemy misję do uruchomienia
                 missionsToStart.push(singletransaction);
+            } else if (singletransaction.acf_fc_layout === "skills") {
+                // Obsługa umiejętności - dodajemy umiejętność do aktualizacji
+                const skillType = singletransaction.type_of_skills;
+                const value = parseInt(singletransaction.value, 10);
+
+                // Dodaj do listy umiejętności do aktualizacji
+                skillsToUpdate.push({
+                    skillType,
+                    value
+                });
+            } else if (singletransaction.acf_fc_layout === "exp_rep") {
+                // Obsługa doświadczenia i reputacji
+                const type = singletransaction.type;
+                const value = parseInt(singletransaction.value, 10);
+
+                // Dodaj do listy doświadczenia/reputacji do aktualizacji
+                expRepToUpdate.push({
+                    type,
+                    value
+                });
             } else if (singletransaction.acf_fc_layout === "item") {
                 // Obsługa przedmiotów
                 const itemId = parseInt(singletransaction.item, 10);
@@ -383,6 +405,109 @@ async function handleAnswer(input) {
                 }
             } catch (error) {
                 console.error('Błąd podczas operacji na przedmiocie:', error);
+                showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
+                return; // Przerwij dalsze operacje
+            }
+        }
+
+        // Wykonaj aktualizacje umiejętności
+        for (const skillOperation of skillsToUpdate) {
+            try {
+                const { skillType, value } = skillOperation;
+
+                // Mapowanie nazw umiejętności na przyjazne nazwy dla komunikatów
+                const skillNames = {
+                    'combat': 'Walka',
+                    'steal': 'Kradzież',
+                    'craft': 'Produkcja',
+                    'trade': 'Handel',
+                    'relations': 'Relacje',
+                    'street': 'Uliczna wiedza'
+                };
+
+                // Aktualizacja umiejętności przy użyciu istniejącej funkcji updateACFFieldsWithGui
+                const response = await updateACFFieldsWithGui(
+                    { [`skills.${skillType}`]: value },
+                    ['body']
+                );
+
+                console.log('Odpowiedź po aktualizacji umiejętności:', response);
+
+                // Przygotuj przyjazny komunikat
+                const skillName = skillNames[skillType] || skillType;
+                const skillMessage = value > 0
+                    ? `Umiejętność ${skillName} wzrosła o ${value}`
+                    : `Umiejętność ${skillName} zmalała o ${Math.abs(value)}`;
+
+                // Dodaj komunikat do ogólnej wiadomości
+                message = message
+                    ? `${message} i ${skillMessage}`
+                    : skillMessage;
+
+                popupstate = 'success';
+            } catch (error) {
+                console.error('Błąd podczas aktualizacji umiejętności:', error);
+                showPopup('Wystąpił błąd: ' + error, 'error');
+                return; // Przerwij dalsze operacje
+            }
+        }
+
+        // Wykonaj aktualizacje doświadczenia i reputacji
+        for (const expRepOperation of expRepToUpdate) {
+            try {
+                const { type, value } = expRepOperation;
+
+                // Mapowanie typu na nazwy pól w bazie danych i przyjazne nazwy dla komunikatów
+                const fieldMapping = {
+                    'exp': 'progress.exp',
+                    'reputation': 'progress.reputation'
+                };
+
+                const nameMapping = {
+                    'exp': 'Doświadczenie',
+                    'reputation': 'Reputacja'
+                };
+
+                // Aktualizacja doświadczenia lub reputacji przy użyciu istniejącej funkcji
+                const fieldName = fieldMapping[type];
+
+                // Sprawdzamy, czy dla reputacji potrzebujemy dodać pole, jeśli nie istnieje
+                if (type === 'reputation') {
+                    try {
+                        const userFields = await fetchLatestACFFields();
+                        if (!userFields.progress || userFields.progress.reputation === undefined) {
+                            // Jeśli pole reputacji nie istnieje, najpierw je utworzymy z wartością 0
+                            await updateACFFieldsWithGui(
+                                { 'progress.reputation': 0 },
+                                ['body']
+                            );
+                        }
+                    } catch (error) {
+                        console.error('Błąd podczas sprawdzania pola reputacji:', error);
+                    }
+                }
+
+                const response = await updateACFFieldsWithGui(
+                    { [fieldName]: value },
+                    ['body']
+                );
+
+                console.log(`Odpowiedź po aktualizacji ${type}:`, response);
+
+                // Przygotuj przyjazny komunikat
+                const typeName = nameMapping[type] || type;
+                const expRepMessage = value > 0
+                    ? `${typeName} wzrosło o ${value}`
+                    : `${typeName} zmalało o ${Math.abs(value)}`;
+
+                // Dodaj komunikat do ogólnej wiadomości
+                message = message
+                    ? `${message} i ${expRepMessage}`
+                    : expRepMessage;
+
+                popupstate = 'success';
+            } catch (error) {
+                console.error('Błąd podczas aktualizacji doświadczenia/reputacji:', error);
                 showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
                 return; // Przerwij dalsze operacje
             }
