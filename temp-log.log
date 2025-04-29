@@ -358,49 +358,79 @@ Array
             [legs_item] => 
         )
 
-    [mission_258] => Array
-        (
-            [status] => not_started
-            [assigned_date] => 
-            [completion_date] => 
-            [tasks] => Array
-                (
-                    [zadanie-1_0] => not_started
-                    [zadanie-2_1] => not_started
-                )
-
-        )
-
     [mission_247] => Array
         (
-            [status] => completed
+            [status] => not_started
             [assigned_date] => 2025-04-27 13:05:30
             [completion_date] => 2025-04-27 13:06:42
             [tasks] => Array
                 (
                     [zidentyfikuj-potencjalnych-klientow_0] => Array
                         (
-                            [status] => completed
+                            [status] => not_started
                             [npc_target_70] => failed
-                            [npc_70] => failed
+                            [npc_70] => not_started
                             [npc_target_77] => failed
-                            [npc_77] => failed
+                            [npc_77] => not_started
                             [npc_target_250] => completed
-                            [npc_250] => completed
+                            [npc_250] => not_started
                             [npc_target_215] => completed
                             [npc_215] => not_started
                             [npc_target_252] => completed
-                            [npc_252] => completed
+                            [npc_252] => not_started
                         )
 
-                    [rozlicz-sie-z-irasem_1] => completed
+                    [rozlicz-sie-z-irasem_1] => not_started
                 )
 
         )
 
-    [current_area] => 
+    [current_area] => WP_Post Object
+        (
+            [ID] => 207
+            [post_author] => 1
+            [post_date] => 2025-04-24 16:21:46
+            [post_date_gmt] => 2025-04-24 16:21:46
+            [post_content] => 
+            [post_title] => Park
+            [post_excerpt] => 
+            [post_status] => publish
+            [comment_status] => closed
+            [ping_status] => closed
+            [post_password] => 
+            [post_name] => park
+            [to_ping] => 
+            [pinged] => 
+            [post_modified] => 2025-04-27 16:24:50
+            [post_modified_gmt] => 2025-04-27 16:24:50
+            [post_content_filtered] => 
+            [post_parent] => 0
+            [guid] => http://seb.soeasy.it/?post_type=tereny&#038;p=207
+            [menu_order] => 0
+            [post_type] => tereny
+            [post_mime_type] => 
+            [comment_count] => 0
+            [filter] => raw
+        )
+
     [available_areas] => Array
         (
+            [0] => 207
+        )
+
+    [mission_339] => Array
+        (
+            [status] => in_progress
+            [assigned_date] => 2025-04-28 18:27:50
+            [completion_date] => 
+            [tasks] => Array
+                (
+                    [dojedz-do-sebastianowa_0] => completed
+                    [wybierz-klase-postaci_1] => in_progress
+                    [wybierz-avatar_2] => in_progress
+                    [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+                )
+
         )
 
 )

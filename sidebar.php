@@ -6,6 +6,7 @@ $avatar_id = get_field('avatar', 'user_' . $current_user_id);
 $avatar = get_field('avatar', 'user_' . $current_user_id);
 $nick = get_field('nick', 'user_' . $current_user_id);
 $stats = get_field('vitality', 'user_' . $current_user_id);
+$current_area = get_field('current_area', 'user_' . get_current_user_id());
 
 ?>
 <aside>
@@ -34,6 +35,10 @@ $stats = get_field('vitality', 'user_' . $current_user_id);
             </div>
         </div>
         <div class="icons">
+            <a href="/<?= get_permalink($current_area->ID); ?>">
+                <img src="<?= esc_url(PNG . '/spacer.png'); ?>" alt="">
+                <span class="icon-label">Rejon</span>
+            </a>
             <a href="/plecak">
                 <img src="<?= esc_url(PNG . '/plecak.png'); ?>" alt="">
                 <span class="icon-label">Plecak</span>

@@ -1,0 +1,171 @@
+/* 
+ * Style dla systemu powiadomień
+ * Obsługuje różne typy powiadomień: success, bad, failed, neutral 
+ */
+
+/* Kontener dla wszystkich powiadomień */
+.game-notifications-wrapper {
+    position: fixed;
+    z-index: 10000;
+    width: 300px;
+    max-width: 100%;
+    box-sizing: border-box;
+    pointer-events: none;
+    /* Pozwala na klikanie elementów pod kontenerem */
+    font-family: "Work Sans", sans-serif;
+}
+
+/* Pozycje kontenera */
+.game-notifications-wrapper.top-right {
+    top: 20px;
+    right: 20px;
+}
+
+.game-notifications-wrapper.top-left {
+    top: 20px;
+    left: 20px;
+}
+
+.game-notifications-wrapper.bottom-right {
+    bottom: 20px;
+    right: 20px;
+}
+
+.game-notifications-wrapper.bottom-left {
+    bottom: 20px;
+    left: 20px;
+}
+
+.game-notifications-wrapper.top-center {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.game-notifications-wrapper.bottom-center {
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Style dla pojedynczego powiadomienia */
+.game-notification {
+    position: relative;
+    margin-bottom: 10px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: #333;
+    color: #fff;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    pointer-events: all;
+    /* Przywraca możliwość klikania na powiadomienie */
+}
+
+/* Animacje wejścia i wyjścia */
+.game-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.game-notification.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+/* Style dla ikon */
+.notification-icon {
+    margin-right: 10px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+/* Treść powiadomienia */
+.notification-content {
+    flex: 1;
+    word-break: break-word;
+}
+
+/* Przycisk zamknięcia */
+.notification-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    padding: 0;
+    margin-left: 10px;
+}
+
+.notification-close:hover {
+    opacity: 1;
+}
+
+/* Style dla różnych statusów */
+.game-notification-success {
+    background-color: #43a047;
+    border-left: 4px solid #2e7d32;
+}
+
+.game-notification-success .notification-icon {
+    background-color: #2e7d32;
+}
+
+.game-notification-bad {
+    background-color: #ff9800;
+    border-left: 4px solid #ef6c00;
+}
+
+.game-notification-bad .notification-icon {
+    background-color: #ef6c00;
+}
+
+.game-notification-failed {
+    background-color: #e53935;
+    border-left: 4px solid #c62828;
+}
+
+.game-notification-failed .notification-icon {
+    background-color: #c62828;
+}
+
+.game-notification-neutral {
+    background-color: #546e7a;
+    border-left: 4px solid #37474f;
+}
+
+.game-notification-neutral .notification-icon {
+    background-color: #37474f;
+}
+
+/* Responsywność dla małych ekranów */
+@media screen and (max-width: 480px) {
+    .game-notifications-wrapper {
+        width: calc(100% - 30px);
+        left: 15px;
+        right: 15px;
+    }
+
+    .game-notifications-wrapper.top-center,
+    .game-notifications-wrapper.bottom-center,
+    .game-notifications-wrapper.top-left,
+    .game-notifications-wrapper.top-right,
+    .game-notifications-wrapper.bottom-left,
+    .game-notifications-wrapper.bottom-right {
+        left: 15px;
+        right: 15px;
+        transform: none;
+    }
+}

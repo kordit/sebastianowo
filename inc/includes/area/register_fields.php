@@ -13,16 +13,6 @@ if (function_exists('acf_add_local_field_group')) {
                 'new_lines' => 'br',
             ),
             array(
-                'key' => 'siedziba_grupy',
-                'label' => 'Siedziba grupy',
-                'name' => 'siedziba_grupy',
-                'type' => 'post_object',
-                'return_format' => 'object',
-                'post_type' => array('group'),
-                'allow_null' => 1,
-                'bidirectional_target' => array('teren_grupy'),
-            ),
-            array(
                 'key' => 'field_67ffcb196ea22',
                 'label' => 'Zdarzenia',
                 'name' => '',

@@ -13,13 +13,10 @@ if ($instance != 'kreator'): ?>
     </div>
     <div class="game-content--inner">
         <?php
-        $current_user_id = get_current_user_id();
-        $current_area = get_field_object('available_areas', 'user_' . $current_user_id);
-        et_r($current_area);
 
         if (is_single() && get_the_ID() !== 24) {
             $post = get_post();
-            echo '<a class="walk btn btn-green" href="' . esc_url(get_permalink($post)) . '?spacer=true">Idź na spacer</a>';
+            echo '<a class="walk btn btn-green" href="' . esc_url(get_permalink($post)) . '?spacer=true">Poszwędaj się</a>';
         }
 
 
@@ -48,6 +45,7 @@ if ($instance != 'kreator'): ?>
         }
         ?>
     </div>
+
 </main>
 <?php
 

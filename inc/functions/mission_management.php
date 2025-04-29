@@ -203,18 +203,48 @@ function ajax_assign_mission_to_user()
     $result = assign_mission_to_user($user_id, $mission_id, $mission_status, $mission_task_id, $mission_task_status, $npc_id);
 
     if ($result['success']) {
+        // Pobierz numer z task_id, jeśli istnieje (np. "dojedz-do-sebastianowa_2" -> "2")
+        $task_num = '';
+        if ($mission_task_id && preg_match('/_(\d+)$/', $mission_task_id, $matches)) {
+            $task_num = $matches[1];
+        }
+
+        // Określ sekwencje zadań w misji, aby front-end mógł lepiej obsłużyć powiadomienia
+        $mission_tasks = get_field('mission_tasks', $mission_id);
+        $task_sequence = [];
+
+        if (is_array($mission_tasks)) {
+            foreach ($mission_tasks as $index => $task) {
+                $task_id = isset($task['task_id']) ? $task['task_id'] : '';
+                $task_title = isset($task['task_title']) ? $task['task_title'] : 'Zadanie ' . ($index + 1);
+
+                if (!empty($task_id)) {
+                    $task_sequence[] = [
+                        'id' => $task_id,
+                        'title' => $task_title,
+                        'position' => $index
+                    ];
+                }
+            }
+        }
+
+        // Rozszerz odpowiedź o dodatkowe informacje
         $response = [
-            'message' => 'Misja została przypisana do użytkownika',
+            'message' => $result['message'], // Używamy komunikatu z funkcji assign_mission_to_user
             'mission_id' => $mission_id,
             'mission_title' => $mission->post_title,
             'task_id' => $result['first_task_id'],
-            'npc_id' => $npc_id
+            'task_num' => $task_num,
+            'task_name' => $result['task_name'], // Dodajemy nazwę zadania
+            'task_sequence' => $task_sequence,
+            'npc_id' => $npc_id,
+            'messages' => $result['messages'] // Przekaż tablicę wszystkich komunikatów
         ];
 
-
+        mission_debug_log('Odpowiedź dla sukcesu misji:', $response);
         wp_send_json_success($response);
     } else {
-
+        mission_debug_log('Błąd podczas przypisywania misji:', $result['message']);
         wp_send_json_error(['message' => $result['message']]);
     }
 }
@@ -390,21 +420,150 @@ function assign_mission_to_user($user_id, $mission_id, $mission_status = 'in_pro
         }
     }
 
-    // 7. Zapisanie danych
+    // 7. Generowanie komunikatów o zmianach
+    $messages = [];
+    $mission_post = get_post($mission_id);
+    $mission_title = $mission_post ? $mission_post->post_title : 'Nieznana misja';
+
+    // Mapowanie technicznych nazw statusów na przyjazne dla użytkownika
+    $status_friendly_names = [
+        'not_started' => 'Niezaczęta',
+        'in_progress' => 'W trakcie',
+        'completed' => 'Ukończona',
+        'failed' => 'Nieudana',
+        'progress_npc' => 'W trakcie'
+    ];
+
+    // Mapowanie technicznych nazw statusów zadań na przyjazne dla użytkownika
+    $task_status_friendly_names = [
+        'not_started' => 'Niezaczęte',
+        'in_progress' => 'W trakcie',
+        'completed' => 'Ukończone',
+        'failed' => 'Nieudane',
+        'progress_npc' => 'W trakcie'
+    ];
+
+    // Sprawdź czy zmienił się status misji
+    if (isset($existing_mission['status']) && $existing_mission['status'] !== $mission_data['status']) {
+        // Użyj przyjaznej nazwy statusu
+        $friendly_status = isset($status_friendly_names[$mission_data['status']]) ?
+            $status_friendly_names[$mission_data['status']] : $mission_data['status'];
+
+        $messages[] = "Misja \"{$mission_title}\" jest teraz {$friendly_status}";
+    }
+
+    // Sprawdź czy zmienił się status zadania
+    if ($mission_task_id) {
+        // Pobierz nazwę zadania
+        $task_name = 'Nieznane zadanie';
+        $mission_tasks = get_field('mission_tasks', $mission_id);
+
+        mission_debug_log('Szukam zadania o ID: ' . $mission_task_id);
+        mission_debug_log('Zadania misji:', $mission_tasks);
+
+        // Wyodrębnij numer zadania z ID zadania (np. z "dojedz-do-sebastianowa_2" -> 2)
+        $task_num = '';
+        if (preg_match('/_(\d+)$/', $mission_task_id, $matches)) {
+            $task_num = $matches[1];
+        }
+
+        if (is_array($mission_tasks)) {
+            foreach ($mission_tasks as $index => $task) {
+                $task_id = isset($task['task_id']) ? $task['task_id'] : '';
+                mission_debug_log('Porównuję task_id: ' . $task_id . ' z mission_task_id: ' . $mission_task_id);
+
+                // Usuń potencjalne numery na końcu ID zadań (np. _0)
+                $clean_task_id = preg_replace('/_\d+$/', '', $task_id);
+                $clean_mission_task_id = preg_replace('/_\d+$/', '', $mission_task_id);
+
+                mission_debug_log('Po oczyszczeniu: ' . $clean_task_id . ' vs ' . $clean_mission_task_id);
+
+                if (
+                    $task_id === $mission_task_id ||
+                    $clean_task_id === $clean_mission_task_id ||
+                    strpos($task_id, $clean_mission_task_id) !== false ||
+                    strpos($mission_task_id, $clean_task_id) !== false
+                ) {
+                    $task_name = isset($task['task_title']) && !empty($task['task_title']) ?
+                        $task['task_title'] : $task_name;
+                    mission_debug_log('Znaleziono zadanie: ' . $task_name);
+                    break;
+                }
+            }
+        }
+
+        // Pobierz czyste ID zadania bez numerów i podkreślnika na końcu
+        $clean_display_id = preg_replace('/_\d+$/', '', $mission_task_id);
+
+        // Pobierz przyjazną nazwę statusu zadania
+        $friendly_task_status = isset($task_status_friendly_names[$mission_task_status]) ?
+            $task_status_friendly_names[$mission_task_status] : $mission_task_status;
+
+        // Sprawdź czy zadanie istniało wcześniej i czy zmienił się jego status
+        if (!isset($existing_mission['tasks'][$mission_task_id])) {
+            // Nowe zadanie
+            $messages[] = "Zadanie \"{$clean_display_id}\" zostało rozpoczęte";
+        } elseif (
+            is_array($existing_mission['tasks'][$mission_task_id]) &&
+            isset($existing_mission['tasks'][$mission_task_id]['status']) &&
+            $existing_mission['tasks'][$mission_task_id]['status'] !== $mission_task_status
+        ) {
+            // Zmienił się status zadania (tablica)
+            $messages[] = "Zadanie \"{$clean_display_id}\" jest teraz {$friendly_task_status}";
+
+            // Dodaj ID zadania i identyfikator misji do odpowiedzi
+            $task_data = [
+                'task_id' => $mission_task_id,
+                'task_name' => $task_name,
+                'task_num' => $task_num,
+                'status' => $mission_task_status
+            ];
+        } elseif (
+            !is_array($existing_mission['tasks'][$mission_task_id]) &&
+            $existing_mission['tasks'][$mission_task_id] !== $mission_task_status
+        ) {
+            // Zmienił się status zadania (string)
+            $messages[] = "Zadanie \"{$clean_display_id}\" jest teraz {$friendly_task_status}";
+        }
+    }
+
+    // Jeśli nie wykryto zmian, dodaj ogólny komunikat
+    if (empty($messages)) {
+        $messages[] = "Aktualizacja misji \"{$mission_title}\" zakończona pomyślnie";
+    }
+
+    // Poprawienie formatu komunikatu - usuń nazwę misji w komunikacie
+    if (count($messages) > 1 && isset($existing_mission['status']) && $existing_mission['status'] !== $mission_data['status']) {
+        // Jeśli mamy komunikat o misji i zadaniu, uprość komunikat o misji
+        foreach ($messages as $key => $message) {
+            if (strpos($message, 'Misja "') === 0) {
+                $friendly_status = isset($status_friendly_names[$mission_data['status']]) ?
+                    $status_friendly_names[$mission_data['status']] : $mission_data['status'];
+                $messages[$key] = "{$friendly_status}";
+                break;
+            }
+        }
+    }
+
+    $final_message = implode('. ', $messages);
+
+    // 8. Zapisanie danych
     // Używamy bezpośrednio update_user_meta, które jest bardziej niezawodne niż update_field
     $success = update_user_meta($user_id, $mission_meta_key, $mission_data);
 
-    // 8. Zapewnienie kompatybilności z ACF i czyszczenie cache
+    // 9. Zapewnienie kompatybilności z ACF i czyszczenie cache
     update_field($mission_meta_key, $mission_data, 'user_' . $user_id);
 
-    // 9. Usuwamy cache, by zmiany były od razu widoczne
+    // 10. Usuwamy cache, by zmiany były od razu widoczne
     clean_user_cache($user_id);
     wp_cache_delete($user_id, 'user_meta');
 
-    // 10. Zwracamy wynik
+    // 11. Zwracamy wynik z dodatkowymi informacjami
     return [
         'success' => $success,
-        'message' => $success ? 'Misja została zaktualizowana' : 'Błąd podczas aktualizacji misji',
-        'first_task_id' => $first_task_id
+        'message' => $success ? $final_message : 'Błąd podczas aktualizacji misji',
+        'first_task_id' => $first_task_id,
+        'task_name' => $task_name ?? 'Nieznane zadanie', // Dodajemy nazwę zadania
+        'messages' => $messages // Dołączamy tablicę wszystkich komunikatów
     ];
 }

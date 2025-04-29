@@ -24,9 +24,30 @@ function game_enqueue_scripts_and_styles()
         // Zamiast tego będziemy ładować potrzebne zależności bezpośrednio
     }
 
+    // Załaduj system powiadomień
+    $notification_css_path = get_stylesheet_directory() . '/assets/css/notification-system.css';
+    $notification_js_path = get_stylesheet_directory() . '/assets/js/notification-system.js';
+
+    if (file_exists($notification_css_path)) {
+        $notification_css_version = filemtime($notification_css_path);
+        wp_enqueue_style('game-notifications-style', get_stylesheet_directory_uri() . '/assets/css/notification-system.css', [], $notification_css_version);
+    }
+
+    if (file_exists($notification_js_path)) {
+        $notification_js_version = filemtime($notification_js_path);
+        wp_enqueue_script('game-notifications-js', get_stylesheet_directory_uri() . '/assets/js/notification-system.js', ['jquery'], $notification_js_version, true);
+    }
+
     // Załaduj główny skrypt bez podwójnej deklaracji AjaxHelper - dodajemy wersję z timestamp aby uniknąć cache'owania
     $main_js_version = filemtime(get_stylesheet_directory() . '/assets/js/main.js');
-    wp_enqueue_script('game-main-js', get_stylesheet_directory_uri() . '/assets/js/main.js', ['jquery', 'game-ajax-helper'], $main_js_version, true);
+    wp_enqueue_script('game-main-js', get_stylesheet_directory_uri() . '/assets/js/main.js', ['jquery', 'game-ajax-helper', 'game-notifications-js'], $main_js_version, true);
+
+    // Załaduj nowy system obsługi misji
+    $mission_handler_path = get_stylesheet_directory() . '/assets/js/mission-handler.js';
+    if (file_exists($mission_handler_path)) {
+        $mission_handler_version = filemtime($mission_handler_path);
+        wp_enqueue_script('game-mission-handler', get_stylesheet_directory_uri() . '/assets/js/mission-handler.js', ['jquery', 'game-ajax-helper', 'game-notifications-js', 'game-main-js'], $mission_handler_version, true);
+    }
 
     // Załaduj obsługę misji
     $mission_handler_path = get_stylesheet_directory() . '/assets/js/mission-handler.js';

@@ -1,3 +1,7 @@
+// Importujemy klasę MissionManager z pliku mission-handler.js
+// Utworzenie globalnej instancji MissionManager
+
+
 function fetchDialogue(npcData, idConversation, conditions, userId) {
     const data = {
         action: 'get_dialogue',
@@ -12,75 +16,8 @@ function fetchDialogue(npcData, idConversation, conditions, userId) {
 
 // Funkcja globalna do obsługi uruchamiania misji
 window.startMission = async function (params) {
-
-    console.log('parametry misji:', params);
-    // Sprawdź, czy otrzymaliśmy wymagane parametry
-    if (!params || !params.mission_id) {
-        console.error('Błąd: brak wymaganych parametrów misji');
-        showPopup('Nie można uruchomić misji: brak identyfikatora misji', 'error');
-        return false;
-    }
-
-
-    try {
-        // Pobierz informacje o misji przed próbą jej przypisania - przekazując identyfikator zadania z przycisku!
-        const missionInfoResponse = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
-            action: 'get_mission_info',
-            mission_id: params.mission_id,
-            mission_task_id: params.mission_task_id || null // Dodajemy task_id z przycisku!
-        });
-
-        if (!missionInfoResponse.success) {
-            console.error('Błąd podczas pobierania informacji o misji:', missionInfoResponse.data?.message);
-            showPopup('Nie można znaleźć misji', 'error');
-            return false;
-        }
-
-        // Pobierz dane misji
-        const missionInfo = missionInfoResponse.data;
-
-        // Koniecznie wykorzystaj mission_task_id z przycisku NPC, a nie z odpowiedzi serwera!
-        const task_id_to_use = params.mission_task_id || missionInfo.first_task_id;
-        // Przygotuj dane do zapisania misji
-        const missionData = {
-            action: 'assign_mission_to_user',
-            mission_id: params.mission_id,
-            npc_id: params.npc_id || null,
-            mission_status: params.mission_status,
-            mission_task_id: task_id_to_use, // Używamy ID zadania z przycisku!
-            mission_task_status: params.mission_task_status
-        };
-
-        // Przypisz misję do użytkownika
-        const assignResponse = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', missionData);
-
-        if (!assignResponse.success) {
-            console.error('Błąd podczas przypisywania misji:', assignResponse.data?.message);
-            showPopup(assignResponse.data?.message || 'Nie można przypisać misji', 'error');
-            return false;
-        }
-
-        // Pokaż komunikat potwierdzający, jeśli wymagany
-        if (params.show_confirmation) {
-            const message = params.success_message || 'Otrzymano nową misję!';
-            showPopup(message, 'success');
-        }
-
-        // Opcjonalne przekierowanie
-        if (params.redirect_after) {
-            setTimeout(() => {
-                window.location.href = params.redirect_after;
-            }, 1500);
-        }
-
-        // Zwróć dane odpowiedzi
-        return assignResponse.data;
-
-    } catch (error) {
-        console.error('Wystąpił błąd podczas uruchamiania misji:', error);
-        showPopup('Wystąpił błąd podczas uruchamiania misji: ' + error, 'error');
-        return false;
-    }
+    // Używamy instancji MissionManager do obsługi misji
+    return await missionManager.startMission(params);
 };
 
 function buildNpcPopup(npcData, userId) {
@@ -225,6 +162,7 @@ async function handleAnswer(input) {
     const skillsToUpdate = []; // Nowa tablica dla aktualizacji umiejętności
     const expRepToUpdate = []; // Nowa tablica dla aktualizacji doświadczenia i reputacji
     const areasToUnlock = []; // Nowa tablica dla odblokowywania rejonów
+    const areasToChange = []; // Nowa tablica dla zmiany aktualnego rejonu
 
     // Faza 1: Walidacja wszystkich transakcji
     try {
@@ -311,6 +249,15 @@ async function handleAnswer(input) {
                 if (areaId) {
                     // Dodaj rejon do listy rejonów do odblokowania
                     areasToUnlock.push({
+                        areaId
+                    });
+                }
+            } else if (singletransaction.acf_fc_layout === "change_area") {
+                // Obsługa zmiany aktualnego rejonu
+                const areaId = parseInt(singletransaction.area, 10);
+                if (areaId) {
+                    // Dodaj rejon do zmiany do listy
+                    areasToChange.push({
                         areaId
                     });
                 }
@@ -573,62 +520,158 @@ async function handleAnswer(input) {
         // nie powinniśmy przyznawać przedmiotów związanych z nią
         if (missionsToStart.length > 0) {
             console.log('Uruchamiam misje:', missionsToStart);
-            for (const missionConfig of missionsToStart) {
-                try {
-                    const missionId = missionConfig.mission_id;
-                    if (!missionId) {
-                        console.error('Brak ID misji w konfiguracji:', missionConfig);
-                        continue;
-                    }
 
-                    // Pobierz ID NPC, który daje misję
-                    const npcId = document.getElementById('npcdatamanager')?.dataset?.id;
+            // Tablica, która przechowa wszystkie komunikaty o misjach (nie używamy Set, aby zachować duplikaty)
+            const allMissionMessages = [];
 
-                    // Sprawdź, czy funkcja startMission jest dostępna
-                    if (typeof window.startMission === 'function') {
+            // Grupowanie misji według identyfikatora misji
+            const missionGroups = {};
+            for (const mission of missionsToStart) {
+                const id = mission.mission_id;
+                if (!missionGroups[id]) {
+                    missionGroups[id] = [];
+                }
+                missionGroups[id].push(mission);
+            }
 
+            // Przetwarzanie każdej grupy misji
+            for (const missionId in missionGroups) {
+                const missionsInGroup = missionGroups[missionId];
 
-                        // Parametry dla funkcji startMission
-                        const missionParams = {
-                            mission_id: missionId,
-                            npc_id: npcId,
-                            mission_status: missionConfig.mission_status || 'active',
-                            mission_task_status: missionConfig.mission_task_status || 'active',
+                // Pobierz ID NPC, który daje misję
+                const npcId = document.getElementById('npcdatamanager')?.dataset?.id;
 
-                            success_message: missionConfig.success_message || 'Otrzymano nową misję!',
-                        };
-
-                        // NAPRAWIONY KOD: Przekaż prawidłowe ID zadania misji
-                        // Sprawdź czy misja zawiera mission_task_id
-                        if (missionConfig.mission_task_id) {
-                            // Dodaj mission_task_id do parametrów misji
-                            missionParams.mission_task_id = missionConfig.mission_task_id;
+                for (const missionConfig of missionsInGroup) {
+                    try {
+                        if (!missionConfig.mission_id) {
+                            console.error('Brak ID misji w konfiguracji:', missionConfig);
+                            continue;
                         }
 
-                        // Uruchom misję i sprawdź status
-                        const missionResult = await window.startMission(missionParams);
+                        // Sprawdź, czy funkcja startMission jest dostępna
+                        if (typeof window.startMission === 'function') {
+                            // Parametry dla funkcji startMission
+                            const missionParams = {
+                                mission_id: missionConfig.mission_id,
+                                npc_id: npcId,
+                                mission_status: missionConfig.mission_status || 'active',
+                                mission_task_status: missionConfig.mission_task_status || 'active',
+                                success_message: missionConfig.success_message || 'Otrzymano nową misję!',
+                                // Przekazujemy dodatkowy parametr, aby uniknąć pokazywania automatycznych komunikatów
+                                show_confirmation: missionConfig.show_confirmation || false
+                            };
 
-                        // Jeśli wystąpił błąd podczas uruchamiania misji, 
-                        // przerwij całą funkcję handleAnswer - nie wykonuj kolejnych operacji
-                        if (missionResult === false) {
-                            // Nie musimy tu nic robić, ponieważ showPopup został już wywołany w startMission
+                            // Przekaż prawidłowe ID zadania misji
+                            if (missionConfig.mission_task_id) {
+                                missionParams.mission_task_id = missionConfig.mission_task_id;
+                            }
+
+                            // Uruchom misję i sprawdź status
+                            const missionResult = await window.startMission(missionParams);
+
+                            // Jeśli wystąpił błąd podczas uruchamiania misji
+                            if (missionResult === false) {
+                                return; // Przerwij całą operację
+                            }
+
+                            // Zapisz komunikat z dodatkowymi informacjami do identyfikacji
+                            if (!missionConfig.show_confirmation && missionResult && missionResult.message) {
+                                // Dodaj pełne dane do wiadomości
+                                allMissionMessages.push({
+                                    message: missionResult.message,
+                                    taskId: missionConfig.mission_task_id || '',
+                                    missionId: missionConfig.mission_id || '',
+                                    taskStatus: missionConfig.mission_task_status || '',
+                                    // Dodajemy oryginalną wiadomość z serwera
+                                    originalMessage: missionResult.message,
+                                    // Dodaj znacznik czasu, aby zapewnić unikalne sortowanie
+                                    timestamp: Date.now()
+                                });
+                                console.log("Dodano komunikat misji:", missionResult.message, "dla zadania:", missionConfig.mission_task_id);
+                            }
+                        } else {
+                            console.error('Funkcja startMission nie jest dostępna');
+                            showPopup('Wystąpił błąd podczas uruchamiania misji', 'error');
                             return; // Przerwij całą operację
                         }
-
-                        // Ustaw komunikat potwierdzający (jeśli nie pokazujemy osobnego potwierdzenia)
-                        if (!missionConfig.show_confirmation && !message) {
-                            message = 'Misja została zaktualizowana!';
-                            popupstate = 'success';
-                        }
-                    } else {
-                        console.error('Funkcja startMission nie jest dostępna');
-                        showPopup('Wystąpił błąd podczas uruchamiania misji', 'error');
+                    } catch (error) {
+                        console.error('Błąd podczas uruchamiania misji:', error);
+                        showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
                         return; // Przerwij całą operację
                     }
-                } catch (error) {
-                    console.error('Błąd podczas uruchamiania misji:', error);
-                    showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
-                    return; // Przerwij całą operację
+                }
+            }
+
+            // Wyświetl każdy komunikat o misji jako osobne powiadomienie w poprawnej kolejności
+            if (allMissionMessages.length > 0) {
+                console.log('Wszystkie komunikaty misji przed sortowaniem:', allMissionMessages);
+
+                // Sortuj komunikaty według taskId i statusu, aby zapewnić logiczną kolejność
+                allMissionMessages.sort((a, b) => {
+                    // Sortuj najpierw według ID zadania (jeśli są różne)
+                    if (a.taskId !== b.taskId) {
+                        // Wyodrębnij numery z taskId (np. z "dojedz-do-sebastianowa_0" -> 0)
+                        const aNum = parseInt((a.taskId.match(/_(\d+)$/) || [0, 0])[1], 10);
+                        const bNum = parseInt((b.taskId.match(/_(\d+)$/) || [0, 0])[1], 10);
+                        return aNum - bNum;
+                    }
+
+                    // Jeśli zadania mają ten sam ID, sortuj według statusu:
+                    // completed powinno być przed in_progress
+                    if (a.taskStatus === 'completed' && b.taskStatus !== 'completed') return -1;
+                    if (a.taskStatus !== 'completed' && b.taskStatus === 'completed') return 1;
+
+                    // Jako ostatnią instancję, sortuj według znacznika czasu
+                    return a.timestamp - b.timestamp;
+                });
+
+                console.log('Komunikaty misji po sortowaniu:', allMissionMessages);
+
+                // Dodaj numer pozycji do zadań z tą samą nazwą, aby rozróżnić je w komunikatach
+                const taskCounts = {};
+                const processedMessages = allMissionMessages.map(item => {
+                    // Znajdź identyfikator zadania z treści wiadomości
+                    const taskNameMatch = item.message.match(/Zadanie "(.*?)" jest teraz/);
+
+                    if (taskNameMatch && taskNameMatch[1]) {
+                        const taskName = taskNameMatch[1];
+
+                        // Jeśli nazwa zadania już wystąpiła, dodaj do niej numer pozycji
+                        if (taskCounts[taskName]) {
+                            taskCounts[taskName]++;
+
+                            // Wyciągnij numer z ID zadania, jeśli istnieje
+                            const taskNumMatch = item.taskId.match(/_(\d+)$/);
+                            const taskNum = taskNumMatch ? taskNumMatch[1] : taskCounts[taskName];
+
+                            // Dodaj numer pozycji do nazwy zadania w komunikacie
+                            const newMessage = item.message.replace(
+                                `Zadanie "${taskName}"`,
+                                `Zadanie "${taskName} (${taskNum})"`
+                            );
+
+                            return {
+                                ...item,
+                                message: newMessage
+                            };
+                        } else {
+                            taskCounts[taskName] = 1;
+                        }
+                    }
+                    return item;
+                });
+
+                // Wyświetl komunikaty w odpowiedniej kolejności
+                processedMessages.forEach(item => {
+                    console.log("Wyświetlam komunikat misji:", item.message);
+                    showPopup(item.message, 'success');
+                });
+
+                // Jeśli był już jakiś wcześniejszy komunikat, również go pokaż osobno
+                if (message) {
+                    showPopup(message, popupstate || 'success');
+                    // Resetujemy message, aby nie pokazywać go ponownie na końcu funkcji
+                    message = '';
                 }
             }
         }
@@ -674,9 +717,81 @@ async function handleAnswer(input) {
             }
         }
 
+        // Zmień rejon, jeśli są takie operacje
+        if (areasToChange.length > 0) {
+            console.log('Zmiana rejonu na:', areasToChange);
+            for (const areaChange of areasToChange) {
+                try {
+                    const { areaId } = areaChange;
+
+                    // Pobierz informacje o nowym rejonie
+                    const newAreaInfoResponse = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+                        action: 'get_area_info',
+                        area_id: areaId
+                    });
+
+                    const newAreaName = newAreaInfoResponse.success ? newAreaInfoResponse.data?.name : 'nowy rejon';
+
+                    // Zaktualizuj pole rejonu użytkownika
+                    const response = await updateACFFieldsWithGui(
+                        { 'user_area': areaId },
+                        ['body']
+                    );
+
+                    if (response) {
+                        message = `Przeniesiono do rejonu: ${newAreaName}`;
+                        popupstate = 'success';
+                    } else {
+                        throw new Error('Nie udało się zmienić rejonu');
+                    }
+                } catch (error) {
+                    console.error('Błąd podczas zmiany rejonu:', error);
+                    showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
+                    return; // Przerwij dalsze operacje
+                }
+            }
+        }
+
         // Wyświetl komunikat podsumowujący
         if (message) {
             showPopup(message, popupstate || 'success');
+        }
+
+        // Zmień aktualny rejon
+        if (areasToChange.length > 0) {
+            console.log('Zmieniam aktualny rejon:', areasToChange);
+            for (const areaOperation of areasToChange) {
+                try {
+                    const { areaId } = areaOperation;
+
+                    // Pobierz informacje o rejonie
+                    const areaInfoResponse = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+                        action: 'get_area_info',
+                        area_id: areaId
+                    });
+
+                    const areaName = areaInfoResponse.success ? areaInfoResponse.data?.name : 'nowy rejon';
+
+                    // Zmień aktualny rejon użytkownika
+                    const response = await AjaxHelper.sendRequest(global.ajaxurl, 'POST', {
+                        action: 'change_current_area',
+                        area_id: areaId
+                    });
+
+                    if (response.success) {
+                        const areaMessage = `Zmieniono aktualny rejon na: ${areaName}`;
+
+                        // Wyświetl komunikat o zmianie rejonu
+                        showPopup(areaMessage, 'success');
+                    } else {
+                        console.error('Błąd podczas zmiany rejonu:', response.data?.message);
+                        throw new Error(response.data?.message || 'Nieznany błąd');
+                    }
+                } catch (error) {
+                    console.error('Błąd podczas zmiany rejonu:', error);
+                    showPopup(`Wystąpił błąd: ${error.message || 'nieznany błąd'}`, 'error');
+                }
+            }
         }
 
     } catch (error) {

@@ -47,34 +47,62 @@ async function createCustomPopup(params) {
 // Rejestracja w `window`, aby była dostępna globalnie
 window.createCustomPopup = createCustomPopup;
 
+/**
+ * Funkcja showPopup - przekierowuje do nowego systemu powiadomień
+ * Mapuje stare statusy 'success', 'error' itd. na nowe statusy systemu powiadomień
+ */
 function showPopup(message, type = 'success') {
-    const existingPopup = document.querySelector('.popup');
-    if (existingPopup) existingPopup.remove();
+    // Sprawdź, czy nowy system powiadomień jest dostępny
+    if (typeof window.gameNotifications !== 'undefined') {
+        // Mapowanie starych typów powiadomień na nowe
+        const statusMap = {
+            'success': 'success',
+            'error': 'failed',
+            'bad': 'bad',
+            'neutral': 'neutral'
+        };
 
-    const popup = document.createElement('div');
-    popup.className = `popup popup-${type}`;
-    popup.innerHTML = `
-        <div class="popup-content">
-            <div class="popup-message">${message}</div>
-            <button class="popup-close">X</button>
-        </div>
-    `;
+        // Mapuj stary typ na nowy lub użyj 'neutral' jako domyślny
+        const mappedStatus = statusMap[type] || 'neutral';
 
-    document.body.appendChild(popup);
+        // Wywołaj nowy system powiadomień
+        window.gameNotifications.show(message, mappedStatus);
+    } else {
+        // Jeśli nowy system powiadomień nie jest jeszcze dostępny, użyj tymczasowego powiadomienia
+        console.warn('System powiadomień nie został jeszcze załadowany!', message);
 
-    function closePopup() {
-        popup.remove();
-        document.removeEventListener('keydown', escHandler);
-    }
+        // Stworz tymczasowe powiadomienie w stylu starego systemu
+        const existingPopup = document.querySelector('.popup');
+        if (existingPopup) existingPopup.remove();
 
-    popup.querySelector('.popup-close').addEventListener('click', closePopup);
+        const popup = document.createElement('div');
+        popup.className = `popup popup-${type}`;
+        popup.innerHTML = `
+            <div class="popup-content">
+                <div class="popup-message">${message}</div>
+                <button class="popup-close">X</button>
+            </div>
+        `;
 
-    function escHandler(event) {
-        if (event.key === 'Escape') {
-            closePopup();
+        document.body.appendChild(popup);
+
+        function closePopup() {
+            popup.remove();
+            document.removeEventListener('keydown', escHandler);
         }
+
+        popup.querySelector('.popup-close').addEventListener('click', closePopup);
+
+        function escHandler(event) {
+            if (event.key === 'Escape') {
+                closePopup();
+            }
+        }
+        document.addEventListener('keydown', escHandler);
+
+        // Automatyczne zamknięcie po 5 sekundach
+        setTimeout(closePopup, 5000);
     }
-    document.addEventListener('keydown', escHandler);
 }
 
 

@@ -265,3 +265,54 @@ function unlock_area_for_user()
 }
 add_action('wp_ajax_unlock_area_for_user', 'unlock_area_for_user');
 // Nie dodajemy wp_ajax_nopriv_unlock_area_for_user, ponieważ tylko zalogowani użytkownicy mogą odblokowywać rejony
+
+/**
+ * Funkcja AJAX do zmiany aktualnego rejonu użytkownika
+ */
+function change_current_area_for_user()
+{
+    // Sprawdzenie, czy mamy ID rejonu
+    if (!isset($_POST['area_id']) || empty($_POST['area_id'])) {
+        wp_send_json_error(array('message' => 'Nie podano ID rejonu'));
+        wp_die();
+    }
+
+    $area_id = intval($_POST['area_id']);
+
+    // Sprawdź czy rejon istnieje
+    $area = get_post($area_id);
+    if (!$area || $area->post_type !== 'tereny') {
+        wp_send_json_error(array('message' => 'Nie znaleziono rejonu o podanym ID'));
+        wp_die();
+    }
+
+    // Pobierz aktualnego użytkownika
+    $current_user_id = get_current_user_id();
+    if (!$current_user_id) {
+        wp_send_json_error(array('message' => 'Użytkownik nie jest zalogowany'));
+        wp_die();
+    }
+
+    // Pobierz dostępne rejony użytkownika
+    $available_areas = get_field('available_areas', 'user_' . $current_user_id);
+
+    // Sprawdź, czy rejon jest odblokowany dla użytkownika
+    if (!is_array($available_areas) || !in_array($area_id, $available_areas)) {
+        wp_send_json_error(array(
+            'message' => 'Ten rejon nie jest odblokowany dla tego użytkownika',
+        ));
+        wp_die();
+    }
+
+    // Zaktualizuj pole current_area dla użytkownika
+    update_field('current_area', $area_id, 'user_' . $current_user_id);
+
+    wp_send_json_success(array(
+        'message' => 'Aktualny rejon został zmieniony',
+        'area_id' => $area_id,
+        'area_name' => $area->post_title
+    ));
+    wp_die();
+}
+add_action('wp_ajax_change_current_area', 'change_current_area_for_user');
+// Nie dodajemy wp_ajax_nopriv_change_current_area, ponieważ tylko zalogowani użytkownicy mogą zmieniać rejon
