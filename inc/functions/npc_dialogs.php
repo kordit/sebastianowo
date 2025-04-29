@@ -1,44 +1,17 @@
 <?php
 
-
-/**
- * Enqueue skryptów potrzebnych do obsługi dialogów NPC
- */
-function enqueue_npc_dialog_scripts()
-{
-    // Zarejestruj i załaduj skrypt
-    wp_enqueue_script(
-        'npc-dialogs-js',
-        get_template_directory_uri() . '/assets/js/npc-dialogs.js',
-        ['jquery'],
-        filemtime(get_template_directory() . '/assets/js/npc-dialogs.js'),
-        true
-    );
-
-    // Przekaż dane do JS
-    wp_localize_script(
-        'npc-dialogs-js',
-        'npcDialogsData',
-        [
-            'ajaxurl' => admin_url('admin-ajax.php'),
-            'security' => wp_create_nonce('npc_dialog_nonce')
-        ]
-    );
-}
-add_action('wp_enqueue_scripts', 'enqueue_npc_dialog_scripts');
-
 /**
  * Funkcja AJAX do pobierania dialogów NPC na podstawie ID podstrony
  */
 function get_npc_dialogs_by_post_id()
 {
     // Sprawdź nonce dla bezpieczeństwa
-    if (!wp_verify_nonce($_POST['security'], 'npc_dialog_nonce')) {
-        wp_send_json_error([
-            'message' => 'Błąd bezpieczeństwa. Odśwież stronę i spróbuj ponownie.'
-        ]);
-        wp_die();
-    }
+    // if (!wp_verify_nonce($_POST['security'], 'npc_dialog_nonce')) {
+    //     wp_send_json_error([
+    //         'message' => 'Błąd bezpieczeństwa. Odśwież stronę i spróbuj ponownie.'
+    //     ]);
+    //     wp_die();
+    // }
 
     // Pobierz ID podstrony z żądania
     $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;

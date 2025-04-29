@@ -1,9 +1,9 @@
-76Array
+250Array
 (
     [mission_id] => 247
     [mission_status] => in_progress
     [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => completed
+    [mission_task_status] => not_started_npc
 )
 Array
 (
@@ -420,8 +420,8 @@ Array
 
     [mission_339] => Array
         (
-            [status] => not_started
-            [assigned_date] => 
+            [status] => in_progress
+            [assigned_date] => 2025-04-29 17:13:55
             [completion_date] => 
             [tasks] => Array
                 (
@@ -434,3 +434,3238 @@ Array
         )
 
 )
+[2025-04-29 18:02:00] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:02:00] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:02:00] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => dojedz-do-sebastianowa_0
+    [mission_task_status] => completed
+)
+
+
+[2025-04-29 18:02:00] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:02:00] Po konwersji mission_id: : 339
+
+[2025-04-29 18:02:00] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:02:00] Po konwersji npc_id: : 0
+
+[2025-04-29 18:02:00] mission_status: : in_progress
+
+[2025-04-29 18:02:00] mission_task_id: : dojedz-do-sebastianowa_0
+
+[2025-04-29 18:02:00] mission_task_status: : completed
+
+[2025-04-29 18:02:00] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:02:00] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=dojedz-do-sebastianowa_0, mission_task_status=completed, npc_id=0
+
+[2025-04-29 18:02:00] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:02:00] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:02:00] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => not_started
+            [wybierz-klase-postaci_1] => not_started
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:02:00] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => not_started
+            [wybierz-klase-postaci_1] => not_started
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:02:00] Struktura istniejącego zadania dojedz-do-sebastianowa_0:: not_started
+
+[2025-04-29 18:02:00] Naprawianie nieprawidłowej struktury zadania dojedz-do-sebastianowa_0 (było: not_started)
+
+[2025-04-29 18:02:00] Szukam zadania o ID: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:02:00] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:02:00] Porównuję task_id:  z mission_task_id: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:02:00] Po oczyszczeniu:  vs dojedz-do-sebastianowa
+
+[2025-04-29 18:02:00] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:02:00] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Zadanie "dojedz-do-sebastianowa" jest teraz Ukończone
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => dojedz-do-sebastianowa_0
+    [task_num] => 0
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Zadanie "dojedz-do-sebastianowa" jest teraz Ukończone
+        )
+
+)
+
+
+[2025-04-29 18:02:00] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:02:01] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:02:01] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-klase-postaci_1
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:02:01] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:02:01] Po konwersji mission_id: : 339
+
+[2025-04-29 18:02:01] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:02:01] Po konwersji npc_id: : 0
+
+[2025-04-29 18:02:01] mission_status: : in_progress
+
+[2025-04-29 18:02:01] mission_task_id: : wybierz-klase-postaci_1
+
+[2025-04-29 18:02:01] mission_task_status: : in_progress
+
+[2025-04-29 18:02:01] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:02:01] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-klase-postaci_1, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:02:01] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:02:01] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:02:01] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => not_started
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:02:01] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => not_started
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:02:01] Struktura istniejącego zadania wybierz-klase-postaci_1:: not_started
+
+[2025-04-29 18:02:01] Naprawianie nieprawidłowej struktury zadania wybierz-klase-postaci_1 (było: not_started)
+
+[2025-04-29 18:02:01] Szukam zadania o ID: wybierz-klase-postaci_1
+
+[2025-04-29 18:02:01] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:02:01] Porównuję task_id:  z mission_task_id: wybierz-klase-postaci_1
+
+[2025-04-29 18:02:01] Po oczyszczeniu:  vs wybierz-klase-postaci
+
+[2025-04-29 18:02:01] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:02:01] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Zadanie "wybierz-klase-postaci" jest teraz W trakcie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-klase-postaci_1
+    [task_num] => 1
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Zadanie "wybierz-klase-postaci" jest teraz W trakcie
+        )
+
+)
+
+
+[2025-04-29 18:02:01] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:02:01] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:02:01] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-avatar_2
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:02:01] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:02:01] Po konwersji mission_id: : 339
+
+[2025-04-29 18:02:01] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:02:01] Po konwersji npc_id: : 0
+
+[2025-04-29 18:02:01] mission_status: : in_progress
+
+[2025-04-29 18:02:01] mission_task_id: : wybierz-avatar_2
+
+[2025-04-29 18:02:01] mission_task_status: : in_progress
+
+[2025-04-29 18:02:01] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:02:01] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-avatar_2, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:02:01] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:02:01] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:02:01] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:02:01] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:02:01] Struktura istniejącego zadania wybierz-avatar_2:: not_started
+
+[2025-04-29 18:02:01] Naprawianie nieprawidłowej struktury zadania wybierz-avatar_2 (było: not_started)
+
+[2025-04-29 18:02:01] Szukam zadania o ID: wybierz-avatar_2
+
+[2025-04-29 18:02:01] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:02:01] Porównuję task_id:  z mission_task_id: wybierz-avatar_2
+
+[2025-04-29 18:02:01] Po oczyszczeniu:  vs wybierz-avatar
+
+[2025-04-29 18:02:01] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:02:01] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Zadanie "wybierz-avatar" jest teraz W trakcie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-avatar_2
+    [task_num] => 2
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Zadanie "wybierz-avatar" jest teraz W trakcie
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:03:46] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:03:46] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => dojedz-do-sebastianowa_0
+    [mission_task_status] => completed
+)
+
+
+[2025-04-29 18:03:46] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:03:46] Po konwersji mission_id: : 339
+
+[2025-04-29 18:03:46] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:03:46] Po konwersji npc_id: : 0
+
+[2025-04-29 18:03:46] mission_status: : in_progress
+
+[2025-04-29 18:03:46] mission_task_id: : dojedz-do-sebastianowa_0
+
+[2025-04-29 18:03:46] mission_task_status: : completed
+
+[2025-04-29 18:03:46] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:03:46] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=dojedz-do-sebastianowa_0, mission_task_status=completed, npc_id=0
+
+[2025-04-29 18:03:46] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:03:46] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:03:46] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Struktura istniejącego zadania dojedz-do-sebastianowa_0:: completed
+
+[2025-04-29 18:03:46] Naprawianie nieprawidłowej struktury zadania dojedz-do-sebastianowa_0 (było: completed)
+
+[2025-04-29 18:03:46] Szukam zadania o ID: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:03:46] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Porównuję task_id:  z mission_task_id: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:03:46] Po oczyszczeniu:  vs dojedz-do-sebastianowa
+
+[2025-04-29 18:03:46] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:03:46] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => dojedz-do-sebastianowa_0
+    [task_num] => 0
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:03:46] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:03:46] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-klase-postaci_1
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:03:46] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:03:46] Po konwersji mission_id: : 339
+
+[2025-04-29 18:03:46] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:03:46] Po konwersji npc_id: : 0
+
+[2025-04-29 18:03:46] mission_status: : in_progress
+
+[2025-04-29 18:03:46] mission_task_id: : wybierz-klase-postaci_1
+
+[2025-04-29 18:03:46] mission_task_status: : in_progress
+
+[2025-04-29 18:03:46] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:03:46] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-klase-postaci_1, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:03:46] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:03:46] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:03:46] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Struktura istniejącego zadania wybierz-klase-postaci_1:: in_progress
+
+[2025-04-29 18:03:46] Naprawianie nieprawidłowej struktury zadania wybierz-klase-postaci_1 (było: in_progress)
+
+[2025-04-29 18:03:46] Szukam zadania o ID: wybierz-klase-postaci_1
+
+[2025-04-29 18:03:46] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Porównuję task_id:  z mission_task_id: wybierz-klase-postaci_1
+
+[2025-04-29 18:03:46] Po oczyszczeniu:  vs wybierz-klase-postaci
+
+[2025-04-29 18:03:46] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:03:46] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-klase-postaci_1
+    [task_num] => 1
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:03:46] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:03:46] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-avatar_2
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:03:46] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:03:46] Po konwersji mission_id: : 339
+
+[2025-04-29 18:03:46] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:03:46] Po konwersji npc_id: : 0
+
+[2025-04-29 18:03:46] mission_status: : in_progress
+
+[2025-04-29 18:03:46] mission_task_id: : wybierz-avatar_2
+
+[2025-04-29 18:03:46] mission_task_status: : in_progress
+
+[2025-04-29 18:03:46] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:03:46] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-avatar_2, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:03:46] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:03:46] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:03:46] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 17:13:55
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Struktura istniejącego zadania wybierz-avatar_2:: in_progress
+
+[2025-04-29 18:03:46] Naprawianie nieprawidłowej struktury zadania wybierz-avatar_2 (było: in_progress)
+
+[2025-04-29 18:03:46] Szukam zadania o ID: wybierz-avatar_2
+
+[2025-04-29 18:03:46] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:03:46] Porównuję task_id:  z mission_task_id: wybierz-avatar_2
+
+[2025-04-29 18:03:46] Po oczyszczeniu:  vs wybierz-avatar
+
+[2025-04-29 18:03:46] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:03:46] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-avatar_2
+    [task_num] => 2
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:04:25] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:04:25] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:04:25] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => dojedz-do-sebastianowa_0
+    [mission_task_status] => completed
+)
+
+
+[2025-04-29 18:04:25] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:04:25] Po konwersji mission_id: : 339
+
+[2025-04-29 18:04:25] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:04:25] Po konwersji npc_id: : 0
+
+[2025-04-29 18:04:25] mission_status: : in_progress
+
+[2025-04-29 18:04:25] mission_task_id: : dojedz-do-sebastianowa_0
+
+[2025-04-29 18:04:25] mission_task_status: : completed
+
+[2025-04-29 18:04:25] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:04:25] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=dojedz-do-sebastianowa_0, mission_task_status=completed, npc_id=0
+
+[2025-04-29 18:04:25] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:04:25] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:04:25] Istniejąca misja: 
+Array
+(
+    [status] => not_started
+    [assigned_date] => 
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => not_started
+            [wybierz-klase-postaci_1] => not_started
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:04:25] Przygotowana struktura misji: 
+Array
+(
+    [status] => not_started
+    [assigned_date] => 
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => not_started
+            [wybierz-klase-postaci_1] => not_started
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:04:25] Struktura istniejącego zadania dojedz-do-sebastianowa_0:: not_started
+
+[2025-04-29 18:04:25] Naprawianie nieprawidłowej struktury zadania dojedz-do-sebastianowa_0 (było: not_started)
+
+[2025-04-29 18:04:25] Szukam zadania o ID: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:04:25] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:04:25] Porównuję task_id:  z mission_task_id: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:04:25] Po oczyszczeniu:  vs dojedz-do-sebastianowa
+
+[2025-04-29 18:04:25] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:04:25] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => W trakcie. Zadanie "dojedz-do-sebastianowa" jest teraz Ukończone
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => dojedz-do-sebastianowa_0
+    [task_num] => 0
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => W trakcie
+            [1] => Zadanie "dojedz-do-sebastianowa" jest teraz Ukończone
+        )
+
+)
+
+
+[2025-04-29 18:04:26] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:04:26] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:04:26] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-klase-postaci_1
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:04:26] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:04:26] Po konwersji mission_id: : 339
+
+[2025-04-29 18:04:26] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:04:26] Po konwersji npc_id: : 0
+
+[2025-04-29 18:04:26] mission_status: : in_progress
+
+[2025-04-29 18:04:26] mission_task_id: : wybierz-klase-postaci_1
+
+[2025-04-29 18:04:26] mission_task_status: : in_progress
+
+[2025-04-29 18:04:26] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:04:26] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-klase-postaci_1, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:04:26] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:04:26] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:04:26] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => not_started
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:04:26] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => not_started
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:04:26] Struktura istniejącego zadania wybierz-klase-postaci_1:: not_started
+
+[2025-04-29 18:04:26] Naprawianie nieprawidłowej struktury zadania wybierz-klase-postaci_1 (było: not_started)
+
+[2025-04-29 18:04:26] Szukam zadania o ID: wybierz-klase-postaci_1
+
+[2025-04-29 18:04:26] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:04:26] Porównuję task_id:  z mission_task_id: wybierz-klase-postaci_1
+
+[2025-04-29 18:04:26] Po oczyszczeniu:  vs wybierz-klase-postaci
+
+[2025-04-29 18:04:26] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:04:26] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Zadanie "wybierz-klase-postaci" jest teraz W trakcie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-klase-postaci_1
+    [task_num] => 1
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Zadanie "wybierz-klase-postaci" jest teraz W trakcie
+        )
+
+)
+
+
+[2025-04-29 18:04:26] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:04:26] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:04:26] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-avatar_2
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:04:26] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:04:26] Po konwersji mission_id: : 339
+
+[2025-04-29 18:04:26] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:04:26] Po konwersji npc_id: : 0
+
+[2025-04-29 18:04:26] mission_status: : in_progress
+
+[2025-04-29 18:04:26] mission_task_id: : wybierz-avatar_2
+
+[2025-04-29 18:04:26] mission_task_status: : in_progress
+
+[2025-04-29 18:04:26] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:04:26] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-avatar_2, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:04:26] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:04:26] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:04:26] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:04:26] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => not_started
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:04:26] Struktura istniejącego zadania wybierz-avatar_2:: not_started
+
+[2025-04-29 18:04:26] Naprawianie nieprawidłowej struktury zadania wybierz-avatar_2 (było: not_started)
+
+[2025-04-29 18:04:26] Szukam zadania o ID: wybierz-avatar_2
+
+[2025-04-29 18:04:26] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:04:26] Porównuję task_id:  z mission_task_id: wybierz-avatar_2
+
+[2025-04-29 18:04:26] Po oczyszczeniu:  vs wybierz-avatar
+
+[2025-04-29 18:04:26] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:04:26] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Zadanie "wybierz-avatar" jest teraz W trakcie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-avatar_2
+    [task_num] => 2
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Zadanie "wybierz-avatar" jest teraz W trakcie
+        )
+
+)
+
+
+[2025-04-29 18:11:52] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:11:52] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:11:52] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => dojedz-do-sebastianowa_0
+    [mission_task_status] => completed
+)
+
+
+[2025-04-29 18:11:52] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:11:52] Po konwersji mission_id: : 339
+
+[2025-04-29 18:11:52] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:11:52] Po konwersji npc_id: : 0
+
+[2025-04-29 18:11:52] mission_status: : in_progress
+
+[2025-04-29 18:11:52] mission_task_id: : dojedz-do-sebastianowa_0
+
+[2025-04-29 18:11:52] mission_task_status: : completed
+
+[2025-04-29 18:11:52] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:11:52] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=dojedz-do-sebastianowa_0, mission_task_status=completed, npc_id=0
+
+[2025-04-29 18:11:52] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:11:52] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:11:52] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:11:52] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:11:52] Struktura istniejącego zadania dojedz-do-sebastianowa_0:: completed
+
+[2025-04-29 18:11:52] Naprawianie nieprawidłowej struktury zadania dojedz-do-sebastianowa_0 (było: completed)
+
+[2025-04-29 18:11:52] Szukam zadania o ID: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:11:52] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:11:52] Porównuję task_id:  z mission_task_id: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:11:52] Po oczyszczeniu:  vs dojedz-do-sebastianowa
+
+[2025-04-29 18:11:52] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:11:52] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => dojedz-do-sebastianowa_0
+    [task_num] => 0
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:11:52] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:11:52] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:11:52] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-klase-postaci_1
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:11:52] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:11:52] Po konwersji mission_id: : 339
+
+[2025-04-29 18:11:52] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:11:52] Po konwersji npc_id: : 0
+
+[2025-04-29 18:11:52] mission_status: : in_progress
+
+[2025-04-29 18:11:52] mission_task_id: : wybierz-klase-postaci_1
+
+[2025-04-29 18:11:52] mission_task_status: : in_progress
+
+[2025-04-29 18:11:52] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:11:52] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-klase-postaci_1, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:11:52] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:11:52] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:11:52] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:11:52] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:11:52] Struktura istniejącego zadania wybierz-klase-postaci_1:: in_progress
+
+[2025-04-29 18:11:52] Naprawianie nieprawidłowej struktury zadania wybierz-klase-postaci_1 (było: in_progress)
+
+[2025-04-29 18:11:52] Szukam zadania o ID: wybierz-klase-postaci_1
+
+[2025-04-29 18:11:52] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:11:52] Porównuję task_id:  z mission_task_id: wybierz-klase-postaci_1
+
+[2025-04-29 18:11:52] Po oczyszczeniu:  vs wybierz-klase-postaci
+
+[2025-04-29 18:11:52] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:11:52] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-klase-postaci_1
+    [task_num] => 1
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:11:52] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:11:53] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:11:53] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-avatar_2
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:11:53] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:11:53] Po konwersji mission_id: : 339
+
+[2025-04-29 18:11:53] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:11:53] Po konwersji npc_id: : 0
+
+[2025-04-29 18:11:53] mission_status: : in_progress
+
+[2025-04-29 18:11:53] mission_task_id: : wybierz-avatar_2
+
+[2025-04-29 18:11:53] mission_task_status: : in_progress
+
+[2025-04-29 18:11:53] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:11:53] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-avatar_2, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:11:53] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:11:53] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:11:53] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:11:53] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:11:53] Struktura istniejącego zadania wybierz-avatar_2:: in_progress
+
+[2025-04-29 18:11:53] Naprawianie nieprawidłowej struktury zadania wybierz-avatar_2 (było: in_progress)
+
+[2025-04-29 18:11:53] Szukam zadania o ID: wybierz-avatar_2
+
+[2025-04-29 18:11:53] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:11:53] Porównuję task_id:  z mission_task_id: wybierz-avatar_2
+
+[2025-04-29 18:11:53] Po oczyszczeniu:  vs wybierz-avatar
+
+[2025-04-29 18:11:53] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:11:53] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-avatar_2
+    [task_num] => 2
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:12:17] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:12:18] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:12:18] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => dojedz-do-sebastianowa_0
+    [mission_task_status] => completed
+)
+
+
+[2025-04-29 18:12:18] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:12:18] Po konwersji mission_id: : 339
+
+[2025-04-29 18:12:18] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:12:18] Po konwersji npc_id: : 0
+
+[2025-04-29 18:12:18] mission_status: : in_progress
+
+[2025-04-29 18:12:18] mission_task_id: : dojedz-do-sebastianowa_0
+
+[2025-04-29 18:12:18] mission_task_status: : completed
+
+[2025-04-29 18:12:18] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:12:18] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=dojedz-do-sebastianowa_0, mission_task_status=completed, npc_id=0
+
+[2025-04-29 18:12:18] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:12:18] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:12:18] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:12:18] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:12:18] Struktura istniejącego zadania dojedz-do-sebastianowa_0:: completed
+
+[2025-04-29 18:12:18] Naprawianie nieprawidłowej struktury zadania dojedz-do-sebastianowa_0 (było: completed)
+
+[2025-04-29 18:12:18] Szukam zadania o ID: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:12:18] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:12:18] Porównuję task_id:  z mission_task_id: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:12:18] Po oczyszczeniu:  vs dojedz-do-sebastianowa
+
+[2025-04-29 18:12:18] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:12:18] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => dojedz-do-sebastianowa_0
+    [task_num] => 0
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:12:18] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:12:18] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:12:18] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-klase-postaci_1
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:12:18] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:12:18] Po konwersji mission_id: : 339
+
+[2025-04-29 18:12:18] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:12:18] Po konwersji npc_id: : 0
+
+[2025-04-29 18:12:18] mission_status: : in_progress
+
+[2025-04-29 18:12:18] mission_task_id: : wybierz-klase-postaci_1
+
+[2025-04-29 18:12:18] mission_task_status: : in_progress
+
+[2025-04-29 18:12:18] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:12:18] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-klase-postaci_1, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:12:18] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:12:18] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:12:18] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:12:18] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:12:18] Struktura istniejącego zadania wybierz-klase-postaci_1:: in_progress
+
+[2025-04-29 18:12:18] Naprawianie nieprawidłowej struktury zadania wybierz-klase-postaci_1 (było: in_progress)
+
+[2025-04-29 18:12:18] Szukam zadania o ID: wybierz-klase-postaci_1
+
+[2025-04-29 18:12:18] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:12:18] Porównuję task_id:  z mission_task_id: wybierz-klase-postaci_1
+
+[2025-04-29 18:12:18] Po oczyszczeniu:  vs wybierz-klase-postaci
+
+[2025-04-29 18:12:18] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:12:18] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-klase-postaci_1
+    [task_num] => 1
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:12:18] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:12:18] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:12:18] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-avatar_2
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:12:18] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:12:18] Po konwersji mission_id: : 339
+
+[2025-04-29 18:12:18] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:12:18] Po konwersji npc_id: : 0
+
+[2025-04-29 18:12:18] mission_status: : in_progress
+
+[2025-04-29 18:12:18] mission_task_id: : wybierz-avatar_2
+
+[2025-04-29 18:12:18] mission_task_status: : in_progress
+
+[2025-04-29 18:12:18] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:12:18] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-avatar_2, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:12:18] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:12:18] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:12:18] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:12:18] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:12:18] Struktura istniejącego zadania wybierz-avatar_2:: in_progress
+
+[2025-04-29 18:12:18] Naprawianie nieprawidłowej struktury zadania wybierz-avatar_2 (było: in_progress)
+
+[2025-04-29 18:12:18] Szukam zadania o ID: wybierz-avatar_2
+
+[2025-04-29 18:12:18] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:12:18] Porównuję task_id:  z mission_task_id: wybierz-avatar_2
+
+[2025-04-29 18:12:18] Po oczyszczeniu:  vs wybierz-avatar
+
+[2025-04-29 18:12:18] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:12:18] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-avatar_2
+    [task_num] => 2
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:15:50] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:15:50] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:15:50] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => dojedz-do-sebastianowa_0
+    [mission_task_status] => completed
+)
+
+
+[2025-04-29 18:15:50] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:15:50] Po konwersji mission_id: : 339
+
+[2025-04-29 18:15:50] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:15:50] Po konwersji npc_id: : 0
+
+[2025-04-29 18:15:50] mission_status: : in_progress
+
+[2025-04-29 18:15:50] mission_task_id: : dojedz-do-sebastianowa_0
+
+[2025-04-29 18:15:50] mission_task_status: : completed
+
+[2025-04-29 18:15:50] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:15:50] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=dojedz-do-sebastianowa_0, mission_task_status=completed, npc_id=0
+
+[2025-04-29 18:15:50] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:15:50] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:15:50] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:15:50] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:15:50] Struktura istniejącego zadania dojedz-do-sebastianowa_0:: completed
+
+[2025-04-29 18:15:50] Naprawianie nieprawidłowej struktury zadania dojedz-do-sebastianowa_0 (było: completed)
+
+[2025-04-29 18:15:50] Szukam zadania o ID: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:15:50] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:15:50] Porównuję task_id:  z mission_task_id: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:15:50] Po oczyszczeniu:  vs dojedz-do-sebastianowa
+
+[2025-04-29 18:15:50] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:15:50] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => dojedz-do-sebastianowa_0
+    [task_num] => 0
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:15:50] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:15:50] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:15:50] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-klase-postaci_1
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:15:50] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:15:50] Po konwersji mission_id: : 339
+
+[2025-04-29 18:15:50] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:15:50] Po konwersji npc_id: : 0
+
+[2025-04-29 18:15:50] mission_status: : in_progress
+
+[2025-04-29 18:15:50] mission_task_id: : wybierz-klase-postaci_1
+
+[2025-04-29 18:15:50] mission_task_status: : in_progress
+
+[2025-04-29 18:15:50] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:15:50] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-klase-postaci_1, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:15:50] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:15:50] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:15:50] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:15:50] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:15:50] Struktura istniejącego zadania wybierz-klase-postaci_1:: in_progress
+
+[2025-04-29 18:15:50] Naprawianie nieprawidłowej struktury zadania wybierz-klase-postaci_1 (było: in_progress)
+
+[2025-04-29 18:15:50] Szukam zadania o ID: wybierz-klase-postaci_1
+
+[2025-04-29 18:15:50] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:15:50] Porównuję task_id:  z mission_task_id: wybierz-klase-postaci_1
+
+[2025-04-29 18:15:50] Po oczyszczeniu:  vs wybierz-klase-postaci
+
+[2025-04-29 18:15:50] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:15:50] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-klase-postaci_1
+    [task_num] => 1
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:15:51] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:15:51] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:15:51] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-avatar_2
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:15:51] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:15:51] Po konwersji mission_id: : 339
+
+[2025-04-29 18:15:51] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:15:51] Po konwersji npc_id: : 0
+
+[2025-04-29 18:15:51] mission_status: : in_progress
+
+[2025-04-29 18:15:51] mission_task_id: : wybierz-avatar_2
+
+[2025-04-29 18:15:51] mission_task_status: : in_progress
+
+[2025-04-29 18:15:51] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:15:51] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-avatar_2, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:15:51] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:15:51] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:15:51] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:15:51] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:15:51] Struktura istniejącego zadania wybierz-avatar_2:: in_progress
+
+[2025-04-29 18:15:51] Naprawianie nieprawidłowej struktury zadania wybierz-avatar_2 (było: in_progress)
+
+[2025-04-29 18:15:51] Szukam zadania o ID: wybierz-avatar_2
+
+[2025-04-29 18:15:51] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:15:51] Porównuję task_id:  z mission_task_id: wybierz-avatar_2
+
+[2025-04-29 18:15:51] Po oczyszczeniu:  vs wybierz-avatar
+
+[2025-04-29 18:15:51] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:15:51] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-avatar_2
+    [task_num] => 2
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:16:00] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:16:00] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:16:00] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => dojedz-do-sebastianowa_0
+    [mission_task_status] => completed
+)
+
+
+[2025-04-29 18:16:00] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:16:00] Po konwersji mission_id: : 339
+
+[2025-04-29 18:16:00] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:16:00] Po konwersji npc_id: : 0
+
+[2025-04-29 18:16:00] mission_status: : in_progress
+
+[2025-04-29 18:16:00] mission_task_id: : dojedz-do-sebastianowa_0
+
+[2025-04-29 18:16:00] mission_task_status: : completed
+
+[2025-04-29 18:16:00] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:16:00] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=dojedz-do-sebastianowa_0, mission_task_status=completed, npc_id=0
+
+[2025-04-29 18:16:00] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:16:00] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:16:00] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:16:00] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:16:00] Struktura istniejącego zadania dojedz-do-sebastianowa_0:: completed
+
+[2025-04-29 18:16:00] Naprawianie nieprawidłowej struktury zadania dojedz-do-sebastianowa_0 (było: completed)
+
+[2025-04-29 18:16:00] Szukam zadania o ID: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:16:00] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:16:00] Porównuję task_id:  z mission_task_id: dojedz-do-sebastianowa_0
+
+[2025-04-29 18:16:00] Po oczyszczeniu:  vs dojedz-do-sebastianowa
+
+[2025-04-29 18:16:00] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:16:00] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => dojedz-do-sebastianowa_0
+    [task_num] => 0
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:16:00] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:16:00] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:16:00] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-klase-postaci_1
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:16:00] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:16:00] Po konwersji mission_id: : 339
+
+[2025-04-29 18:16:00] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:16:00] Po konwersji npc_id: : 0
+
+[2025-04-29 18:16:00] mission_status: : in_progress
+
+[2025-04-29 18:16:00] mission_task_id: : wybierz-klase-postaci_1
+
+[2025-04-29 18:16:00] mission_task_status: : in_progress
+
+[2025-04-29 18:16:00] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:16:00] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-klase-postaci_1, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:16:00] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:16:00] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:16:00] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:16:00] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:16:00] Struktura istniejącego zadania wybierz-klase-postaci_1:: in_progress
+
+[2025-04-29 18:16:00] Naprawianie nieprawidłowej struktury zadania wybierz-klase-postaci_1 (było: in_progress)
+
+[2025-04-29 18:16:00] Szukam zadania o ID: wybierz-klase-postaci_1
+
+[2025-04-29 18:16:00] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:16:00] Porównuję task_id:  z mission_task_id: wybierz-klase-postaci_1
+
+[2025-04-29 18:16:00] Po oczyszczeniu:  vs wybierz-klase-postaci
+
+[2025-04-29 18:16:00] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:16:00] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-klase-postaci_1
+    [task_num] => 1
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+
+[2025-04-29 18:16:01] Przetwarzanie misji ID: 339
+
+[2025-04-29 18:16:01] ====== ROZPOCZĘCIE AJAX_ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:16:01] Wszystkie dane POST: 
+Array
+(
+    [action] => assign_mission_to_user
+    [mission_id] => 339
+    [npc_id] => null
+    [mission_status] => in_progress
+    [mission_task_id] => wybierz-avatar_2
+    [mission_task_status] => in_progress
+)
+
+
+[2025-04-29 18:16:01] Otrzymana wartość mission_id: : 339
+
+[2025-04-29 18:16:01] Po konwersji mission_id: : 339
+
+[2025-04-29 18:16:01] Otrzymana wartość npc_id: : null
+
+[2025-04-29 18:16:01] Po konwersji npc_id: : 0
+
+[2025-04-29 18:16:01] mission_status: : in_progress
+
+[2025-04-29 18:16:01] mission_task_id: : wybierz-avatar_2
+
+[2025-04-29 18:16:01] mission_task_status: : in_progress
+
+[2025-04-29 18:16:01] ====== ROZPOCZĘCIE ASSIGN_MISSION_TO_USER ======
+
+[2025-04-29 18:16:01] Parametry: user_id=1, mission_id=339, mission_status=in_progress, mission_task_id=wybierz-avatar_2, mission_task_status=in_progress, npc_id=0
+
+[2025-04-29 18:16:01] Typy parametrów: user_id=integer, mission_id=integer, mission_task_id=string, npc_id=integer
+
+[2025-04-29 18:16:01] Klucz meta dla misji: mission_339
+
+[2025-04-29 18:16:01] Istniejąca misja: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:16:01] Przygotowana struktura misji: 
+Array
+(
+    [status] => in_progress
+    [assigned_date] => 2025-04-29 18:04:25
+    [completion_date] => 
+    [tasks] => Array
+        (
+            [dojedz-do-sebastianowa_0] => completed
+            [wybierz-klase-postaci_1] => in_progress
+            [wybierz-avatar_2] => in_progress
+            [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
+        )
+
+)
+
+
+[2025-04-29 18:16:01] Struktura istniejącego zadania wybierz-avatar_2:: in_progress
+
+[2025-04-29 18:16:01] Naprawianie nieprawidłowej struktury zadania wybierz-avatar_2 (było: in_progress)
+
+[2025-04-29 18:16:01] Szukam zadania o ID: wybierz-avatar_2
+
+[2025-04-29 18:16:01] Zadania misji:
+Array
+(
+    [0] => Array
+        (
+            [task_title] => Dojedź do Sebastianowa
+            [task_description] => Na tej stacji nie czekają na spóźnialskich. Pociąg do Sebastianowa już sapie i rzęzi jak stary menel po nocnej libacji.
+            [task_type] => place
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [1] => Array
+        (
+            [task_title] => Wybierz klasę postaci
+            [task_description] => Każdy musi się określić, kim jest. Chcesz walić z liścia? Przebierać ludzi na klatce? A może kombinować na boku?
+Wybierz klasę i poznaj swoje przeznaczenie.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-klase
+            [task_checkpoint_npc] => 
+        )
+
+    [2] => Array
+        (
+            [task_title] => Wybierz avatar
+            [task_description] => Bez ryja nie ma szacunu. Wybierz, jak chcesz wyglądać, zanim inni ci przypną własną łatkę.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => wybierz-avatar
+            [task_checkpoint_npc] => 
+        )
+
+    [3] => Array
+        (
+            [task_title] => Przebierz się z przypałowych ciuchów Olimpii Adrianowo
+            [task_description] => Dobrze, że Młody miał litość i dał ci te stare portki, bo jeszcze by cię psy zgarnęły za gorszenie okolicy.
+Wbij wreszcie w te spodnie... Wejdź w plecak, znajdź ciuchy i przestań robić przypał.
+            [task_type] => checkpoint
+            [task_place_id] => 
+            [task_checkpoint] => przebierz-sie
+            [task_checkpoint_npc] => 
+        )
+
+)
+
+
+[2025-04-29 18:16:01] Porównuję task_id:  z mission_task_id: wybierz-avatar_2
+
+[2025-04-29 18:16:01] Po oczyszczeniu:  vs wybierz-avatar
+
+[2025-04-29 18:16:01] Znaleziono zadanie: Dojedź do Sebastianowa
+
+[2025-04-29 18:16:01] Odpowiedź dla sukcesu misji:
+Array
+(
+    [message] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+    [mission_id] => 339
+    [mission_title] => Przejdź samouczek
+    [task_id] => wybierz-avatar_2
+    [task_num] => 2
+    [task_name] => Dojedź do Sebastianowa
+    [task_sequence] => Array
+        (
+        )
+
+    [npc_id] => 0
+    [messages] => Array
+        (
+            [0] => Aktualizacja misji "Przejdź samouczek" zakończona pomyślnie
+        )
+
+)
+
+

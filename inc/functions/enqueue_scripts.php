@@ -8,25 +8,25 @@
  */
 
 // Główna funkcja ładująca skrypty i style
-function game_enqueue_scripts_and_styles()
+function game_enqueue_scripts_and_styles2()
 {
     // Zawsze ładowane podstawowe skrypty i style
-    wp_enqueue_style('game-main-style', get_stylesheet_uri(), [], filemtime(get_stylesheet_directory() . '/style.css'));
+    // wp_enqueue_style('game-main-style', get_stylesheet_uri(), [], filemtime(get_stylesheet_directory() . '/style.css'));
 
-    // Najpierw załaduj moduły klasowe, żeby zapobiec podwójnym deklaracjom
-    $class_dir = get_stylesheet_directory() . '/assets/js/class';
-    if (file_exists($class_dir) && is_dir($class_dir)) {
-        // Rejestrowanie klas osobno - AjaxHelper musi być pierwszy
-        game_register_custom_script('ajax-helper', '/assets/js/class/AjaxHelper.js', [], true);
-        wp_enqueue_script('game-ajax-helper');
+    // // Najpierw załaduj moduły klasowe, żeby zapobiec podwójnym deklaracjom
+    // $class_dir = get_stylesheet_directory() . '/assets/js/class';
+    // if (file_exists($class_dir) && is_dir($class_dir)) {
+    //     // Rejestrowanie klas osobno - AjaxHelper musi być pierwszy
+    //     game_register_custom_script('ajax-helper', '/assets/js/class/AjaxHelper.js', [], true);
+    //     wp_enqueue_script('game-ajax-helper');
 
-        // Pomijamy index.js, jeśli zawiera duplikat AjaxHelper
-        // Zamiast tego będziemy ładować potrzebne zależności bezpośrednio
-    }
+    //     // Pomijamy index.js, jeśli zawiera duplikat AjaxHelper
+    //     // Zamiast tego będziemy ładować potrzebne zależności bezpośrednio
+    // }
 
     // Załaduj system powiadomień
     $notification_css_path = get_stylesheet_directory() . '/assets/css/notification-system.css';
-    $notification_js_path = get_stylesheet_directory() . '/assets/js/notification-system.js';
+    // $notification_js_path = get_stylesheet_directory() . '/assets/js/notification-system.js';
 
     if (file_exists($notification_css_path)) {
         $notification_css_version = filemtime($notification_css_path);
@@ -35,25 +35,25 @@ function game_enqueue_scripts_and_styles()
 
     if (file_exists($notification_js_path)) {
         $notification_js_version = filemtime($notification_js_path);
-        wp_enqueue_script('game-notifications-js', get_stylesheet_directory_uri() . '/assets/js/notification-system.js', ['jquery'], $notification_js_version, true);
+        // wp_enqueue_script('game-notifications-js', get_stylesheet_directory_uri() . '/assets/js/notification-system.js', ['jquery'], $notification_js_version, true);
     }
 
     // Załaduj główny skrypt bez podwójnej deklaracji AjaxHelper - dodajemy wersję z timestamp aby uniknąć cache'owania
-    $main_js_version = filemtime(get_stylesheet_directory() . '/assets/js/main.js');
-    wp_enqueue_script('game-main-js', get_stylesheet_directory_uri() . '/assets/js/main.js', ['jquery', 'game-ajax-helper', 'game-notifications-js'], $main_js_version, true);
+    // $main_js_version = filemtime(get_stylesheet_directory() . '/assets/js/main.js');
+    // wp_enqueue_script('game-main-js', get_stylesheet_directory_uri() . '/assets/js/main.js', ['jquery', 'game-ajax-helper', 'game-notifications-js'], $main_js_version, true);
 
     // Załaduj nowy system obsługi misji
-    $mission_handler_path = get_stylesheet_directory() . '/assets/js/mission-handler.js';
+    // $mission_handler_path = get_stylesheet_directory() . '/assets/js/mission-handler.js';
     if (file_exists($mission_handler_path)) {
         $mission_handler_version = filemtime($mission_handler_path);
-        wp_enqueue_script('game-mission-handler', get_stylesheet_directory_uri() . '/assets/js/mission-handler.js', ['jquery', 'game-ajax-helper', 'game-notifications-js', 'game-main-js'], $mission_handler_version, true);
+        // wp_enqueue_script('game-mission-handler', get_stylesheet_directory_uri() . '/assets/js/mission-handler.js', ['jquery', 'game-ajax-helper', 'game-notifications-js', 'game-main-js'], $mission_handler_version, true);
     }
 
     // Załaduj obsługę misji
-    $mission_handler_path = get_stylesheet_directory() . '/assets/js/mission-handler.js';
+    // $mission_handler_path = get_stylesheet_directory() . '/assets/js/mission-handler.js';
     if (file_exists($mission_handler_path)) {
         $mission_handler_version = filemtime($mission_handler_path);
-        wp_enqueue_script('game-mission-handler', get_stylesheet_directory_uri() . '/assets/js/mission-handler.js', ['jquery', 'game-ajax-helper', 'game-main-js'], $mission_handler_version, true);
+        // wp_enqueue_script('game-mission-handler', get_stylesheet_directory_uri() . '/assets/js/mission-handler.js', ['jquery', 'game-ajax-helper', 'game-main-js'], $mission_handler_version, true);
     }
 
     // Globalne zależności dla skryptów
@@ -69,7 +69,7 @@ function game_enqueue_scripts_and_styles()
         $current_template = 'author';
         // Bezpośrednie ładowanie plików dla podstrony autora
         $author_style_path = get_stylesheet_directory() . '/page-templates/author/style.css';
-        $author_script_path = get_stylesheet_directory() . '/page-templates/author/main.js';
+        // $author_script_path = get_stylesheet_directory() . '/page-templates/author/main.js';
 
         if (file_exists($author_style_path)) {
             wp_enqueue_style(
@@ -83,13 +83,13 @@ function game_enqueue_scripts_and_styles()
         if (file_exists($author_script_path)) {
             wp_enqueue_script(
                 'game-author-panel-script',
-                get_stylesheet_directory_uri() . '/page-templates/author/main.js',
+                // get_stylesheet_directory_uri() . '/page-templates/author/main.js',
                 ['jquery'],
                 true
             );
             wp_enqueue_script(
                 'game-author-stats-upgrade',
-                get_stylesheet_directory_uri() . '/page-templates/author/stats-upgrade.js',
+                // get_stylesheet_directory_uri() . '/page-templates/author/stats-upgrade.js',
                 ['jquery'],
                 true
             );
@@ -197,13 +197,13 @@ function game_enqueue_scripts_and_styles()
 
         // Załaduj skrypt dla tego szablonu, jeśli istnieje
         if (!empty($template_script_path)) {
-            wp_enqueue_script(
-                'game-' . $current_template . ($view_type ? '-' . $view_type : '') . '-script',
-                $template_script_path,
-                $script_dependencies,
-                filemtime(str_replace(get_stylesheet_directory_uri(), get_stylesheet_directory(), $template_script_path)),
-                true
-            );
+            // wp_enqueue_script(
+            //     'game-' . $current_template . ($view_type ? '-' . $view_type : '') . '-script',
+            //     $template_script_path,
+            //     $script_dependencies,
+            //     filemtime(str_replace(get_stylesheet_directory_uri(), get_stylesheet_directory(), $template_script_path)),
+            //     true
+            // );
         }
     }
 
@@ -218,7 +218,7 @@ function game_enqueue_scripts_and_styles()
         ]);
     }
 }
-add_action('wp_enqueue_scripts', 'game_enqueue_scripts_and_styles');
+add_action('wp_enqueue_scripts', 'game_enqueue_scripts_and_styles2');
 
 // Funkcja pomocnicza do rejestrowania skryptów niestandardowych
 function game_register_custom_script($name, $path, $deps = ['jquery'], $in_footer = true)

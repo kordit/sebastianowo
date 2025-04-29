@@ -162,7 +162,7 @@ function enqueue_dm_scripts()
 {
     // Ładujemy skrypt tylko, jeśli użytkownik jest zalogowany i ma prawo modyfikować minerały
     if (is_user_logged_in()) {
-        wp_enqueue_script('global-script', get_stylesheet_directory_uri() . '/assets/js/main.js', [], null, true);
+        // wp_enqueue_script('global-script', get_stylesheet_directory_uri() . '/assets/js/main.js', [], null, true);
         $nonce = wp_create_nonce('dm_nonce');
 
         wp_localize_script('global-script', 'global', [
