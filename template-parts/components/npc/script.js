@@ -86,35 +86,54 @@ function buildNpcPopup(npcData, userId) {
                     }
                 });
                 btn.addEventListener('click', async () => {
-                    if (btn.hasAttribute('data-type-anwser')) {
-                        const typeAnwser = JSON.parse(btn.getAttribute('data-type-anwser'));
-                        let errorOccurred = false;
-                        const originalShowPopup = window.showPopup;
-                        window.showPopup = function (message, state) {
-                            if (state === 'error') errorOccurred = true;
-                            originalShowPopup(message, state);
-                        };
-                        await handleAnswer(typeAnwser);
-                        window.showPopup = originalShowPopup;
-                        if (errorOccurred) return;
-                    }
-                    if (answer.go_to_id && answer.go_to_id !== "0") {
-                        dialogueContent.innerHTML = '<div class="loader">Myśli...</div>';
-                        try {
-                            const newData = await fetchDialogue(npcData, answer.go_to_id, getPageData(), userId);
-                            if (newData && newData.conversation) {
-                                renderDialogueContent(newData.conversation);
+                    // Zapobiegaj wielokrotnym kliknięciom - wyłączenie przycisku
+                    if (btn.disabled) return;
+                    btn.disabled = true;
+                    btn.classList.add('processing');
+
+                    try {
+                        if (btn.hasAttribute('data-type-anwser')) {
+                            const typeAnwser = JSON.parse(btn.getAttribute('data-type-anwser'));
+                            let errorOccurred = false;
+                            const originalShowPopup = window.showPopup;
+                            window.showPopup = function (message, state) {
+                                if (state === 'error') errorOccurred = true;
+                                originalShowPopup(message, state);
+                            };
+                            await handleAnswer(typeAnwser);
+                            window.showPopup = originalShowPopup;
+                            if (errorOccurred) {
+                                btn.disabled = false;
+                                btn.classList.remove('processing');
+                                return;
                             }
-                        } catch (err) {
-                            console.error(err);
                         }
-                    } else {
-                        if (popupContainer.dataset.functions) {
-                            const functionsList = JSON.parse(popupContainer.dataset.functions);
-                            runFunctionNPC(functionsList);
+                        if (answer.go_to_id && answer.go_to_id !== "0") {
+                            dialogueContent.innerHTML = '<div class="loader">Myśli...</div>';
+                            try {
+                                const newData = await fetchDialogue(npcData, answer.go_to_id, getPageData(), userId);
+                                if (newData && newData.conversation) {
+                                    renderDialogueContent(newData.conversation);
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                // Przywróć przycisk w przypadku błędu
+                                btn.disabled = false;
+                                btn.classList.remove('processing');
+                            }
+                        } else {
+                            if (popupContainer.dataset.functions) {
+                                const functionsList = JSON.parse(popupContainer.dataset.functions);
+                                runFunctionNPC(functionsList);
+                            }
+                            popupContainer.classList.remove('active');
+                            setTimeout(() => popupContainer.remove(), 300);
                         }
-                        popupContainer.classList.remove('active');
-                        setTimeout(() => popupContainer.remove(), 300);
+                    } catch (error) {
+                        console.error('Błąd podczas przetwarzania przycisku:', error);
+                        // Przywróć przycisk w przypadku błędu
+                        btn.disabled = false;
+                        btn.classList.remove('processing');
                     }
 
                 });
