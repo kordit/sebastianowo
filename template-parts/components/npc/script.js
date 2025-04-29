@@ -54,6 +54,7 @@ function buildNpcPopup(npcData, userId) {
         conversationWrapper.appendChild(header);
     }
 
+
     // Oddzielny kontener dla zawartości dialogu, aby nagłówek pozostał widoczny
     const dialogueContent = document.createElement('div');
     dialogueContent.className = 'npc-dialogue-content';
