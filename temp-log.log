@@ -1,9 +1,9 @@
-252Array
+76Array
 (
     [mission_id] => 247
     [mission_status] => in_progress
     [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => not_started_npc
+    [mission_task_status] => completed
 )
 Array
 (
@@ -89,7 +89,7 @@ Array
 
     [backpack] => Array
         (
-            [gold] => 1
+            [gold] => 7
             [cigarettes] => 0
         )
 
@@ -240,7 +240,7 @@ Array
                             [filter] => raw
                         )
 
-                    [quantity] => 1
+                    [quantity] => 2
                 )
 
         )
@@ -360,27 +360,27 @@ Array
 
     [mission_247] => Array
         (
-            [status] => not_started
+            [status] => completed
             [assigned_date] => 2025-04-27 13:05:30
-            [completion_date] => 2025-04-27 13:06:42
+            [completion_date] => 2025-04-29 16:43:16
             [tasks] => Array
                 (
                     [zidentyfikuj-potencjalnych-klientow_0] => Array
                         (
-                            [status] => not_started
+                            [status] => completed
                             [npc_target_70] => failed
                             [npc_70] => not_started
                             [npc_target_77] => failed
                             [npc_77] => not_started
                             [npc_target_250] => completed
-                            [npc_250] => not_started
+                            [npc_250] => completed
                             [npc_target_215] => completed
-                            [npc_215] => not_started
+                            [npc_215] => completed
                             [npc_target_252] => completed
-                            [npc_252] => not_started
+                            [npc_252] => completed
                         )
 
-                    [rozlicz-sie-z-irasem_1] => not_started
+                    [rozlicz-sie-z-irasem_1] => completed
                 )
 
         )
@@ -420,14 +420,14 @@ Array
 
     [mission_339] => Array
         (
-            [status] => in_progress
-            [assigned_date] => 2025-04-28 18:27:50
+            [status] => not_started
+            [assigned_date] => 
             [completion_date] => 
             [tasks] => Array
                 (
-                    [dojedz-do-sebastianowa_0] => completed
-                    [wybierz-klase-postaci_1] => in_progress
-                    [wybierz-avatar_2] => in_progress
+                    [dojedz-do-sebastianowa_0] => not_started
+                    [wybierz-klase-postaci_1] => not_started
+                    [wybierz-avatar_2] => not_started
                     [przebierz-sie-z-przypalowych-ciuchow-olimpii-adrianowo_3] => not_started
                 )
 

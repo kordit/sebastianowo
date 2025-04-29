@@ -12,20 +12,6 @@
 <body <?php body_class('body'); ?>>
     <?php if (is_user_logged_in()): ?>
         <header>
-            <!-- <h3 class="navigation-title">Nawigacja</h3> -->
-            <!-- <nav>
-                <ul>
-                    <li>
-                        <a href="<?= $author_url; ?>">Postać</a>
-                    </li>
-                    <li>
-                        <a href="/tereny">Dzielnice</a>
-                    </li>
-                    <li>
-                        <a style="color:red;font-weight:bold;" href="<?php echo wp_logout_url(home_url()); ?>">Wyloguj</a>
-                    </li>
-                </ul>
-            </nav> -->
             <div class="nowt-display">
                 <?php
                 $user_id = get_current_user_id();

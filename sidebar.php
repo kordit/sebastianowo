@@ -34,6 +34,7 @@ $current_area = get_field('current_area', 'user_' . get_current_user_id());
                 <div class="bar-game" data-bar-max="<?= $stats['max_energy']; ?>" data-bar-current="<?= $stats['energy']; ?>" data-bar-color="#ff5733" data-bar-type="energy"></div>
             </div>
         </div>
+        <h5 class="navigation-title">Nawigacja</h5>
         <div class="icons">
             <a href="/<?= get_permalink($current_area->ID); ?>">
                 <img src="<?= esc_url(PNG . '/spacer.png'); ?>" alt="">
