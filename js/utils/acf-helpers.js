@@ -3,7 +3,7 @@
  * 
  * Ten moduł zawiera funkcje ułatwiające pracę z polami ACF w WP
  */
-
+console.log("🔧 ACF Helpers loaded");
 /**
  * Pobiera najnowsze pola ACF za pomocą AJAX
  * @returns {Promise<Object>} Obiekt zawierający pola ACF

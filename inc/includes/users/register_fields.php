@@ -39,7 +39,7 @@ add_action('acf/include_fields', function () {
                     'class' => '',
                     'id' => '',
                 ),
-                'return_format' => 'array',
+                'return_format' => 'id',
                 'library' => 'all',
                 'min_width' => '',
                 'min_height' => '',
@@ -59,7 +59,7 @@ add_action('acf/include_fields', function () {
                 'instructions' => 'Pełny obrazek postaci',
                 'required' => 0,
                 'conditional_logic' => 0,
-                'return_format' => 'array',
+                'return_format' => 'id',
                 'library' => 'all',
                 'wrapper' => array(
                     'width' => '50%',

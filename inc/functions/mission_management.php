@@ -18,26 +18,6 @@ if (!defined('ABSPATH')) {
  * @param mixed $data Opcjonalne dane do zalogowania
  * @return void
  */
-function mission_debug_log($message, $data = null)
-{
-    $log_file = ABSPATH . '/wp-content/themes/game/temp-log.log';
-    $timestamp = date('[Y-m-d H:i:s]');
-    $log_message = $timestamp . ' ' . $message;
-
-    if ($data !== null) {
-        if (is_array($data) || is_object($data)) {
-            $log_message .= "\n" . print_r($data, true);
-        } else {
-            $log_message .= ': ' . $data;
-        }
-    }
-
-    $log_message .= "\n\n";
-
-    // Zapisz do pliku
-    file_put_contents($log_file, $log_message, FILE_APPEND);
-}
-
 /**
  * Rejestracja akcji AJAX dla systemu misji
  */

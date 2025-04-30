@@ -115,7 +115,6 @@ load_all_files_php_from_directory(get_template_directory() . '/inc/functions');
 add_action('init', function () {
     // Ładowanie wszystkich klas z katalogu 'inc/classes'
     load_all_files_php_from_directory(get_template_directory() . '/inc/classes');
-    new InstanceManager('walka', true);
     new InstanceManager('plecak', true);
     new InstanceManager('zadania', true);
 
@@ -220,3 +219,11 @@ add_action('template_redirect', function () {
 });
 
 require_once('inc/includes/svg-group.php');
+
+add_filter('show_admin_bar', '__return_false');
+
+$dir = get_template_directory() . '/class';
+
+foreach (glob($dir . '/*.php') as $filename) {
+    require_once $filename;
+}

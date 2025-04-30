@@ -20,8 +20,6 @@
                 $resources = [
                     ['name' => 'gold', 'icon' => '&#128176;', 'name_pl' => 'Hajs', 'icon_url' => PNG . '/hajs.png'],
                     ['name' => 'papierosy', 'icon' => '&#129704;', 'name_pl' => 'Szlugi', 'icon_url' => PNG . '/szlug.png'],
-                    ['name' => 'piwo', 'icon' => '&#129516;', 'name_pl' => 'Browary', 'icon_url' => PNG . '/browar.png'],
-                    // ['name' => 'marihuana', 'icon' => '&#129704;', 'name_pl' => 'Zioło', 'icon_url' => PNG . '/weed.png'],
                 ];
 
                 foreach ($resources as $resource): ?>

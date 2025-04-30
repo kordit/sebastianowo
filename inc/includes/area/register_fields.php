@@ -131,19 +131,21 @@ if (function_exists('acf_add_local_field_group')) {
 
 
 
-if (function_exists('acf_add_options_page')) {
-    acf_add_options_page([
-        'page_title'  => 'SVG Paths Settings',
-        'menu_title'  => 'SVG Paths',
-        'menu_slug'   => 'theme-svg-options',
-        'capability'  => 'edit_theme_options',
-        'redirect'    => false,
-    ]);
-}
+
 
 
 add_action('acf/init', function () {
     if (function_exists('acf_add_local_field_group')) {
+
+        if (function_exists('acf_add_options_page')) {
+            acf_add_options_page([
+                'page_title'  => 'SVG Paths Settings',
+                'menu_title'  => 'SVG Paths',
+                'menu_slug'   => 'theme-svg-options',
+                'capability'  => 'edit_theme_options',
+                'redirect'    => false,
+            ]);
+        }
         $path_count = count_svg_paths(SVG . 'map-2.svg');
 
         $fields = [];
