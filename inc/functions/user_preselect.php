@@ -389,6 +389,7 @@ add_action('init', function () {
             $post_title = sanitize_title($post->post_title);
             $scenes     = get_field('scenes', $post_id);
 
+
             if (!$scenes || !is_array($scenes) || empty($scenes)) {
                 continue;
             }

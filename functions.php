@@ -227,3 +227,133 @@ $dir = get_template_directory() . '/class';
 foreach (glob($dir . '/*.php') as $filename) {
     require_once $filename;
 }
+
+// Ładowanie skryptów z Webpacka
+function game_load_webpack_scripts()
+{
+    // Ścieżki do katalogów z plikami JavaScript
+    $dist_path = get_template_directory() . '/dist';
+    $dist_url = get_template_directory_uri() . '/dist';
+
+    // Główny skrypt aplikacji
+    if (file_exists($dist_path . '/js/app.bundle.js')) {
+        wp_enqueue_script(
+            'game-webpack-app',
+            $dist_url . '/js/app.bundle.js',
+            [], // Zależności są zarządzane przez Webpack
+            filemtime($dist_path . '/js/app.bundle.js'),
+            true // W stopce
+        );
+
+        // Przekazanie danych do JS
+        wp_localize_script('game-webpack-app', 'gameData', [
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'homeUrl' => home_url(),
+            'themeUrl' => get_template_directory_uri(),
+            'userId' => get_current_user_id(),
+            'isLoggedIn' => is_user_logged_in(),
+            'nonce' => wp_create_nonce('game_ajax_nonce'),
+            'dataManagerNonce' => wp_create_nonce('data_manager_nonce'),
+            'missionNonce' => wp_create_nonce('mission_ajax_nonce'),
+        ]);
+    }
+
+    // Warunkowe ładowanie modułów w zależności od kontekstu
+    $current_template = '';
+    $view_type = '';
+    $post_type = get_post_type();
+
+    // Ustalenie typu zawartości i widoku
+    if (is_author()) {
+        $current_template = 'author';
+    } elseif (is_archive()) {
+        $current_template = $post_type;
+        $view_type = 'archive';
+    } elseif (is_single()) {
+        $current_template = $post_type;
+        $view_type = 'single';
+    } elseif (is_page()) {
+        // Sprawdzanie szablonu strony
+        $template_slug = get_page_template_slug();
+        if ($template_slug) {
+            $current_template = basename($template_slug, '.php');
+        } else {
+            $current_template = 'page';
+        }
+    } elseif (is_front_page()) {
+        $current_template = 'front-page';
+    }
+
+    // Ładowanie modułu character na wszystkich stronach
+    if (file_exists($dist_path . '/js/character.bundle.js')) {
+        wp_enqueue_script(
+            'game-webpack-character',
+            $dist_url . '/js/character.bundle.js',
+            ['game-webpack-app'],
+            filemtime($dist_path . '/js/character.bundle.js'),
+            true
+        );
+    }
+
+    // Warunkowe ładowanie modułu inventory
+    if (is_page_template('page-templates/plecak/template.php') || get_query_var('instance_name') === 'plecak') {
+        if (file_exists($dist_path . '/js/inventory.bundle.js')) {
+            wp_enqueue_script(
+                'game-webpack-inventory',
+                $dist_url . '/js/inventory.bundle.js',
+                ['game-webpack-app'],
+                filemtime($dist_path . '/js/inventory.bundle.js'),
+                true
+            );
+        }
+    }
+
+    // Warunkowe ładowanie modułu areas dla terenów
+    if ($post_type === 'tereny' || strpos($current_template, 'tereny') !== false) {
+        if (file_exists($dist_path . '/js/areas.bundle.js')) {
+            wp_enqueue_script(
+                'game-webpack-areas',
+                $dist_url . '/js/areas.bundle.js',
+                ['game-webpack-app'],
+                filemtime($dist_path . '/js/areas.bundle.js'),
+                true
+            );
+        }
+    }
+
+    // Warunkowe ładowanie modułu missions
+    if (is_page_template('page-templates/zadania/template.php') || get_query_var('instance_name') === 'zadania') {
+        if (file_exists($dist_path . '/js/missions.bundle.js')) {
+            wp_enqueue_script(
+                'game-webpack-missions',
+                $dist_url . '/js/missions.bundle.js',
+                ['game-webpack-app'],
+                filemtime($dist_path . '/js/missions.bundle.js'),
+                true
+            );
+        }
+    }
+
+    // Warunkowe ładowanie modułu NPC
+    if (is_single()) {
+        if (file_exists($dist_path . '/js/npc.bundle.js')) {
+            wp_enqueue_script(
+                'game-webpack-npc',
+                $dist_url . '/js/npc.bundle.js',
+                ['game-webpack-app'],
+                filemtime($dist_path . '/js/npc.bundle.js'),
+                true
+            );
+        }
+    }
+
+    // Dodaj informację o debugowaniu, jeśli WP_DEBUG jest włączone
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        wp_localize_script('game-webpack-app', 'GameDebug', [
+            'template' => $current_template,
+            'viewType' => $view_type,
+            'postType' => $post_type
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'game_load_webpack_scripts');
