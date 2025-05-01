@@ -56,5 +56,6 @@ $current_area = get_field('current_area', 'user_' . get_current_user_id());
                 <span class="icon-label">Ustawienia</span>
             </a>
         </div>
+        <?php include('template-parts/components/character-status-bars.php'); ?>
     </div>
 </aside>
