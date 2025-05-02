@@ -10,10 +10,9 @@
  * Inicjalizuje interakcje dla elementów SVG
  */
 function initSvgInteractions() {
-    console.log('Inicjalizacja interakcji SVG');
     const paths = document.querySelectorAll('.container-world svg path');
     if (!paths.length) {
-        console.log('Nie znaleziono ścieżek SVG do inicjalizacji');
+
         return;
     }
 

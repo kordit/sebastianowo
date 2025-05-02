@@ -20,14 +20,22 @@ class UIHelpers {
         // Inicjalizuj system zakładek (wszystkie rodzaje)
         UIHelpers.initializeTabs();
 
-        // Inicjalizuj przyciski ulepszania statystyk
-        UIHelpers.initializeStatUpgradeButtons();
+        // Inicjalizuj system aktualizacji interfejsu użytkownika
+        UIHelpers.initializeUIUpdater();
 
         // Inicjalizuj dialogi NPC
         // UIHelpers.al();
 
         // Nasłuchuj na zdarzenia, które mogą wymagać aktualizacji pasków
         document.addEventListener('statsUpdated', UIHelpers.updateStatusBars);
+        document.addEventListener('userDataUpdated', (event) => {
+            // Możemy automatycznie aktualizować paski statusu gdy dane użytkownika się zmieniają
+            if (event.detail && event.detail.vitality) {
+                const vitality = event.detail.vitality;
+                UIHelpers.updateStatusBar('life', vitality.life, vitality.max_life);
+                UIHelpers.updateStatusBar('energy', vitality.energy, vitality.max_energy);
+            }
+        });
     }
 
     /**
@@ -173,113 +181,145 @@ class UIHelpers {
     }
 
     /**
-     * Inicjalizuje przyciski ulepszania statystyk użytkownika
-     * Obsługuje funkcjonalność przycisków z klasą .stat-upgrade-btn
+     * Inicjalizuje system aktualizacji danych interfejsu użytkownika
      */
-    static initializeStatUpgradeButtons() {
-        // Znajdujemy wszystkie przyciski ulepszenia statystyk
-        const upgradeButtons = document.querySelectorAll('.stat-upgrade-btn');
+    static initializeUIUpdater() {
+        const flushButton = document.querySelector('#flush-ui-button');
 
-        if (upgradeButtons.length === 0) {
-            console.log('Nie znaleziono przycisków do ulepszania statystyk');
-            return;
+        // Obsługa przycisku odświeżania
+        if (flushButton) {
+            flushButton.addEventListener('click', async () => {
+                try {
+                    const data = await UIHelpers.refreshUserData();
+                    console.log('Interfejs został odświeżony z danymi:', data);
+                } catch (error) {
+                    console.error('Błąd odświeżania UI:', error);
+                }
+            });
         }
 
-        console.log('Znaleziono ' + upgradeButtons.length + ' przycisków do ulepszania statystyk');
-        const userIdElement = document.getElementById('get-user-id');
+        // Eksportujemy funkcje do globalnego użycia (dla konsoli)
+        window.refreshUserData = UIHelpers.refreshUserData;
+        window.updateUIElements = UIHelpers.updateUIElements;
+    }
 
-        // Dodajemy obsługę kliknięć dla każdego przycisku
-        upgradeButtons.forEach(button => {
-            button.addEventListener('click', function (e) {
-                e.preventDefault();
+    /**
+     * Aktualizuje wszystkie elementy interfejsu użytkownika na podstawie otrzymanych danych
+     * 
+     * @param {Object} userData - Dane użytkownika z API
+     */
+    static updateUIElements(userData) {
+        if (!userData) return;
 
-                const stat = this.getAttribute('data-stat');
+        // Aktualizacja zasobów w nagłówku (hajs, szlugi, etc.)
+        if (userData.backpack) {
+            UIHelpers.updateResourcesUI(userData);
+        }
 
-                // Pobieramy ID użytkownika z nagłówka z id 'get-user-id' (atrybut data-id)
-                let userId = '';
-                if (userIdElement) {
-                    userId = userIdElement.getAttribute('data-id');
-                }
+        // Aktualizacja pasków witalności (życie, energia)
+        if (userData.vitality) {
+            UIHelpers.updateSidebarUI(userData);
+        }
 
-                const statItem = this.closest('.stat-item');
+        // Próba aktualizacji statystyk postaci (jeśli strona zawiera panel postaci)
+        if (window.CharacterManager && typeof CharacterManager.updateCharacterUI === 'function') {
+            CharacterManager.updateCharacterUI(userData);
+        }
+    }
 
-                console.log('Kliknięto przycisk dla statystyki:', stat);
-                console.log('User ID:', userId);
+    /**
+     * Aktualizuje interfejs zasobów (nagłówek) z nowymi danymi
+     * 
+     * @param {Object} userData - Dane użytkownika z API
+     */
+    static updateResourcesUI(userData) {
+        if (!userData.backpack) return;
 
-                // Wyłączamy przycisk podczas ładowania
-                this.disabled = true;
-                this.classList.add('loading');
+        const backpackData = userData.backpack;
+        const resourceItems = document.querySelectorAll('.resource-item');
 
-                // Przygotowujemy dane do wysłania
-                const data = {
-                    stat: stat,
-                    user_id: userId
-                };
+        resourceItems.forEach(item => {
+            const resourceName = item.dataset.resource;
+            const valueElement = item.querySelector('.resource-value');
 
-                console.log('Wysyłane dane:', data);
+            if (valueElement && backpackData[resourceName] !== undefined) {
+                valueElement.textContent = backpackData[resourceName];
+            }
 
-                // Wysyłamy żądanie za pomocą Axios do REST API
-                axios({
-                    method: 'POST',
-                    url: '/wp-json/game/v1/user/upgrade-stat',
-                    data: data
-                })
-                    .then(response => {
-                        console.log('Odpowiedź API:', response);
-
-                        // Przetwarzamy odpowiedź API
-                        const apiData = response.data.data;
-
-                        // Aktualizujemy wartość statystyki
-                        const statValueElement = statItem.querySelector('.stat-value');
-                        if (statValueElement) {
-                            statValueElement.textContent = apiData.new_value;
-                        }
-
-                        // Aktualizujemy liczbę punktów nauki w elemencie learning-points-info
-                        const learningPointsInfo = document.querySelector('.learning-points-info');
-                        if (learningPointsInfo) {
-                            const remainingPoints = apiData.remaining_points;
-                            learningPointsInfo.innerHTML = '<strong>Dostępne punkty nauki:</strong> ' + remainingPoints;
-                        }
-
-                        // Jeśli nie ma już punktów nauki, ukrywamy wszystkie przyciski
-                        if (apiData.remaining_points <= 0) {
-                            document.querySelectorAll('.stat-upgrade-btn').forEach(btn => {
-                                btn.style.display = 'none';
-                            });
-                        }
-
-                        // Powiadomienie o sukcesie, jeśli jest dostępny system powiadomień
-                        if (typeof showPopup === 'function') {
-                            showPopup('Statystyka została ulepszona!', 'success');
-                        } else if (typeof Notifications !== 'undefined' && typeof Notifications.show === 'function') {
-                            Notifications.show('Statystyka została ulepszona!', 'success');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Błąd API:', error);
-                        let errorMessage = 'Wystąpił błąd podczas ulepszania statystyki';
-
-                        // Próba wyciągnięcia szczegółów błędu z odpowiedzi API
-                        if (error.response && error.response.data && error.response.data.error) {
-                            errorMessage += ': ' + error.response.data.error;
-                        }
-
-                        // Powiadomienie o błędzie, jeśli jest dostępny system powiadomień
-                        if (typeof showPopup === 'function') {
-                            showPopup(errorMessage, 'error');
-                        } else if (typeof Notifications !== 'undefined' && typeof Notifications.show === 'function') {
-                            Notifications.show(errorMessage, 'error');
-                        }
-                    })
-                    .finally(() => {
-                        // Włączamy przycisk po zakończeniu
-                        this.disabled = false;
-                        this.classList.remove('loading');
-                    });
-            });
+            // Efekt wizualny aktualizacji
+            item.classList.add('resource-updated');
+            setTimeout(() => {
+                item.classList.remove('resource-updated');
+            }, 1000);
         });
+    }
+
+    /**
+     * Aktualizuje paski statusu w sidebarze (życie, energia)
+     * 
+     * @param {Object} userData - Dane użytkownika z API
+     */
+    static updateSidebarUI(userData) {
+        if (!userData || !userData.vitality) return;
+
+        const vitality = userData.vitality;
+
+        // Aktualizacja paska życia
+        if (vitality.life !== undefined && vitality.max_life !== undefined) {
+            UIHelpers.updateStatusBar('life', vitality.life, vitality.max_life);
+        }
+
+        // Aktualizacja paska energii
+        if (vitality.energy !== undefined && vitality.max_energy !== undefined) {
+            UIHelpers.updateStatusBar('energy', vitality.energy, vitality.max_energy);
+        }
+
+        // Dodaj efekt wizualny aktualizacji do wrappera pasków
+        const barWrappers = document.querySelectorAll('.wrap-bar');
+        barWrappers.forEach(wrapper => {
+            wrapper.classList.add('resource-updated');
+            setTimeout(() => {
+                wrapper.classList.remove('resource-updated');
+            }, 1000);
+        });
+    }
+
+    /**
+     * Pobiera aktualne dane użytkownika z serwera i odświeża wszystkie elementy interfejsu
+     * 
+     * @returns {Promise<Object>} - Zwraca Promise z danymi użytkownika
+     */
+    static async refreshUserData() {
+        try {
+            // Korzystamy z REST API WordPressa do pobrania danych użytkownika
+            const response = await axios.get(
+                `${userManagerData.restUrl}game/v1/get-user-data`,
+                {
+                    headers: {
+                        'X-WP-Nonce': userManagerData.nonce,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (response.data && response.data.success) {
+                const userData = response.data.data;
+                // Aktualizujemy wszystkie elementy interfejsu
+                UIHelpers.updateUIElements(userData);
+
+                // Wywołujemy zdarzenie aktualizacji danych użytkownika
+                // Inne moduły mogą nasłuchiwać tego zdarzenia
+                const event = new CustomEvent('userDataUpdated', { detail: userData });
+                document.dispatchEvent(event);
+
+                return userData;
+            } else {
+                throw new Error(response.data.message || 'Brak danych z serwera');
+            }
+        } catch (error) {
+            console.error('Błąd podczas odświeżania danych użytkownika:', error);
+            throw error;
+        }
     }
 }
 

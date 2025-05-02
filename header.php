@@ -19,21 +19,22 @@
 
                 $resources = [
                     ['name' => 'gold', 'icon' => '&#128176;', 'name_pl' => 'Hajs', 'icon_url' => PNG . '/hajs.png'],
-                    ['name' => 'papierosy', 'icon' => '&#129704;', 'name_pl' => 'Szlugi', 'icon_url' => PNG . '/szlug.png'],
+                    ['name' => 'cigarettes', 'icon' => '&#129704;', 'name_pl' => 'Szlugi', 'icon_url' => PNG . '/szlug.png'],
                 ];
 
                 foreach ($resources as $resource): ?>
-                    <div class="resource-item">
+                    <div class="resource-item" data-resource="<?= esc_attr($resource['name']) ?>">
                         <img src="<?= esc_url($resource['icon_url']) ?>" alt="<?= esc_attr($resource['name']) ?>" class="resource-icon" />
                         <div class="wrap">
                             <span><?= '<strong>' . $resource['name_pl'] . ': </strong>'; ?></span>
-                            <span class="ud-backpack-<?= $resource['name'] ?>">
+                            <span class="resource-value">
                                 <?= isset($minerals[$resource['name']]) ? esc_html($minerals[$resource['name']]) : 0 ?>
                             </span>
                         </div>
                     </div>
                 <?php endforeach; ?>
 
+                <button id="flush-ui-button" class="flush-button" title="Odśwież zasoby">↻</button>
 
                 <!-- <div class="ud-user_class-label">
                     <?php

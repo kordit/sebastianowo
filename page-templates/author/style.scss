@@ -36,32 +36,8 @@
     pointer-events: none;
 }
 
-/* Style dla powiadomień */
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    border-radius: 5px;
-    color: white;
-    z-index: 1000;
-    animation: slide-in 0.3s ease;
-}
-
-.notification.success {
-    background-color: #4CAF50;
-}
-
-.notification.error {
-    background-color: #f44336;
-}
-
-.notification.info {
-    background-color: #2196F3;
-}
-
-.notification.fade-out {
-    animation: fade-out 0.5s ease forwards;
+span.points-value {
+    font-family: inherit;
 }
 
 @keyframes slide-in {

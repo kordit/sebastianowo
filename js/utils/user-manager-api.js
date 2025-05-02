@@ -49,7 +49,7 @@ const UserManager = (() => {
     const makeRequest = async (params) => {
         try {
             const response = await axios.post(
-                userManagerData.rest_url + '/update-user-field',
+                `${userManagerData.restUrl}game/v1/update-user-field`,
                 params,
                 axiosConfig
             );
@@ -251,6 +251,9 @@ const UserManager = (() => {
         getUserData
     };
 })();
+
+
+
 
 // Eksportuj moduł do globalnego użycia
 window.UserManager = UserManager;

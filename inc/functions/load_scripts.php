@@ -45,6 +45,33 @@ function game_load_scripts()
     );
     wp_enqueue_script('svg-interactions');
 
+    // Skrypty systemu zarządzania użytkownikiem
+    wp_register_script(
+        'user-manager-api',
+        get_template_directory_uri() . '/js/utils/user-manager-api.js',
+        array('jquery', 'axios'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('user-manager-api');
+
+    // Helpers UI - zawiera funkcje do aktualizacji nagłówka
+    wp_register_script(
+        'ui-helpers',
+        get_template_directory_uri() . '/js/core/ui-helpers.js',
+        array('jquery', 'axios', 'user-manager-api'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('ui-helpers');
+
+    // Lokalizacja danych dla UserManager API
+    wp_localize_script('user-manager-api', 'userManagerData', array(
+        'nonce'  => wp_create_nonce('wp_rest'),
+        'apiUrl' => admin_url('admin-ajax.php'),
+        'restUrl' => esc_url_raw(rest_url()),
+    ));
+
     // Główny plik aplikacji
     wp_register_script(
         'game-app',
@@ -82,14 +109,17 @@ function game_load_scripts()
     );
     wp_enqueue_script('ui-helpers');
 
-    wp_register_script(
-        'user-manager-api',
-        get_template_directory_uri() . '/js/utils/user-manager-api.js',
-        array('jquery', 'axios'),
-        '1.0.0',
-        true
-    );
-    wp_enqueue_script('user-manager-api');
+    //jesli jest to podstrona author
+    if (is_author()) {
+        wp_register_script(
+            'character-manager',
+            get_template_directory_uri() . '/js/modules/character/character-manager.js',
+            array('axios'),
+            '1.0.0',
+            true
+        );
+        wp_enqueue_script('character-manager');
+    }
 }
 
 // Podpięcie funkcji ładującej skrypty do odpowiedniego hooka WordPress

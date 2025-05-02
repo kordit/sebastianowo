@@ -181,10 +181,28 @@ add_action('acf/include_fields', function () {
                 }
             }
 
-            // Tworzenie grupy dla misji z jej zadaniami
+            // Tworzenie taba dla misji
+            $mission_fields[] = array(
+                'key' => 'field_mission_tab_' . $mission->ID,
+                'label' => $mission->post_title,
+                'name' => '',
+                'type' => 'tab',
+                'instructions' => '',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'placement' => 'top',
+                'endpoint' => 0,
+            );
+
+            // Dodajemy grupę wewnątrz taba do przechowywania danych misji
             $mission_fields[] = array(
                 'key' => 'field_mission_' . $mission->ID,
-                'label' => $mission->post_titlew,
+                'label' => 'Dane misji: ' . $mission->post_title,
                 'name' => 'mission_' . $mission->ID,
                 'type' => 'group',
                 'instructions' => '',
@@ -274,7 +292,27 @@ add_action('acf/include_fields', function () {
                 ),
             );
         }
-    }
+    }    // Zakładka "Wszystkie misje" jako accordion
+    $all_missions_tab = array(
+        'key' => 'field_tab_all_missions',
+        'label' => 'Wszystkie misje',
+        'name' => '',
+        'type' => 'accordion',
+        'instructions' => '',
+        'required' => 0,
+        'conditional_logic' => 0,
+        'wrapper' => array(
+            'width' => '',
+            'class' => '',
+            'id' => '',
+        ),
+        'open' => 0,
+        'multi_expand' => 1,
+        'endpoint' => 0,
+    );
+
+    // Dodajemy accordion na początku tablicy pól misji
+    array_unshift($mission_fields, $all_missions_tab);
 
     // Grupa pól do zarządzania misjami użytkownika
     acf_add_local_field_group(array(
