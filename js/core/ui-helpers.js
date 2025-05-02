@@ -24,7 +24,7 @@ class UIHelpers {
         UIHelpers.initializeStatUpgradeButtons();
 
         // Inicjalizuj dialogi NPC
-        UIHelpers.initializeNpcDialogs();
+        // UIHelpers.al();
 
         // Nasłuchuj na zdarzenia, które mogą wymagać aktualizacji pasków
         document.addEventListener('statsUpdated', UIHelpers.updateStatusBars);
@@ -212,108 +212,74 @@ class UIHelpers {
 
                 // Przygotowujemy dane do wysłania
                 const data = {
-                    action: 'upgrade_user_stat',
                     stat: stat,
-                    nonce: global.dataManagerNonce,
                     user_id: userId
                 };
 
                 console.log('Wysyłane dane:', data);
 
-                // Sprawdzamy czy dostępny jest AjaxHelper
-                if (typeof AjaxHelper !== 'undefined') {
-                    // Wysyłamy żądanie AJAX używając AjaxHelper
-                    AjaxHelper.sendRequest(global.ajaxurl, 'POST', data)
-                        .then(response => {
-                            console.log('Odpowiedź AJAX:', response);
+                // Wysyłamy żądanie za pomocą Axios do REST API
+                axios({
+                    method: 'POST',
+                    url: '/wp-json/game/v1/user/upgrade-stat',
+                    data: data
+                })
+                    .then(response => {
+                        console.log('Odpowiedź API:', response);
 
-                            // Aktualizujemy wartość statystyki
-                            const statValueElement = statItem.querySelector('.stat-value');
-                            if (statValueElement) {
-                                statValueElement.textContent = response.data.new_value;
-                            }
+                        // Przetwarzamy odpowiedź API
+                        const apiData = response.data.data;
 
-                            // Aktualizujemy liczbę punktów nauki w elemencie learning-points-info
-                            const learningPointsInfo = document.querySelector('.learning-points-info');
-                            if (learningPointsInfo) {
-                                const remainingPoints = response.data.remaining_points;
-                                learningPointsInfo.innerHTML = '<strong>Dostępne punkty nauki:</strong> ' + remainingPoints;
-                            }
+                        // Aktualizujemy wartość statystyki
+                        const statValueElement = statItem.querySelector('.stat-value');
+                        if (statValueElement) {
+                            statValueElement.textContent = apiData.new_value;
+                        }
 
-                            // Jeśli nie ma już punktów nauki, ukrywamy wszystkie przyciski
-                            if (response.data.remaining_points <= 0) {
-                                document.querySelectorAll('.stat-upgrade-btn').forEach(btn => {
-                                    btn.style.display = 'none';
-                                });
-                            }
+                        // Aktualizujemy liczbę punktów nauki w elemencie learning-points-info
+                        const learningPointsInfo = document.querySelector('.learning-points-info');
+                        if (learningPointsInfo) {
+                            const remainingPoints = apiData.remaining_points;
+                            learningPointsInfo.innerHTML = '<strong>Dostępne punkty nauki:</strong> ' + remainingPoints;
+                        }
 
-                            // Powiadomienie o sukcesie, jeśli jest dostępny system powiadomień
-                            if (typeof showPopup === 'function') {
-                                showPopup('Statystyka została ulepszona!', 'success');
-                            } else if (typeof Notifications !== 'undefined' && typeof Notifications.show === 'function') {
-                                Notifications.show('Statystyka została ulepszona!', 'success');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Błąd AJAX:', error);
+                        // Jeśli nie ma już punktów nauki, ukrywamy wszystkie przyciski
+                        if (apiData.remaining_points <= 0) {
+                            document.querySelectorAll('.stat-upgrade-btn').forEach(btn => {
+                                btn.style.display = 'none';
+                            });
+                        }
 
-                            // Powiadomienie o błędzie, jeśli jest dostępny system powiadomień
-                            if (typeof showPopup === 'function') {
-                                showPopup('Wystąpił błąd podczas ulepszania statystyki: ' + error, 'error');
-                            } else if (typeof Notifications !== 'undefined' && typeof Notifications.show === 'function') {
-                                Notifications.show('Wystąpił błąd podczas ulepszania statystyki: ' + error, 'error');
-                            }
-                        })
-                        .finally(() => {
-                            // Włączamy przycisk po zakończeniu
-                            this.disabled = false;
-                            this.classList.remove('loading');
-                        });
-                } else {
-                    console.error('AjaxHelper nie jest zdefiniowany!');
-                    this.disabled = false;
-                    this.classList.remove('loading');
-                }
+                        // Powiadomienie o sukcesie, jeśli jest dostępny system powiadomień
+                        if (typeof showPopup === 'function') {
+                            showPopup('Statystyka została ulepszona!', 'success');
+                        } else if (typeof Notifications !== 'undefined' && typeof Notifications.show === 'function') {
+                            Notifications.show('Statystyka została ulepszona!', 'success');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Błąd API:', error);
+                        let errorMessage = 'Wystąpił błąd podczas ulepszania statystyki';
+
+                        // Próba wyciągnięcia szczegółów błędu z odpowiedzi API
+                        if (error.response && error.response.data && error.response.data.error) {
+                            errorMessage += ': ' + error.response.data.error;
+                        }
+
+                        // Powiadomienie o błędzie, jeśli jest dostępny system powiadomień
+                        if (typeof showPopup === 'function') {
+                            showPopup(errorMessage, 'error');
+                        } else if (typeof Notifications !== 'undefined' && typeof Notifications.show === 'function') {
+                            Notifications.show(errorMessage, 'error');
+                        }
+                    })
+                    .finally(() => {
+                        // Włączamy przycisk po zakończeniu
+                        this.disabled = false;
+                        this.classList.remove('loading');
+                    });
             });
         });
-    }
-
-    /**
-     * Inicjalizuje system dialogów NPC
-     * Ta metoda uruchamia skrypt dialogów NPC, jeśli na stronie znajdują się NPC z dialogami
-     */
-    static initializeNpcDialogs() {
-        // Sprawdź czy na stronie są elementy SVG z NPC (ścieżki z atrybutem data-npc)
-        const npcPaths = document.querySelectorAll('svg path[data-npc]');
-
-        // Jeśli nie ma elementów NPC, nie inicjalizuj modułu dialogów
-        if (npcPaths.length === 0) {
-            return;
-        }
-
-        // Jeśli istnieje moduł dialogów NPC, zainicjuj go
-        if (typeof window.NpcDialogs !== 'undefined' && typeof window.NpcDialogs.init === 'function') {
-            window.NpcDialogs.init();
-        } else {
-            // Sprawdź, czy mamy dostęp do modułu poprzez ścieżkę
-            try {
-                // Próbujemy dynamicznie zaimportować moduł dialogów (opcjonalnie)
-                const script = document.createElement('script');
-                script.src = '/wp-content/themes/game/js/modules/npc/npc-dialogs.js';
-                script.async = true;
-
-                script.onload = function () {
-                    // Jeśli załadowano skrypt, zainicjuj dialogi
-                    if (typeof window.NpcDialogs !== 'undefined' && typeof window.NpcDialogs.init === 'function') {
-                        window.NpcDialogs.init();
-                    }
-                };
-
-                document.head.appendChild(script);
-            } catch (error) {
-                console.error('Nie udało się zainicjować dialogów NPC:', error);
-            }
-        }
     }
 }
 

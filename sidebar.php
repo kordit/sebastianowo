@@ -36,7 +36,7 @@ $current_area = get_field('current_area', 'user_' . get_current_user_id());
         </div>
         <h5 class="navigation-title">Nawigacja</h5>
         <div class="icons">
-            <a href="/<?= get_permalink($current_area->ID); ?>">
+            <a href="<?= get_permalink($current_area->ID); ?>">
                 <img src="<?= esc_url(PNG . '/spacer.png'); ?>" alt="">
                 <span class="icon-label">Rejon</span>
             </a>
@@ -56,6 +56,5 @@ $current_area = get_field('current_area', 'user_' . get_current_user_id());
                 <span class="icon-label">Ustawienia</span>
             </a>
         </div>
-        <?php include('template-parts/components/character-status-bars.php'); ?>
     </div>
 </aside>

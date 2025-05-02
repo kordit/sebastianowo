@@ -312,12 +312,12 @@ async function handleAnswer(input) {
         // Pobierz aktualne dane użytkownika
         const userFields = await (typeof window.fetchLatestACFFields === 'function' ?
             window.fetchLatestACFFields() : // Użyj globalnej funkcji jeśli istnieje
-            await AjaxHelper.sendRequest((window.global && window.global.ajaxurl) || window.ajaxurl || '/wp-admin/admin-ajax.php', 'POST', {
-                action: 'get_acf_fields', // Zdefiniowana w acf_ajax_handlers.php
-                nonce: (window.global && window.global.dataManagerNonce) || (window.gameData && window.gameData.dataManagerNonce) || ''
+            await axios({
+                method: 'GET',
+                url: '/wp-json/game/v1/acf/fields'
             }).then(response => {
-                if (!response.success) throw new Error(response || "Nieznany błąd serwera");
-                return response.data.fields;
+                if (!response.data.success) throw new Error(response.data || "Nieznany błąd serwera");
+                return response.data.data.fields;
             }).catch(error => {
                 console.error("❌ Błąd pobierania bazy ACF:", error);
                 return {};
@@ -424,15 +424,24 @@ async function handleAnswer(input) {
 
         // Wykonaj transakcje walutowe (złoto, papierosy)
         for (const transaction of transactionsToExecute) {
-            console.log('Wykonuję transakcję:', transaction);
-
-            // Aktualizuj wartość w plecaku zgodnie ze strukturą w register_fields.php
-            const response = await (typeof window.updateACFFieldsWithGui === 'function' ?
-                window.updateACFFieldsWithGui :
-                localUpdateACFFieldsWithGui)(
-                    { [`backpack.${transaction.bagType}`]: transaction.value }, // Ścieżka zgodna z ACF: backpack.gold
-                    ['body']
-                );
+            console.log('Wykonuję transakcję:', transaction);                    // Aktualizuj wartość w plecaku zgodnie ze strukturą w register_fields.php
+            const response = await (typeof window.UserManager !== 'undefined' && window.UserManager.updateBackpack ?
+                window.UserManager.updateBackpack(transaction.bagType, transaction.value) :
+                (typeof window.updateACFFieldsWithGui === 'function' ?
+                    window.updateACFFieldsWithGui({
+                        [`backpack.${transaction.bagType}`]: transaction.value
+                    }) :
+                    axios({
+                        method: 'POST',
+                        url: '/wp-json/game/v1/acf/update',
+                        data: {
+                            fields: { [`backpack.${transaction.bagType}`]: transaction.value } // Ścieżka zgodna z ACF: backpack.gold
+                        }
+                    }).then(response => {
+                        if (!response.data.success) throw new Error(response.data || "Nieznany błąd serwera");
+                        return response.data;
+                    })
+                ));
 
             const bagMessage = transaction.value < 0 ?
                 `Wydano ${Math.abs(transaction.value)} ${transaction.friendly}` :
@@ -450,13 +459,23 @@ async function handleAnswer(input) {
                     console.log('Aktualizacja umiejętności:', skill.skillType, 'wartość:', skill.value);
 
                     // Aktualizuj wartość umiejętności zgodnie ze strukturą w register_fields.php
-                    const response = await (typeof window.updateACFFieldsWithGui === 'function' ?
-                        window.updateACFFieldsWithGui :
-                        localUpdateACFFieldsWithGui)(
-                            { [`skills.${skill.skillType}`]: skill.value }, // Ścieżka zgodna z ACF: skills.steal
-                            ['body'],
-                            'Aktualizacja umiejętności...'
-                        );
+                    const response = await (typeof window.UserManager !== 'undefined' && window.UserManager.updateSkill ?
+                        window.UserManager.updateSkill(skill.skillType, skill.value) :
+                        (typeof window.updateACFFieldsWithGui === 'function' ?
+                            window.updateACFFieldsWithGui({
+                                [`skills.${skill.skillType}`]: skill.value
+                            }) :
+                            axios({
+                                method: 'POST',
+                                url: '/wp-json/game/v1/acf/update',
+                                data: {
+                                    fields: { [`skills.${skill.skillType}`]: skill.value } // Ścieżka zgodna z ACF: skills.steal
+                                }
+                            }).then(response => {
+                                if (!response.data.success) throw new Error(response.data || "Nieznany błąd serwera");
+                                return response.data;
+                            })
+                        ));
 
                     const skillMessage = skill.value > 0 ?
                         `Zwiększono umiejętność ${skill.skillType} o ${skill.value}` :
@@ -495,13 +514,21 @@ async function handleAnswer(input) {
                     console.log('Aktualizacja relacji dla NPC ID:', npcId, 'nowa wartość:', newRelation);
 
                     // Aktualizuj relację
+                    // Tutaj relacje są obsługiwane specjalnie, nie mamy bezpośredniej metody w UserManager API
                     const response = await (typeof window.updateACFFieldsWithGui === 'function' ?
-                        window.updateACFFieldsWithGui :
-                        localUpdateACFFieldsWithGui)(
-                            { [relationKey]: newRelation },
-                            ['body'],
-                            'Aktualizacja relacji...'
-                        );
+                        window.updateACFFieldsWithGui({
+                            [relationKey]: newRelation
+                        }) :
+                        axios({
+                            method: 'POST',
+                            url: '/wp-json/game/v1/acf/update',
+                            data: {
+                                fields: { [relationKey]: newRelation }
+                            }
+                        }).then(response => {
+                            if (!response.data.success) throw new Error(response.data || "Nieznany błąd serwera");
+                            return response.data;
+                        }));
 
                     // Przygotuj komunikat
                     const relationMessage = changeValue > 0 ?
@@ -558,17 +585,23 @@ async function handleAnswer(input) {
                     const { areaId } = areaOperation;
 
                     // Pobierz informacje o rejonie
-                    const areaInfoResponse = await AjaxHelper.sendRequest((window.global && window.global.ajaxurl) || window.ajaxurl || '/wp-admin/admin-ajax.php', 'POST', {
-                        action: 'get_area_info',
-                        area_id: areaId
+                    const areaInfoResponse = await axios({
+                        method: 'GET',
+                        url: '/wp-json/game/v1/area/info',
+                        params: {
+                            area_id: areaId
+                        }
                     });
 
-                    const areaName = areaInfoResponse.success ? areaInfoResponse.data?.name : 'nowy rejon';
+                    const areaName = areaInfoResponse.data.success ? areaInfoResponse.data.data?.name : 'nowy rejon';
 
                     // Aktualizuj dostęp do rejonu
-                    const response = await AjaxHelper.sendRequest((window.global && window.global.ajaxurl) || window.ajaxurl || '/wp-admin/admin-ajax.php', 'POST', {
-                        action: 'unlock_area_for_user',
-                        area_id: areaId
+                    const response = await axios({
+                        method: 'POST',
+                        url: '/wp-json/game/v1/area/unlock',
+                        data: {
+                            area_id: areaId
+                        }
                     });
 
                     if (response.success) {
@@ -590,20 +623,34 @@ async function handleAnswer(input) {
                     const { areaId } = areaChange;
 
                     // Pobierz informacje o nowym rejonie
-                    const newAreaInfoResponse = await AjaxHelper.sendRequest((window.global && window.global.ajaxurl) || window.ajaxurl || '/wp-admin/admin-ajax.php', 'POST', {
-                        action: 'get_area_info',
-                        area_id: areaId
+                    const newAreaInfoResponse = await axios({
+                        method: 'GET',
+                        url: '/wp-json/game/v1/area/info',
+                        params: {
+                            area_id: areaId
+                        }
                     });
 
-                    const newAreaName = newAreaInfoResponse.success ? newAreaInfoResponse.data?.name : 'nowy rejon';
+                    const newAreaName = newAreaInfoResponse.data.success ? newAreaInfoResponse.data.data?.name : 'nowy rejon';
 
                     // Aktualizuj aktualny rejon użytkownika
-                    const response = await (typeof window.updateACFFieldsWithGui === 'function' ?
-                        window.updateACFFieldsWithGui :
-                        localUpdateACFFieldsWithGui)(
-                            { 'user_area': areaId },
-                            ['body']
-                        );
+                    const response = await (typeof window.UserManager !== 'undefined' && window.UserManager.setCurrentArea ?
+                        window.UserManager.setCurrentArea(areaId) :
+                        (typeof window.updateACFFieldsWithGui === 'function' ?
+                            window.updateACFFieldsWithGui({
+                                'user_area': areaId
+                            }) :
+                            axios({
+                                method: 'POST',
+                                url: '/wp-json/game/v1/acf/update',
+                                data: {
+                                    fields: { 'user_area': areaId }
+                                }
+                            }).then(response => {
+                                if (!response.data.success) throw new Error(response.data || "Nieznany błąd serwera");
+                                return response.data;
+                            })
+                        ));
 
                     if (response) {
                         message = `Przeniesiono do rejonu: ${newAreaName}`;
@@ -650,26 +697,27 @@ function flattenData(data, prefix = '') {
 }
 
 /**
- * Funkcja do pobierania najnowszych pól ACF
+ * Funkcja do pobierania najnowszych pól ACF z wykorzystaniem REST API
  * 
  * @returns {Promise<Object>} - Pola ACF
  */
 async function fetchLatestACFFields() {
     try {
-        const ajaxUrl = (window.global && window.global.ajaxurl) || window.ajaxurl || '/wp-admin/admin-ajax.php';
         const nonce = (window.global && window.global.dataManagerNonce) || (window.gameData && window.gameData.dataManagerNonce) || '';
 
-        const response = await AjaxHelper.sendRequest(ajaxUrl, 'POST', {
-            action: 'get_acf_fields',
-            nonce: nonce
+        const response = await axios({
+            method: 'GET',
+            url: '/wp-json/game/v1/acf/fields',
+            headers: nonce ? { 'X-WP-Nonce': nonce } : {}
         });
 
-        if (!response.success) {
-            throw new Error(response || "Nieznany błąd serwera");
+        if (!response.data.success) {
+            throw new Error(response.data || "Nieznany błąd serwera");
         }
-        return response.data.fields;
+
+        return response.data.data.fields;
     } catch (error) {
-        console.error("❌ Błąd pobierania bazy:", error);
+        console.error("❌ Błąd pobierania bazy ACF:", error);
         return {};
     }
 }
@@ -736,69 +784,7 @@ async function updateACFFields(fields) {
  * @param {string|null} customMsg - Niestandardowy komunikat podczas aktualizacji
  * @returns {Promise<Object>} - Wynik operacji
  */
-async function updateACFFieldsWithGui(fields, parentSelectors = ['body'], customMsg = null) {
-    try {
-        // Wywołaj czystą funkcję aktualizacji danych
-        const response = await updateACFFields(fields);
 
-        // Pobierz najnowsze dane ACF
-        const freshData = await fetchLatestACFFields();
-
-        // Własna implementacja flattenData, jeśli globalna nie jest dostępna
-        const flattenFunc = typeof window.flattenData === 'function' ?
-            window.flattenData : flattenData;
-
-        // Spłaszcz dane
-        const flatData = flattenFunc(freshData);
-
-        // Aktualizacja standardowych elementów (np. elementów z klasą .ud-*)
-        parentSelectors.forEach(selector => {
-            document.querySelectorAll(selector).forEach(parent => {
-                if (flatData) {
-                    Object.entries(flatData).forEach(([key, value]) => {
-                        parent.querySelectorAll(`.ud-${key}`).forEach(el => {
-                            el.textContent = value;
-                        });
-                    });
-                }
-            });
-        });
-
-        // Aktualizacja pasków postępu
-        document.querySelectorAll('.bar-game').forEach(wrapper => {
-            const statKey = 'stats-' + (wrapper.dataset.barType || '');
-            if (flatData && flatData.hasOwnProperty(statKey)) {
-                const newCurrent = parseFloat(flatData[statKey]);
-                const max = parseFloat(wrapper.dataset.barMax);
-                const percentage = (newCurrent / max) * 100;
-
-                // Aktualizacja szerokości paska
-                const bar = wrapper.querySelector('.bar');
-                if (bar) {
-                    bar.style.width = percentage + '%';
-                }
-
-                // Aktualizacja wartości wyświetlanej obok paska
-                const barValueSpan = wrapper.querySelector('.bar-value span');
-                if (barValueSpan) {
-                    barValueSpan.textContent = newCurrent;
-                }
-
-                // Zaktualizuj atrybut data-bar-current dla synchronizacji
-                wrapper.dataset.barCurrent = newCurrent;
-            }
-        });
-
-        return response;
-    } catch (error) {
-        const errorMsg = error && error.message ? error.message : String(error);
-        console.error("❌ Błąd aktualizacji bazy danych:", errorMsg);
-        if (typeof window.showPopup === 'function') {
-            window.showPopup(errorMsg, 'error');
-        }
-        throw error;
-    }
-}
 
 // Eksport modułu i funkcji globalnych dla wstecznej kompatybilności
 const NpcModule = {
@@ -808,7 +794,7 @@ const NpcModule = {
     fetchLatestACFFields,
     updatePostACFFields,
     updateACFFields,
-    updateACFFieldsWithGui,
+    // updateACFFieldsWithGui,
     flattenData
 };
 
@@ -820,5 +806,5 @@ window.handleAnswer = handleAnswer;
 window.fetchLatestACFFields = window.fetchLatestACFFields || fetchLatestACFFields;
 window.updatePostACFFields = window.updatePostACFFields || updatePostACFFields;
 window.updateACFFields = window.updateACFFields || updateACFFields;
-window.updateACFFieldsWithGui = window.updateACFFieldsWithGui || updateACFFieldsWithGui;
+// window.updateACFFieldsWithGui = window.updateACFFieldsWithGui || updateACFFieldsWithGui;
 window.flattenData = window.flattenData || flattenData;

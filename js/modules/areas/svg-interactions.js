@@ -1,3 +1,4 @@
+
 /**
  * Moduł obsługi interakcji SVG
  * 
@@ -27,11 +28,14 @@ function initSvgInteractions() {
                 return;
             }
 
-            AjaxHelper.sendRequest(window.ajaxurl || '/wp-admin/admin-ajax.php', 'POST', {
-                action: 'get_npc_popup',
-                npc_id: npcId,
-                page_id: JSON.stringify(window.pageData || getPageData()),
-                current_url: window.location.href
+            axios({
+                method: 'POST',
+                url: '/wp-json/game/v1/npc/popup',
+                data: {
+                    npc_id: npcId,
+                    page_id: JSON.stringify(window.pageData || getPageData()),
+                    current_url: window.location.href
+                }
             })
                 .then(response => {
                     const npcData = response?.data?.npc_data;

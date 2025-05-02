@@ -34,6 +34,62 @@ function game_load_scripts()
         true
     );
     wp_enqueue_script('alpinejs');
+
+    // Moduł interakcji SVG - ładowany domyślnie
+    wp_register_script(
+        'svg-interactions',
+        get_template_directory_uri() . '/js/modules/areas/svg-interactions.js',
+        array('jquery', 'axios'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('svg-interactions');
+
+    // Główny plik aplikacji
+    wp_register_script(
+        'game-app',
+        get_template_directory_uri() . '/js/app.js',
+        array('jquery', 'axios'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('game-app');
+
+    wp_register_script(
+        'notifications',
+        get_template_directory_uri() . '/js/core/notifications.js',
+        array('jquery', 'axios'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('notifications');
+
+    wp_register_script(
+        'npc-handler',
+        get_template_directory_uri() . '/js/modules/npc/npc-handler.js',
+        array('jquery', 'axios'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('npc-handler');
+
+    wp_register_script(
+        'ui-helpers',
+        get_template_directory_uri() . '/js/core/ui-helpers.js',
+        array('jquery', 'axios'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('ui-helpers');
+
+    wp_register_script(
+        'user-manager-api',
+        get_template_directory_uri() . '/js/utils/user-manager-api.js',
+        array('jquery', 'axios'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('user-manager-api');
 }
 
 // Podpięcie funkcji ładującej skrypty do odpowiedniego hooka WordPress

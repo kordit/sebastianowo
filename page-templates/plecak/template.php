@@ -9,7 +9,7 @@ if (!$user_id) {
     exit;
 }
 
-merge_duplicate_items($user_id);
+// merge_duplicate_items($user_id);
 
 // Pobierz przedmioty użytkownika z pola ACF 'items'
 $user_items = get_field('items', 'user_' . $user_id);

@@ -84,7 +84,10 @@ function scene_generator()
 {
     $post_id = get_the_ID();
     $post_type = get_post_type();
-    $post_name = get_post()->post_name;
+
+    $post_obj = get_post();
+    $post_name = $post_obj ? $post_obj->post_name : '';
+
     $scene_id = get_query_var('scene_id', $post_id);
     $get_scenes = get_field('scenes');
     $current_user_id = get_current_user_id();

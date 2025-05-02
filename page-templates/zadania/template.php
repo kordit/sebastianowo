@@ -21,14 +21,33 @@ function get_task_progress_map($mission_id, $mission_tasks_progress)
     return $map;
 }
 ?>
-<div class="zadania-container">
+<div class="zadania-container" x-data="{ 
+    activeTab: 'aktywne',
+    
+    setActiveTab(tab) {
+        this.activeTab = tab;
+    },
+    
+    isActive(tab) {
+        return this.activeTab === tab;
+    }
+}">
     <div class="tab-controls">
-        <div class="tab-btn active" data-tab="aktywne">Aktywne Misje</div>
-        <div class="tab-btn" data-tab="ukonczone">Zrealizowane Misje</div>
+        <div class="tab-btn"
+            :class="{ 'active': isActive('aktywne') }"
+            @click="setActiveTab('aktywne')"
+            data-tab="aktywne">Aktywne Misje</div>
+        <div class="tab-btn"
+            :class="{ 'active': isActive('ukonczone') }"
+            @click="setActiveTab('ukonczone')"
+            data-tab="ukonczone">Zrealizowane Misje</div>
     </div>
     <div class="tabs-content">
         <!-- Aktywne misje -->
-        <div class="tab-panel active" id="aktywne-tab">
+        <div class="tab-panel"
+            :class="{ 'active': isActive('aktywne') }"
+            id="aktywne-tab"
+            x-show="activeTab === 'aktywne'">
             <?php if (!empty($active_missions)) : ?>
                 <?php foreach ($active_missions as $mission_id) :
                     $mission = get_post($mission_id);
@@ -58,8 +77,11 @@ function get_task_progress_map($mission_id, $mission_tasks_progress)
                     $tasks_count = count($visible_tasks);
                     $completion_percent = $tasks_count > 0 ? floor(($completed_tasks / $tasks_count) * 100) : 0;
                 ?>
-                    <div class="mission-card">
-                        <div class="mission-header">
+                    <div class="mission-card" x-data="{ 
+                        isExpanded: false,
+                        toggleExpand() { this.isExpanded = !this.isExpanded; }
+                    }">
+                        <div class="mission-header" @click="toggleExpand()">
                             <h3>Misja "<?php echo esc_html($mission_title); ?>"</h3>
                             <div class="mission-progress">
                                 <div class="progress-bar">
@@ -67,12 +89,16 @@ function get_task_progress_map($mission_id, $mission_tasks_progress)
                                 </div>
                                 <span class="progress-text"><?php echo esc_html($completion_percent); ?>% (<?php echo esc_html($completed_tasks); ?>/<?php echo esc_html($tasks_count); ?>)</span>
                             </div>
+                            <div class="mission-toggle" :class="{ 'expanded': isExpanded }">
+                                <i x-show="!isExpanded" class="fas fa-chevron-down"></i>
+                                <i x-show="isExpanded" class="fas fa-chevron-up"></i>
+                            </div>
                         </div>
-                        <div class="mission-description">
+                        <div class="mission-description" x-show="isExpanded">
                             <p><?php echo esc_html($mission_content); ?></p>
                         </div>
                         <?php if ($tasks_count > 0) : ?>
-                            <div class="mission-tasks">
+                            <div class="mission-tasks" x-show="isExpanded">
                                 <ul>
                                     <?php foreach ($visible_tasks as $t) :
                                         $task = $t['task'];
@@ -82,18 +108,20 @@ function get_task_progress_map($mission_id, $mission_tasks_progress)
                                         $task_title = !empty($task['title']) ? $task['title'] : (!empty($task['description']) ? wp_trim_words(strip_tags($task['description']), 8, '...') : 'Zadanie');
                                         $task_description = !empty($task['description']) ? $task['description'] : '';
                                     ?>
-                                        <li class="task-item <?php echo $task_class; ?>">
-                                            <div class="task-header">
+                                        <li class="task-item <?php echo $task_class; ?>"
+                                            x-data="{ showDetails: false }">
+                                            <div class="task-header" @click="showDetails = !showDetails">
                                                 <div class="bold"><?php echo esc_html($task_title); ?></div>
                                                 <div class="task-status <?php echo $status; ?>">
                                                     <span>
                                                         <?php if ($status === 'completed') echo 'Ukończone';
                                                         elseif ($status === 'in_progress') echo 'Aktywne'; ?>
                                                     </span>
+                                                    <i class="fas" :class="showDetails ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                                                 </div>
                                             </div>
                                             <?php if ($task_description) : ?>
-                                                <div class="task-description">
+                                                <div class="task-description" x-show="showDetails" x-transition>
                                                     <?php echo wpautop($task_description); ?>
                                                 </div>
                                             <?php endif; ?>
@@ -111,7 +139,10 @@ function get_task_progress_map($mission_id, $mission_tasks_progress)
             <?php endif; ?>
         </div>
         <!-- Ukończone misje -->
-        <div class="tab-panel" id="ukonczone-tab">
+        <div class="tab-panel"
+            :class="{ 'active': isActive('ukonczone') }"
+            id="ukonczone-tab"
+            x-show="activeTab === 'ukonczone'">
             <?php if (!empty($completed_missions)) : ?>
                 <div class="completed-missions-grid">
                     <?php foreach ($completed_missions as $mission_id) :
