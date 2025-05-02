@@ -1,109 +1,4 @@
 /**
- * Moduł obsługi NPC
- * 
- * Plik zawiera funkcje do obsługi interakcji z NPC, dialogów, popupów itp.
- * Jest używany na wszystkich stronach, gdzie występują NPC.
- * Bazuje na strukturze pól ACF zdefiniowanych w register_fields.php.
- */
-
-/**
- * Funkcja pomocnicza do aktualizacji pól ACF z interfejsem graficznym
- * Jest używana jako backup, jeśli główna funkcja nie jest dostępna
- * 
- * @param {Object} fields - Pola do aktualizacji w formacie {nazwa_pola: wartość}
- * @param {Array<string>} parentSelectors - Selektory kontenerów nadrzędnych
- * @param {string|null} customMsg - Niestandardowy komunikat podczas aktualizacji
- * @returns {Promise<Object>} - Wynik operacji
- */
-async function localUpdateACFFieldsWithGui(fields, parentSelectors = ['body'], customMsg = null) {
-    try {
-        // Pokaż wskaźnik ładowania w każdym selektorze nadrzędnym
-        document.querySelectorAll('.bar-game').forEach(wrapper => {
-            wrapper.innerHTML = '';
-            const loadingBar = document.createElement('div');
-            loadingBar.classList.add('bar');
-            loadingBar.style.width = '100%';
-            loadingBar.style.background = '#00aaff';
-            loadingBar.style.animation = 'pulse 1.5s infinite';
-
-            const loadingText = document.createElement('div');
-            loadingText.classList.add('bar-value');
-            loadingText.textContent = customMsg || 'Zapisywanie danych...';
-
-            wrapper.appendChild(loadingBar);
-            wrapper.appendChild(loadingText);
-        });
-
-        // Wywołaj aktualizację poprzez AJAX
-        const response = await AjaxHelper.sendRequest((window.global && window.global.ajaxurl) || window.ajaxurl || '/wp-admin/admin-ajax.php', 'POST', {
-            action: 'update_acf_fields',  // Akcja zdefiniowana w acf_ajax_handlers.php
-            nonce: (window.global && window.global.dataManagerNonce) || (window.gameData && window.gameData.dataManagerNonce) || '',
-            fields: JSON.stringify(fields),
-            request_id: Date.now() + Math.random().toString(36).substring(2, 9)
-        });
-
-        if (!response.success) {
-            throw new Error(response.data?.message || "Nieznany błąd serwera");
-        }
-
-        // Po pomyślnej aktualizacji odśwież paski statusu
-        document.querySelectorAll('.bar-game').forEach(wrapper => {
-            const datasetExists = wrapper.dataset && wrapper.dataset.barMax && wrapper.dataset.barCurrent;
-
-            if (datasetExists) {
-                wrapper.innerHTML = '';
-                const max = parseFloat(wrapper.dataset.barMax);
-                const current = parseFloat(wrapper.dataset.barCurrent);
-                const color = wrapper.dataset.barColor || '#4caf50';
-                const type = wrapper.dataset.barType || 'default';
-                const percentage = (current / max) * 100;
-
-                const bar = document.createElement('div');
-                bar.classList.add('bar');
-                bar.style.width = percentage + '%';
-                bar.style.background = color;
-
-                const barValue = document.createElement('div');
-                barValue.classList.add('bar-value');
-                barValue.innerHTML = `<span class="ud-stats-${type}">${current}</span> / ${max}`;
-
-                wrapper.appendChild(bar);
-                wrapper.appendChild(barValue);
-            }
-        });
-
-        return response;
-    } catch (error) {
-        const errorMsg = error && error.message ? error.message : String(error);
-        console.error("❌ Błąd aktualizacji bazy danych:", errorMsg);
-        throw error;
-    }
-}
-
-/**
- * Pobiera dialogi NPC z serwera
- * 
- * @param {Object} npcData - Dane NPC
- * @param {string|null} idConversation - ID konwersacji
- * @param {Object|null} conditions - Warunki konwersacji
- * @param {number|string|null} userId - ID użytkownika
- * @returns {Promise<Object>} - Dane dialogu
- */
-function fetchDialogue(npcData, idConversation, conditions, userId) {
-    const data = {
-        action: 'get_dialogue',  // Akcja zdefiniowana w npc_dialogs.php
-        npc_data: JSON.stringify(npcData),
-        user_id: userId
-    };
-
-    if (idConversation) data.id_conversation = idConversation;
-    if (conditions) data.conditions = JSON.stringify(conditions);
-
-    return AjaxHelper.sendRequest((window.global && window.global.ajaxurl) || window.ajaxurl || '/wp-admin/admin-ajax.php', 'POST', data)
-        .then(response => response.data);
-}
-
-/**
  * Tworzy popup z NPC
  * 
  * @param {Object} npcData - Dane NPC
@@ -267,12 +162,6 @@ function buildNpcPopup(npcData, userId) {
     }
 }
 
-/**
- * Obsługuje odpowiedź gracza i wykonuje związane z nią akcje
- * 
- * @param {Object|Event} input - Dane odpowiedzi lub event kliknięcia
- * @returns {Promise<void>}
- */
 async function handleAnswer(input) {
     // Pozyskaj dane z wejścia
     const dataset = input && input.currentTarget ? input.currentTarget.dataset : input;
@@ -503,32 +392,26 @@ async function handleAnswer(input) {
                         throw new Error('Nieprawidłowe dane relacji');
                     }
 
-                    // Założenie: relations jest obiektem z kluczami w formacie "npc_ID"
-                    // Przykład: relations.npc_19 dla NPC o ID 19
-                    const relationKey = `relations.npc_${npcId}`;
+                    console.log('Aktualizacja relacji dla NPC ID:', npcId, 'zmiana o wartość:', changeValue);
 
-                    // Pobierz aktualną wartość relacji z bazy
-                    const currentRelation = userFields?.relations?.[`npc_${npcId}`] || 0;
-                    const newRelation = parseInt(currentRelation, 10) + changeValue;
-
-                    console.log('Aktualizacja relacji dla NPC ID:', npcId, 'nowa wartość:', newRelation);
-
-                    // Aktualizuj relację
-                    // Tutaj relacje są obsługiwane specjalnie, nie mamy bezpośredniej metody w UserManager API
-                    const response = await (typeof window.updateACFFieldsWithGui === 'function' ?
-                        window.updateACFFieldsWithGui({
-                            [relationKey]: newRelation
-                        }) :
-                        axios({
-                            method: 'POST',
-                            url: '/wp-json/game/v1/acf/update',
-                            data: {
-                                fields: { [relationKey]: newRelation }
-                            }
-                        }).then(response => {
-                            if (!response.data.success) throw new Error(response.data || "Nieznany błąd serwera");
-                            return response.data;
-                        }));
+                    // Użyj nowej funkcji UserManager.updateNpcRelation() do aktualizacji relacji
+                    const response = await (typeof window.UserManager !== 'undefined' && window.UserManager.updateNpcRelation ?
+                        window.UserManager.updateNpcRelation(npcId, changeValue) :
+                        (typeof window.updateACFFieldsWithGui === 'function' ?
+                            window.updateACFFieldsWithGui({
+                                [`npc-relation-${npcId}`]: changeValue
+                            }) :
+                            axios({
+                                method: 'POST',
+                                url: '/wp-json/game/v1/acf/update',
+                                data: {
+                                    fields: { [`npc-relation-${npcId}`]: changeValue }
+                                }
+                            }).then(response => {
+                                if (!response.data.success) throw new Error(response.data || "Nieznany błąd serwera");
+                                return response.data;
+                            })
+                        ));
 
                     // Przygotuj komunikat
                     const relationMessage = changeValue > 0 ?
@@ -674,137 +557,15 @@ async function handleAnswer(input) {
     }
 }
 
-/**
- * Własna implementacja funkcji flattenData jeśli nie jest dostępna w window
- * 
- * @param {Object} data - Zagnieżdzone dane do spłaszczenia
- * @param {string} prefix - Prefiks dla kluczy zagnieżdżonych
- * @return {Object} - Spłaszczony obiekt
- */
-function flattenData(data, prefix = '') {
-    let flat = {};
-    for (let key in data) {
-        if (data.hasOwnProperty(key)) {
-            const newKey = prefix ? `${prefix}-${key}` : key;
-            if (data[key] !== null && typeof data[key] === 'object' && !Array.isArray(data[key])) {
-                Object.assign(flat, flattenData(data[key], newKey));
-            } else {
-                flat[newKey] = data[key];
-            }
-        }
-    }
-    return flat;
-}
-
-/**
- * Funkcja do pobierania najnowszych pól ACF z wykorzystaniem REST API
- * 
- * @returns {Promise<Object>} - Pola ACF
- */
-async function fetchLatestACFFields() {
-    try {
-        const nonce = (window.global && window.global.dataManagerNonce) || (window.gameData && window.gameData.dataManagerNonce) || '';
-
-        const response = await axios({
-            method: 'GET',
-            url: '/wp-json/game/v1/acf/fields',
-            headers: nonce ? { 'X-WP-Nonce': nonce } : {}
-        });
-
-        if (!response.data.success) {
-            throw new Error(response.data || "Nieznany błąd serwera");
-        }
-
-        return response.data.data.fields;
-    } catch (error) {
-        console.error("❌ Błąd pobierania bazy ACF:", error);
-        return {};
-    }
-}
-
-/**
- * Funkcja do aktualizacji pól ACF w poście
- * 
- * @param {number} postId - ID posta do aktualizacji
- * @param {Object} fields - Pola do aktualizacji
- * @returns {Promise<Object>} - Wynik operacji
- */
-async function updatePostACFFields(postId, fields) {
-    const ajaxUrl = (window.global && window.global.ajaxurl) || window.ajaxurl || '/wp-admin/admin-ajax.php';
-    const nonce = (window.global && window.global.dataManagerNonce) || (window.gameData && window.gameData.dataManagerNonce) || '';
-
-    return AjaxHelper.sendRequest(ajaxUrl, 'POST', {
-        action: 'update_acf_post_fields_reusable',
-        nonce: nonce,
-        post_id: postId,
-        fields: JSON.stringify(fields),
-        request_id: Date.now() + Math.random().toString(36).substring(2, 9)
-    });
-}
-
-/**
- * Funkcja do aktualizacji pól ACF (bez GUI)
- * 
- * @param {Object} fields - Pola do aktualizacji
- * @returns {Promise<Object>} - Wynik operacji
- */
-async function updateACFFields(fields) {
-    try {
-        const ajaxUrl = (window.global && window.global.ajaxurl) || window.ajaxurl || '/wp-admin/admin-ajax.php';
-        const nonce = (window.global && window.global.dataManagerNonce) || (window.gameData && window.gameData.dataManagerNonce) || '';
-
-        console.log('Aktualizacja pól ACF:', fields);
-
-        const response = await AjaxHelper.sendRequest(ajaxUrl, 'POST', {
-            action: 'update_acf_fields',
-            nonce: nonce,
-            fields: JSON.stringify(fields),
-            request_id: Date.now() + Math.random().toString(36).substring(2, 9)
-        });
-
-        console.log('Fields:', fields);
-        console.log('Odpowiedź z serwera:', response);
-
-        if (!response.success) {
-            throw new Error(response.data?.message || "Nieznany błąd serwera");
-        }
-
-        return response;
-    } catch (error) {
-        console.error("❌ Błąd aktualizacji ACF:", error);
-        throw error;
-    }
-}
-
-/**
- * Funkcja do aktualizacji pól ACF z interfejsem graficznym
- * 
- * @param {Object} fields - Pola do aktualizacji
- * @param {Array<string>} parentSelectors - Selektory kontenerów nadrzędnych
- * @param {string|null} customMsg - Niestandardowy komunikat podczas aktualizacji
- * @returns {Promise<Object>} - Wynik operacji
- */
-
-
 // Eksport modułu i funkcji globalnych dla wstecznej kompatybilności
 const NpcModule = {
-    fetchDialogue,
+    // fetchDialogue,
     buildNpcPopup,
     handleAnswer,
-    fetchLatestACFFields,
-    updatePostACFFields,
-    updateACFFields,
-    // updateACFFieldsWithGui,
-    flattenData
 };
 
 // Eksport globalny
 window.NpcModule = NpcModule;
-window.fetchDialogue = fetchDialogue;
 window.buildNpcPopup = buildNpcPopup;
 window.handleAnswer = handleAnswer;
-window.fetchLatestACFFields = window.fetchLatestACFFields || fetchLatestACFFields;
-window.updatePostACFFields = window.updatePostACFFields || updatePostACFFields;
-window.updateACFFields = window.updateACFFields || updateACFFields;
-// window.updateACFFieldsWithGui = window.updateACFFieldsWithGui || updateACFFieldsWithGui;
-window.flattenData = window.flattenData || flattenData;
+

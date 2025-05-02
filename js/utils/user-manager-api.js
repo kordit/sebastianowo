@@ -229,6 +229,21 @@ const UserManager = (() => {
         },
 
         /**
+         * Aktualizacja relacji z NPC
+         * 
+         * @param {number} npcId - ID NPC, z którym aktualizujemy relację
+         * @param {number} value - Wartość do dodania/odjęcia od relacji (-100 do 100)
+         * @returns {Promise} - Promise z wynikiem operacji
+         */
+        updateNpcRelation: async (npcId, value) => {
+            return makeRequest({
+                fieldType: 'relation',
+                npcId: parseInt(npcId),
+                value: parseInt(value)
+            });
+        },
+
+        /**
          * Pobranie danych użytkownika
          * 
          * @returns {Promise} - Promise z danymi użytkownika

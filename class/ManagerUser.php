@@ -73,6 +73,27 @@ class ManagerUser
         $field_type = $request->get_param('fieldType');
         $field_name = $request->get_param('fieldName');
 
+        // Obsługa relacji z NPC - specjalne parametry
+        if ($field_type === 'relation') {
+            $npc_id = intval($request->get_param('npcId'));
+            $value = intval($request->get_param('value'));
+
+            if (empty($npc_id)) {
+                return new WP_REST_Response([
+                    'success' => false,
+                    'message' => 'Brak wymaganych parametrów dla relacji z NPC'
+                ], 400);
+            }
+
+            $result = $this->updateNpcRelation($npc_id, $value);
+
+            if ($result['success']) {
+                return new WP_REST_Response($result, 200);
+            } else {
+                return new WP_REST_Response($result, 400);
+            }
+        }
+
         // Obsługa rejonów - specjalne parametry
         if ($field_type === 'area') {
             $area_id = intval($request->get_param('areaId'));
@@ -806,6 +827,95 @@ class ManagerUser
             'success' => true,
             'message' => "Usunięto rejon {$area->post_title} z dostępnych",
             'area_id' => $area_id
+        ];
+    }
+
+    /**
+     * Aktualizuje relację z NPC
+     * 
+     * @param int $npc_id ID NPC
+     * @param int $value Wartość do dodania/odjęcia od relacji
+     * @return array Wynik operacji
+     */
+    public function updateNpcRelation($npc_id, $value)
+    {
+        // Sprawdź czy użytkownik istnieje
+        if (!get_user_by('ID', $this->user_id)) {
+            return [
+                'success' => false,
+                'message' => 'Użytkownik nie istnieje'
+            ];
+        }
+
+        // Sprawdź czy NPC istnieje
+        $npc = get_post($npc_id);
+        if (!$npc || $npc->post_type !== 'npc') {
+            return [
+                'success' => false,
+                'message' => 'NPC nie istnieje'
+            ];
+        }
+
+        // Nazwa pola relacji dla tego NPC
+        $relation_field = 'npc-relation-' . $npc_id;
+        $meet_field = 'npc-meet-' . $npc_id;
+
+        // Pobierz aktualną wartość relacji
+        $current_relation = get_field($relation_field, 'user_' . $this->user_id);
+        if ($current_relation === null || $current_relation === '') {
+            $current_relation = 0;
+        } else {
+            $current_relation = intval($current_relation);
+        }
+
+        // Oblicz nową wartość relacji
+        $new_relation = $current_relation + $value;
+
+        // Ograniczenie wartości relacji do zakresu -100 do 100
+        $new_relation = max(-100, min(100, $new_relation));
+
+        // Zapisz zmiany w relacji
+        $updated = update_field($relation_field, $new_relation, 'user_' . $this->user_id);
+
+        // Ustaw flagę poznania NPC na true, jeśli jeszcze nie ustawiona
+        $has_met = get_field($meet_field, 'user_' . $this->user_id);
+        if (!$has_met) {
+            update_field($meet_field, true, 'user_' . $this->user_id);
+        }
+
+        if (!$updated) {
+            // Dodatkowa weryfikacja czy relacja została zaktualizowana
+            $verified_relation = get_field($relation_field, 'user_' . $this->user_id);
+
+            if ($verified_relation == $new_relation) {
+                // Relacja została faktycznie zaktualizowana mimo zwróconego false
+                return [
+                    'success' => true,
+                    'message' => $value > 0 ?
+                        "Zwiększono relację z {$npc->post_title} o {$value}" :
+                        "Zmniejszono relację z {$npc->post_title} o " . abs($value),
+                    'npc_id' => $npc_id,
+                    'field_name' => $relation_field,
+                    'new_value' => $new_relation,
+                    'old_value' => $current_relation
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Nie udało się zaktualizować relacji'
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => $value > 0 ?
+                "Zwiększono relację z {$npc->post_title} o {$value}" :
+                "Zmniejszono relację z {$npc->post_title} o " . abs($value),
+            'npc_id' => $npc_id,
+            'field_name' => $relation_field,
+            'new_value' => $new_relation,
+            'old_value' => $current_relation
         ];
     }
 
