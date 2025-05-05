@@ -122,12 +122,65 @@ function buildNpcPopup(npcData, userId) {
                         if (answer.go_to_id && answer.go_to_id !== "0") {
                             dialogueContent.innerHTML = '<div class="loader">Myśli...</div>';
                             try {
-                                const newData = await fetchDialogue(npcData, answer.go_to_id, getPageData(), userId);
-                                if (newData && newData.conversation) {
-                                    renderDialogueContent(newData.conversation);
+                                // Konfiguracja bezpieczeństwa dla żądań API
+                                const securityConfig = {
+                                    headers: {
+                                        'X-WP-Nonce': userManagerData.nonce,
+                                        'Content-Type': 'application/json'
+                                    }
+                                };
+
+                                // Używamy poprawnego endpointu popup z metodą POST
+                                const response = await axios({
+                                    method: 'POST',  // Metoda POST jest bardziej bezpieczna
+                                    url: '/wp-json/game/v1/npc/popup',
+                                    data: {  // Dane w formacie JSON
+                                        npc_id: npcData.npc_id,
+                                        id_conversation: answer.go_to_id,
+                                        user_id: userId,
+                                        page_id: JSON.stringify(typeof getPageData === 'function' ? getPageData() : {})
+                                    },
+                                    ...securityConfig  // Dodajemy konfigurację bezpieczeństwa
+                                });
+
+                                // Sprawdzamy czy otrzymaliśmy właściwą odpowiedź zgodną ze strukturą z ApiNpcHandler.php
+                                console.log('Otrzymana odpowiedź:', response.data);
+
+                                if (response.data && response.data.npc_data) {
+                                    // Struktura z ApiNpcHandler.php - poprawiona obsługa
+                                    if (response.data.npc_data.conversation) {
+                                        // Przekazujemy obiekt conversation, który ma prawidłową strukturę
+                                        renderDialogueContent(response.data.npc_data.conversation);
+
+                                        // Aktualizujemy też inne dane NPC (tytuł, miniaturkę itd.)
+                                        if (response.data.npc_data.npc_post_title) {
+                                            const header = popupContainer.querySelector('h2');
+                                            if (header) {
+                                                header.innerHTML = response.data.npc_data.npc_post_title + ' mówi:';
+                                            }
+                                        }
+
+                                        if (response.data.npc_data.npc_thumbnail) {
+                                            const img = popupContainer.querySelector('.npc-thumbnail');
+                                            if (img) {
+                                                img.src = response.data.npc_data.npc_thumbnail;
+                                            }
+                                        }
+                                    } else {
+                                        console.warn('Brak konwersacji w otrzymanej odpowiedzi:', response.data);
+                                        throw new Error('Nie udało się pobrać dialogu - brak konwersacji');
+                                    }
+                                } else if (response.data && response.data.success && response.data.data && response.data.data.conversation) {
+                                    renderDialogueContent(response.data.data.conversation);
+                                } else if (response.data && response.data.conversation) {
+                                    // Alternatywna struktura odpowiedzi
+                                    renderDialogueContent(response.data.conversation);
+                                } else {
+                                    console.warn('Nietypowa struktura odpowiedzi:', response.data);
+                                    throw new Error('Nie udało się pobrać dialogu - niepoprawna struktura odpowiedzi');
                                 }
                             } catch (err) {
-                                console.error(err);
+                                console.error('Błąd podczas pobierania dialogu:', err);
                                 // Przywróć przycisk w przypadku błędu
                                 btn.disabled = false;
                                 btn.classList.remove('processing');

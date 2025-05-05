@@ -7,28 +7,144 @@
 
 const UserManager = (() => {
     /**
-     * Podstawowe ustawienia axios dla żądań
+     * Podstawowe ustawienia axios dla żądań z zabezpieczeniami
      */
     const axiosConfig = {
         headers: {
-            'X-WP-Nonce': userManagerData.nonce,
+            'X-WP-Nonce': userManagerData?.nonce || '', // Token nonce do zabezpieczenia CSRF
             'Content-Type': 'application/json'
+        },
+        withCredentials: true // Zapewnia wysyłanie ciasteczek w żądaniach cross-origin
+    };
+
+    /**
+     * Flaga wskazująca, czy obecnie odświeżamy token
+     * Zapobiega wielokrotnym jednoczesnym próbom odświeżania
+     */
+    let isRefreshingToken = false;
+
+    /**
+     * Kolejka żądań oczekujących na odświeżenie tokena
+     */
+    const pendingRequests = [];
+
+    /**
+     * Bazowy URL dla endpointów REST API
+     * Zapewnij, że zawsze używamy absolutnego URL zaczynającego się od protokołu lub /
+     * 
+     * @returns {string} Bazowy URL dla endpointów REST API
+     */
+    const getBaseRestUrl = () => {
+        // Sprawdź czy userManagerData.rest_url jest zdefiniowane
+        if (userManagerData?.rest_url) {
+            // Jeśli URL zaczyna się od http lub / - użyj go bezpośrednio
+            if (userManagerData.rest_url.startsWith('http') || userManagerData.rest_url.startsWith('/')) {
+                return userManagerData.rest_url;
+            }
+        }
+        // Fallback - użyj standardowej ścieżki WordPress REST API
+        return '/wp-json/game/v1';
+    };
+
+    /**
+     * Asynchronicznie odświeża token bezpieczeństwa
+     * 
+     * @returns {Promise<string|null>} Promise z nowym tokenem lub null jeśli wystąpił błąd
+     */
+    const refreshTokenAsync = async () => {
+        // Jeśli już odświeżamy token, zwróć istniejący proces
+        if (isRefreshingToken) {
+            return new Promise((resolve) => {
+                // Dodaj do kolejki funkcję, która zostanie wywołana po odświeżeniu tokena
+                pendingRequests.push((token) => {
+                    resolve(token);
+                });
+            });
+        }
+
+        isRefreshingToken = true;
+
+        try {
+            const response = await fetch(`${getBaseRestUrl()}/refresh-nonce`, {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Błąd HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data && data.success && data.nonce) {
+                // Aktualizuj globalny token i konfigurację axios
+                if (window.userManagerData) {
+                    window.userManagerData.nonce = data.nonce;
+                }
+                axiosConfig.headers['X-WP-Nonce'] = data.nonce;
+
+                // Wywołaj wszystkie oczekujące żądania
+                pendingRequests.forEach(callback => callback(data.nonce));
+                pendingRequests.length = 0; // Wyczyść kolejkę
+
+                return data.nonce;
+            }
+            return null;
+        } catch (error) {
+            console.error('Błąd podczas odświeżania tokena:', error);
+
+            // Poinformuj oczekujące żądania o błędzie
+            pendingRequests.forEach(callback => callback(null));
+            pendingRequests.length = 0; // Wyczyść kolejkę
+
+            return null;
+        } finally {
+            isRefreshingToken = false;
         }
     };
 
     /**
-     * Obsługa błędów z API
+     * Wykonanie żądania z automatycznym ponawianiem przy błędach autoryzacji
+     * 
+     * @param {Function} requestFn - Funkcja wykonująca żądanie axios
+     * @param {number} retries - Liczba pozostałych prób
+     * @returns {Promise<any>} Wynik żądania
+     */
+    const executeWithRetry = async (requestFn, retries = 1) => {
+        try {
+            return await requestFn();
+        } catch (error) {
+            // Jeśli błąd 403 i mamy jeszcze próby, odśwież token i spróbuj ponownie
+            if (error.status === 403 && retries > 0) {
+                console.warn('Odświeżanie tokena bezpieczeństwa i ponawianie żądania...');
+
+                const newToken = await refreshTokenAsync();
+                if (newToken) {
+                    return executeWithRetry(requestFn, retries - 1);
+                }
+            }
+
+            throw error; // Propaguj błąd dalej, jeśli nie udało się ponowić
+        }
+    };
+
+    /**
+     * Obsługa błędów z API z uwzględnieniem błędów autoryzacji
      * 
      * @param {Error} error - Obiekt błędu z axios
      * @returns {Object} - Ustrukturyzowany obiekt błędu
      */
     const handleError = (error) => {
-        console.error('Błąd API ManagerUser:', error);
+        console.error('Błąd API UserManager:', error);
 
         if (error.response) {
             return {
                 success: false,
-                message: error.response.data.message || 'Wystąpił błąd podczas komunikacji z serwerem',
+                message: error.response.data?.message || 'Wystąpił błąd podczas komunikacji z serwerem',
                 status: error.response.status
             };
         }
@@ -47,17 +163,29 @@ const UserManager = (() => {
      * @returns {Promise} - Promise z wynikiem żądania
      */
     const makeRequest = async (params) => {
-        try {
-            const response = await axios.post(
-                `${userManagerData.restUrl}game/v1/update-user-field`,
-                params,
-                axiosConfig
-            );
+        const baseUrl = getBaseRestUrl();
 
-            return response.data;
-        } catch (error) {
-            throw handleError(error);
-        }
+        // Funkcja wykonująca właściwe żądanie
+        const performRequest = async () => {
+            try {
+                // Debugowanie - dla łatwiejszego wykrywania problemów z URL
+                console.debug('Wywołanie API:', `${baseUrl}/update-user-field`, params);
+
+                const response = await axios.post(
+                    `${baseUrl}/update-user-field`,
+                    params,
+                    axiosConfig
+                );
+
+                return response.data;
+            } catch (error) {
+                console.error('Błąd żądania:', error.message, error.config?.url);
+                throw handleError(error);
+            }
+        };
+
+        // Wykonaj z automatycznym ponawianiem
+        return executeWithRetry(performRequest);
     };
 
     /**
@@ -66,18 +194,26 @@ const UserManager = (() => {
      * @returns {Promise} - Promise z danymi użytkownika
      */
     const getUserData = async () => {
-        try {
-            const response = await axios.get(
-                userManagerData.rest_url + '/get-user-data',
-                axiosConfig
-            );
+        const baseUrl = getBaseRestUrl();
 
-            return response.data;
-        } catch (error) {
-            throw handleError(error);
-        }
+        // Funkcja wykonująca właściwe żądanie
+        const performRequest = async () => {
+            try {
+                const response = await axios.get(
+                    `${baseUrl}/get-user-data`,
+                    axiosConfig
+                );
+                return response.data;
+            } catch (error) {
+                throw handleError(error);
+            }
+        };
+
+        // Wykonaj z automatycznym ponawianiem
+        return executeWithRetry(performRequest);
     };
 
+    // Główny obiekt API z metodami publicznymi
     return {
         /**
          * Aktualizacja statystyki
@@ -107,6 +243,50 @@ const UserManager = (() => {
                 fieldName: skillName,
                 value: parseFloat(value)
             });
+        },
+
+        /**
+         * Zakładanie przedmiotu na postać
+         * 
+         * @param {number} itemId - ID przedmiotu do założenia
+         * @param {string} slot - Slot, na który założyć przedmiot (chest_item, bottom_item, legs_item)
+         * @returns {Promise} - Promise z wynikiem operacji
+         */
+        equipItem: async (itemId, slot) => {
+            try {
+                const response = await axios.post(
+                    `${getBaseRestUrl()}/equip-item`,
+                    {
+                        item_id: itemId,
+                        slot: slot
+                    },
+                    axiosConfig
+                );
+                return response.data;
+            } catch (error) {
+                throw handleError(error);
+            }
+        },
+
+        /**
+         * Zdejmowanie przedmiotu z postaci
+         * 
+         * @param {string} slot - Slot, z którego zdjąć przedmiot (chest_item, bottom_item, legs_item)
+         * @returns {Promise} - Promise z wynikiem operacji
+         */
+        unequipItem: async (slot) => {
+            try {
+                const response = await axios.post(
+                    `${getBaseRestUrl()}/unequip-item`,
+                    {
+                        slot: slot
+                    },
+                    axiosConfig
+                );
+                return response.data;
+            } catch (error) {
+                throw handleError(error);
+            }
         },
 
         /**
@@ -248,12 +428,65 @@ const UserManager = (() => {
          * 
          * @returns {Promise} - Promise z danymi użytkownika
          */
-        getUserData
+        getUserData,
+
+        /**
+         * Ręczne odświeżenie tokenu bezpieczeństwa
+         * 
+         * @returns {Promise<boolean>} - Promise z informacją czy token został pomyślnie odświeżony
+         */
+        refreshSecurityToken: async () => {
+            const token = await refreshTokenAsync();
+            return token !== null;
+        }
     };
 })();
 
+/**
+ * Funkcja do generowania nowego tokenu bezpieczeństwa
+ * Może być wykorzystana w przypadku wygaśnięcia tokenu
+ * 
+ * @returns {string|null} - Nowy token bezpieczeństwa lub null jeśli błąd
+ */
+window.refreshSecurityToken = async function () {
+    try {
+        const response = await fetch('/wp-json/game/v1/refresh-nonce', {
+            method: 'GET',
+            credentials: 'same-origin' // Ważne dla bezpieczeństwa
+        });
 
+        if (!response.ok) throw new Error('Nie udało się odświeżyć tokenu');
 
+        const data = await response.json();
+        if (data && data.success && data.nonce) {
+            // Aktualizuj globalny token
+            if (window.userManagerData) {
+                window.userManagerData.nonce = data.nonce;
+            }
+            return data.nonce;
+        }
+        return null;
+    } catch (error) {
+        console.error('Błąd podczas odświeżania tokenu:', error);
+        return null;
+    }
+};
 
 // Eksportuj moduł do globalnego użycia
 window.UserManager = UserManager;
+
+// Dobra praktyka - nasłuchuj na zdarzenia związane z załadowaniem strony
+document.addEventListener('DOMContentLoaded', () => {
+    // Jeśli użytkownik jest zalogowany, sprawdź czy token jest ważny
+    if (userManagerData && userManagerData.nonce) {
+        // Możemy opcjonalnie wykonać lekkie żądanie, aby sprawdzić ważność tokena
+        UserManager.getUserData()
+            .catch(() => {
+                console.info('Automatyczne odświeżanie tokena bezpieczeństwa...');
+                return UserManager.refreshSecurityToken();
+            })
+            .then(() => {
+                console.debug('Inicjalizacja UserManager zakończona');
+            });
+    }
+});

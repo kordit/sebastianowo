@@ -1,7 +1,7 @@
-76Array
+250Array
 (
     [mission_id] => 247
     [mission_status] => in_progress
     [mission_task_id] => zidentyfikuj-potencjalnych-klientow_0
-    [mission_task_status] => completed
+    [mission_task_status] => not_started_npc
 )

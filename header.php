@@ -33,9 +33,6 @@
                         </div>
                     </div>
                 <?php endforeach; ?>
-
-                <button id="flush-ui-button" class="flush-button" title="Odśwież zasoby">↻</button>
-
                 <!-- <div class="ud-user_class-label">
                     <?php
                     $field = get_field_object('user_class', 'user_' . $user_id);

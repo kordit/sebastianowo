@@ -110,6 +110,15 @@
     --ft: 'Bungee Outline';
 }
 
+* {
+    box-sizing: border-box;
+
+    &:before,
+    &:after {
+        box-sizing: border-box;
+    }
+}
+
 pre {
     color: #fff !important;
     // position: fixed;
@@ -876,4 +885,29 @@ body.template-kreator .game-content {
         margin-top: auto;
     }
 
+}
+
+ul.tabs-nav {
+    display: flex;
+    list-style-type: none;
+    padding: 0px;
+    margin: 0;
+    margin-bottom: 30px;
+    margin-top: -83px;
+    gap: 15px;
+    margin-left: -25px;
+
+
+    .tab-item {
+        font-family: var(--ff);
+        padding: 15px 30px;
+        border: solid 4px #000;
+        background: #fff;
+        cursor: pointer;
+
+        &.active {
+            background-color: #000;
+            color: #fff;
+        }
+    }
 }

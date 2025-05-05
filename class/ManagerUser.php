@@ -19,6 +19,11 @@ class ManagerUser
     private $namespace = 'game/v1';
 
     /**
+     * Nazwa nonce dla zabezpieczenia żądań
+     */
+    private $nonce_name = 'game_user_manager_nonce';
+
+    /**
      * Konstruktor
      * 
      * @param int $user_id ID użytkownika (opcjonalne, domyślnie aktualny użytkownik)
@@ -50,17 +55,85 @@ class ManagerUser
             'callback' => [$this, 'rest_get_user_data'],
             'permission_callback' => [$this, 'check_permissions'],
         ]);
+
+        // Endpoint do odświeżania tokenu nonce
+        register_rest_route($this->namespace, '/refresh-nonce', [
+            'methods' => 'GET',
+            'callback' => [$this, 'rest_refresh_nonce'],
+            'permission_callback' => function () {
+                return is_user_logged_in();
+            },
+        ]);
     }
 
     /**
-     * Sprawdza uprawnienia użytkownika
+     * Obsługa endpointu REST API do odświeżania tokenu nonce
      * 
-     * @return bool Czy użytkownik ma uprawnienia
+     * @param WP_REST_Request $request Obiekt żądania
+     * @return WP_REST_Response Odpowiedź REST API
      */
-    public function check_permissions()
+    public function rest_refresh_nonce($request)
     {
-        return is_user_logged_in();
+        // Tworzenie nowego tokenu nonce
+        $new_nonce = wp_create_nonce($this->nonce_name);
+
+        return new WP_REST_Response([
+            'success' => true,
+            'nonce' => $new_nonce,
+            'message' => 'Token bezpieczeństwa został odświeżony'
+        ], 200);
     }
+
+    /**
+     * Sprawdza uprawnienia użytkownika i weryfikuje żądanie
+     * 
+     * @param WP_REST_Request $request Obiekt żądania
+     * @return bool|WP_Error Czy użytkownik ma uprawnienia lub obiekt błędu
+     */
+    public function check_permissions($request)
+    {
+        // Sprawdź czy użytkownik jest zalogowany
+        if (!is_user_logged_in()) {
+            return new WP_Error(
+                'rest_forbidden',
+                __('Dostęp zabroniony - musisz być zalogowany.'),
+                ['status' => 401]
+            );
+        }
+
+        // Sprawdź nonce dla zabezpieczenia CSRF
+        $nonce = $request->get_header('X-WP-Nonce');
+        if (!$nonce || !wp_verify_nonce($nonce, $this->nonce_name)) {
+            return new WP_Error(
+                'rest_forbidden',
+                __('Nieprawidłowy token bezpieczeństwa.'),
+                ['status' => 403]
+            );
+        }
+
+        // Sprawdź referer - upewnij się, że żądanie pochodzi z naszej witryny
+        $referer = $request->get_header('referer');
+        if (!$referer || strpos($referer, home_url()) !== 0) {
+            return new WP_Error(
+                'rest_forbidden',
+                __('Niedozwolone źródło żądania.'),
+                ['status' => 403]
+            );
+        }
+
+        // Sprawdź czy użytkownik modyfikuje tylko swoje dane
+        $user_id = get_current_user_id();
+        if ($this->user_id !== $user_id && !current_user_can('administrator')) {
+            return new WP_Error(
+                'rest_forbidden',
+                __('Nie możesz modyfikować danych innego użytkownika.'),
+                ['status' => 403]
+            );
+        }
+
+        return true;
+    }
+
     /**
      * Obsługa endpoint REST API do aktualizacji pola
      * 
@@ -831,7 +904,20 @@ class ManagerUser
     }
 
     /**
-     * Aktualizuje relację z NPC
+     * Enumeracja stanów dla maszyny stanów przy aktualizacji relacji NPC
+     */
+    private const RELATION_STATE = [
+        'INIT' => 'init',             // Stan początkowy
+        'VALIDATING' => 'validating', // Walidacja danych
+        'CALCULATING' => 'calculating', // Obliczanie nowych wartości
+        'UPDATING' => 'updating',     // Aktualizacja w bazie danych
+        'VERIFYING' => 'verifying',   // Weryfikacja zmian
+        'COMPLETED' => 'completed',   // Operacja zakończona sukcesem
+        'FAILED' => 'failed'          // Operacja zakończona niepowodzeniem
+    ];
+
+    /**
+     * Aktualizuje relację z NPC z wykorzystaniem maszyny stanów (FSM)
      * 
      * @param int $npc_id ID NPC
      * @param int $value Wartość do dodania/odjęcia od relacji
@@ -839,84 +925,189 @@ class ManagerUser
      */
     public function updateNpcRelation($npc_id, $value)
     {
-        // Sprawdź czy użytkownik istnieje
-        if (!get_user_by('ID', $this->user_id)) {
-            return [
-                'success' => false,
-                'message' => 'Użytkownik nie istnieje'
-            ];
-        }
-
-        // Sprawdź czy NPC istnieje
-        $npc = get_post($npc_id);
-        if (!$npc || $npc->post_type !== 'npc') {
-            return [
-                'success' => false,
-                'message' => 'NPC nie istnieje'
-            ];
-        }
-
-        // Nazwa pola relacji dla tego NPC
-        $relation_field = 'npc-relation-' . $npc_id;
-        $meet_field = 'npc-meet-' . $npc_id;
-
-        // Pobierz aktualną wartość relacji
-        $current_relation = get_field($relation_field, 'user_' . $this->user_id);
-        if ($current_relation === null || $current_relation === '') {
-            $current_relation = 0;
-        } else {
-            $current_relation = intval($current_relation);
-        }
-
-        // Oblicz nową wartość relacji
-        $new_relation = $current_relation + $value;
-
-        // Ograniczenie wartości relacji do zakresu -100 do 100
-        $new_relation = max(-100, min(100, $new_relation));
-
-        // Zapisz zmiany w relacji
-        $updated = update_field($relation_field, $new_relation, 'user_' . $this->user_id);
-
-        // Ustaw flagę poznania NPC na true, jeśli jeszcze nie ustawiona
-        $has_met = get_field($meet_field, 'user_' . $this->user_id);
-        if (!$has_met) {
-            update_field($meet_field, true, 'user_' . $this->user_id);
-        }
-
-        if (!$updated) {
-            // Dodatkowa weryfikacja czy relacja została zaktualizowana
-            $verified_relation = get_field($relation_field, 'user_' . $this->user_id);
-
-            if ($verified_relation == $new_relation) {
-                // Relacja została faktycznie zaktualizowana mimo zwróconego false
-                return [
-                    'success' => true,
-                    'message' => $value > 0 ?
-                        "Zwiększono relację z {$npc->post_title} o {$value}" :
-                        "Zmniejszono relację z {$npc->post_title} o " . abs($value),
-                    'npc_id' => $npc_id,
-                    'field_name' => $relation_field,
-                    'new_value' => $new_relation,
-                    'old_value' => $current_relation
-                ];
-            }
-
-            return [
-                'success' => false,
-                'message' => 'Nie udało się zaktualizować relacji'
-            ];
-        }
-
-        return [
-            'success' => true,
-            'message' => $value > 0 ?
-                "Zwiększono relację z {$npc->post_title} o {$value}" :
-                "Zmniejszono relację z {$npc->post_title} o " . abs($value),
+        // Inicjalizacja danych i stanu początkowego FSM
+        $state = self::RELATION_STATE['INIT'];
+        $result = [
+            'success' => false,
+            'message' => 'Nie rozpoczęto przetwarzania',
+            'state_history' => [$state],
             'npc_id' => $npc_id,
-            'field_name' => $relation_field,
-            'new_value' => $new_relation,
-            'old_value' => $current_relation
+            'value' => $value
         ];
+
+        $npc = null;
+        $current_relation = null;
+        $new_relation = null;
+        $relation_field = null;
+        $meet_field = null;
+
+        // Logika FSM - przetwarzanie stanu po stanie
+        while ($state !== self::RELATION_STATE['COMPLETED'] && $state !== self::RELATION_STATE['FAILED']) {
+
+            switch ($state) {
+                // Stan początkowy - inicjalizacja
+                case self::RELATION_STATE['INIT']:
+                    // Przejdź do walidacji
+                    $state = self::RELATION_STATE['VALIDATING'];
+                    $result['state_history'][] = $state;
+                    break;
+
+                // Walidacja danych wejściowych
+                case self::RELATION_STATE['VALIDATING']:
+                    try {
+                        // Sprawdź czy użytkownik istnieje
+                        if (!get_user_by('ID', $this->user_id)) {
+                            $result['message'] = 'Użytkownik nie istnieje';
+                            $state = self::RELATION_STATE['FAILED'];
+                            break;
+                        }
+
+                        // Sprawdź czy NPC istnieje
+                        $npc = get_post($npc_id);
+                        if (!$npc || $npc->post_type !== 'npc') {
+                            $result['message'] = 'NPC nie istnieje';
+                            $state = self::RELATION_STATE['FAILED'];
+                            break;
+                        }
+
+                        // Nazwa pola relacji dla tego NPC
+                        $relation_field = 'npc-relation-' . $npc_id;
+                        $meet_field = 'npc-meet-' . $npc_id;
+
+                        // Sprawdź czy wartość jest liczbą
+                        if (!is_numeric($value)) {
+                            $result['message'] = 'Wartość musi być liczbą';
+                            $state = self::RELATION_STATE['FAILED'];
+                            break;
+                        }
+
+                        // Przejdź do obliczania nowej wartości
+                        $state = self::RELATION_STATE['CALCULATING'];
+                        $result['state_history'][] = $state;
+                    } catch (Exception $e) {
+                        $result['message'] = 'Błąd walidacji: ' . $e->getMessage();
+                        $state = self::RELATION_STATE['FAILED'];
+                    }
+                    break;
+
+                // Obliczanie nowej wartości relacji
+                case self::RELATION_STATE['CALCULATING']:
+                    try {
+                        // Pobierz aktualną wartość relacji
+                        $current_relation = get_field($relation_field, 'user_' . $this->user_id);
+                        if ($current_relation === null || $current_relation === '') {
+                            $current_relation = 0;
+                        } else {
+                            $current_relation = intval($current_relation);
+                        }
+
+                        $result['old_value'] = $current_relation;
+
+                        // Oblicz nową wartość relacji
+                        $new_relation = $current_relation + $value;
+
+                        // Ograniczenie wartości relacji do zakresu -100 do 100
+                        $new_relation = max(-100, min(100, $new_relation));
+
+                        $result['new_value'] = $new_relation;
+                        $result['field_name'] = $relation_field;
+
+                        // Przejdź do aktualizacji danych
+                        $state = self::RELATION_STATE['UPDATING'];
+                        $result['state_history'][] = $state;
+                    } catch (Exception $e) {
+                        $result['message'] = 'Błąd obliczania: ' . $e->getMessage();
+                        $state = self::RELATION_STATE['FAILED'];
+                    }
+                    break;
+
+                // Aktualizacja danych w bazie
+                case self::RELATION_STATE['UPDATING']:
+                    try {
+                        // Zapisz zmiany w relacji
+                        $updated = update_field($relation_field, $new_relation, 'user_' . $this->user_id);
+
+                        // Ustaw flagę poznania NPC na true, jeśli jeszcze nie ustawiona
+                        $has_met = get_field($meet_field, 'user_' . $this->user_id);
+                        if (!$has_met) {
+                            update_field($meet_field, true, 'user_' . $this->user_id);
+                            $result['first_meeting'] = true;
+                        }
+
+                        // Jeśli aktualizacja się nie powiodła, przejdź do weryfikacji
+                        if (!$updated) {
+                            $state = self::RELATION_STATE['VERIFYING'];
+                            $result['state_history'][] = $state;
+                        } else {
+                            // Aktualizacja się powiodła
+                            $state = self::RELATION_STATE['COMPLETED'];
+                            $result['state_history'][] = $state;
+                        }
+                    } catch (Exception $e) {
+                        $result['message'] = 'Błąd aktualizacji: ' . $e->getMessage();
+                        $state = self::RELATION_STATE['FAILED'];
+                    }
+                    break;
+
+                // Weryfikacja zmian (gdy update_field zwróciło false)
+                case self::RELATION_STATE['VERIFYING']:
+                    try {
+                        // Dodatkowa weryfikacja czy relacja została zaktualizowana
+                        $verified_relation = get_field($relation_field, 'user_' . $this->user_id);
+
+                        if ($verified_relation == $new_relation) {
+                            // Relacja została faktycznie zaktualizowana mimo zwróconego false
+                            $state = self::RELATION_STATE['COMPLETED'];
+                            $result['state_history'][] = $state;
+                        } else {
+                            $result['message'] = 'Nie udało się zaktualizować relacji';
+                            $state = self::RELATION_STATE['FAILED'];
+                        }
+                    } catch (Exception $e) {
+                        $result['message'] = 'Błąd weryfikacji: ' . $e->getMessage();
+                        $state = self::RELATION_STATE['FAILED'];
+                    }
+                    break;
+
+                // Stan nieprawidłowy - zabezpieczenie
+                default:
+                    $result['message'] = 'Nieprawidłowy stan FSM';
+                    $state = self::RELATION_STATE['FAILED'];
+                    break;
+            }
+        }
+
+        // Ustaw końcowy wynik
+        if ($state === self::RELATION_STATE['COMPLETED']) {
+            $result['success'] = true;
+            $result['message'] = $value > 0 ?
+                "Zwiększono relację z {$npc->post_title} o {$value}" :
+                "Zmniejszono relację z {$npc->post_title} o " . abs($value);
+
+            // Dodaj dodatkowe dane wynikowe
+            $result['npc_id'] = $npc_id;
+            $result['npc_name'] = $npc->post_title;
+
+            // Informacje o zmianie relacji
+            if ($current_relation <= -75 && $new_relation > -75) {
+                $result['relation_threshold'] = 'improved_from_hostile';
+            } elseif ($current_relation >= 75 && $new_relation < 75) {
+                $result['relation_threshold'] = 'reduced_from_friendly';
+            } elseif ($new_relation >= 75 && $current_relation < 75) {
+                $result['relation_threshold'] = 'became_friendly';
+            } elseif ($new_relation <= -75 && $current_relation > -75) {
+                $result['relation_threshold'] = 'became_hostile';
+            }
+        }
+
+        // W trybie debugowania możemy zachować historię stanów
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            return $result;
+        } else {
+            // W produkcji usuń dane debugowania
+            unset($result['state_history']);
+            return $result;
+        }
     }
 
     /**
@@ -1043,6 +1234,6 @@ function add_user_manager_rest_api_data()
 {
     wp_localize_script('jquery', 'userManagerData', [
         'rest_url' => rest_url('game/v1'),
-        'nonce' => wp_create_nonce('wp_rest')
+        'nonce' => wp_create_nonce('game_user_manager_nonce')
     ]);
 }
