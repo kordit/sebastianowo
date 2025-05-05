@@ -10,9 +10,9 @@ function load_theme_files(array $dirs)
 }
 
 load_theme_files([
-    'class',
-    'functions',
-    'register-cpt',
-    'inc/core',
-    'inc/dynamic-fields',
+    'includes/core',
+    'includes/register-cpt',
+    'includes/class',
+    'includes/functions',
+    'includes/dynamic-fields',
 ]);

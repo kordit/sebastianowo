@@ -211,4 +211,3 @@ function showPopup(message, type = 'success') {
 
 // Eksport globalny dla wstecznej kompatybilności
 window.NotificationSystem = NotificationSystem;
-window.showPopup = showPopup;
