@@ -383,7 +383,7 @@ if (!function_exists('game_get_visibility_settings_component')) {
                             'label' => 'Wartość relacji',
                             'name' => 'relation_value',
                             'type' => 'number',
-                            'instructions' => 'Podaj wartość relacji (0-100)',
+                            'instructions' => 'Podaj wartość relacji (-100 do 100)',
                             'required' => 0,
                             'conditional_logic' => array(
                                 array(
@@ -414,7 +414,7 @@ if (!function_exists('game_get_visibility_settings_component')) {
                                 'id' => '',
                             ),
                             'default_value' => 50,
-                            'min' => 0,
+                            'min' => -100,
                             'max' => 100,
                             'step' => 1,
                             'placeholder' => '',

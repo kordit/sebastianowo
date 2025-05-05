@@ -39,6 +39,48 @@ class UIHelpers {
     }
 
     /**
+     * Pobiera dane o aktualnej stronie na podstawie URL i klas dokumentu
+     * 
+     * @returns {Object} - Obiekt zawierający typ strony i jej wartość
+     */
+    static getPageData() {
+        const body = document.body;
+        let pageData = {};
+
+        // Pobierz aktualny URL i segmenty ścieżki
+        const url = new URL(window.location.href);
+        const pathSegments = url.pathname.split('/').filter(segment => segment); // Usunięcie pustych wartości
+        const segmentCount = pathSegments.length;
+
+        let lastSegment = pathSegments[segmentCount - 1] || ''; // Ostatni segment (domyślnie)
+
+        // 1️⃣ Jeśli body ma klasę zaczynającą się od 'template-', to jest to 'instance' (zwraca normalnie)
+        const templateClass = [...body.classList].find(cls => cls.startsWith('template-'));
+        if (templateClass) {
+            pageData = {
+                TypePage: 'instance',
+                value: lastSegment // ✅ Pobranie ostatniego segmentu URL
+            };
+        }
+        // 2️⃣ Jeśli body ma klasę 'single', to jest to 'scene' (musi zwracać kolejną logikę)
+        else if (body.classList.contains('single')) {
+            if (segmentCount === 2) {
+                pageData = {
+                    TypePage: 'scena',
+                    value: `${pathSegments[1]}/main` // ✅ Format: "kolejowa/main"
+                };
+            } else if (segmentCount >= 3) {
+                pageData = {
+                    TypePage: 'scena',
+                    value: `${pathSegments[1]}/${lastSegment}` // ✅ Format: "kolejowa/klatka"
+                };
+            }
+        }
+
+        return pageData;
+    }
+
+    /**
      * Inicjalizuje wszystkie paski statusu na stronie
      */
     static initializeStatusBars() {

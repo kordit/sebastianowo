@@ -23,9 +23,12 @@ function getRelationColor($relation)
  * @param string $post_title Tytuł posta (sanityzowany)
  * @param int $scene_index Indeks sceny (0 dla pierwszej sceny lub indeks z tablicy dla pozostałych)
  * @param int $current_user_id ID bieżącego użytkownika
+ * @param string $post_type Typ posta
+ * @param string $post_name Nazwa posta
+ * @param bool $autostart Czy element ma być automatycznie aktywowany
  * @return array Tablica z danymi ścieżek
  */
-function process_svg_paths($svg_url, $post_id, $post_title, $scene_index, $current_user_id, $post_type, $post_name, $autostart = false)
+function process_svg_paths(string $svg_url, int $post_id, string $post_title, int $scene_index, int $current_user_id, string $post_type, string $post_name, bool $autostart = false): array
 {
     if (!$svg_url) {
         return [];
@@ -41,32 +44,49 @@ function process_svg_paths($svg_url, $post_id, $post_title, $scene_index, $curre
         $name    = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_name", $post_id);
         $link    = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_page", $post_id) ?: '';
 
-        if ($select == 'scena') {
+        // Określenie koloru w zależności od typu elementu
+        $color = '#000'; // Domyślny kolor
+        if ($select === 'scena' || $select === 'page') {
             $color = '#fff';
-        } elseif ($select == 'page') {
-            $color = '#fff';
-        } elseif ($select == 'npc') {
-            $color = get_field('npc-relation-user-' . $current_user_id, $npc);
-            $color = getRelationColor($color);
-        } else {
-            $color = '#000';
+        } elseif ($select === 'npc' && $npc) {
+            $relation_value = get_field('npc-relation-user-' . $current_user_id, $npc);
+            $color = getRelationColor($relation_value);
         }
 
+        // Obsługa linku jako tablicy (obsługa pola ACF typu link)
         if (isset($link['url'])) {
             $link = $link['url'];
         }
 
         if (!empty($select) || !empty($path_id) || !empty($npc) || !empty($name)) {
+            // Inicjalizacja podstawowych danych wspólnych dla wszystkich typów
             $path_data = [
                 'select' => $select,
-                'target' => get_site_url() . '/' . $post_type . '/' . $post_name . '/' . $path_id,
-                'npc'    => $npc ?: NULL,
-                'page'   => $link,
                 'title'  => $name ?: 'brak tytułu',
                 'color'  => $color,
-                'npc-name' => get_the_title($npc) ?: NULL,
                 'autostart' => $autostart,
             ];
+
+            // Dodawanie odpowiednich atrybutów w zależności od typu elementu
+            switch ($select) {
+                case 'npc':
+                    // Dane dla NPC
+                    if ($npc) {
+                        $path_data['npc-id'] = $npc;
+                        $path_data['npc-name'] = get_the_title($npc);
+                    }
+                    break;
+
+                case 'scena':
+                    // Dane dla sceny - tylko target
+                    $path_data['target'] = get_site_url() . '/' . $post_type . '/' . $post_name . '/' . $path_id;
+                    break;
+
+                case 'page':
+                    // Dane dla strony
+                    $path_data['page'] = $link;
+                    break;
+            }
 
             // Dodaj pole relacji tylko dla głównej sceny (indeks 0)
             if ($scene_index === 0) {

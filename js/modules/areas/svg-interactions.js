@@ -1,4 +1,3 @@
-
 /**
  * Moduł obsługi interakcji SVG
  * 
@@ -12,7 +11,6 @@
 function initSvgInteractions() {
     const paths = document.querySelectorAll('.container-world svg path');
     if (!paths.length) {
-
         return;
     }
 
@@ -21,32 +19,57 @@ function initSvgInteractions() {
         const selectType = el.getAttribute('data-select');
 
         if (selectType === 'npc') {
-            const npcId = el.getAttribute('data-npc');
+            const npcId = el.getAttribute('data-npc-id');
             if (!npcId) {
                 console.error("Brak atrybutu data-npc dla elementu.");
                 return;
             }
+
+            // Emituj zdarzenie npcClicked dla narzędzi deweloperskich
+            const pageData = window.pageData || UIHelpers.getPageData();
+            console.log(JSON.stringify(pageData));
+
+            document.dispatchEvent(new CustomEvent('npcClicked', {
+                detail: {
+                    npcId: npcId,
+                    pageData: pageData,
+                    currentUrl: window.location.href
+                }
+            }));
 
             axios({
                 method: 'POST',
                 url: '/wp-json/game/v1/npc/popup',
                 data: {
                     npc_id: npcId,
-                    page_id: JSON.stringify(window.pageData || getPageData()),
+                    page_data: pageData,
                     current_url: window.location.href
                 }
             })
                 .then(response => {
-                    const npcData = response?.data?.npc_data;
+                    const npcData = response?.data;
                     if (!npcData) {
                         console.error("Brak danych NPC w odpowiedzi AJAX:", response);
                         return;
                     }
                     const userId = npcData.user_id;
-                    buildNpcPopup(npcData, userId);
+                    console.log("Dane NPC:", npcData);
+                    // buildNpcPopup(npcData, userId);
                 })
                 .catch(error => {
-                    console.error("Błąd zapytania AJAX:", error);
+                    console.error("Błąd zapytania:", error);
+                    if (error.response && error.response.status === 401) {
+                        console.warn("Użytkownik nie jest zalogowany. W trybie deweloperskim (WP_DEBUG) wciąż możesz testować funkcjonalność.");
+                        
+                        // Sprawdź czy mamy obsługę powiadomień
+                        if (window.NotificationSystem) {
+                            window.NotificationSystem.showNotification({
+                                type: 'warning',
+                                message: 'Funkcja dostępna tylko dla zalogowanych użytkowników',
+                                duration: 5000
+                            });
+                        }
+                    }
                 });
         }
         else if (selectType === 'scena') {

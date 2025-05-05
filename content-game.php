@@ -31,20 +31,28 @@ if ($instance != 'kreator'): ?>
         } else {
             $scene = '';
         }
+        $npc_id = 449;
+        $user_id = get_current_user_id();
+        $user_relation = intval(get_field('npc-relation-' . $npc_id, 'user_' . $user_id) ?? 0);
+        $user_has_met = (bool)(get_field('npc-meet-' . $npc_id, 'user_' . $user_id) ?? false);
+        var_dump($user_relation);
+        var_dump($user_has_met);
+
+        et_r(get_fields(449)['dialogs']);
 
 
-        if ($instance) {
-            include(THEME_SRC . '/page-templates/' . $instance . '/template.php');
-        } elseif (is_author()) {
-            include(THEME_SRC . '/page-templates/author/config.php');
-        } elseif (is_archive()) {
-            $single_src = get_post()->post_type;
-            include(THEME_SRC . '/page-templates/' . $single_src . '/main/template.php');
-        } elseif (is_single()) {
-            $single_src = get_post()->post_type;
-            include(THEME_SRC . '/page-templates/' . $single_src . '/single/template.php');
-        } else {
-        }
+        // if ($instance) {
+        //     include(THEME_SRC . '/page-templates/' . $instance . '/template.php');
+        // } elseif (is_author()) {
+        //     include(THEME_SRC . '/page-templates/author/config.php');
+        // } elseif (is_archive()) {
+        //     $single_src = get_post()->post_type;
+        //     include(THEME_SRC . '/page-templates/' . $single_src . '/main/template.php');
+        // } elseif (is_single()) {
+        //     $single_src = get_post()->post_type;
+        //     include(THEME_SRC . '/page-templates/' . $single_src . '/single/template.php');
+        // } else {
+        // }
         ?>
     </div>
 

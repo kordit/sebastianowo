@@ -1,0 +1,2672 @@
+[2025-05-05 20:56:31] Próba dostępu do endpointu NPC przez niezalogowanego użytkownika - ZEZWOLONO (tryb deweloperski)
+--------------------------------------------------
+[2025-05-05 20:56:31] Próba dostępu do endpointu NPC przez niezalogowanego użytkownika - ZEZWOLONO (tryb deweloperski)
+--------------------------------------------------
+[2025-05-05 20:56:31] ===== ROZPOCZĘCIE PRZETWARZANIA ŻĄDANIA NPC =====
+--------------------------------------------------
+[2025-05-05 20:56:31] ===== ROZPOCZĘCIE PRZETWARZANIA ŻĄDANIA NPC =====
+--------------------------------------------------
+[2025-05-05 20:56:31] Parametry żądania:
+Array
+(
+    [npc_id] => 449
+    [page_data] => Array
+        (
+            [TypePage] => scena
+            [value] => park/main
+        )
+
+    [current_url] => http://seb.soeasy.it/tereny/park/
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Parametry żądania:
+Array
+(
+    [npc_id] => 449
+    [page_data] => Array
+        (
+            [TypePage] => scena
+            [value] => park/main
+        )
+
+    [current_url] => http://seb.soeasy.it/tereny/park/
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Wykryto ciasteczko logowania, próba odtworzenia sesji
+--------------------------------------------------
+[2025-05-05 20:56:31] Wykryto ciasteczko logowania, próba odtworzenia sesji
+--------------------------------------------------
+[2025-05-05 20:56:31] Odtworzono sesję dla użytkownika: 1
+--------------------------------------------------
+[2025-05-05 20:56:31] Odtworzono sesję dla użytkownika: 1
+--------------------------------------------------
+[2025-05-05 20:56:31] Wyodrębnione dane lokalizacji:
+Array
+(
+    [location] => tereny/park
+    [type_page] => scena
+    [location_value] => park/main
+    [user_id] => 1
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Wyodrębnione dane lokalizacji:
+Array
+(
+    [location] => tereny/park
+    [type_page] => scena
+    [location_value] => park/main
+    [user_id] => 1
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Pobrane dialogi dla NPC 449:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_npc_relation
+                                    [condition] => relation_above
+                                    [npc_id] => 449
+                                    [relation_value] => -50
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => Dialog
+            [id_pola] => lubimy-sie
+            [question] => <p>Lubimy sie</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => test
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [1] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_location
+                                    [condition] => is
+                                    [location_type] => text
+                                    [area] => 
+                                    [location_text] => park/main
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => nazwa-w-parku
+            [id_pola] => nazwa-w-parku
+            [question] => <p>Dialog w parku</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => condition_location
+                                                    [condition] => is
+                                                    [location_type] => text
+                                                    [area] => 
+                                                    [location_text] => park/main
+                                                )
+
+                                        )
+
+                                )
+
+                            [anwser_text] => Odpowiedź w parku
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                    [1] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => condition_location
+                                                    [condition] => is
+                                                    [location_type] => text
+                                                    [area] => 
+                                                    [location_text] => park/zamek
+                                                )
+
+                                        )
+
+                                )
+
+                            [anwser_text] => odpowiedź w zamku
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                    [2] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => Domyślna
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [2] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_location
+                                    [condition] => is
+                                    [location_type] => text
+                                    [area] => 
+                                    [location_text] => park/zamek
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => dialog-na-zamku
+            [id_pola] => dialog-na-zamku
+            [question] => <p>dialog na zamku</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => elo
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [3] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => 
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => domyslny
+            [id_pola] => domyslny
+            [question] => <p>Domyślny</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => domyslne
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie pasujących dialogów, liczba dialogów: 4
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie dialogu: lubimy-sie
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog lubimy-sie, operator logiczny: and
+--------------------------------------------------
+[2025-05-05 20:56:31] Ustawienia widoczności dialogu lubimy-sie:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => condition_npc_relation
+            [condition] => relation_above
+            [npc_id] => 449
+            [relation_value] => -50
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku condition_npc_relation dla dialogu lubimy-sie
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku typu: condition_npc_relation
+--------------------------------------------------
+[2025-05-05 20:56:31] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_npc_relation
+    [condition] => relation_above
+    [npc_id] => 449
+    [relation_value] => -50
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku relacji z NPC:
+--------------------------------------------------
+[2025-05-05 20:56:31] - User ID: 0
+--------------------------------------------------
+[2025-05-05 20:56:31] - NPC ID: 449
+--------------------------------------------------
+[2025-05-05 20:56:31] - Operator warunku: relation_above
+--------------------------------------------------
+[2025-05-05 20:56:31] - Wymagana wartość relacji: -50
+--------------------------------------------------
+[2025-05-05 20:56:31] - Niezalogowany użytkownik, przyjęto domyślną relację: -100 i znajomość: TAK
+--------------------------------------------------
+[2025-05-05 20:56:31] - Aktualna wartość relacji: -100
+--------------------------------------------------
+[2025-05-05 20:56:31] - Czy użytkownik spotkał NPC: TAK
+--------------------------------------------------
+[2025-05-05 20:56:31] - Warunek 'relation_above' (-100 > -50): NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_npc_relation: NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_npc_relation: FAŁSZ
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog lubimy-sie końcowy wynik: NIE PASUJE
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog lubimy-sie pasuje do kryteriów: NIE
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie dialogu: nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog nazwa-w-parku, operator logiczny: and
+--------------------------------------------------
+[2025-05-05 20:56:31] Ustawienia widoczności dialogu nazwa-w-parku:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => condition_location
+            [condition] => is
+            [location_type] => text
+            [area] => 
+            [location_text] => park/main
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku condition_location dla dialogu nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:56:31] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/main
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:56:31] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:56:31] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:56:31] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:56:31] - Wymagana lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:56:31] - Porównanie 'is': PRAWDA
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_location: SPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_location: PRAWDA
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog nazwa-w-parku końcowy wynik: PASUJE
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog nazwa-w-parku pasuje do kryteriów: TAK
+--------------------------------------------------
+[2025-05-05 20:56:31] Zwracam pasujący dialog: nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:56:31] Wybrany dialog po filtrowaniu:
+Array
+(
+    [acf_fc_layout] => question
+    [layout_settings] => Array
+        (
+            [visibility_tab] => 
+            [logic_operator] => and
+            [visibility_settings] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => condition_location
+                            [condition] => is
+                            [location_type] => text
+                            [area] => 
+                            [location_text] => park/main
+                        )
+
+                )
+
+        )
+
+    [acfe_flexible_toggle] => 
+    [acfe_flexible_layout_title] => nazwa-w-parku
+    [id_pola] => nazwa-w-parku
+    [question] => <p>Dialog w parku</p>
+
+    [anwsers] => Array
+        (
+            [0] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/main
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => Odpowiedź w parku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [1] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/zamek
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => odpowiedź w zamku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [2] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => 
+                        )
+
+                    [anwser_text] => Domyślna
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:56:31] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/main
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:56:31] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:56:31] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:56:31] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:56:31] - Wymagana lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:56:31] - Porównanie 'is': PRAWDA
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_location: SPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:56:31] Pobrane dialogi dla NPC 449:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_npc_relation
+                                    [condition] => relation_above
+                                    [npc_id] => 449
+                                    [relation_value] => -50
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => Dialog
+            [id_pola] => lubimy-sie
+            [question] => <p>Lubimy sie</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => test
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [1] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_location
+                                    [condition] => is
+                                    [location_type] => text
+                                    [area] => 
+                                    [location_text] => park/main
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => nazwa-w-parku
+            [id_pola] => nazwa-w-parku
+            [question] => <p>Dialog w parku</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => condition_location
+                                                    [condition] => is
+                                                    [location_type] => text
+                                                    [area] => 
+                                                    [location_text] => park/main
+                                                )
+
+                                        )
+
+                                )
+
+                            [anwser_text] => Odpowiedź w parku
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                    [1] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => condition_location
+                                                    [condition] => is
+                                                    [location_type] => text
+                                                    [area] => 
+                                                    [location_text] => park/zamek
+                                                )
+
+                                        )
+
+                                )
+
+                            [anwser_text] => odpowiedź w zamku
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                    [2] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => Domyślna
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [2] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_location
+                                    [condition] => is
+                                    [location_type] => text
+                                    [area] => 
+                                    [location_text] => park/zamek
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => dialog-na-zamku
+            [id_pola] => dialog-na-zamku
+            [question] => <p>dialog na zamku</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => elo
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [3] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => 
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => domyslny
+            [id_pola] => domyslny
+            [question] => <p>Domyślny</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => domyslne
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie pasujących dialogów, liczba dialogów: 4
+--------------------------------------------------
+[2025-05-05 20:56:31] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/zamek
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie dialogu: lubimy-sie
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog lubimy-sie, operator logiczny: and
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:56:31] Ustawienia widoczności dialogu lubimy-sie:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => condition_npc_relation
+            [condition] => relation_above
+            [npc_id] => 449
+            [relation_value] => -50
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku condition_npc_relation dla dialogu lubimy-sie
+--------------------------------------------------
+[2025-05-05 20:56:31] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku typu: condition_npc_relation
+--------------------------------------------------
+[2025-05-05 20:56:31] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:56:31] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_npc_relation
+    [condition] => relation_above
+    [npc_id] => 449
+    [relation_value] => -50
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] - Wymagana lokalizacja: park/zamek
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku relacji z NPC:
+--------------------------------------------------
+[2025-05-05 20:56:31] - Porównanie 'is': FAŁSZ
+--------------------------------------------------
+[2025-05-05 20:56:31] - User ID: 0
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_location: NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:56:31] - NPC ID: 449
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog po filtrowaniu odpowiedzi:
+Array
+(
+    [acf_fc_layout] => question
+    [layout_settings] => Array
+        (
+            [visibility_tab] => 
+            [logic_operator] => and
+            [visibility_settings] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => condition_location
+                            [condition] => is
+                            [location_type] => text
+                            [area] => 
+                            [location_text] => park/main
+                        )
+
+                )
+
+        )
+
+    [acfe_flexible_toggle] => 
+    [acfe_flexible_layout_title] => nazwa-w-parku
+    [id_pola] => nazwa-w-parku
+    [question] => <p>Dialog w parku</p>
+
+    [anwsers] => Array
+        (
+            [0] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/main
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => Odpowiedź w parku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [1] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => 
+                        )
+
+                    [anwser_text] => Domyślna
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] - Operator warunku: relation_above
+--------------------------------------------------
+[2025-05-05 20:56:31] Dane odpowiedzi:
+Array
+(
+    [status] => success
+    [npc_data] => Array
+        (
+            [id] => 449
+            [name] => Papuga
+            [user_id] => 1
+            [dialog] => Array
+                (
+                    [acf_fc_layout] => question
+                    [question] => <p>Dialog w parku</p>
+
+                    [id_pola] => nazwa-w-parku
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [anwser_text] => Odpowiedź w parku
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                            [1] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [anwser_text] => Domyślna
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] - Wymagana wartość relacji: -50
+--------------------------------------------------
+[2025-05-05 20:56:31] ===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA NPC =====
+--------------------------------------------------
+[2025-05-05 20:56:31] - Niezalogowany użytkownik, przyjęto domyślną relację: -100 i znajomość: TAK
+--------------------------------------------------
+[2025-05-05 20:56:31] - Aktualna wartość relacji: -100
+--------------------------------------------------
+[2025-05-05 20:56:31] - Czy użytkownik spotkał NPC: TAK
+--------------------------------------------------
+[2025-05-05 20:56:31] - Warunek 'relation_above' (-100 > -50): NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_npc_relation: NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_npc_relation: FAŁSZ
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog lubimy-sie końcowy wynik: NIE PASUJE
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog lubimy-sie pasuje do kryteriów: NIE
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie dialogu: nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog nazwa-w-parku, operator logiczny: and
+--------------------------------------------------
+[2025-05-05 20:56:31] Próba dostępu do endpointu NPC przez niezalogowanego użytkownika - ZEZWOLONO (tryb deweloperski)
+--------------------------------------------------
+[2025-05-05 20:56:31] Ustawienia widoczności dialogu nazwa-w-parku:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => condition_location
+            [condition] => is
+            [location_type] => text
+            [area] => 
+            [location_text] => park/main
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku condition_location dla dialogu nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:56:31] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/main
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:56:31] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:56:31] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:56:31] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:56:31] - Wymagana lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:56:31] - Porównanie 'is': PRAWDA
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_location: SPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_location: PRAWDA
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog nazwa-w-parku końcowy wynik: PASUJE
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog nazwa-w-parku pasuje do kryteriów: TAK
+--------------------------------------------------
+[2025-05-05 20:56:31] Zwracam pasujący dialog: nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:56:31] Wybrany dialog po filtrowaniu:
+Array
+(
+    [acf_fc_layout] => question
+    [layout_settings] => Array
+        (
+            [visibility_tab] => 
+            [logic_operator] => and
+            [visibility_settings] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => condition_location
+                            [condition] => is
+                            [location_type] => text
+                            [area] => 
+                            [location_text] => park/main
+                        )
+
+                )
+
+        )
+
+    [acfe_flexible_toggle] => 
+    [acfe_flexible_layout_title] => nazwa-w-parku
+    [id_pola] => nazwa-w-parku
+    [question] => <p>Dialog w parku</p>
+
+    [anwsers] => Array
+        (
+            [0] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/main
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => Odpowiedź w parku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [1] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/zamek
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => odpowiedź w zamku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [2] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => 
+                        )
+
+                    [anwser_text] => Domyślna
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:56:31] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/main
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:56:31] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:56:31] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:56:31] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:56:31] - Wymagana lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:56:31] - Porównanie 'is': PRAWDA
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_location: SPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:56:31] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/zamek
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:56:31] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:56:31] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:56:31] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:56:31] - Wymagana lokalizacja: park/zamek
+--------------------------------------------------
+[2025-05-05 20:56:31] - Porównanie 'is': FAŁSZ
+--------------------------------------------------
+[2025-05-05 20:56:31] Wynik warunku condition_location: NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:56:31] Dialog po filtrowaniu odpowiedzi:
+Array
+(
+    [acf_fc_layout] => question
+    [layout_settings] => Array
+        (
+            [visibility_tab] => 
+            [logic_operator] => and
+            [visibility_settings] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => condition_location
+                            [condition] => is
+                            [location_type] => text
+                            [area] => 
+                            [location_text] => park/main
+                        )
+
+                )
+
+        )
+
+    [acfe_flexible_toggle] => 
+    [acfe_flexible_layout_title] => nazwa-w-parku
+    [id_pola] => nazwa-w-parku
+    [question] => <p>Dialog w parku</p>
+
+    [anwsers] => Array
+        (
+            [0] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/main
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => Odpowiedź w parku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [1] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => 
+                        )
+
+                    [anwser_text] => Domyślna
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] Dane odpowiedzi:
+Array
+(
+    [status] => success
+    [npc_data] => Array
+        (
+            [id] => 449
+            [name] => Papuga
+            [user_id] => 1
+            [dialog] => Array
+                (
+                    [acf_fc_layout] => question
+                    [question] => <p>Dialog w parku</p>
+
+                    [id_pola] => nazwa-w-parku
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [anwser_text] => Odpowiedź w parku
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                            [1] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [anwser_text] => Domyślna
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:56:31] ===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA NPC =====
+--------------------------------------------------
+[2025-05-05 20:56:31] Próba dostępu do endpointu NPC przez niezalogowanego użytkownika - ZEZWOLONO (tryb deweloperski)
+--------------------------------------------------
+[2025-05-05 20:57:12] Próba dostępu do endpointu NPC przez niezalogowanego użytkownika - ZEZWOLONO (tryb deweloperski)
+--------------------------------------------------
+[2025-05-05 20:57:12] ===== ROZPOCZĘCIE PRZETWARZANIA ŻĄDANIA NPC =====
+--------------------------------------------------
+[2025-05-05 20:57:12] Parametry żądania:
+Array
+(
+    [npc_id] => 449
+    [page_data] => Array
+        (
+            [TypePage] => scena
+            [value] => park/main
+        )
+
+    [current_url] => http://seb.soeasy.it/tereny/park/
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Wykryto ciasteczko logowania, próba odtworzenia sesji
+--------------------------------------------------
+[2025-05-05 20:57:12] Odtworzono sesję dla użytkownika: 1
+--------------------------------------------------
+[2025-05-05 20:57:12] Wyodrębnione dane lokalizacji:
+Array
+(
+    [location] => tereny/park
+    [type_page] => scena
+    [location_value] => park/main
+    [user_id] => 1
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Pobrane dialogi dla NPC 449:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_npc_relation
+                                    [condition] => relation_above
+                                    [npc_id] => 449
+                                    [relation_value] => -50
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => Dialog
+            [id_pola] => lubimy-sie
+            [question] => <p>Lubimy sie</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => test
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [1] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_location
+                                    [condition] => is
+                                    [location_type] => text
+                                    [area] => 
+                                    [location_text] => park/main
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => nazwa-w-parku
+            [id_pola] => nazwa-w-parku
+            [question] => <p>Dialog w parku</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => condition_location
+                                                    [condition] => is
+                                                    [location_type] => text
+                                                    [area] => 
+                                                    [location_text] => park/main
+                                                )
+
+                                        )
+
+                                )
+
+                            [anwser_text] => Odpowiedź w parku
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                    [1] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => condition_location
+                                                    [condition] => is
+                                                    [location_type] => text
+                                                    [area] => 
+                                                    [location_text] => park/zamek
+                                                )
+
+                                        )
+
+                                )
+
+                            [anwser_text] => odpowiedź w zamku
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                    [2] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => Domyślna
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [2] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_location
+                                    [condition] => is
+                                    [location_type] => text
+                                    [area] => 
+                                    [location_text] => park/zamek
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => dialog-na-zamku
+            [id_pola] => dialog-na-zamku
+            [question] => <p>dialog na zamku</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => elo
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [3] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => 
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => domyslny
+            [id_pola] => domyslny
+            [question] => <p>Domyślny</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => domyslne
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie pasujących dialogów, liczba dialogów: 4
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie dialogu: lubimy-sie
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog lubimy-sie, operator logiczny: and
+--------------------------------------------------
+[2025-05-05 20:57:12] Ustawienia widoczności dialogu lubimy-sie:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => condition_npc_relation
+            [condition] => relation_above
+            [npc_id] => 449
+            [relation_value] => -50
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku condition_npc_relation dla dialogu lubimy-sie
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku typu: condition_npc_relation
+--------------------------------------------------
+[2025-05-05 20:57:12] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_npc_relation
+    [condition] => relation_above
+    [npc_id] => 449
+    [relation_value] => -50
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku relacji z NPC:
+--------------------------------------------------
+[2025-05-05 20:57:12] - User ID: 0
+--------------------------------------------------
+[2025-05-05 20:57:12] - NPC ID: 449
+--------------------------------------------------
+[2025-05-05 20:57:12] - Operator warunku: relation_above
+--------------------------------------------------
+[2025-05-05 20:57:12] - Wymagana wartość relacji: -50
+--------------------------------------------------
+[2025-05-05 20:57:12] - Niezalogowany użytkownik, przyjęto domyślną relację: -100 i znajomość: TAK
+--------------------------------------------------
+[2025-05-05 20:57:12] - Aktualna wartość relacji: -100
+--------------------------------------------------
+[2025-05-05 20:57:12] - Czy użytkownik spotkał NPC: TAK
+--------------------------------------------------
+[2025-05-05 20:57:12] - Warunek 'relation_above' (-100 > -50): NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_npc_relation: NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_npc_relation: FAŁSZ
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog lubimy-sie końcowy wynik: NIE PASUJE
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog lubimy-sie pasuje do kryteriów: NIE
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie dialogu: nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog nazwa-w-parku, operator logiczny: and
+--------------------------------------------------
+[2025-05-05 20:57:12] Ustawienia widoczności dialogu nazwa-w-parku:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => condition_location
+            [condition] => is
+            [location_type] => text
+            [area] => 
+            [location_text] => park/main
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku condition_location dla dialogu nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:57:12] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/main
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:57:12] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:57:12] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:57:12] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:57:12] - Wymagana lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:57:12] - Porównanie 'is': PRAWDA
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_location: SPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_location: PRAWDA
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog nazwa-w-parku końcowy wynik: PASUJE
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog nazwa-w-parku pasuje do kryteriów: TAK
+--------------------------------------------------
+[2025-05-05 20:57:12] Zwracam pasujący dialog: nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:57:12] Wybrany dialog po filtrowaniu:
+Array
+(
+    [acf_fc_layout] => question
+    [layout_settings] => Array
+        (
+            [visibility_tab] => 
+            [logic_operator] => and
+            [visibility_settings] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => condition_location
+                            [condition] => is
+                            [location_type] => text
+                            [area] => 
+                            [location_text] => park/main
+                        )
+
+                )
+
+        )
+
+    [acfe_flexible_toggle] => 
+    [acfe_flexible_layout_title] => nazwa-w-parku
+    [id_pola] => nazwa-w-parku
+    [question] => <p>Dialog w parku</p>
+
+    [anwsers] => Array
+        (
+            [0] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/main
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => Odpowiedź w parku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [1] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/zamek
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => odpowiedź w zamku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [2] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => 
+                        )
+
+                    [anwser_text] => Domyślna
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:57:12] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/main
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:57:12] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:57:12] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:57:12] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:57:12] - Wymagana lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:57:12] - Porównanie 'is': PRAWDA
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_location: SPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:57:12] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/zamek
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:57:12] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:57:12] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:57:12] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:57:12] - Wymagana lokalizacja: park/zamek
+--------------------------------------------------
+[2025-05-05 20:57:12] - Porównanie 'is': FAŁSZ
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_location: NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog po filtrowaniu odpowiedzi:
+Array
+(
+    [acf_fc_layout] => question
+    [layout_settings] => Array
+        (
+            [visibility_tab] => 
+            [logic_operator] => and
+            [visibility_settings] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => condition_location
+                            [condition] => is
+                            [location_type] => text
+                            [area] => 
+                            [location_text] => park/main
+                        )
+
+                )
+
+        )
+
+    [acfe_flexible_toggle] => 
+    [acfe_flexible_layout_title] => nazwa-w-parku
+    [id_pola] => nazwa-w-parku
+    [question] => <p>Dialog w parku</p>
+
+    [anwsers] => Array
+        (
+            [0] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/main
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => Odpowiedź w parku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [1] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => 
+                        )
+
+                    [anwser_text] => Domyślna
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Dane odpowiedzi:
+Array
+(
+    [status] => success
+    [npc_data] => Array
+        (
+            [id] => 449
+            [name] => Papuga
+            [user_id] => 1
+            [dialog] => Array
+                (
+                    [acf_fc_layout] => question
+                    [question] => <p>Dialog w parku</p>
+
+                    [id_pola] => nazwa-w-parku
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [anwser_text] => Odpowiedź w parku
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                            [1] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [anwser_text] => Domyślna
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] ===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA NPC =====
+--------------------------------------------------
+[2025-05-05 20:57:12] Próba dostępu do endpointu NPC przez niezalogowanego użytkownika - ZEZWOLONO (tryb deweloperski)
+--------------------------------------------------
+[2025-05-05 20:57:12] Próba dostępu do endpointu NPC przez niezalogowanego użytkownika - ZEZWOLONO (tryb deweloperski)
+--------------------------------------------------
+[2025-05-05 20:57:12] ===== ROZPOCZĘCIE PRZETWARZANIA ŻĄDANIA NPC =====
+--------------------------------------------------
+[2025-05-05 20:57:12] Parametry żądania:
+Array
+(
+    [npc_id] => 449
+    [page_data] => Array
+        (
+            [TypePage] => scena
+            [value] => park/main
+        )
+
+    [current_url] => http://seb.soeasy.it/tereny/park/
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Wykryto ciasteczko logowania, próba odtworzenia sesji
+--------------------------------------------------
+[2025-05-05 20:57:12] Odtworzono sesję dla użytkownika: 1
+--------------------------------------------------
+[2025-05-05 20:57:12] Wyodrębnione dane lokalizacji:
+Array
+(
+    [location] => tereny/park
+    [type_page] => scena
+    [location_value] => park/main
+    [user_id] => 1
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Pobrane dialogi dla NPC 449:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_npc_relation
+                                    [condition] => relation_above
+                                    [npc_id] => 449
+                                    [relation_value] => -50
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => Dialog
+            [id_pola] => lubimy-sie
+            [question] => <p>Lubimy sie</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => test
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [1] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_location
+                                    [condition] => is
+                                    [location_type] => text
+                                    [area] => 
+                                    [location_text] => park/main
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => nazwa-w-parku
+            [id_pola] => nazwa-w-parku
+            [question] => <p>Dialog w parku</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => condition_location
+                                                    [condition] => is
+                                                    [location_type] => text
+                                                    [area] => 
+                                                    [location_text] => park/main
+                                                )
+
+                                        )
+
+                                )
+
+                            [anwser_text] => Odpowiedź w parku
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                    [1] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => condition_location
+                                                    [condition] => is
+                                                    [location_type] => text
+                                                    [area] => 
+                                                    [location_text] => park/zamek
+                                                )
+
+                                        )
+
+                                )
+
+                            [anwser_text] => odpowiedź w zamku
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                    [2] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => Domyślna
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [2] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_location
+                                    [condition] => is
+                                    [location_type] => text
+                                    [area] => 
+                                    [location_text] => park/zamek
+                                )
+
+                        )
+
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => dialog-na-zamku
+            [id_pola] => dialog-na-zamku
+            [question] => <p>dialog na zamku</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => elo
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+    [3] => Array
+        (
+            [acf_fc_layout] => question
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => 
+                )
+
+            [acfe_flexible_toggle] => 
+            [acfe_flexible_layout_title] => domyslny
+            [id_pola] => domyslny
+            [question] => <p>Domyślny</p>
+
+            [anwsers] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => anwser
+                            [layout_settings] => Array
+                                (
+                                    [visibility_tab] => 
+                                    [logic_operator] => and
+                                    [visibility_settings] => 
+                                )
+
+                            [anwser_text] => domyslne
+                            [type_anwser] => 
+                            [go_to_id] => 0
+                        )
+
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie pasujących dialogów, liczba dialogów: 4
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie dialogu: lubimy-sie
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog lubimy-sie, operator logiczny: and
+--------------------------------------------------
+[2025-05-05 20:57:12] Ustawienia widoczności dialogu lubimy-sie:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => condition_npc_relation
+            [condition] => relation_above
+            [npc_id] => 449
+            [relation_value] => -50
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku condition_npc_relation dla dialogu lubimy-sie
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku typu: condition_npc_relation
+--------------------------------------------------
+[2025-05-05 20:57:12] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_npc_relation
+    [condition] => relation_above
+    [npc_id] => 449
+    [relation_value] => -50
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku relacji z NPC:
+--------------------------------------------------
+[2025-05-05 20:57:12] - User ID: 0
+--------------------------------------------------
+[2025-05-05 20:57:12] - NPC ID: 449
+--------------------------------------------------
+[2025-05-05 20:57:12] - Operator warunku: relation_above
+--------------------------------------------------
+[2025-05-05 20:57:12] - Wymagana wartość relacji: -50
+--------------------------------------------------
+[2025-05-05 20:57:12] - Niezalogowany użytkownik, przyjęto domyślną relację: -100 i znajomość: TAK
+--------------------------------------------------
+[2025-05-05 20:57:12] - Aktualna wartość relacji: -100
+--------------------------------------------------
+[2025-05-05 20:57:12] - Czy użytkownik spotkał NPC: TAK
+--------------------------------------------------
+[2025-05-05 20:57:12] - Warunek 'relation_above' (-100 > -50): NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_npc_relation: NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_npc_relation: FAŁSZ
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog lubimy-sie końcowy wynik: NIE PASUJE
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog lubimy-sie pasuje do kryteriów: NIE
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie dialogu: nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog nazwa-w-parku, operator logiczny: and
+--------------------------------------------------
+[2025-05-05 20:57:12] Ustawienia widoczności dialogu nazwa-w-parku:
+Array
+(
+    [0] => Array
+        (
+            [acf_fc_layout] => condition_location
+            [condition] => is
+            [location_type] => text
+            [area] => 
+            [location_text] => park/main
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku condition_location dla dialogu nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:57:12] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/main
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:57:12] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:57:12] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:57:12] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:57:12] - Wymagana lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:57:12] - Porównanie 'is': PRAWDA
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_location: SPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_location: PRAWDA
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog nazwa-w-parku końcowy wynik: PASUJE
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog nazwa-w-parku pasuje do kryteriów: TAK
+--------------------------------------------------
+[2025-05-05 20:57:12] Zwracam pasujący dialog: nazwa-w-parku
+--------------------------------------------------
+[2025-05-05 20:57:12] Wybrany dialog po filtrowaniu:
+Array
+(
+    [acf_fc_layout] => question
+    [layout_settings] => Array
+        (
+            [visibility_tab] => 
+            [logic_operator] => and
+            [visibility_settings] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => condition_location
+                            [condition] => is
+                            [location_type] => text
+                            [area] => 
+                            [location_text] => park/main
+                        )
+
+                )
+
+        )
+
+    [acfe_flexible_toggle] => 
+    [acfe_flexible_layout_title] => nazwa-w-parku
+    [id_pola] => nazwa-w-parku
+    [question] => <p>Dialog w parku</p>
+
+    [anwsers] => Array
+        (
+            [0] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/main
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => Odpowiedź w parku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [1] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/zamek
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => odpowiedź w zamku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [2] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => 
+                        )
+
+                    [anwser_text] => Domyślna
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:57:12] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/main
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:57:12] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:57:12] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:57:12] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:57:12] - Wymagana lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:57:12] - Porównanie 'is': PRAWDA
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_location: SPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku typu: condition_location
+--------------------------------------------------
+[2025-05-05 20:57:12] Dane warunku:
+Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => park/zamek
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Sprawdzanie warunku lokalizacji:
+--------------------------------------------------
+[2025-05-05 20:57:12] - Aktualna lokalizacja: park/main
+--------------------------------------------------
+[2025-05-05 20:57:12] - Operator warunku: is
+--------------------------------------------------
+[2025-05-05 20:57:12] - Typ lokalizacji: text
+--------------------------------------------------
+[2025-05-05 20:57:12] - Wymagana lokalizacja: park/zamek
+--------------------------------------------------
+[2025-05-05 20:57:12] - Porównanie 'is': FAŁSZ
+--------------------------------------------------
+[2025-05-05 20:57:12] Wynik warunku condition_location: NIESPEŁNIONY
+--------------------------------------------------
+[2025-05-05 20:57:12] Dialog po filtrowaniu odpowiedzi:
+Array
+(
+    [acf_fc_layout] => question
+    [layout_settings] => Array
+        (
+            [visibility_tab] => 
+            [logic_operator] => and
+            [visibility_settings] => Array
+                (
+                    [0] => Array
+                        (
+                            [acf_fc_layout] => condition_location
+                            [condition] => is
+                            [location_type] => text
+                            [area] => 
+                            [location_text] => park/main
+                        )
+
+                )
+
+        )
+
+    [acfe_flexible_toggle] => 
+    [acfe_flexible_layout_title] => nazwa-w-parku
+    [id_pola] => nazwa-w-parku
+    [question] => <p>Dialog w parku</p>
+
+    [anwsers] => Array
+        (
+            [0] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/main
+                                        )
+
+                                )
+
+                        )
+
+                    [anwser_text] => Odpowiedź w parku
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+            [1] => Array
+                (
+                    [acf_fc_layout] => anwser
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => 
+                        )
+
+                    [anwser_text] => Domyślna
+                    [type_anwser] => 
+                    [go_to_id] => 0
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] Dane odpowiedzi:
+Array
+(
+    [status] => success
+    [npc_data] => Array
+        (
+            [id] => 449
+            [name] => Papuga
+            [user_id] => 1
+            [dialog] => Array
+                (
+                    [acf_fc_layout] => question
+                    [question] => <p>Dialog w parku</p>
+
+                    [id_pola] => nazwa-w-parku
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [anwser_text] => Odpowiedź w parku
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                            [1] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [anwser_text] => Domyślna
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+--------------------------------------------------
+[2025-05-05 20:57:12] ===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA NPC =====
+--------------------------------------------------
+[2025-05-05 20:57:12] Próba dostępu do endpointu NPC przez niezalogowanego użytkownika - ZEZWOLONO (tryb deweloperski)
+--------------------------------------------------

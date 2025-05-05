@@ -39,31 +39,11 @@ function game_load_scripts()
     wp_register_script(
         'svg-interactions',
         get_template_directory_uri() . '/js/modules/areas/svg-interactions.js',
-        array('jquery', 'axios'),
+        array('axios'),
         '1.0.0',
         true
     );
     wp_enqueue_script('svg-interactions');
-
-    // Skrypty systemu zarządzania użytkownikiem
-    wp_register_script(
-        'user-manager-api',
-        get_template_directory_uri() . '/js/utils/user-manager-api.js',
-        array('jquery', 'axios'),
-        '1.0.0',
-        true
-    );
-    wp_enqueue_script('user-manager-api');
-
-    // Helpers UI - zawiera funkcje do aktualizacji nagłówka
-    wp_register_script(
-        'ui-helpers',
-        get_template_directory_uri() . '/js/core/ui-helpers.js',
-        array('jquery', 'axios', 'user-manager-api'),
-        '1.0.0',
-        true
-    );
-    wp_enqueue_script('ui-helpers');
 
     // Lokalizacja danych dla UserManager API
     wp_localize_script('user-manager-api', 'userManagerData', array(
@@ -72,38 +52,28 @@ function game_load_scripts()
         'restUrl' => esc_url_raw(rest_url()),
     ));
 
-    // Główny plik aplikacji
-    wp_register_script(
-        'game-app',
-        get_template_directory_uri() . '/js/app.js',
-        array('jquery', 'axios'),
-        '1.0.0',
-        true
-    );
-    wp_enqueue_script('game-app');
-
     wp_register_script(
         'notifications',
         get_template_directory_uri() . '/js/core/notifications.js',
-        array('jquery', 'axios'),
+        array('axios'),
         '1.0.0',
         true
     );
     wp_enqueue_script('notifications');
 
-    wp_register_script(
-        'npc-handler',
-        get_template_directory_uri() . '/js/modules/npc/npc-handler.js',
-        array('jquery', 'axios'),
-        '1.0.0',
-        true
-    );
-    wp_enqueue_script('npc-handler');
+    // wp_register_script(
+    //     'npc-debug',
+    //     get_template_directory_uri() . '/js/modules/npc/npc-debug.js',
+    //     array('axios'),
+    //     '1.0.0',
+    //     true
+    // );
+    // wp_enqueue_script('npc-debug');
 
     wp_register_script(
         'ui-helpers',
         get_template_directory_uri() . '/js/core/ui-helpers.js',
-        array('jquery', 'axios'),
+        array('axios'),
         '1.0.0',
         true
     );
