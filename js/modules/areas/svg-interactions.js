@@ -21,13 +21,12 @@ function initSvgInteractions() {
         if (selectType === 'npc') {
             const npcId = el.getAttribute('data-npc-id');
             if (!npcId) {
-                console.error("Brak atrybutu data-npc dla elementu.");
+                console.error("Brak atrybutu data-npc-id dla elementu.");
                 return;
             }
 
             // Emituj zdarzenie npcClicked dla narzędzi deweloperskich
             const pageData = window.pageData || UIHelpers.getPageData();
-            console.log(JSON.stringify(pageData));
 
             document.dispatchEvent(new CustomEvent('npcClicked', {
                 detail: {
@@ -37,6 +36,7 @@ function initSvgInteractions() {
                 }
             }));
 
+            // Wywołaj endpoint NPC za pomocą Axios
             axios({
                 method: 'POST',
                 url: '/wp-json/game/v1/npc/popup',
@@ -49,26 +49,32 @@ function initSvgInteractions() {
                 .then(response => {
                     const npcData = response?.data;
                     if (!npcData) {
-                        console.error("Brak danych NPC w odpowiedzi AJAX:", response);
+                        console.error("Brak danych NPC w odpowiedzi:", response);
                         return;
                     }
-                    const userId = npcData.user_id;
+
+                    const userId = npcData.npc_data?.user_id;
                     console.log("Dane NPC:", npcData);
-                    // buildNpcPopup(npcData, userId);
+
+                    if (window.buildNpcPopup && typeof window.buildNpcPopup === 'function') {
+                        window.buildNpcPopup(npcData.npc_data, userId);
+                    } else {
+                        console.warn("Funkcja buildNpcPopup nie jest dostępna");
+                    }
                 })
                 .catch(error => {
                     console.error("Błąd zapytania:", error);
-                    if (error.response && error.response.status === 401) {
-                        console.warn("Użytkownik nie jest zalogowany. W trybie deweloperskim (WP_DEBUG) wciąż możesz testować funkcjonalność.");
-                        
-                        // Sprawdź czy mamy obsługę powiadomień
-                        if (window.NotificationSystem) {
-                            window.NotificationSystem.showNotification({
-                                type: 'warning',
-                                message: 'Funkcja dostępna tylko dla zalogowanych użytkowników',
-                                duration: 5000
-                            });
-                        }
+                    // Dodaj bardziej szczegółowe logowanie błędów
+                    if (error.response) {
+                        // Serwer zwrócił status error
+                        console.error("Status błędu:", error.response.status);
+                        console.error("Dane błędu:", error.response.data);
+                    } else if (error.request) {
+                        // Żądanie zostało wykonane, ale brak odpowiedzi
+                        console.error("Brak odpowiedzi z serwera");
+                    } else {
+                        // Coś poszło nie tak przy tworzeniu żądania
+                        console.error("Błąd konfiguracji żądania:", error.message);
                     }
                 });
         }

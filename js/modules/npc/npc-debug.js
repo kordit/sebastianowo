@@ -38,13 +38,11 @@
         if (!isDebugModeActive()) return;
 
         try {
-
             // Wywołaj oba endpointy równolegle
             const [regularResponse, debugResponse] = await Promise.all([
                 callRegularEndpoint(npcId, pageData, currentUrl),
                 callDebugEndpoint(npcId, pageData, currentUrl)
             ]);
-            console.groupEnd();
 
             // Pokaż podgląd w interfejsie
             showDebugOverlay(regularResponse, debugResponse);
@@ -83,16 +81,17 @@
      * @returns {Promise<Object>} - Odpowiedź z API
      */
     const callDebugEndpoint = async (npcId, pageData, currentUrl) => {
+        // Użyj Axios zamiast jQuery AJAX
         const response = await axios({
             method: 'POST',
-            url: npcDebugData.ajaxUrl,
+            url: '/wp-json/game/v1/npc/debug',
             data: {
                 npc_id: npcId,
                 page_data: pageData,
                 current_url: currentUrl
             },
             headers: {
-                'X-WP-Nonce': npcDebugData.nonce
+                'X-WP-Nonce': npcDebugData?.nonce || ''
             }
         });
 

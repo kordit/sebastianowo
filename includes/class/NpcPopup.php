@@ -69,23 +69,23 @@ class NpcPopup
                 if (!defined('DOING_AJAX')) {
                     define('DOING_AJAX', true);
                 }
-                
+
                 // W trybie deweloperskim zezwalaj na dostęp bez logowania
                 $is_dev_mode = defined('WP_DEBUG') && WP_DEBUG;
                 $is_logged_in = is_user_logged_in();
-                
+
                 if (!$is_logged_in) {
-                    $this->debug_log('Próba dostępu do endpointu NPC przez niezalogowanego użytkownika - ' . 
+                    $this->debug_log('Próba dostępu do endpointu NPC przez niezalogowanego użytkownika - ' .
                         ($is_dev_mode ? 'ZEZWOLONO (tryb deweloperski)' : 'ODMÓWIONO'));
                 }
-                
+
                 // W trybie deweloperskim zezwalaj na dostęp bez logowania
                 return $is_logged_in || $is_dev_mode;
             },
             'args' => [
                 'npc_id' => [
                     'required' => true,
-                    'validate_callback' => function($param) {
+                    'validate_callback' => function ($param) {
                         return is_numeric($param);
                     }
                 ],
@@ -128,7 +128,7 @@ class NpcPopup
 
         // Pobierz ID użytkownika - używamy cookie do identyfikacji
         $user_id = get_current_user_id();
-        
+
         // Jeśli user_id to 0, ale mamy ciasteczko sesji, spróbujmy odtworzyć sesję
         if ($user_id === 0 && isset($_COOKIE[LOGGED_IN_COOKIE])) {
             $this->debug_log("Wykryto ciasteczko logowania, próba odtworzenia sesji");
@@ -509,7 +509,8 @@ class NpcPopup
      */
     private function check_npc_relation_condition(array $condition, array $criteria): bool
     {
-        $user_id = get_current_user_id();
+        // Używaj ID użytkownika z przekazanych kryteriów, a nie pobieraj ponownie
+        $user_id = $criteria['user_id'] ?? 0;
         $npc_id = isset($condition['npc_id']) ? absint($condition['npc_id']) : 0;
         $condition_op = $condition['condition'] ?? '';
         $relation_value = isset($condition['relation_value']) ? intval($condition['relation_value']) : 0;
@@ -527,13 +528,11 @@ class NpcPopup
         }
 
         // Pobierz wartości relacji i spotkania z NPC dla użytkownika
-        // Dla niezalogowanych użytkowników (user_id = 0), przyjmujemy domyślne wartości
         if ($user_id > 0) {
             $user_relation = intval(get_field('npc-relation-' . $npc_id, 'user_' . $user_id) ?? 0);
             $user_has_met = (bool)(get_field('npc-meet-' . $npc_id, 'user_' . $user_id) ?? false);
         } else {
             // Dla niezalogowanych użytkowników, przyjmij domyślne wartości
-            // Możesz dostosować te wartości według potrzeb gry
             $user_relation = -100; // Domyślna relacja dla niezalogowanych
             $user_has_met = true; // Zakładamy, że niezalogowani "znają" NPC
             $this->debug_log("- Niezalogowany użytkownik, przyjęto domyślną relację: {$user_relation} i znajomość: " . ($user_has_met ? 'TAK' : 'NIE'));
@@ -555,25 +554,19 @@ class NpcPopup
                 $this->debug_log("- Warunek 'is_not_known': " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
                 break;
             case 'relation_greater_than':
+            case 'relation_above': // Obsługuj oba warianty tak samo
                 $result = $user_relation > $relation_value;
-                $this->debug_log("- Warunek 'relation_greater_than' ({$user_relation} > {$relation_value}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
-                break;
-            case 'relation_above':
-                $result = $user_relation > $relation_value;
-                $this->debug_log("- Warunek 'relation_above' ({$user_relation} > {$relation_value}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                $this->debug_log("- Warunek '{$condition_op}' ({$user_relation} > {$relation_value}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
                 break;
             case 'relation_less_than':
+            case 'relation_below': // Obsługuj oba warianty tak samo
                 $result = $user_relation < $relation_value;
-                $this->debug_log("- Warunek 'relation_less_than' ({$user_relation} < {$relation_value}): " . ($result ? 'SPEŁNIONY' : 'NIESPEłNIONY'));
+                $this->debug_log("- Warunek '{$condition_op}' ({$user_relation} < {$relation_value}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
                 break;
-            case 'relation_below':
-                $result = $user_relation < $relation_value;
-                $this->debug_log("- Warunek 'relation_below' ({$user_relation} < {$relation_value}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
-                break;
-            case 'relation_equals':
             case 'relation_equal':
+            case 'relation_equals':
                 $result = ($user_relation == $relation_value);
-                $this->debug_log("- Warunek 'relation_equals' ({$user_relation} == {$relation_value}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                $this->debug_log("- Warunek '{$condition_op}' ({$user_relation} == {$relation_value}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
                 break;
             default:
                 $this->debug_log("- Nieznany operator warunku relacji: {$condition_op}");
