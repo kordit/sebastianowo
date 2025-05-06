@@ -133,12 +133,12 @@ class NpcPopup
         $current_url = isset($params['current_url']) ? esc_url_raw($params['current_url']) : '';
 
         // Rozpocznij logowanie dla nowego żądania
-        $this->logger->debug_log("===== ROZPOCZĘCIE PRZETWARZANIA ŻĄDANIA NPC =====");
-        $this->logger->debug_log("Parametry żądania:", [
-            'npc_id' => $npc_id,
-            'page_data' => $page_data,
-            'current_url' => $current_url
-        ]);
+        // $this->logger->debug_log("===== ROZPOCZĘCIE PRZETWARZANIA ŻĄDANIA NPC =====");
+        // $this->logger->debug_log("Parametry żądania:", [
+        //     'npc_id' => $npc_id,
+        //     'page_data' => $page_data,
+        //     'current_url' => $current_url
+        // ]);
 
         // Wyodrębnij informacje o lokalizacji
         $location = $this->locationExtractor->extract_location_from_url($current_url);
@@ -150,20 +150,20 @@ class NpcPopup
 
         // Jeśli user_id to 0, ale mamy ciasteczko sesji, spróbujmy odtworzyć sesję
         if ($user_id === 0 && isset($_COOKIE[LOGGED_IN_COOKIE])) {
-            $this->logger->debug_log("Wykryto ciasteczko logowania, próba odtworzenia sesji");
+            // $this->logger->debug_log("Wykryto ciasteczko logowania, próba odtworzenia sesji");
             $user = wp_validate_auth_cookie($_COOKIE[LOGGED_IN_COOKIE], 'logged_in');
             if ($user) {
                 $user_id = $user;
-                $this->logger->debug_log("Odtworzono sesję dla użytkownika: {$user_id}");
+                // $this->logger->debug_log("Odtworzono sesję dla użytkownika: {$user_id}");
             }
         }
 
-        $this->logger->debug_log("Wyodrębnione dane lokalizacji:", [
-            'location' => $location,
-            'type_page' => $type_page,
-            'location_value' => $location_value,
-            'user_id' => $user_id
-        ]);
+        // $this->logger->debug_log("Wyodrębnione dane lokalizacji:", [
+        //     'location' => $location,
+        //     'type_page' => $type_page,
+        //     'location_value' => $location_value,
+        //     'user_id' => $user_id
+        // ]);
 
         $criteria = [
             'type_page' => $type_page,
@@ -173,7 +173,7 @@ class NpcPopup
         ];
 
         if (!$npc_id) {
-            $this->logger->debug_log("BŁĄD: Nieprawidłowe ID NPC");
+            // $this->logger->debug_log("BŁĄD: Nieprawidłowe ID NPC");
             return new \WP_REST_Response([
                 'status' => 'error',
                 'message' => 'Nieprawidłowe ID NPC'
@@ -184,16 +184,16 @@ class NpcPopup
         $fields = get_fields($npc_id);
         $dialogs = isset($fields['dialogs']) ? $fields['dialogs'] : [];
 
-        $this->logger->debug_log("Pobrane dialogi dla NPC {$npc_id}:", $dialogs);
+        // $this->logger->debug_log("Pobrane dialogi dla NPC {$npc_id}:", $dialogs);
 
         // Filtruj dialogi na podstawie lokalizacji, relacji NPC i innych kryteriów
         $filtered_dialog = $this->dialogManager->get_first_matching_dialog($dialogs, $criteria);
-        $this->logger->debug_log("Wybrany dialog po filtrowaniu:", $filtered_dialog);
+        // $this->logger->debug_log("Wybrany dialog po filtrowaniu:", $filtered_dialog);
 
         // Jeśli znaleziono dialog, filtruj także jego odpowiedzi
         if ($filtered_dialog) {
             $filtered_dialog = $this->dialogManager->filter_answers($filtered_dialog, $criteria);
-            $this->logger->debug_log("Dialog po filtrowaniu odpowiedzi:", $filtered_dialog);
+            // $this->logger->debug_log("Dialog po filtrowaniu odpowiedzi:", $filtered_dialog);
         }
 
         // Pobierz URL obrazka miniatury dla NPC
@@ -206,7 +206,7 @@ class NpcPopup
             $thumbnail_url = get_template_directory_uri() . '/assets/images/png/postac.png';
         }
 
-        $this->logger->debug_log("URL miniatury NPC: {$thumbnail_url}");
+        // $this->logger->debug_log("URL miniatury NPC: {$thumbnail_url}");
 
         // Pobierz dodatkowe dane o wpisie
         $post_data = get_post($npc_id, ARRAY_A);
@@ -225,8 +225,8 @@ class NpcPopup
             ]
         ];
 
-        $this->logger->debug_log("Dane odpowiedzi:", $response_data);
-        $this->logger->debug_log("===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA NPC =====");
+        // $this->logger->debug_log("Dane odpowiedzi:", $response_data);
+        // $this->logger->debug_log("===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA NPC =====");
 
         return new \WP_REST_Response($response_data, 200);
     }

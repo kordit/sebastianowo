@@ -198,39 +198,39 @@ class DialogHandler
     {
         // Klucz meta dla znaczników czasu transakcji
         $meta_key = 'last_transaction_timestamps';
-        
+
         // Pobierz zapisane znaczniki czasu transakcji
         $transaction_timestamps = get_user_meta($user_id, $meta_key, true);
         if (!is_array($transaction_timestamps)) {
             $transaction_timestamps = [];
         }
-        
+
         $current_time = time();
-        
+
         // Sprawdź, czy transakcja o danym kluczu była wykonana w ostatnim czasie
         if (isset($transaction_timestamps[$transaction_key])) {
             $last_time = $transaction_timestamps[$transaction_key];
             $time_diff = $current_time - $last_time;
-            
+
             if ($time_diff < self::TRANSACTION_COOLDOWN) {
                 $logger->debug_log("TRANSAKCJA ZABLOKOWANA: Próba wykonania transakcji '$transaction_key' za szybko (ostatnia: " . $time_diff . "s temu)");
                 return false;
             }
         }
-        
+
         // Zapisz znacznik czasu dla tej transakcji
         $transaction_timestamps[$transaction_key] = $current_time;
-        
+
         // Usuń stare znaczniki czasu (starsze niż 1 minuta)
         foreach ($transaction_timestamps as $key => $timestamp) {
             if ($current_time - $timestamp > 60) {
                 unset($transaction_timestamps[$key]);
             }
         }
-        
+
         // Zapisz zaktualizowane znaczniki czasu
         update_user_meta($user_id, $meta_key, $transaction_timestamps);
-        
+
         return true;
     }
 
@@ -363,12 +363,12 @@ class DialogHandler
 
                     // Uproszczenie struktury dialogu
                     $simplified_dialog = $dialog_manager->simplify_dialog($filtered_dialog);
-                    $logger->debug_log("Uproszczona struktura dialogu:", $simplified_dialog);
+                    // $logger->debug_log("Uproszczona struktura dialogu:", $simplified_dialog);
 
                     // Pobierz URL obrazka miniatury dla NPC
                     $thumbnail_url = get_the_post_thumbnail_url($npc_id, 'full') ?: '';
 
-                    // Przygotuj dane odpowiedzi
+                    // Przygotuj dane odpowiedzi 
                     $response_data = [
                         'success' => true,
                         'dialog' => $simplified_dialog,
@@ -447,15 +447,15 @@ class DialogHandler
                                         // Jeśli próbujemy zabrać walutę (wartość ujemna), sprawdź czy użytkownik ma jej wystarczającą ilość
                                         if ($value < 0 && abs($value) > $current_value) {
                                             $logger->debug_log("NIEPOWODZENIE TRANSAKCJI: Próba zabrania {$value} $currency, ale użytkownik ma tylko $current_value");
-                                            
+
                                             // Przygotuj powiadomienie o niewystarczających środkach
                                             $notification = [
                                                 'message' => "Nie masz wystarczającej ilości $currency! Potrzeba " . abs($value) . ", a masz $current_value.",
                                                 'status' => 'bad'
                                             ];
-                                            
+
                                             $logger->debug_log("Transakcja odrzucona - niewystarczające środki", $notification);
-                                            
+
                                             // Zamiast kontynuować do następnego dialogu, wracamy ten sam dialog
                                             // aby użytkownik mógł wybrać inną opcję
                                             $response_data = [
@@ -468,10 +468,10 @@ class DialogHandler
                                                 ],
                                                 'notification' => $notification
                                             ];
-                                            
+
                                             $logger->debug_log("Zwracam ten sam dialog (warunek transakcji nie spełniony):", $response_data);
                                             $logger->debug_log("===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA DIALOGU =====");
-                                            
+
                                             return new \WP_REST_Response($response_data, 200);
                                         }
 
@@ -520,39 +520,39 @@ class DialogHandler
                                         $quantity = (int)($action['quantity'] ?? 1);
 
                                         $logger->debug_log("Wykonuję akcję przedmiotu: $item_action, ID: $item_id, ilość: $quantity");
-                                        
+
                                         if (!$item_id) {
                                             $logger->debug_log("BŁĄD: Nieprawidłowe ID przedmiotu");
                                             break;
                                         }
-                                        
+
                                         // Pobierz informacje o przedmiocie
                                         $item_post = get_post($item_id);
                                         if (!$item_post || $item_post->post_type !== 'item') {
                                             $logger->debug_log("BŁĄD: Przedmiot o ID $item_id nie istnieje");
                                             break;
                                         }
-                                        
+
                                         $item_name = $item_post->post_title;
-                                        
+
                                         // Pobierz aktualny ekwipunek użytkownika
                                         $items_inventory = get_field('items', 'user_' . $user_id);
-                                        
+
                                         if (!is_array($items_inventory)) {
                                             $items_inventory = [];
                                         }
-                                        
+
                                         $logger->debug_log("Aktualny stan ekwipunku użytkownika:", $items_inventory);
-                                        
+
                                         // Flaga określająca, czy przedmiot został znaleziony w ekwipunku
                                         $item_found = false;
-                                        
+
                                         // Szukamy przedmiotu w ekwipunku
                                         foreach ($items_inventory as $key => $inventory_item) {
                                             if (isset($inventory_item['item']) && (int)$inventory_item['item'] === $item_id) {
                                                 $item_found = true;
                                                 $current_quantity = (int)($inventory_item['quantity'] ?? 0);
-                                                
+
                                                 if ($item_action === 'give') {
                                                     // Dodaj przedmiot do ekwipunku
                                                     $items_inventory[$key]['quantity'] = $current_quantity + $quantity;
@@ -564,7 +564,7 @@ class DialogHandler
                                                 } elseif ($item_action === 'take') {
                                                     // Zabierz przedmiot z ekwipunku
                                                     $new_quantity = max(0, $current_quantity - $quantity);
-                                                    
+
                                                     if ($new_quantity > 0) {
                                                         $items_inventory[$key]['quantity'] = $new_quantity;
                                                         $logger->debug_log("Zabrano $quantity x $item_name z ekwipunku. Nowy stan: {$items_inventory[$key]['quantity']}");
@@ -574,45 +574,45 @@ class DialogHandler
                                                         $items_inventory = array_values($items_inventory); // Reindeksowanie tablicy
                                                         $logger->debug_log("Usunięto przedmiot $item_name z ekwipunku (ilość = 0)");
                                                     }
-                                                    
+
                                                     $notification = [
                                                         'message' => "Stracono $quantity x $item_name",
                                                         'status' => 'bad'
                                                     ];
-                                                    
+
                                                     // Sprawdź, czy gracz ma wystarczającą ilość przedmiotów
                                                     if ($current_quantity < $quantity) {
                                                         $logger->debug_log("UWAGA: Próba zabrania większej ilości przedmiotów ($quantity) niż posiada gracz ($current_quantity)");
                                                     }
                                                 }
-                                                
+
                                                 break;
                                             }
                                         }
-                                        
+
                                         // Jeśli przedmiot nie został znaleziony w ekwipunku, a akcja to dodawanie
                                         if (!$item_found && $item_action === 'give') {
                                             $items_inventory[] = [
                                                 'item' => $item_id,
                                                 'quantity' => $quantity
                                             ];
-                                            
+
                                             $notification = [
                                                 'message' => "Otrzymano $quantity x $item_name",
                                                 'status' => 'success'
                                             ];
-                                            
+
                                             $logger->debug_log("Dodano nowy przedmiot $item_name (x$quantity) do ekwipunku");
                                         } elseif (!$item_found && $item_action === 'take') {
                                             $logger->debug_log("NIEPOWODZENIE AKCJI PRZEDMIOTU: Próba zabrania przedmiotu $item_name, ale użytkownik go nie posiada");
-                                            
+
                                             $notification = [
                                                 'message' => "Nie posiadasz przedmiotu $item_name!",
                                                 'status' => 'bad'
                                             ];
-                                            
+
                                             $logger->debug_log("Akcja przedmiotu odrzucona - brak przedmiotu w ekwipunku", $notification);
-                                            
+
                                             // Zamiast kontynuować do następnego dialogu, wracamy ten sam dialog
                                             // aby użytkownik mógł wybrać inną opcję
                                             $response_data = [
@@ -625,13 +625,333 @@ class DialogHandler
                                                 ],
                                                 'notification' => $notification
                                             ];
-                                            
+
                                             $logger->debug_log("Zwracam ten sam dialog (brak przedmiotu w ekwipunku):", $response_data);
                                             $logger->debug_log("===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA DIALOGU =====");
-                                            
+
                                             return new \WP_REST_Response($response_data, 200);
                                         }
-                                        
+
+                                        break;
+
+                                    case 'skills':
+                                        $skill_type = $action['type_of_skills'] ?? '';
+                                        $skill_value = (int)($action['value'] ?? 0);
+
+                                        $logger->debug_log("Wykonuję akcję umiejętności: typ=$skill_type, wartość=$skill_value");
+
+                                        if (empty($skill_type)) {
+                                            $logger->debug_log("BŁĄD: Nie podano typu umiejętności");
+                                            break;
+                                        }
+
+                                        // Pobierz aktualne umiejętności użytkownika
+                                        $skills = get_field(SKILLS['name'], 'user_' . $user_id);
+                                        if (!is_array($skills)) {
+                                            $skills = [];
+                                            // Zainicjuj domyślne wartości wszystkich umiejętności
+                                            foreach (SKILLS['fields'] as $field_key => $field_data) {
+                                                $skills[$field_key] = $field_data['default'];
+                                            }
+                                        }
+
+                                        // Sprawdź, czy podany typ umiejętności istnieje w strukturze
+                                        if (!isset(SKILLS['fields'][$skill_type])) {
+                                            $logger->debug_log("BŁĄD: Nieprawidłowy typ umiejętności: $skill_type");
+                                            break;
+                                        }
+
+                                        // Pobierz aktualną wartość umiejętności
+                                        $current_value = isset($skills[$skill_type]) ? (int)$skills[$skill_type] : 0;
+                                        $logger->debug_log("Obecna wartość umiejętności $skill_type dla użytkownika $user_id: $current_value");
+
+                                        // Jeśli próbujemy zmniejszyć umiejętność (wartość ujemna), sprawdź czy użytkownik ma jej wystarczający poziom
+                                        if ($skill_value < 0 && abs($skill_value) > $current_value) {
+                                            $logger->debug_log("NIEPOWODZENIE AKCJI UMIEJĘTNOŚCI: Próba zmniejszenia {$skill_type} o " . abs($skill_value) . ", ale użytkownik ma tylko $current_value");
+
+                                            // Przygotuj powiadomienie o niewystarczającym poziomie umiejętności
+                                            $skill_label = SKILLS['fields'][$skill_type]['label'];
+                                            $notification = [
+                                                'message' => "Nie masz wystarczającego poziomu umiejętności {$skill_label}! Wymagane " . abs($skill_value) . ", a masz $current_value.",
+                                                'status' => 'bad'
+                                            ];
+
+                                            $logger->debug_log("Akcja umiejętności odrzucona - niewystarczający poziom", $notification);
+
+                                            // Zamiast kontynuować do następnego dialogu, wracamy ten sam dialog
+                                            // aby użytkownik mógł wybrać inną opcję
+                                            $response_data = [
+                                                'success' => true,
+                                                'dialog' => $dialog_manager->simplify_dialog($prev_dialog),
+                                                'npc' => [
+                                                    'id' => $npc->ID,
+                                                    'name' => $npc->post_title,
+                                                    'image' => get_the_post_thumbnail_url($npc_id, 'full') ?: '',
+                                                ],
+                                                'notification' => $notification
+                                            ];
+
+                                            $logger->debug_log("Zwracam ten sam dialog (niewystarczający poziom umiejętności):", $response_data);
+                                            $logger->debug_log("===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA DIALOGU =====");
+
+                                            return new \WP_REST_Response($response_data, 200);
+                                        }
+
+                                        // Oblicz nową wartość
+                                        $new_value = $current_value + $skill_value;
+                                        if ($new_value < 0) {
+                                            $new_value = 0; // Zabezpieczenie przed ujemnymi wartościami (nie powinno już być potrzebne)
+                                        }
+
+                                        // Aktualna wartość przed aktualizacją
+                                        $logger->debug_log("Aktualne dane umiejętności użytkownika przed aktualizacją:", [
+                                            'user_id' => $user_id,
+                                            'skill_type' => $skill_type,
+                                            'current_value' => $current_value,
+                                            'value_to_add' => $skill_value,
+                                            'new_value' => $new_value
+                                        ]);
+
+                                        // Zaktualizuj wartość umiejętności
+                                        $skills[$skill_type] = $new_value;
+
+                                        // Zapisz zaktualizowane umiejętności do ACF
+                                        $result = update_field(SKILLS['name'], $skills, 'user_' . $user_id);
+                                        $logger->debug_log("Rezultat update_field dla umiejętności: " . ($result ? 'SUKCES' : 'BŁĄD'));
+
+                                        // Sprawdź, czy aktualizacja się powiodła
+                                        $updated_skills = get_field(SKILLS['name'], 'user_' . $user_id);
+                                        $updated_value = isset($updated_skills[$skill_type]) ? (int)$updated_skills[$skill_type] : 0;
+                                        $logger->debug_log("Wartość umiejętności $skill_type po aktualizacji: $updated_value");
+
+                                        // Przygotuj komunikat w zależności od wartości
+                                        $skill_label = SKILLS['fields'][$skill_type]['label'];
+                                        if ($skill_value > 0) {
+                                            $notification = [
+                                                'message' => "Zwiększono umiejętność $skill_label o $skill_value",
+                                                'status' => 'success'
+                                            ];
+                                        } elseif ($skill_value < 0) {
+                                            $notification = [
+                                                'message' => "Zmniejszono umiejętność $skill_label o " . abs($skill_value),
+                                                'status' => 'bad'
+                                            ];
+                                        } else {
+                                            // Jeśli wartość jest 0, nie pokazujemy powiadomienia
+                                            $notification = null;
+                                        }
+
+                                        if ($notification) {
+                                            $logger->debug_log("Utworzono powiadomienie dla umiejętności:", $notification);
+                                        }
+
+                                        $logger->debug_log("Wykonano aktualizację umiejętności. Nowa wartość $skill_type: $new_value");
+                                        break;
+
+                                    case 'exp_rep':
+                                        $type = $action['type'] ?? '';
+                                        $value = (int)($action['value'] ?? 0);
+
+                                        $logger->debug_log("Wykonuję akcję exp/rep: typ=$type, wartość=$value");
+
+                                        if (empty($type) || !in_array($type, ['exp', 'reputation'])) {
+                                            $logger->debug_log("BŁĄD: Nieprawidłowy typ exp_rep: $type");
+                                            break;
+                                        }
+
+                                        // Pobierz aktualne wartości postępu użytkownika
+                                        $progress = get_field(PROGRESS['name'], 'user_' . $user_id);
+                                        if (!is_array($progress)) {
+                                            $progress = [];
+                                            // Zainicjuj domyślne wartości wszystkich pól postępu
+                                            foreach (PROGRESS['fields'] as $field_key => $field_data) {
+                                                $progress[$field_key] = $field_data['default'];
+                                            }
+                                        }
+
+                                        // Pobierz aktualną wartość
+                                        $current_value = isset($progress[$type]) ? (int)$progress[$type] : 0;
+                                        $logger->debug_log("Obecna wartość $type dla użytkownika $user_id: $current_value");
+
+                                        // Oblicz nową wartość
+                                        $new_value = $current_value + $value;
+                                        if ($new_value < 0 && $type === 'reputation') {
+                                            $new_value = 0; // Reputacja nie może być ujemna
+                                        }
+
+                                        $logger->debug_log("Aktualne dane postępu użytkownika przed aktualizacją:", [
+                                            'user_id' => $user_id,
+                                            'progress_type' => $type,
+                                            'current_value' => $current_value,
+                                            'value_to_add' => $value,
+                                            'new_value' => $new_value
+                                        ]);
+
+                                        // Zaktualizuj wartość w postępie
+                                        $progress[$type] = $new_value;
+
+                                        // Jeśli dodano exp, sprawdź czy trzeba dodać punkty nauki (co 100 exp = 1 punkt nauki)
+                                        if ($type === 'exp' && $value > 0) {
+                                            $old_level = floor($current_value / 100);
+                                            $new_level = floor($new_value / 100);
+                                            $learning_points_to_add = $new_level - $old_level;
+
+                                            if ($learning_points_to_add > 0) {
+                                                $current_learning_points = isset($progress['learning_points']) ? (int)$progress['learning_points'] : 0;
+                                                $progress['learning_points'] = $current_learning_points + $learning_points_to_add;
+                                                $logger->debug_log("Dodano $learning_points_to_add punktów nauki (nowy poziom: $new_level)");
+                                            }
+                                        }
+
+                                        // Zapisz zaktualizowany postęp do ACF
+                                        $result = update_field(PROGRESS['name'], $progress, 'user_' . $user_id);
+                                        $logger->debug_log("Rezultat update_field dla postępu: " . ($result ? 'SUKCES' : 'BŁĄD'));
+
+                                        // Sprawdź, czy aktualizacja się powiodła
+                                        $updated_progress = get_field(PROGRESS['name'], 'user_' . $user_id);
+                                        $updated_value = isset($updated_progress[$type]) ? (int)$updated_progress[$type] : 0;
+                                        $logger->debug_log("Wartość $type po aktualizacji: $updated_value");
+
+                                        // Przygotuj komunikat
+                                        $type_label = PROGRESS['fields'][$type]['label'] ?? $type;
+                                        if ($value > 0) {
+                                            $notification = [
+                                                'message' => "Otrzymano $value punktów: $type_label",
+                                                'status' => 'success'
+                                            ];
+                                        } elseif ($value < 0) {
+                                            $notification = [
+                                                'message' => "Utracono " . abs($value) . " punktów: $type_label",
+                                                'status' => 'bad'
+                                            ];
+                                        } else {
+                                            $notification = null;
+                                        }
+
+                                        if ($notification) {
+                                            $logger->debug_log("Utworzono powiadomienie dla postępu:", $notification);
+                                        }
+
+                                        $logger->debug_log("Wykonano aktualizację $type. Nowa wartość: $new_value");
+                                        break;
+
+                                    case 'unlock_area':
+                                        $area_id = (int)($action['area'] ?? 0);
+
+                                        $logger->debug_log("Wykonuję akcję odblokowania rejonu: area_id=$area_id");
+
+                                        if (empty($area_id)) {
+                                            $logger->debug_log("BŁĄD: Nie podano ID rejonu do odblokowania");
+                                            break;
+                                        }
+
+                                        // Sprawdź, czy rejon istnieje
+                                        $area_post = get_post($area_id);
+                                        if (!$area_post || $area_post->post_type !== 'tereny') {
+                                            $logger->debug_log("BŁĄD: Rejon o ID $area_id nie istnieje lub nie jest rejonem");
+                                            break;
+                                        }
+
+                                        $area_name = $area_post->post_title;
+
+                                        // Pobierz dostępne rejony użytkownika
+                                        $available_areas = get_field('available_areas', 'user_' . $user_id);
+                                        if (!is_array($available_areas)) {
+                                            $available_areas = [];
+                                        }
+
+                                        $logger->debug_log("Aktualne dostępne rejony użytkownika:", $available_areas);
+
+                                        // Sprawdź, czy rejon nie jest już odblokowany
+                                        $already_unlocked = in_array($area_id, $available_areas);
+
+                                        if ($already_unlocked) {
+                                            $logger->debug_log("Rejon $area_name jest już dostępny dla użytkownika $user_id");
+                                            $notification = [
+                                                'message' => "Masz już dostęp do rejonu: $area_name",
+                                                'status' => 'info'
+                                            ];
+                                        } else {
+                                            // Dodaj rejon do dostępnych
+                                            $available_areas[] = $area_id;
+
+                                            // Zapisz zaktualizowane dostępne rejony
+                                            $result = update_field('available_areas', $available_areas, 'user_' . $user_id);
+                                            $logger->debug_log("Rezultat update_field dla dostępnych rejonów: " . ($result ? 'SUKCES' : 'BŁĄD'));
+
+                                            // Sprawdź, czy aktualizacja się powiodła
+                                            $updated_areas = get_field('available_areas', 'user_' . $user_id);
+                                            $found = in_array($area_id, $updated_areas);
+
+                                            $logger->debug_log("Weryfikacja odblokowania rejonu: " . ($found ? 'SUKCES' : 'BŁĄD'));
+
+                                            $notification = [
+                                                'message' => "Odblokowano dostęp do nowego rejonu: $area_name",
+                                                'status' => 'success'
+                                            ];
+                                        }
+
+                                        $logger->debug_log("Utworzono powiadomienie dla odblokowania rejonu:", $notification);
+                                        break;
+
+                                    case 'change_area':
+                                        $area_id = (int)($action['area'] ?? 0);
+
+                                        $logger->debug_log("Wykonuję akcję zmiany rejonu: area_id=$area_id");
+
+                                        if (empty($area_id)) {
+                                            $logger->debug_log("BŁĄD: Nie podano ID rejonu do przeniesienia");
+                                            break;
+                                        }
+
+                                        // Sprawdź, czy rejon istnieje
+                                        $area_post = get_post($area_id);
+                                        if (!$area_post || $area_post->post_type !== 'tereny') {
+                                            $logger->debug_log("BŁĄD: Rejon o ID $area_id nie istnieje lub nie jest rejonem");
+                                            break;
+                                        }
+
+                                        $area_name = $area_post->post_title;
+                                        $area_slug = $area_post->post_name;
+
+                                        // Pobierz odblokowane rejony użytkownika
+                                        $unlocked_areas = get_field('unlocked_areas', 'user_' . $user_id);
+                                        if (!is_array($unlocked_areas)) {
+                                            $unlocked_areas = [];
+                                        }
+
+                                        // Sprawdź, czy rejon jest odblokowany dla użytkownika
+                                        $is_unlocked = false;
+                                        foreach ($unlocked_areas as $unlocked_area) {
+                                            if (isset($unlocked_area['area']) && (int)$unlocked_area['area'] === $area_id) {
+                                                $is_unlocked = true;
+                                                break;
+                                            }
+                                        }
+
+                                        // Jeśli rejon nie jest odblokowany, automatycznie go odblokuj
+                                        if (!$is_unlocked) {
+                                            $logger->debug_log("Rejon $area_name nie jest jeszcze odblokowany, odblokowuję go automatycznie");
+                                            $unlocked_areas[] = [
+                                                'area' => $area_id
+                                            ];
+                                            update_field('unlocked_areas', $unlocked_areas, 'user_' . $user_id);
+                                        }
+
+                                        // Zapisz lokalizację w danych użytkownika
+                                        $result = update_field('current_area', $area_id, 'user_' . $user_id);
+                                        $logger->debug_log("Rezultat update_field dla aktualnej lokalizacji: " . ($result ? 'SUKCES' : 'BŁĄD'));
+
+                                        // Dodaj adres URL rejonu do odpowiedzi
+                                        $area_url = site_url('/tereny/' . $area_slug . '/');
+
+                                        $notification = [
+                                            'message' => "Przemieszczono do rejonu: $area_name",
+                                            'status' => 'success',
+                                            'redirect' => $area_url
+                                        ];
+
+                                        $logger->debug_log("Utworzono powiadomienie dla zmiany rejonu:", $notification);
                                         break;
 
                                     // Można dodać obsługę innych typów akcji w przyszłości
@@ -677,16 +997,10 @@ class DialogHandler
 
             // Uproszczenie struktury dialogu
             $simplified_dialog = $dialog_manager->simplify_dialog($filtered_dialog);
-            $logger->debug_log("Uproszczona struktura dialogu:", $simplified_dialog);
+            // $logger->debug_log("Uproszczona struktura dialogu:", $simplified_dialog);
 
             // Pobierz URL obrazka miniatury dla NPC
             $thumbnail_url = get_the_post_thumbnail_url($npc_id, 'full') ?: '';
-
-            // Sprawdź finalny stan zasobów użytkownika
-            $final_gold = (int)get_user_meta($user_id, 'gold', true);
-            $final_papierosy = (int)get_user_meta($user_id, 'papierosy', true);
-            $logger->debug_log("STAN ZASOBÓW PO TRANSAKCJI - Gold: $final_gold, Papierosy: $final_papierosy");
-            $logger->debug_log("ZMIANA ZASOBÓW - Gold: " . ($final_gold - $current_gold) . ", Papierosy: " . ($final_papierosy - $current_papierosy));
 
             // Przygotuj dane odpowiedzi
             $response_data = [
