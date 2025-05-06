@@ -455,7 +455,24 @@ class DialogHandler
                                             ];
                                             
                                             $logger->debug_log("Transakcja odrzucona - niewystarczające środki", $notification);
-                                            break;  // Przerwij przetwarzanie tej akcji i przejdź do następnej
+                                            
+                                            // Zamiast kontynuować do następnego dialogu, wracamy ten sam dialog
+                                            // aby użytkownik mógł wybrać inną opcję
+                                            $response_data = [
+                                                'success' => true,
+                                                'dialog' => $dialog_manager->simplify_dialog($prev_dialog),
+                                                'npc' => [
+                                                    'id' => $npc->ID,
+                                                    'name' => $npc->post_title,
+                                                    'image' => get_the_post_thumbnail_url($npc_id, 'full') ?: '',
+                                                ],
+                                                'notification' => $notification
+                                            ];
+                                            
+                                            $logger->debug_log("Zwracam ten sam dialog (warunek transakcji nie spełniony):", $response_data);
+                                            $logger->debug_log("===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA DIALOGU =====");
+                                            
+                                            return new \WP_REST_Response($response_data, 200);
                                         }
 
                                         // Oblicz nową wartość
@@ -587,20 +604,33 @@ class DialogHandler
                                             
                                             $logger->debug_log("Dodano nowy przedmiot $item_name (x$quantity) do ekwipunku");
                                         } elseif (!$item_found && $item_action === 'take') {
-                                            $logger->debug_log("BŁĄD: Nie można zabrać przedmiotu $item_name, którego gracz nie posiada");
+                                            $logger->debug_log("NIEPOWODZENIE AKCJI PRZEDMIOTU: Próba zabrania przedmiotu $item_name, ale użytkownik go nie posiada");
+                                            
                                             $notification = [
-                                                'message' => "Nie posiadasz przedmiotu $item_name",
+                                                'message' => "Nie posiadasz przedmiotu $item_name!",
                                                 'status' => 'bad'
                                             ];
+                                            
+                                            $logger->debug_log("Akcja przedmiotu odrzucona - brak przedmiotu w ekwipunku", $notification);
+                                            
+                                            // Zamiast kontynuować do następnego dialogu, wracamy ten sam dialog
+                                            // aby użytkownik mógł wybrać inną opcję
+                                            $response_data = [
+                                                'success' => true,
+                                                'dialog' => $dialog_manager->simplify_dialog($prev_dialog),
+                                                'npc' => [
+                                                    'id' => $npc->ID,
+                                                    'name' => $npc->post_title,
+                                                    'image' => get_the_post_thumbnail_url($npc_id, 'full') ?: '',
+                                                ],
+                                                'notification' => $notification
+                                            ];
+                                            
+                                            $logger->debug_log("Zwracam ten sam dialog (brak przedmiotu w ekwipunku):", $response_data);
+                                            $logger->debug_log("===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA DIALOGU =====");
+                                            
+                                            return new \WP_REST_Response($response_data, 200);
                                         }
-                                        
-                                        // Zapisz zaktualizowany ekwipunek do pola ACF
-                                        $update_result = update_field('items', $items_inventory, 'user_' . $user_id);
-                                        $logger->debug_log("Zapisano zaktualizowany ekwipunek: " . ($update_result ? 'SUKCES' : 'BŁĄD'));
-                                        
-                                        // Pobierz zaktualizowany ekwipunek dla walidacji
-                                        $updated_inventory = get_field('items', 'user_' . $user_id);
-                                        $logger->debug_log("Stan ekwipunku po aktualizacji:", $updated_inventory);
                                         
                                         break;
 
