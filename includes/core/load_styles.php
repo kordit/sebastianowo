@@ -40,6 +40,18 @@ function game_load_styles()
         );
     }
 
+    // Ładujemy style dla dialogów NPC
+    $npc_dialogs_css_path = get_stylesheet_directory() . '/assets/css/npc-dialogs.css';
+    if (file_exists($npc_dialogs_css_path)) {
+        $npc_dialogs_css_version = filemtime($npc_dialogs_css_path);
+        wp_enqueue_style(
+            'game-npc-dialogs-style',
+            get_stylesheet_directory_uri() . '/assets/css/npc-dialogs.css',
+            [],
+            $npc_dialogs_css_version
+        );
+    }
+
     // Określenie aktualnego szablonu i typu widoku (main/archive vs single)
     $current_template = '';
     $view_type = '';

@@ -376,66 +376,6 @@ html {
     display: none;
 }
 
-.npc-dialog-bubble {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid #333;
-    border-radius: 12px;
-    padding: 10px 15px;
-    width: 250px;
-    max-width: 100%;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    transition: opacity 0.3s ease;
-    transform: translate(20%, 0%);
-    display: none;
-
-    .npc-dialog-next {
-        margin: auto;
-        display: block;
-        background: green;
-    }
-}
-
-.npc-dialog-bubble::after {
-    content: "";
-    position: absolute;
-    top: 40px;
-    left: -20px;
-    margin-left: -10px;
-    border-width: 20px 20px 0;
-    border-style: solid;
-    border-color: #fff rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
-    transform: rotate(90deg);
-    opacity: .9;
-}
-
-.npc-dialog-speaker {
-    color: #111;
-    font-size: 12px;
-    font-weight: bold;
-    text-align: left;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 4px;
-    background-color: rgba(0, 0, 0, 0.03);
-    padding: 3px 6px;
-    border-radius: 4px;
-}
-
-.npc-dialog-content {
-    color: #333;
-    font-size: 14px;
-    line-height: 1.4;
-    text-align: center;
-}
-
-.npc-dialog-bubble {
-    animation: dialogFadeIn 0.5s ease forwards;
-}
-
 aside {
     position: absolute;
     z-index: 4;

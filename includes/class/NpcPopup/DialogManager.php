@@ -253,18 +253,31 @@ class DialogManager
      */
     public function simplify_dialog(array $dialog): array
     {
+        // Prawidłowe przetwarzanie tekstu dialogu - usunięcie niepotrzebnych znaków specjalnych
+        $question = isset($dialog['question']) ? $dialog['question'] : '';
+        
+        // Logowanie dla celów debugowania
+        $this->logger->debug_log("Oryginalny tekst dialogu przed przetworzeniem: " . substr($question, 0, 100) . (strlen($question) > 100 ? '...' : ''));
+        
+        // Upewnij się, że znaki nowej linii są zachowane poprawnie
+        $question = str_replace("\r\n", "\n", $question);
+        
         $simplified = [
             'acf_fc_layout' => $dialog['acf_fc_layout'] ?? '',
-            'question' => $dialog['question'] ?? '',
+            'question' => $question,
             'id_pola' => $dialog['id_pola'] ?? ''
         ];
 
         // Dodaj odpowiedzi, jeśli istnieją
         if (isset($dialog['anwsers']) && is_array($dialog['anwsers'])) {
             $simplified['anwsers'] = array_map(function ($answer) {
+                $answerText = isset($answer['anwser_text']) ? $answer['anwser_text'] : '';
+                // Również normalizuj znaki nowej linii w odpowiedziach
+                $answerText = str_replace("\r\n", "\n", $answerText);
+                
                 return [
                     'acf_fc_layout' => $answer['acf_fc_layout'] ?? '',
-                    'anwser_text' => $answer['anwser_text'] ?? '',
+                    'anwser_text' => $answerText,
                     'type_anwser' => $answer['type_anwser'] ?? false,
                     'go_to_id' => $answer['go_to_id'] ?? '0'
                 ];
@@ -272,6 +285,9 @@ class DialogManager
         } else {
             $simplified['anwsers'] = [];
         }
+        
+        // Logowanie dla celów debugowania
+        $this->logger->debug_log("Tekst dialogu po przetworzeniu: " . substr($simplified['question'], 0, 100) . (strlen($simplified['question']) > 100 ? '...' : ''));
 
         return $simplified;
     }

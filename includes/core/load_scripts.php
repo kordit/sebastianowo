@@ -45,6 +45,16 @@ function game_load_scripts()
     );
     wp_enqueue_script('svg-interactions');
 
+    // Moduł obsługi dialogów NPC
+    wp_register_script(
+        'npc-dialogs',
+        get_template_directory_uri() . '/js/modules/npc/buildNpcPopup.js',
+        array('axios'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('npc-dialogs');
+
     // Lokalizacja danych dla UserManager API
     wp_localize_script('user-manager-api', 'userManagerData', array(
         'nonce'  => wp_create_nonce('wp_rest'),
