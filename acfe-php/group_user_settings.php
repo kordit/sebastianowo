@@ -70,7 +70,7 @@ $acf_vitality_group = [
 
 $acf_backpack_group = [
     'key' => 'field_6793e69183c31',
-    'label' => 'Plecak',
+    'label' => 'Plecaki',
     'name' => BACKPACK['name'],
     'aria-label' => '',
     'type' => 'group',

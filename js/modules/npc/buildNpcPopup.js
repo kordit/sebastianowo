@@ -116,17 +116,21 @@ const formatDialogText = (text) => {
  */
 const buildAnswerButtons = (answers) => {
     if (!answers || !answers.length) {
-        return '<button class="npc-answer-button" data-go-to="close">Zamknij</button>';
+        return '<button class="npc-answer-button" data-go-to="close" data-answer-id="close" data-answer-index="-1">Zamknij</button>';
     }
 
-    return answers.map(answer => {
+    return answers.map((answer, index) => {
         // Obsługa różnych formatów dialogów (zarówno z ACF jak i po uproszczeniu)
         const goToId = answer.next_dialog || answer.go_to_id || 'close';
         const buttonClass = answer.type_anwser ? 'npc-answer-button special' : 'npc-answer-button';
         const answerText = answer.text || answer.anwser_text || 'Dalej';
+        const answerId = answer.id || `answer-${index}`;
 
         return `
-            <button class="${buttonClass}" data-go-to="${goToId}">
+            <button class="${buttonClass}" 
+                   data-go-to="${goToId}" 
+                   data-answer-id="${answerId}" 
+                   data-answer-index="${index}">
                 ${answerText}
             </button>
         `;
@@ -161,14 +165,23 @@ const setupEventListeners = (container, npcData, userId) => {
     answerButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             const goToId = button.getAttribute('data-go-to');
+            const answerId = button.getAttribute('data-answer-id');
+            const answerIndex = button.getAttribute('data-answer-index');
 
             if (goToId === 'close') {
                 closeNpcDialog(container);
                 return;
             }
 
+            // Pobierz ID aktualnego dialogu
+            const currentDialogId = container.querySelector('.npc-dialog-answers').getAttribute('data-dialog-id');
+
             // Obsługa przejścia do kolejnej części dialogu
-            handleDialogNavigation(goToId, npcData, userId);
+            handleDialogNavigation(goToId, npcData, userId, {
+                answerId: answerId,
+                answerIndex: answerIndex,
+                currentDialogId: currentDialogId
+            });
         });
     });
 };
@@ -179,9 +192,11 @@ const setupEventListeners = (container, npcData, userId) => {
  * @param {string} goToId - ID następnej części dialogu
  * @param {Object} npcData - Dane NPC
  * @param {number} userId - ID zalogowanego użytkownika
+ * @param {Object} answerData - Dane o wybranej odpowiedzi
  */
-const handleDialogNavigation = async (goToId, npcData, userId) => {
+const handleDialogNavigation = async (goToId, npcData, userId, answerData = {}) => {
     if (goToId === '0' || !goToId) {
+        console.log('Dialog: zamykanie dialogu po kliknięciu przycisku z go_to_id =', goToId);
         closeNpcDialog(document.getElementById('npc-dialog-popup'));
         return;
     }
@@ -192,7 +207,9 @@ const handleDialogNavigation = async (goToId, npcData, userId) => {
 
         // Ekstrakcja danych strony z atrybutów danych
         const pageData = window.pageData || {};
-        const data = {
+
+        // Przygotuj dane do wysłania
+        const requestData = {
             npc_id: npcData.id,
             dialog_id: goToId,
             current_url: currentUrl,
@@ -200,20 +217,18 @@ const handleDialogNavigation = async (goToId, npcData, userId) => {
             page_data: pageData
         };
 
-        const dataArray = Object.entries(data);
-
+        // Dodaj dane o odpowiedzi jeśli dostępne
+        if (answerData) {
+            requestData.answer_id = answerData.answerId;
+            requestData.answer_index = answerData.answerIndex;
+            requestData.current_dialog_id = answerData.currentDialogId;
+        }
 
         // Pobranie kolejnej części dialogu z API
         const response = await axios({
             method: 'POST',
-            url: '/wp-json/game/v1/dialog', // Zaktualizowana ścieżka endpointu
-            data: {
-                npc_id: npcData.id,
-                dialog_id: goToId,
-                current_url: currentUrl,
-                user_id: userId,
-                page_data: pageData
-            }
+            url: '/wp-json/game/v1/dialog',
+            data: requestData
         });
 
         const dialogData = response?.data;
@@ -230,6 +245,39 @@ const handleDialogNavigation = async (goToId, npcData, userId) => {
             id: npcData.id,
             thumbnail_url: dialogData.npc?.image || npcData.thumbnail_url
         };
+
+        // Sprawdź, czy otrzymaliśmy powiadomienie o transakcji
+        if (dialogData.notification) {
+            console.log('Dialog: otrzymano powiadomienie z API:', dialogData.notification);
+            
+            // Wyświetl powiadomienie, jeśli jest dostępny system powiadomień
+            if (window.gameNotifications) {
+                console.log('Dialog: wyświetlanie powiadomienia za pomocą gameNotifications');
+                window.gameNotifications.show(
+                    dialogData.notification.message,
+                    dialogData.notification.status || 'success'
+                );
+            } else if (window.showPopup) {
+                // Spadek do starego systemu powiadomień, jeśli dostępny
+                console.log('Dialog: wyświetlanie powiadomienia za pomocą showPopup');
+                window.showPopup(
+                    dialogData.notification.message,
+                    dialogData.notification.status === 'bad' ? 'error' : 'success'
+                );
+            } else {
+                console.warn('Dialog: brak systemu powiadomień do wyświetlenia informacji:', dialogData.notification);
+            }
+            
+            // Odśwież dane interfejsu użytkownika po transakcji
+            if (window.UIHelpers && typeof window.UIHelpers.refreshUserData === 'function') {
+                console.log('Dialog: odświeżanie danych użytkownika po transakcji');
+                try {
+                    await window.UIHelpers.refreshUserData();
+                } catch (refreshError) {
+                    console.error('Błąd podczas odświeżania danych użytkownika:', refreshError);
+                }
+            }
+        }
 
         // Aktualizacja dialogu
         updateDialogContent(formattedData);
@@ -273,13 +321,22 @@ const updateDialogContent = (npcData) => {
         newAnswerButtons.forEach(button => {
             button.addEventListener('click', (e) => {
                 const goToId = button.getAttribute('data-go-to');
+                const answerId = button.getAttribute('data-answer-id');
+                const answerIndex = button.getAttribute('data-answer-index');
 
                 if (goToId === 'close') {
                     closeNpcDialog(document.getElementById('npc-dialog-popup'));
                     return;
                 }
 
-                handleDialogNavigation(goToId, npcData, npcData.user_id);
+                // Pobierz ID aktualnego dialogu
+                const currentDialogId = answersContainer.getAttribute('data-dialog-id');
+
+                handleDialogNavigation(goToId, npcData, npcData.user_id, {
+                    answerId: answerId,
+                    answerIndex: answerIndex,
+                    currentDialogId: currentDialogId
+                });
             });
         });
     }
@@ -302,6 +359,14 @@ const closeNpcDialog = (container) => {
 
     container.classList.remove('active');
     container.classList.add('closing');
+
+    // Odśwież dane interfejsu użytkownika po zamknięciu dialogu
+    if (window.UIHelpers && typeof window.UIHelpers.refreshUserData === 'function') {
+        console.log('Dialog: odświeżanie danych użytkownika po zamknięciu dialogu');
+        window.UIHelpers.refreshUserData().catch(error => {
+            console.error('Błąd podczas odświeżania danych użytkownika:', error);
+        });
+    }
 
     // Usuń element po zakończeniu animacji
     setTimeout(() => {

@@ -125,12 +125,12 @@
 }
 
 .game-notification-bad {
-    background-color: #ff9800;
-    border-left: 4px solid #ef6c00;
+    background-color: #e53935;
+    border-left: 4px solid #c62828;
 }
 
 .game-notification-bad .notification-icon {
-    background-color: #ef6c00;
+    background-color: #c62828;
 }
 
 .game-notification-failed {

@@ -333,12 +333,16 @@ class UIHelpers {
      */
     static async refreshUserData() {
         try {
+            // Pobierz adres bazowy WordPress API
+            const wpApiUrl = '/wp-json/';
+
+            console.log('Próba odświeżenia danych użytkownika z API');
+
             // Korzystamy z REST API WordPressa do pobrania danych użytkownika
             const response = await axios.get(
-                `${userManagerData.restUrl}game/v1/get-user-data`,
+                `${wpApiUrl}game/v1/get-user-data`,
                 {
                     headers: {
-                        'X-WP-Nonce': userManagerData.nonce,
                         'Content-Type': 'application/json'
                     }
                 }
@@ -346,6 +350,8 @@ class UIHelpers {
 
             if (response.data && response.data.success) {
                 const userData = response.data.data;
+                console.log('Otrzymano dane użytkownika:', userData);
+
                 // Aktualizujemy wszystkie elementy interfejsu
                 UIHelpers.updateUIElements(userData);
 
@@ -356,7 +362,7 @@ class UIHelpers {
 
                 return userData;
             } else {
-                throw new Error(response.data.message || 'Brak danych z serwera');
+                throw new Error(response.data?.message || 'Brak danych z serwera');
             }
         } catch (error) {
             console.error('Błąd podczas odświeżania danych użytkownika:', error);
