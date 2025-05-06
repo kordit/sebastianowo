@@ -34,11 +34,10 @@ if ($instance != 'kreator'): ?>
         $npc_id = 449;
         $user_id = get_current_user_id();
         $user_relation = intval(get_field('npc-relation-' . $npc_id, 'user_' . $user_id) ?? 0);
-        $user_has_met = (bool)(get_field('npc-meet-' . $npc_id, 'user_' . $user_id) ?? false);
-        var_dump($user_relation);
-        var_dump($user_has_met);
+        $user_has_met = get_fields('user_' . $user_id);
+        et_r($user_has_met);
 
-        et_r(get_fields(449)['dialogs']);
+        // et_r(get_fields(449)['dialogs']);
 
 
         // if ($instance) {

@@ -631,7 +631,7 @@ if (function_exists('acf_add_local_field_group')):
                         'taxonomy' => '',
                         'allow_null' => 0,
                         'multiple' => 0,
-                        'return_format' => 'object',
+                        'return_format' => 'id',
                         'ui' => 1,
                         'bidirectional_target' => array(),
                         'save_custom' => 0,

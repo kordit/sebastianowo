@@ -448,6 +448,15 @@ class NpcPopup
             case 'condition_npc_relation':
                 $result = $this->check_npc_relation_condition($condition, $criteria);
                 break;
+            case 'condition_inventory':
+                $result = $this->check_inventory_condition($condition, $criteria);
+                break;
+            case 'condition_mission':
+                $result = $this->check_mission_condition($condition, $criteria);
+                break;
+            case 'condition_task':
+                $result = $this->check_task_condition($condition, $criteria);
+                break;
             default:
                 // Dla nieznanych warunków, uznaj że są spełnione
                 $this->debug_log("Nieznany warunek typu {$layout} - przyjmuję jako spełniony");
@@ -457,6 +466,391 @@ class NpcPopup
 
         $this->debug_log("Wynik warunku {$layout}: " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
         return $result;
+    }
+
+    /**
+     * Sprawdza warunek stanu zadania w misji użytkownika
+     *
+     * @param array $condition Warunek zadania
+     * @param array $criteria Kryteria do sprawdzenia
+     * @return bool Czy warunek jest spełniony
+     */
+    private function check_task_condition(array $condition, array $criteria): bool
+    {
+        $user_id = $criteria['user_id'] ?? 0;
+        $condition_op = $condition['condition'] ?? '';
+        $mission_id = isset($condition['mission_id']) ? absint($condition['mission_id']) : 0;
+        $task_id = $condition['task_id'] ?? '';
+        $required_status = $condition['status'] ?? '';
+        
+        // Wyciągnij ID NPC z kontekstu dla sprawdzenia statusu NPC-specyficznego
+        $npc_id = $criteria['npc_id'] ?? 0;
+
+        $this->debug_log("Sprawdzanie warunku zadania:");
+        $this->debug_log("- User ID: {$user_id}");
+        $this->debug_log("- Operator warunku: {$condition_op}");
+        $this->debug_log("- ID misji: {$mission_id}");
+        $this->debug_log("- ID zadania: {$task_id}");
+        $this->debug_log("- ID NPC: {$npc_id}");
+        $this->debug_log("- Wymagany status: {$required_status}");
+
+        // Jeśli użytkownik nie jest zalogowany lub brak ID misji/zadania, warunek nie jest spełniony
+        if (!$user_id || !$mission_id || empty($task_id)) {
+            $this->debug_log("- Brak User ID, Mission ID lub Task ID - warunek niespełniony");
+            return false;
+        }
+
+        // Pobierz dane misji użytkownika
+        $mission_field_name = "mission_{$mission_id}";
+        $user_mission_data = get_field($mission_field_name, "user_{$user_id}");
+        $this->debug_log("- Dane misji użytkownika:", $user_mission_data);
+
+        // Sprawdź czy misja istnieje w danych użytkownika
+        if (!$user_mission_data || !is_array($user_mission_data)) {
+            $this->debug_log("- Misja nie istnieje w danych użytkownika - warunek niespełniony");
+            return false;
+        }
+        
+        // Sprawdzenie czy mamy do czynienia ze specjalną strukturą statusu NPC
+        if (strpos($required_status, 'completed_npc') !== false && $npc_id > 0) {
+            // Sprawdź czy zadanie istnieje w misji
+            if (!isset($user_mission_data['tasks']) || !is_array($user_mission_data['tasks']) || !isset($user_mission_data['tasks'][$task_id])) {
+                $this->debug_log("- Zadanie {$task_id} nie istnieje w danych misji - warunek niespełniony");
+                return false;
+            }
+            
+            // Sprawdź czy zadanie ma strukturę tablicową (zawierającą dane NPC)
+            $task_data = $user_mission_data['tasks'][$task_id];
+            $this->debug_log("- Dane zadania:", $task_data);
+            
+            if (is_array($task_data)) {
+                // Sprawdź status NPC w zadaniu
+                $npc_field = "npc_{$npc_id}";
+                if (isset($task_data[$npc_field])) {
+                    $npc_status = $task_data[$npc_field];
+                    $this->debug_log("- Status NPC {$npc_id} w zadaniu: {$npc_status}");
+                    
+                    // Porównaj status NPC z wymaganym (zazwyczaj "completed")
+                    $result = ($npc_status === 'completed');
+                    $this->debug_log("- Warunek 'completed_npc' (status {$npc_field}: {$npc_status} === completed): " . 
+                        ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                    return $result;
+                } else {
+                    // Sprawdź status dla npc_target_ID
+                    $npc_target_field = "npc_target_{$npc_id}";
+                    if (isset($task_data[$npc_target_field])) {
+                        $npc_status = $task_data[$npc_target_field];
+                        $this->debug_log("- Status NPC target {$npc_id} w zadaniu: {$npc_status}");
+                        
+                        // Porównaj status NPC z wymaganym (zazwyczaj "completed")
+                        $result = ($npc_status === 'completed');
+                        $this->debug_log("- Warunek 'completed_npc' (status {$npc_target_field}: {$npc_status} === completed): " . 
+                            ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                        return $result;
+                    }
+                }
+                
+                // Sprawdź ogólny status zadania w strukturze tablicowej
+                if (isset($task_data['status'])) {
+                    $current_task_status = $task_data['status'];
+                    $this->debug_log("- Aktualny ogólny status zadania: {$current_task_status}");
+                } else {
+                    $this->debug_log("- Brak ogólnego statusu zadania w strukturze tablicowej - warunek niespełniony");
+                    return false;
+                }
+            } else {
+                // Jeśli zadanie nie ma struktury tablicowej, uznaj jego wartość za status
+                $current_task_status = $task_data;
+                $this->debug_log("- Aktualny status zadania (wartość prosta): {$current_task_status}");
+            }
+        } else {
+            // Pobierz aktualny status zadania - standardowa obsługa
+            if (!isset($user_mission_data['tasks']) || !is_array($user_mission_data['tasks'])) {
+                $this->debug_log("- Brak danych zadań w misji - warunek niespełniony");
+                return false;
+            }
+            
+            if (!isset($user_mission_data['tasks'][$task_id])) {
+                $this->debug_log("- Zadanie {$task_id} nie istnieje w danych misji - warunek niespełniony");
+                return false;
+            }
+            
+            $task_data = $user_mission_data['tasks'][$task_id];
+            
+            // Sprawdź czy zadanie ma strukturę tablicową czy jest prostą wartością
+            if (is_array($task_data)) {
+                if (isset($task_data['status'])) {
+                    $current_task_status = $task_data['status'];
+                    $this->debug_log("- Aktualny status zadania (z tablicy): {$current_task_status}");
+                } else {
+                    $this->debug_log("- Brak pola status w danych zadania - warunek niespełniony");
+                    return false;
+                }
+            } else {
+                $current_task_status = $task_data;
+                $this->debug_log("- Aktualny status zadania (wartość prosta): {$current_task_status}");
+            }
+        }
+
+        // Standardowe sprawdzenie warunku dla statusu zadania
+        switch ($condition_op) {
+            case 'is':
+                // Sprawdź czy zadanie ma dokładnie taki status jak wymagany
+                $result = ($current_task_status === $required_status);
+                $this->debug_log("- Warunek 'is' ({$current_task_status} === {$required_status}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                return $result;
+
+            case 'is_not':
+                // Sprawdź czy zadanie ma inny status niż wymagany
+                $result = ($current_task_status !== $required_status);
+                $this->debug_log("- Warunek 'is_not' ({$current_task_status} !== {$required_status}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                return $result;
+
+            case 'is_at_least':
+                // Sprawdź czy zadanie ma status co najmniej taki jak wymagany
+                $status_hierarchy = [
+                    'not_started' => 0,
+                    'in_progress' => 1,
+                    'completed' => 2,
+                    'failed' => 3
+                ];
+                
+                $current_level = isset($status_hierarchy[$current_task_status]) ? $status_hierarchy[$current_task_status] : -1;
+                $required_level = isset($status_hierarchy[$required_status]) ? $status_hierarchy[$required_status] : -1;
+                
+                $result = ($current_level >= $required_level);
+                $this->debug_log("- Warunek 'is_at_least' ({$current_task_status} [poziom: {$current_level}] >= {$required_status} [poziom: {$required_level}]): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                return $result;
+
+            case 'is_before':
+                // Sprawdź czy zadanie ma status niższy niż wymagany
+                $status_hierarchy = [
+                    'not_started' => 0,
+                    'in_progress' => 1,
+                    'completed' => 2,
+                    'failed' => 3
+                ];
+                
+                $current_level = isset($status_hierarchy[$current_task_status]) ? $status_hierarchy[$current_task_status] : -1;
+                $required_level = isset($status_hierarchy[$required_status]) ? $status_hierarchy[$required_status] : -1;
+                
+                $result = ($current_level < $required_level);
+                $this->debug_log("- Warunek 'is_before' ({$current_task_status} [poziom: {$current_level}] < {$required_status} [poziom: {$required_level}]): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                return $result;
+
+            default:
+                $this->debug_log("- Nieznany operator warunku zadania: {$condition_op}");
+                return false;
+        }
+    }
+
+    /**
+     * Sprawdza warunek stanu misji użytkownika
+     *
+     * @param array $condition Warunek misji
+     * @param array $criteria Kryteria do sprawdzenia
+     * @return bool Czy warunek jest spełniony
+     */
+    private function check_mission_condition(array $condition, array $criteria): bool
+    {
+        $user_id = $criteria['user_id'] ?? 0;
+        $condition_op = $condition['condition'] ?? '';
+        $mission_id = isset($condition['mission_id']) ? absint($condition['mission_id']) : 0;
+        $required_status = $condition['status'] ?? '';
+
+        $this->debug_log("Sprawdzanie warunku misji:");
+        $this->debug_log("- User ID: {$user_id}");
+        $this->debug_log("- Operator warunku: {$condition_op}");
+        $this->debug_log("- ID misji: {$mission_id}");
+        $this->debug_log("- Wymagany status: {$required_status}");
+
+        // Jeśli użytkownik nie jest zalogowany lub brak ID misji, warunek nie jest spełniony
+        if (!$user_id || !$mission_id) {
+            $this->debug_log("- Brak User ID lub Mission ID - warunek niespełniony");
+            return false;
+        }
+
+        // Pobierz dane misji użytkownika
+        $mission_field_name = "mission_{$mission_id}";
+        $user_mission_data = get_field($mission_field_name, "user_{$user_id}");
+        $this->debug_log("- Dane misji użytkownika:", $user_mission_data);
+
+        // Sprawdź czy misja istnieje w danych użytkownika
+        if (!$user_mission_data || !is_array($user_mission_data)) {
+            $this->debug_log("- Misja nie istnieje w danych użytkownika - warunek niespełniony");
+            return false;
+        }
+
+        // Pobierz aktualny status misji
+        $current_status = isset($user_mission_data['status']) ? $user_mission_data['status'] : '';
+        $this->debug_log("- Aktualny status misji: {$current_status}");
+
+        // Sprawdź warunek misji w zależności od operatora
+        switch ($condition_op) {
+            case 'is':
+                // Sprawdź czy misja ma dokładnie taki status jak wymagany
+                $result = ($current_status === $required_status);
+                $this->debug_log("- Warunek 'is' ({$current_status} === {$required_status}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                return $result;
+
+            case 'is_not':
+                // Sprawdź czy misja ma inny status niż wymagany
+                $result = ($current_status !== $required_status);
+                $this->debug_log("- Warunek 'is_not' ({$current_status} !== {$required_status}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                return $result;
+
+            case 'is_at_least':
+                // Sprawdź czy misja ma status co najmniej taki jak wymagany (np. started >= not_started)
+                $status_hierarchy = [
+                    'not_assigned' => 0,
+                    'not_started' => 1,
+                    'started' => 2,
+                    'completed' => 3,
+                    'failed' => 4
+                ];
+                
+                $current_level = isset($status_hierarchy[$current_status]) ? $status_hierarchy[$current_status] : -1;
+                $required_level = isset($status_hierarchy[$required_status]) ? $status_hierarchy[$required_status] : -1;
+                
+                $result = ($current_level >= $required_level);
+                $this->debug_log("- Warunek 'is_at_least' ({$current_status} [poziom: {$current_level}] >= {$required_status} [poziom: {$required_level}]): " . ($result ? 'SPEŁNIONY' : 'NIESPEłNIONY'));
+                return $result;
+
+            case 'has_task_completed':
+                // Sprawdź czy zadanie w misji jest ukończone
+                $task_id = $required_status; // W tym przypadku required_status to ID zadania
+                
+                if (isset($user_mission_data['tasks']) && is_array($user_mission_data['tasks']) && isset($user_mission_data['tasks'][$task_id])) {
+                    $task_status = $user_mission_data['tasks'][$task_id];
+                    $result = ($task_status === 'completed');
+                    $this->debug_log("- Warunek 'has_task_completed' (zadanie {$task_id} ma status: {$task_status}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                    return $result;
+                }
+                
+                $this->debug_log("- Zadanie {$task_id} nie istnieje w danych misji - warunek niespełniony");
+                return false;
+
+            default:
+                $this->debug_log("- Nieznany operator warunku misji: {$condition_op}");
+                return false;
+        }
+    }
+
+    /**
+     * Sprawdza warunek posiadania przedmiotu w ekwipunku
+     *
+     * @param array $condition Warunek ekwipunku
+     * @param array $criteria Kryteria do sprawdzenia
+     * @return bool Czy warunek jest spełniony
+     */
+    private function check_inventory_condition(array $condition, array $criteria): bool
+    {
+        $user_id = $criteria['user_id'] ?? 0;
+        $condition_op = $condition['condition'] ?? '';
+        $item_id = isset($condition['item_id']) ? absint($condition['item_id']) : 0;
+        $quantity = isset($condition['quantity']) ? absint($condition['quantity']) : 1;
+
+        $this->debug_log("Sprawdzanie warunku ekwipunku:");
+        $this->debug_log("- User ID: {$user_id}");
+        $this->debug_log("- Operator warunku: {$condition_op}");
+        $this->debug_log("- ID przedmiotu: {$item_id}");
+        $this->debug_log("- Wymagana ilość: {$quantity}");
+
+        // Jeśli użytkownik nie jest zalogowany lub brak ID przedmiotu, warunek nie jest spełniony
+        if (!$user_id || !$item_id) {
+            $this->debug_log("- Brak User ID lub Item ID - warunek niespełniony");
+            return false;
+        }
+
+        // Pobierz ekwipunek użytkownika
+        $user_inventory = $this->get_user_inventory($user_id);
+        $this->debug_log("- Ekwipunek użytkownika:", $user_inventory);
+
+        // Oblicz aktualną ilość przedmiotu w ekwipunku użytkownika
+        $current_quantity = 0;
+        if (!empty($user_inventory)) {
+            foreach ($user_inventory as $inventory_item) {
+                if ($inventory_item['item_id'] == $item_id) {
+                    $current_quantity += intval($inventory_item['quantity']);
+                }
+            }
+        }
+        $this->debug_log("- Aktualna ilość przedmiotu {$item_id}: {$current_quantity}");
+
+        // Sprawdź warunek ekwipunku w zależności od operatora
+        switch ($condition_op) {
+            case 'has_item':
+                // Sprawdź czy użytkownik posiada przedmiot w wymaganej ilości
+                $result = ($current_quantity >= $quantity);
+                $this->debug_log("- Warunek 'has_item' (ma {$current_quantity} >= {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                return $result;
+
+            case 'not_has_item':
+            case 'has_not_item': // Obsługuj oba warianty nazwy
+                // Sprawdź czy użytkownik nie posiada przedmiotu lub ma mniej niż wymagane
+                $result = ($current_quantity < $quantity);
+                $this->debug_log("- Warunek '{$condition_op}' (ma {$current_quantity} < {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                return $result;
+
+            case 'quantity_above':
+                // Sprawdź czy użytkownik ma więcej niż określona ilość przedmiotu
+                $result = ($current_quantity > $quantity);
+                $this->debug_log("- Warunek 'quantity_above' (ma {$current_quantity} > {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                return $result;
+
+            case 'quantity_below':
+                // Sprawdź czy użytkownik ma mniej niż określona ilość przedmiotu
+                $result = ($current_quantity < $quantity);
+                $this->debug_log("- Warunek 'quantity_below' (ma {$current_quantity} < {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                return $result;
+
+            case 'quantity_equal':
+                // Sprawdź czy użytkownik ma dokładnie określoną ilość przedmiotu
+                $result = ($current_quantity == $quantity);
+                $this->debug_log("- Warunek 'quantity_equal' (ma {$current_quantity} == {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                return $result;
+
+            default:
+                $this->debug_log("- Nieznany operator warunku ekwipunku: {$condition_op}");
+                return false;
+        }
+    }
+
+    /**
+     * Pobiera ekwipunek użytkownika
+     *
+     * @param int $user_id ID użytkownika
+     * @return array Tablica przedmiotów w ekwipunku
+     */
+    private function get_user_inventory(int $user_id): array
+    {
+        if (!$user_id) {
+            return [];
+        }
+
+        // Pobierz przedmioty z pola ACF 'items'
+        $items_field = get_field('items', 'user_' . $user_id);
+        $this->debug_log("Pobieranie ekwipunku dla użytkownika {$user_id}");
+        
+        // Jeśli pole items nie istnieje lub jest puste, zwróć pustą tablicę
+        if (!$items_field || !is_array($items_field) || empty($items_field)) {
+            $this->debug_log("Brak przedmiotów w ekwipunku lub pole nieznalezione");
+            return [];
+        }
+        
+        // Przygotuj tablicę przedmiotów w formacie do sprawdzania warunków
+        $inventory = [];
+        foreach ($items_field as $item) {
+            if (isset($item['item']) && isset($item['quantity'])) {
+                $inventory[] = [
+                    'item_id' => (int)$item['item'],
+                    'quantity' => (int)$item['quantity']
+                ];
+            }
+        }
+        
+        $this->debug_log("Znaleziono " . count($inventory) . " przedmiotów w ekwipunku");
+        return $inventory;
     }
 
     /**
