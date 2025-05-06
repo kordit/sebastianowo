@@ -35,7 +35,7 @@ if ($instance != 'kreator'): ?>
         $user_id = get_current_user_id();
 
 
-        $user_relation = get_field('backpack', 'user_' . $user_id) ?? 0;
+        $user_relation = get_field('mission_339', 'user_' . $user_id) ?? 0;
         et_r($user_relation);
         $user_has_met = get_fields('user_' . $user_id);
         et_r($user_has_met);

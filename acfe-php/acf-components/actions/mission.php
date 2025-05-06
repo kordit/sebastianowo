@@ -120,7 +120,7 @@ return array(
                 'failed' => 'Niepowodzenie',
                 'completed_npc' => 'Zalicz NPC',
                 'failed_npc' => 'oblej NPC',
-                'progress_npc' => 'w trakcie NPC',
+                'in_progress_npc' => 'w trakcie NPC',
                 'not_started_npc' => 'Niezaczęte NPC',
             ),
             'default_value' => 'not_started',

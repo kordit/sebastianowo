@@ -894,6 +894,320 @@ class DialogHandler
                                         $logger->debug_log("Utworzono powiadomienie dla odblokowania rejonu:", $notification);
                                         break;
 
+                                    case 'mission':
+                                        $mission_id = (int)($action['mission_id'] ?? 0);
+                                        $mission_status = $action['mission_status'] ?? '';
+                                        $task_id = $action['mission_task_id'] ?? '';
+                                        $task_status = $action['mission_task_status'] ?? '';
+                                        $npc_id = $action['npc_id'] ?? $npc_id; // Używaj ID NPC z akcji lub bieżącego NPC
+
+                                        $logger->debug_log("Wykonuję akcję misji: mission_id=$mission_id, status=$mission_status, task_id=$task_id, task_status=$task_status, npc_id=$npc_id");
+
+                                        if (empty($mission_id)) {
+                                            $logger->debug_log("BŁĄD: Nie podano ID misji");
+
+                                            $notification = [
+                                                'message' => "Błąd konfiguracji akcji: Brak ID misji",
+                                                'status' => 'bad'
+                                            ];
+                                            break;
+                                        }
+
+                                        // Sprawdź, czy misja istnieje w systemie
+                                        $mission_post = get_post($mission_id);
+                                        if (!$mission_post || $mission_post->post_type !== 'mission') {
+                                            $logger->debug_log("BŁĄD: Misja o ID $mission_id nie istnieje lub nie jest misją");
+
+                                            $notification = [
+                                                'message' => "Błąd: Misja nie istnieje (ID: $mission_id)",
+                                                'status' => 'bad'
+                                            ];
+                                            break;
+                                        }
+
+                                        $mission_name = $mission_post->post_title;
+                                        $mission_field_key = 'mission_' . $mission_id;
+
+                                        // Pobierz dane konkretnej misji bezpośrednio z pola użytkownika
+                                        $mission_data = get_field($mission_field_key, 'user_' . $user_id);
+
+                                        // Walidacja - czy misja jest zdefiniowana dla użytkownika
+                                        if ($mission_data === false) {
+                                            $logger->debug_log("Misja $mission_field_key nie znaleziona w danych użytkownika $user_id. Próba inicjalizacji.");
+
+                                            // Sprawdź czy pole ACF istnieje dla tej misji
+                                            $acf_field = acf_get_field("field_mission_{$mission_id}");
+                                            if (empty($acf_field)) {
+                                                $logger->debug_log("BŁĄD: Nie znaleziono definicji pola ACF dla misji $mission_id. Sprawdź konfigurację misji.");
+
+                                                $notification = [
+                                                    'message' => "Błąd: Misja niezdefiniowana w systemie (ID: $mission_id)",
+                                                    'status' => 'bad'
+                                                ];
+                                                break;
+                                            }
+                                        }
+
+                                        if (!is_array($mission_data)) {
+                                            $mission_data = [
+                                                'status' => 'not_started',
+                                                'assigned_date' => date('Y-m-d H:i:s'),
+                                                'completion_date' => '',
+                                                'tasks' => []
+                                            ];
+                                            $logger->debug_log("Utworzono nową misję dla użytkownika: $mission_name");
+                                        }
+
+                                        $logger->debug_log("Aktualny stan misji użytkownika:", $mission_data);
+
+                                        // Zapisujemy kopię oryginalnych danych do porównania po aktualizacji
+                                        $original_mission_data = $mission_data;
+
+                                        // Zaktualizuj status misji, jeśli podano
+                                        if (!empty($mission_status)) {
+                                            $old_status = $mission_data['status'];
+                                            $mission_data['status'] = $mission_status;
+
+                                            // Jeśli misja została ukończona, dodaj datę ukończenia
+                                            if ($mission_status === 'completed' && empty($mission_data['completion_date'])) {
+                                                $mission_data['completion_date'] = date('Y-m-d H:i:s');
+                                            }
+
+                                            $logger->debug_log("Zaktualizowano status misji '$mission_name' z '$old_status' na '$mission_status'");
+                                        }
+
+                                        // Zaktualizuj status zadania, jeśli podano
+                                        if (!empty($task_id) && !empty($task_status)) {
+                                            // Inicjalizuj tablicę zadań, jeśli nie istnieje
+                                            if (!isset($mission_data['tasks']) || !is_array($mission_data['tasks'])) {
+                                                $mission_data['tasks'] = [];
+                                            }
+
+                                            // Sprawdź, czy zadanie już istnieje i jakiego jest typu
+                                            $task_exists = isset($mission_data['tasks'][$task_id]);
+                                            $is_npc_task = false;
+                                            $current_task_value = null;
+
+                                            if ($task_exists) {
+                                                $current_task_value = $mission_data['tasks'][$task_id];
+                                                $is_npc_task = is_array($current_task_value);
+                                            }
+
+                                            // Sprawdź, czy status zadania ma prefiks _npc, co oznacza zadanie z NPC
+                                            $is_npc_status = preg_match('/_npc$/', $task_status);
+
+                                            // Jeśli to zadanie z NPC lub już istnieje jako zadanie z NPC
+                                            if ($is_npc_status || $is_npc_task) {
+                                                $logger->debug_log("Rozpoznano zadanie z NPC: task_id=$task_id, npc_id=$npc_id");
+
+                                                // Jeśli zadanie jeszcze nie istnieje lub nie jest tablicą, zainicjuj je
+                                                if (!$task_exists || !$is_npc_task) {
+                                                    $old_value = $task_exists ? $mission_data['tasks'][$task_id] : 'not_started';
+                                                    $mission_data['tasks'][$task_id] = [
+                                                        'status' => $is_npc_status ? 'not_started' : $task_status
+                                                    ];
+                                                    $logger->debug_log("Przekształcono proste zadanie na zadanie z NPC. Poprzedni status: $old_value");
+                                                }
+
+                                                // Jeśli mamy status NPC, zaktualizuj odpowiednie pole dla tego NPC
+                                                if ($is_npc_status && $npc_id) {
+                                                    // Usuń suffix _npc ze statusu dla NPC
+                                                    $clean_status = str_replace('_npc', '', $task_status);
+
+                                                    // Aktualizuj pola NPC
+                                                    $npc_field = 'npc_' . $npc_id;
+                                                    $npc_target_field = 'npc_target_' . $npc_id;
+
+                                                    $old_npc_status = isset($mission_data['tasks'][$task_id][$npc_field])
+                                                        ? $mission_data['tasks'][$task_id][$npc_field]
+                                                        : 'not_started';
+
+                                                    $mission_data['tasks'][$task_id][$npc_field] = $clean_status;
+                                                    $mission_data['tasks'][$task_id][$npc_target_field] = $clean_status;
+
+                                                    $logger->debug_log("Zaktualizowano status NPC $npc_id w zadaniu '$task_id' z '$old_npc_status' na '$clean_status'");
+
+                                                    // Jeśli NPC został zaliczony jako 'completed', sprawdź czy wszystkie NPC są zaliczone
+                                                    // aby zaktualizować ogólny status zadania
+                                                    if ($clean_status === 'completed') {
+                                                        $all_npcs_completed = true;
+                                                        foreach ($mission_data['tasks'][$task_id] as $key => $value) {
+                                                            // Sprawdź tylko pola npc_ (nie npc_target_)
+                                                            if (strpos($key, 'npc_') === 0 && strpos($key, 'npc_target_') !== 0) {
+                                                                if ($value !== 'completed') {
+                                                                    $all_npcs_completed = false;
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+
+                                                        if ($all_npcs_completed) {
+                                                            $old_task_status = $mission_data['tasks'][$task_id]['status'];
+                                                            $mission_data['tasks'][$task_id]['status'] = 'completed';
+                                                            $logger->debug_log("Wszystkie NPC ukończone, aktualizuję ogólny status zadania '$task_id' z '$old_task_status' na 'completed'");
+                                                        }
+                                                    }
+                                                } else {
+                                                    // Aktualizuj ogólny status zadania NPC
+                                                    $old_task_status = $mission_data['tasks'][$task_id]['status'];
+                                                    $mission_data['tasks'][$task_id]['status'] = $task_status;
+                                                    $logger->debug_log("Zaktualizowano ogólny status zadania NPC '$task_id' z '$old_task_status' na '$task_status'");
+                                                }
+                                            } else {
+                                                // Standardowe zadanie (nie NPC) - po prostu aktualizuj status
+                                                $old_task_status = $mission_data['tasks'][$task_id] ?? 'not_started';
+                                                $mission_data['tasks'][$task_id] = $task_status;
+                                                $logger->debug_log("Zaktualizowano status standardowego zadania '$task_id' z '$old_task_status' na '$task_status'");
+                                            }
+
+                                            // Sprawdź, czy wszystkie zadania są ukończone, aby automatycznie ukończyć misję
+                                            if ($task_status === 'completed' || ($is_npc_task && $mission_data['tasks'][$task_id]['status'] === 'completed')) {
+                                                $all_completed = true;
+
+                                                foreach ($mission_data['tasks'] as $task_key => $task_value) {
+                                                    // Obsługa zarówno prostych stringów jak i tablic dla zadań z NPC
+                                                    $task_status_value = is_array($task_value) ? $task_value['status'] : $task_value;
+
+                                                    if ($task_status_value !== 'completed') {
+                                                        $all_completed = false;
+                                                        break;
+                                                    }
+                                                }
+
+                                                // Jeśli wszystkie zadania są ukończone, a misja nie jest jeszcze oznaczona jako ukończona
+                                                if ($all_completed && $mission_data['status'] !== 'completed') {
+                                                    $mission_data['status'] = 'completed';
+                                                    $mission_data['completion_date'] = date('Y-m-d H:i:s');
+                                                    $logger->debug_log("Automatycznie ukończono misję '$mission_name' (wszystkie zadania ukończone)");
+                                                }
+                                            }
+                                        }
+
+                                        // Zapisz zaktualizowane dane misji, tylko jeśli dane zostały zmienione
+                                        if ($mission_data !== $original_mission_data) {
+                                            $result = update_field($mission_field_key, $mission_data, 'user_' . $user_id);
+                                            $logger->debug_log("Rezultat update_field dla misji $mission_field_key: " . ($result ? 'SUKCES' : 'BŁĄD'));
+
+                                            // Sprawdź, czy aktualizacja się powiodła
+                                            $updated_mission_data = get_field($mission_field_key, 'user_' . $user_id);
+
+                                            // Weryfikacja, czy dane zostały poprawnie zapisane
+                                            $update_successful = false;
+                                            if (is_array($updated_mission_data)) {
+                                                // Sprawdź, czy status misji się zmienił
+                                                if (!empty($mission_status) && isset($updated_mission_data['status']) && $updated_mission_data['status'] === $mission_status) {
+                                                    $update_successful = true;
+                                                }
+
+                                                // Sprawdź, czy status zadania się zmienił
+                                                if (!empty($task_id) && !empty($task_status)) {
+                                                    if (isset($updated_mission_data['tasks'][$task_id])) {
+                                                        $updated_task_value = $updated_mission_data['tasks'][$task_id];
+
+                                                        if (is_array($updated_task_value)) {
+                                                            // Dla zadania z NPC
+                                                            if ($is_npc_status && $npc_id) {
+                                                                $npc_field = 'npc_' . $npc_id;
+                                                                $clean_status = str_replace('_npc', '', $task_status);
+                                                                if (isset($updated_task_value[$npc_field]) && $updated_task_value[$npc_field] === $clean_status) {
+                                                                    $update_successful = true;
+                                                                }
+                                                            } else {
+                                                                if (isset($updated_task_value['status']) && $updated_task_value['status'] === $task_status) {
+                                                                    $update_successful = true;
+                                                                }
+                                                            }
+                                                        } else {
+                                                            // Dla prostego zadania
+                                                            if ($updated_task_value === $task_status) {
+                                                                $update_successful = true;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            $logger->debug_log("Stan misji po aktualizacji:", $updated_mission_data ?: 'Błąd aktualizacji');
+
+                                            if (!$update_successful) {
+                                                $logger->debug_log("UWAGA: Nie udało się zweryfikować aktualizacji misji!");
+
+                                                $notification = [
+                                                    'message' => "Wystąpił błąd podczas aktualizacji misji",
+                                                    'status' => 'bad'
+                                                ];
+                                                break;
+                                            }
+                                        } else {
+                                            $logger->debug_log("Misja nie wymaga aktualizacji - dane nie uległy zmianie");
+                                        }
+
+                                        // Przygotuj komunikat dla użytkownika
+                                        if (!empty($task_id) && !empty($task_status)) {
+                                            // Pobierz szczegóły zadania, jeśli możliwe
+                                            $task_name = $task_id; // Domyślnie używamy ID zadania
+                                            $mission_tasks = get_field('mission_tasks', $mission_id);
+                                            if (is_array($mission_tasks)) {
+                                                foreach ($mission_tasks as $task) {
+                                                    if (isset($task['task_id']) && $task['task_id'] === $task_id) {
+                                                        $task_name = $task['task_title'] ?? $task_id;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            $status_display = str_replace('_npc', '', $task_status);
+
+                                            if ($status_display === 'completed') {
+                                                $notification = [
+                                                    'message' => "Ukończono zadanie: $task_name",
+                                                    'status' => 'success'
+                                                ];
+                                            } elseif ($status_display === 'in_progress' || $status_display === 'progress') {
+                                                $notification = [
+                                                    'message' => "Rozpoczęto zadanie: $task_name",
+                                                    'status' => 'info'
+                                                ];
+                                            } elseif ($status_display === 'failed') {
+                                                $notification = [
+                                                    'message' => "Nie udało się wykonać zadania: $task_name",
+                                                    'status' => 'bad'
+                                                ];
+                                            } else {
+                                                $notification = [
+                                                    'message' => "Zaktualizowano status zadania: $task_name",
+                                                    'status' => 'info'
+                                                ];
+                                            }
+                                        } elseif (!empty($mission_status)) {
+                                            if ($mission_status === 'completed') {
+                                                $notification = [
+                                                    'message' => "Ukończono misję: $mission_name",
+                                                    'status' => 'success'
+                                                ];
+                                            } elseif ($mission_status === 'in_progress') {
+                                                $notification = [
+                                                    'message' => "Rozpoczęto misję: $mission_name",
+                                                    'status' => 'info'
+                                                ];
+                                            } elseif ($mission_status === 'failed') {
+                                                $notification = [
+                                                    'message' => "Nie udało się ukończyć misji: $mission_name",
+                                                    'status' => 'bad'
+                                                ];
+                                            } else {
+                                                $notification = [
+                                                    'message' => "Zaktualizowano status misji: $mission_name",
+                                                    'status' => 'info'
+                                                ];
+                                            }
+                                        }
+
+                                        if ($notification) {
+                                            $logger->debug_log("Utworzono powiadomienie dla misji:", $notification);
+                                        }
+                                        break;
+
                                     case 'change_area':
                                         $area_id = (int)($action['area'] ?? 0);
 
