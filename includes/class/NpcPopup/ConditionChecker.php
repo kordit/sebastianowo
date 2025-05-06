@@ -1,39 +1,21 @@
 <?php
 
 /**
- * Abstrakcyjna klasa ConditionChecker
- *
- * Bazowa klasa dla wszystkich typów sprawdzaczy warunków NPC.
- *
+ * Interfejs ConditionChecker
+ * 
+ * Definiuje metody dla klas sprawdzających warunki dialogów NPC.
+ * 
  * @package Game
+ * @subpackage NpcPopup
  * @since 1.0.0
  */
-
-abstract class ConditionChecker
+interface ConditionChecker
 {
     /**
-     * Logger do zapisywania informacji debugowania
-     * 
-     * @var NpcLogger
-     */
-    protected NpcLogger $logger;
-
-    /**
-     * Konstruktor klasy
-     * 
-     * @param NpcLogger $logger Logger do zapisywania informacji debugowania
-     */
-    public function __construct(NpcLogger $logger)
-    {
-        $this->logger = $logger;
-    }
-
-    /**
-     * Sprawdza czy warunek jest spełniony
+     * Sprawdza, czy określone warunki są spełnione
      *
-     * @param array $condition Warunek do sprawdzenia
-     * @param array $criteria Kryteria do sprawdzenia
-     * @return bool Czy warunek jest spełniony
+     * @param array $conditions Warunki do sprawdzenia
+     * @return bool Czy warunki są spełnione
      */
-    abstract public function check_condition(array $condition, array $criteria): bool;
+    public function check_conditions(array $conditions): bool;
 }

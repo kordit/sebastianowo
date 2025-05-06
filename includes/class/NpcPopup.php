@@ -79,8 +79,9 @@ class NpcPopup
      */
     public function register_rest_endpoint(): void
     {
+        // Endpoint dla głównego dialogu NPC
         register_rest_route("{$this->prefix}/v1", '/npc/popup', [
-            'methods' => 'POST',
+            'methods' => 'POST',  // Określenie metody HTTP jako POST
             'callback' => [$this, 'get_npc_data'],
             'permission_callback' => function (\WP_REST_Request $request): bool {
                 // Zapewnij, że WordPress wie, że jesteśmy zalogowani

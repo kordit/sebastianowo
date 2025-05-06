@@ -29,6 +29,8 @@ const buildNpcPopup = (npcData, userId) => {
     popupContainer.id = 'npc-dialog-popup';
     popupContainer.className = 'npc-dialog-popup';
 
+    // Logowanie struktury dialogu w celach diagnostycznych
+
     // Utwórz strukturę popupu z układem pełnoekranowym
     const popupContent = `
         <div class="npc-dialog-container">
@@ -40,10 +42,10 @@ const buildNpcPopup = (npcData, userId) => {
                 <div class="npc-dialog-content">
                     <div class="npc-dialog-bubble">
                         <div class="npc-dialog-speaker">${npcData.name} mówi:</div>
-                        <div class="npc-dialog-text">${formatDialogText(npcData.dialog?.question || '')}</div>
+                        <div class="npc-dialog-text">${formatDialogText(npcData.dialog?.text || npcData.dialog?.question || '')}</div>
                     </div>
-                    <div class="npc-dialog-answers" data-dialog-id="${npcData.dialog?.id_pola || ''}">
-                        ${buildAnswerButtons(npcData.dialog?.anwsers || [])}
+                    <div class="npc-dialog-answers" data-dialog-id="${npcData.dialog?.id || npcData.dialog?.id_pola || ''}">
+                        ${buildAnswerButtons(npcData.dialog?.answers || npcData.dialog?.anwsers || [])}
                     </div>
                 </div>
                 <div class="npc-dialog-avatar">
@@ -78,9 +80,6 @@ const buildNpcPopup = (npcData, userId) => {
  */
 const formatDialogText = (text) => {
     if (!text) return '';
-
-    // Logujemy otrzymany tekst do celów debugowania
-    console.log('Tekst otrzymany do formatowania:', text);
 
     // Usuń niepotrzebne cudzysłowy na początku i końcu (jeśli istnieją)
     let formattedText = text.trim();
@@ -121,12 +120,14 @@ const buildAnswerButtons = (answers) => {
     }
 
     return answers.map(answer => {
-        const goToId = answer.go_to_id || 'close';
+        // Obsługa różnych formatów dialogów (zarówno z ACF jak i po uproszczeniu)
+        const goToId = answer.next_dialog || answer.go_to_id || 'close';
         const buttonClass = answer.type_anwser ? 'npc-answer-button special' : 'npc-answer-button';
+        const answerText = answer.text || answer.anwser_text || 'Dalej';
 
         return `
             <button class="${buttonClass}" data-go-to="${goToId}">
-                ${answer.anwser_text || 'Dalej'}
+                ${answerText}
             </button>
         `;
     }).join('');
@@ -201,30 +202,37 @@ const handleDialogNavigation = async (goToId, npcData, userId) => {
 
         const dataArray = Object.entries(data);
 
-        console.log(dataArray);
-
-
 
         // Pobranie kolejnej części dialogu z API
         const response = await axios({
             method: 'POST',
-            url: '/wp-json/game/v1/npc/dialog',
+            url: '/wp-json/game/v1/dialog', // Zaktualizowana ścieżka endpointu
             data: {
                 npc_id: npcData.id,
                 dialog_id: goToId,
                 current_url: currentUrl,
                 user_id: userId,
+                page_data: pageData
             }
         });
 
         const dialogData = response?.data;
-        if (!dialogData || !dialogData.dialog_data) {
+        if (!dialogData || !dialogData.success) {
             console.error("Brak danych dialogu w odpowiedzi:", response);
             return;
         }
 
+        // Dostosowanie struktury danych do formatu używanego przez updateDialogContent
+        const formattedData = {
+            dialog: dialogData.dialog,
+            name: dialogData.npc?.name || npcData.name,
+            user_id: userId,
+            id: npcData.id,
+            thumbnail_url: dialogData.npc?.image || npcData.thumbnail_url
+        };
+
         // Aktualizacja dialogu
-        updateDialogContent(dialogData.dialog_data);
+        updateDialogContent(formattedData);
 
     } catch (error) {
         console.error("Błąd podczas pobierania dialogu:", error);
@@ -246,8 +254,10 @@ const updateDialogContent = (npcData) => {
     const answersContainer = document.querySelector('.npc-dialog-answers');
     const speakerName = document.querySelector('.npc-dialog-speaker');
 
+    // Logowanie struktury dialogu w celach diagnostycznych
+
     if (dialogText && npcData.dialog) {
-        dialogText.innerHTML = formatDialogText(npcData.dialog.question || '');
+        dialogText.innerHTML = formatDialogText(npcData.dialog.text || npcData.dialog.question || '');
     }
 
     if (speakerName && npcData.name) {
@@ -255,8 +265,8 @@ const updateDialogContent = (npcData) => {
     }
 
     if (answersContainer && npcData.dialog) {
-        answersContainer.innerHTML = buildAnswerButtons(npcData.dialog.anwsers || []);
-        answersContainer.setAttribute('data-dialog-id', npcData.dialog.id_pola || '');
+        answersContainer.innerHTML = buildAnswerButtons(npcData.dialog.answers || npcData.dialog.anwsers || []);
+        answersContainer.setAttribute('data-dialog-id', npcData.dialog.id || npcData.dialog.id_pola || '');
 
         // Dodaj nowe event listenery
         const newAnswerButtons = answersContainer.querySelectorAll('.npc-answer-button');

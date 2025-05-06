@@ -9,8 +9,46 @@
  * @since 1.0.0
  */
 
-class InventoryConditionChecker extends ConditionChecker
+class InventoryConditionChecker implements ConditionChecker
 {
+    /**
+     * Logger do zapisywania informacji o działaniu
+     *
+     * @var NpcLogger
+     */
+    private NpcLogger $logger;
+
+    /**
+     * Konstruktor klasy InventoryConditionChecker
+     */
+    public function __construct()
+    {
+        $this->logger = new NpcLogger();
+    }
+
+    /**
+     * Implementacja metody z interfejsu ConditionChecker
+     *
+     * @param array $conditions Warunki do sprawdzenia
+     * @return bool Czy warunki są spełnione
+     */
+    public function check_conditions(array $conditions): bool
+    {
+        // Ta metoda jest wymagana przez interfejs ConditionChecker
+        foreach ($conditions as $condition) {
+            if (isset($condition['type']) && $condition['type'] === 'inventory') {
+                $criteria = [
+                    'user_id' => $condition['user_id'] ?? get_current_user_id()
+                ];
+                if (!$this->check_condition($condition, $criteria)) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+
     /**
      * Sprawdza warunek posiadania przedmiotu w ekwipunku
      *
@@ -25,21 +63,21 @@ class InventoryConditionChecker extends ConditionChecker
         $item_id = isset($condition['item_id']) ? absint($condition['item_id']) : 0;
         $quantity = isset($condition['quantity']) ? absint($condition['quantity']) : 1;
 
-        $this->logger->debug_log("Sprawdzanie warunku ekwipunku:");
-        $this->logger->debug_log("- User ID: {$user_id}");
-        $this->logger->debug_log("- Operator warunku: {$condition_op}");
-        $this->logger->debug_log("- ID przedmiotu: {$item_id}");
-        $this->logger->debug_log("- Wymagana ilość: {$quantity}");
+        $this->logger->log("Sprawdzanie warunku ekwipunku:", 'debug');
+        $this->logger->log("- User ID: {$user_id}", 'debug');
+        $this->logger->log("- Operator warunku: {$condition_op}", 'debug');
+        $this->logger->log("- ID przedmiotu: {$item_id}", 'debug');
+        $this->logger->log("- Wymagana ilość: {$quantity}", 'debug');
 
         // Jeśli użytkownik nie jest zalogowany lub brak ID przedmiotu, warunek nie jest spełniony
         if (!$user_id || !$item_id) {
-            $this->logger->debug_log("- Brak User ID lub Item ID - warunek niespełniony");
+            $this->logger->log("- Brak User ID lub Item ID - warunek niespełniony", 'debug');
             return false;
         }
 
         // Pobierz ekwipunek użytkownika
         $user_inventory = $this->get_user_inventory($user_id);
-        $this->logger->debug_log("- Ekwipunek użytkownika:", $user_inventory);
+        $this->logger->log("- Pobrano ekwipunek użytkownika", 'debug');
 
         // Oblicz aktualną ilość przedmiotu w ekwipunku użytkownika
         $current_quantity = 0;
@@ -50,43 +88,43 @@ class InventoryConditionChecker extends ConditionChecker
                 }
             }
         }
-        $this->logger->debug_log("- Aktualna ilość przedmiotu {$item_id}: {$current_quantity}");
+        $this->logger->log("- Aktualna ilość przedmiotu {$item_id}: {$current_quantity}", 'debug');
 
         // Sprawdź warunek ekwipunku w zależności od operatora
         switch ($condition_op) {
             case 'has_item':
                 // Sprawdź czy użytkownik posiada przedmiot w wymaganej ilości
                 $result = ($current_quantity >= $quantity);
-                $this->logger->debug_log("- Warunek 'has_item' (ma {$current_quantity} >= {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                $this->logger->log("- Warunek 'has_item' (ma {$current_quantity} >= {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'), 'debug');
                 return $result;
 
             case 'not_has_item':
             case 'has_not_item': // Obsługuj oba warianty nazwy
                 // Sprawdź czy użytkownik nie posiada przedmiotu lub ma mniej niż wymagane
                 $result = ($current_quantity < $quantity);
-                $this->logger->debug_log("- Warunek '{$condition_op}' (ma {$current_quantity} < {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                $this->logger->log("- Warunek '{$condition_op}' (ma {$current_quantity} < {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'), 'debug');
                 return $result;
 
             case 'quantity_above':
                 // Sprawdź czy użytkownik ma więcej niż określona ilość przedmiotu
                 $result = ($current_quantity > $quantity);
-                $this->logger->debug_log("- Warunek 'quantity_above' (ma {$current_quantity} > {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                $this->logger->log("- Warunek 'quantity_above' (ma {$current_quantity} > {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'), 'debug');
                 return $result;
 
             case 'quantity_below':
                 // Sprawdź czy użytkownik ma mniej niż określona ilość przedmiotu
                 $result = ($current_quantity < $quantity);
-                $this->logger->debug_log("- Warunek 'quantity_below' (ma {$current_quantity} < {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                $this->logger->log("- Warunek 'quantity_below' (ma {$current_quantity} < {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'), 'debug');
                 return $result;
 
             case 'quantity_equal':
                 // Sprawdź czy użytkownik ma dokładnie określoną ilość przedmiotu
                 $result = ($current_quantity == $quantity);
-                $this->logger->debug_log("- Warunek 'quantity_equal' (ma {$current_quantity} == {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'));
+                $this->logger->log("- Warunek 'quantity_equal' (ma {$current_quantity} == {$quantity}): " . ($result ? 'SPEŁNIONY' : 'NIESPEŁNIONY'), 'debug');
                 return $result;
 
             default:
-                $this->logger->debug_log("- Nieznany operator warunku ekwipunku: {$condition_op}");
+                $this->logger->log("- Nieznany operator warunku ekwipunku: {$condition_op}", 'debug');
                 return false;
         }
     }
@@ -105,11 +143,11 @@ class InventoryConditionChecker extends ConditionChecker
 
         // Pobierz przedmioty z pola ACF 'items'
         $items_field = get_field('items', 'user_' . $user_id);
-        $this->logger->debug_log("Pobieranie ekwipunku dla użytkownika {$user_id}");
+        $this->logger->log("Pobieranie ekwipunku dla użytkownika {$user_id}", 'debug');
 
         // Jeśli pole items nie istnieje lub jest puste, zwróć pustą tablicę
         if (!$items_field || !is_array($items_field) || empty($items_field)) {
-            $this->logger->debug_log("Brak przedmiotów w ekwipunku lub pole nieznalezione");
+            $this->logger->log("Brak przedmiotów w ekwipunku lub pole nieznalezione", 'debug');
             return [];
         }
 
@@ -124,7 +162,7 @@ class InventoryConditionChecker extends ConditionChecker
             }
         }
 
-        $this->logger->debug_log("Znaleziono " . count($inventory) . " przedmiotów w ekwipunku");
+        $this->logger->log("Znaleziono " . count($inventory) . " przedmiotów w ekwipunku", 'debug');
         return $inventory;
     }
 }
