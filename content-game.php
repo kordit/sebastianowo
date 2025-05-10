@@ -32,22 +32,19 @@ if ($instance != 'kreator'): ?>
             $scene = '';
         }
         $npc_id = 449;
+        $npc_fields = get_fields(449);
+        et_r($npc_fields);
         $user_id = get_current_user_id();
-
-
         $user_relation = get_field('mission_339', 'user_' . $user_id) ?? 0;
-        et_r($user_relation);
         $user_has_met = get_fields('user_' . $user_id);
-        et_r($user_has_met);
-
-        // et_r(get_fields(449)['dialogs']);
 
 
-        // if ($instance) {
-        //     include(THEME_SRC . '/page-templates/' . $instance . '/template.php');
-        // } elseif (is_author()) {
-        //     include(THEME_SRC . '/page-templates/author/config.php');
-        // } elseif (is_archive()) {
+        if ($instance) {
+            include(THEME_SRC . '/page-templates/' . $instance . '/template.php');
+        } elseif (is_author()) {
+            include(THEME_SRC . '/page-templates/author/config.php');
+        }
+        //  elseif (is_archive()) {
         //     $single_src = get_post()->post_type;
         //     include(THEME_SRC . '/page-templates/' . $single_src . '/main/template.php');
         // } elseif (is_single()) {

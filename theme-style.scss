@@ -1,3 +1,11 @@
+:root {
+    --c1: #421318;
+    --c2: #A5A394;
+    --c3: #745F40;
+    --c4: #0E0300;
+    --c5: #F1F4F1;
+}
+
 @font-face {
     font-display: swap;
     /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
@@ -46,6 +54,7 @@
     font-weight: 700;
     src: url('assets/fonts/work-sans-v19-latin_latin-ext-700.woff2') format('woff2');
 }
+
 
 .walking-effect {
     animation: fadeZoomBlur 1s linear forwards;
@@ -121,13 +130,6 @@
 
 pre {
     color: #fff !important;
-    // position: fixed;
-    // top: 0;
-    // left: 0;
-    // width: 100%;
-    // height: 100%;
-    // z-index: 1000000;
-    // background-color: #000;
     overflow: scroll;
 }
 

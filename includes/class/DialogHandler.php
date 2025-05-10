@@ -417,6 +417,241 @@ class DialogHandler
                         if (isset($answer['type_anwser']) && !empty($answer['type_anwser'])) {
                             $logger->debug_log("Odpowiedź zawiera akcje do wykonania:", $answer['type_anwser']);
 
+                            // -- NAJPIERW WERYFIKUJEMY WSZYSTKIE AKCJE --
+                            // Zmienna określająca, czy wszystkie akcje są wykonalne
+                            $all_actions_possible = true;
+                            // Komunikat o błędzie, który pojawi się jeśli jakaś akcja jest niemożliwa
+                            $error_notification = null;
+
+                            // Pobierz dane plecaka i zasobów użytkownika za pomocą ACF
+                            $backpack = get_field(BACKPACK['name'], 'user_' . $user_id);
+                            if (!is_array($backpack)) {
+                                $backpack = [];
+                                // Zainicjuj domyślne wartości wszystkich pól plecaka
+                                foreach (BACKPACK['fields'] as $field_key => $field_data) {
+                                    $backpack[$field_key] = $field_data['default'];
+                                }
+                            }
+
+                            // Pobierz ekwipunek użytkownika (przedmioty)
+                            $items_inventory = get_field('items', 'user_' . $user_id);
+                            if (!is_array($items_inventory)) {
+                                $items_inventory = [];
+                            }
+
+                            // Pobierz umiejętności użytkownika
+                            $skills = get_field(SKILLS['name'], 'user_' . $user_id);
+                            if (!is_array($skills)) {
+                                $skills = [];
+                                // Zainicjuj domyślne wartości wszystkich umiejętności
+                                foreach (SKILLS['fields'] as $field_key => $field_data) {
+                                    $skills[$field_key] = $field_data['default'];
+                                }
+                            }
+
+                            // Sprawdź każdą akcję, czy jest wykonalna, ale jej nie wykonuj
+                            foreach ($answer['type_anwser'] as $action) {
+                                $action_type = $action['acf_fc_layout'] ?? '';
+                                $logger->debug_log("Weryfikacja akcji:", $action);
+
+                                switch ($action_type) {
+                                    case 'transaction':
+                                        // Sprawdź, czy transakcja jest wykonalna
+                                        $currency = $action['backpack'] ?? '';
+                                        $value = (int)($action['value'] ?? 0);
+
+                                        // Mapowanie nazw z polskiego na klucze systemowe
+                                        $currency_mapping = [
+                                            'papierosy' => 'cigarettes',
+                                            'szlugi' => 'cigarettes',
+                                            'złoto' => 'gold',
+                                            'zloto' => 'gold',
+                                            'hajs' => 'gold',
+                                            'grzyby' => 'mushrooms',
+                                            'grzybki' => 'mushrooms',
+                                            'piwo' => 'beer',
+                                            'browary' => 'beer',
+                                            'alko' => 'vodka',
+                                            'wóda' => 'vodka',
+                                            'wódka' => 'vodka',
+                                            'klej' => 'glue',
+                                            'kleje' => 'glue',
+                                            'mj' => 'weed',
+                                            'zioło' => 'weed',
+                                            'ziolo' => 'weed',
+                                            'zielone' => 'weed',
+                                            'marihuana' => 'weed'
+                                        ];
+
+                                        // Sprawdź czy trzeba zamapować klucz
+                                        if (isset($currency_mapping[$currency])) {
+                                            $mapped_currency = $currency_mapping[$currency];
+                                            $logger->debug_log("MAPOWANIE WALUTY: Zamieniono klucz '$currency' na '$mapped_currency'");
+                                            $currency = $mapped_currency;
+                                        }
+
+                                        // Jeśli zabieramy zasoby (wartość ujemna), sprawdź czy użytkownik ma ich wystarczającą ilość
+                                        if ($value < 0) {
+                                            $current_value = isset($backpack[$currency]) ? (int)$backpack[$currency] : 0;
+                                            $logger->debug_log("Weryfikacja transakcji: waluta=$currency, wartość=$value, dostępne=$current_value");
+
+                                            if (abs($value) > $current_value) {
+                                                $all_actions_possible = false;
+                                                $error_notification = [
+                                                    'message' => "Nie masz wystarczającej ilości $currency! Potrzeba " . abs($value) . ", a masz $current_value.",
+                                                    'status' => 'bad'
+                                                ];
+                                                $logger->debug_log("NIEPOWODZENIE WERYFIKACJI TRANSAKCJI: Próba zabrania " . abs($value) . " $currency, ale użytkownik ma tylko $current_value");
+                                                break 2; // Wyjdź z obydwu pętli (foreach i switch)
+                                            }
+                                        }
+                                        break;
+
+                                    case 'item':
+                                        $item_action = $action['item_action'] ?? '';
+                                        $item_id = (int)($action['item'] ?? 0);
+                                        $quantity = (int)($action['quantity'] ?? 1);
+
+                                        // Weryfikuj tylko akcje "take" (zabieranie przedmiotu)
+                                        if ($item_action === 'take') {
+                                            $logger->debug_log("Weryfikacja akcji przedmiotu: $item_action, ID: $item_id, ilość: $quantity");
+
+                                            if (!$item_id) {
+                                                $logger->debug_log("BŁĄD: Nieprawidłowe ID przedmiotu");
+                                                $all_actions_possible = false;
+                                                $error_notification = [
+                                                    'message' => "Błąd konfiguracji: nieprawidłowy przedmiot",
+                                                    'status' => 'bad'
+                                                ];
+                                                break 2;
+                                            }
+
+                                            // Pobierz informacje o przedmiocie
+                                            $item_post = get_post($item_id);
+                                            if (!$item_post || $item_post->post_type !== 'item') {
+                                                $logger->debug_log("BŁĄD: Przedmiot o ID $item_id nie istnieje");
+                                                $all_actions_possible = false;
+                                                $error_notification = [
+                                                    'message' => "Błąd konfiguracji: przedmiot nie istnieje",
+                                                    'status' => 'bad'
+                                                ];
+                                                break 2;
+                                            }
+
+                                            $item_name = $item_post->post_title;
+
+                                            // Flaga określająca, czy przedmiot został znaleziony w ekwipunku
+                                            $item_found = false;
+                                            $current_quantity = 0;
+
+                                            // Szukamy przedmiotu w ekwipunku
+                                            foreach ($items_inventory as $inventory_item) {
+                                                if (isset($inventory_item['item']) && (int)$inventory_item['item'] === $item_id) {
+                                                    $item_found = true;
+                                                    $current_quantity = (int)($inventory_item['quantity'] ?? 0);
+                                                    break;
+                                                }
+                                            }
+
+                                            if (!$item_found || $current_quantity < $quantity) {
+                                                $all_actions_possible = false;
+                                                $error_notification = [
+                                                    'message' => "Nie posiadasz wystarczającej ilości przedmiotu $item_name! Potrzeba {$quantity}, a masz {$current_quantity}.",
+                                                    'status' => 'bad'
+                                                ];
+                                                $logger->debug_log("NIEPOWODZENIE WERYFIKACJI PRZEDMIOTU: Próba zabrania $quantity x $item_name, ale użytkownik ma tylko $current_quantity");
+                                                break 2;
+                                            }
+                                        }
+                                        break;
+
+                                    case 'skills':
+                                        $skill_type = $action['type_of_skills'] ?? '';
+                                        $skill_value = (int)($action['value'] ?? 0);
+
+                                        // Weryfikuj tylko akcje zmniejszające wartość umiejętności
+                                        if ($skill_value < 0) {
+                                            $logger->debug_log("Weryfikacja akcji umiejętności: typ=$skill_type, wartość=$skill_value");
+
+                                            if (empty($skill_type)) {
+                                                $logger->debug_log("BŁĄD: Nie podano typu umiejętności");
+                                                $all_actions_possible = false;
+                                                $error_notification = [
+                                                    'message' => "Błąd konfiguracji: nieprawidłowy typ umiejętności",
+                                                    'status' => 'bad'
+                                                ];
+                                                break 2;
+                                            }
+
+                                            // Sprawdź, czy podany typ umiejętności istnieje w strukturze
+                                            if (!isset(SKILLS['fields'][$skill_type])) {
+                                                $logger->debug_log("BŁĄD: Nieprawidłowy typ umiejętności: $skill_type");
+                                                $all_actions_possible = false;
+                                                $error_notification = [
+                                                    'message' => "Błąd konfiguracji: nieprawidłowy typ umiejętności",
+                                                    'status' => 'bad'
+                                                ];
+                                                break 2;
+                                            }
+
+                                            // Pobierz aktualną wartość umiejętności
+                                            $current_value = isset($skills[$skill_type]) ? (int)$skills[$skill_type] : 0;
+
+                                            if (abs($skill_value) > $current_value) {
+                                                $skill_label = SKILLS['fields'][$skill_type]['label'];
+                                                $all_actions_possible = false;
+                                                $error_notification = [
+                                                    'message' => "Nie masz wystarczającego poziomu umiejętności {$skill_label}! Wymagane " . abs($skill_value) . ", a masz $current_value.",
+                                                    'status' => 'bad'
+                                                ];
+                                                $logger->debug_log("NIEPOWODZENIE WERYFIKACJI UMIEJĘTNOŚCI: Próba zmniejszenia {$skill_type} o " . abs($skill_value) . ", ale użytkownik ma tylko $current_value");
+                                                break 2;
+                                            }
+                                        }
+                                        break;
+
+                                    // Inne typy akcji nie wymagają weryfikacji, więc je pomijamy
+                                    default:
+                                        break;
+                                }
+                            }
+
+                            // Jeśli co najmniej jedna akcja nie jest wykonalna, przerwij wszystkie
+                            if (!$all_actions_possible) {
+                                $logger->debug_log("Nie można wykonać wszystkich akcji. Akcje zostały anulowane.");
+
+                                // Jeśli nie ma komunikatu o błędzie, użyj domyślnego
+                                if (!$error_notification) {
+                                    $error_notification = [
+                                        'message' => "Nie można wykonać wszystkich wymaganych akcji.",
+                                        'status' => 'bad'
+                                    ];
+                                }
+
+                                $logger->debug_log("Akcje odrzucone - niemożliwe do wykonania", $error_notification);
+
+                                // Zamiast kontynuować do następnego dialogu, wracamy ten sam dialog
+                                // aby użytkownik mógł wybrać inną opcję
+                                $response_data = [
+                                    'success' => true,
+                                    'dialog' => $dialog_manager->simplify_dialog($prev_dialog),
+                                    'npc' => [
+                                        'id' => $npc->ID,
+                                        'name' => $npc->post_title,
+                                        'image' => get_the_post_thumbnail_url($npc_id, 'full') ?: '',
+                                    ],
+                                    'notification' => $error_notification
+                                ];
+
+                                $logger->debug_log("Zwracam ten sam dialog (warunki akcji nie spełnione):", $response_data);
+                                $logger->debug_log("===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA DIALOGU =====");
+
+                                return new \WP_REST_Response($response_data, 200);
+                            }
+
+                            // -- JEŚLI DOTARLIŚMY TUTAJ, WSZYSTKIE AKCJE SĄ WYKONALNE --
+                            $logger->debug_log("WSZYSTKIE AKCJE SĄ WYKONALNE, PRZYSTĘPUJĘ DO ICH REALIZACJI");
+
                             // Przetwórz każdą akcję w odpowiedzi
                             foreach ($answer['type_anwser'] as $action) {
                                 $logger->debug_log("Przetwarzanie akcji:", $action);
@@ -425,10 +660,16 @@ class DialogHandler
 
                                 switch ($action_type) {
                                     case 'transaction':
-                                        $currency = $action['backpack'] ?? '';
-                                        $value = (int)($action['value'] ?? 0);
+                                        // Sprawdź wszystkie transakcje przed ich wykonaniem
+                                        // Znajdź wszystkie akcje transaction w tej odpowiedzi
+                                        $all_transactions = [];
+                                        foreach ($answer['type_anwser'] as $trans_check) {
+                                            if (isset($trans_check['acf_fc_layout']) && $trans_check['acf_fc_layout'] === 'transaction') {
+                                                $all_transactions[] = $trans_check;
+                                            }
+                                        }
 
-                                        $logger->debug_log("Wykonuję transakcję: waluta=$currency, wartość=$value");
+                                        $logger->debug_log("Znaleziono " . count($all_transactions) . " transakcji do wykonania");
 
                                         // Pobierz dane plecaka za pomocą ACF
                                         $backpack = get_field(BACKPACK['name'], 'user_' . $user_id);
@@ -440,17 +681,68 @@ class DialogHandler
                                             }
                                         }
 
-                                        // Zapisz obecną wartość waluty do logów
-                                        $current_value = isset($backpack[$currency]) ? (int)$backpack[$currency] : 0;
-                                        $logger->debug_log("Obecna wartość waluty $currency w plecaku dla użytkownika $user_id: $current_value");
+                                        // Sprawdź czy wszystkie transakcje są wykonalne
+                                        $all_transactions_possible = true;
+                                        $failed_currency = '';
+                                        $failed_value = 0;
+                                        $failed_current = 0;
 
-                                        // Jeśli próbujemy zabrać walutę (wartość ujemna), sprawdź czy użytkownik ma jej wystarczającą ilość
-                                        if ($value < 0 && abs($value) > $current_value) {
-                                            $logger->debug_log("NIEPOWODZENIE TRANSAKCJI: Próba zabrania {$value} $currency, ale użytkownik ma tylko $current_value");
+                                        foreach ($all_transactions as $trans_item) {
+                                            $check_currency = $trans_item['backpack'] ?? '';
+                                            $check_value = (int)($trans_item['value'] ?? 0);
+
+                                            // Mapowanie nazw z polskiego na klucze systemowe
+                                            $currency_mapping = [
+                                                'papierosy' => 'cigarettes',
+                                                'szlugi' => 'cigarettes',
+                                                'złoto' => 'gold',
+                                                'zloto' => 'gold',
+                                                'hajs' => 'gold',
+                                                'grzyby' => 'mushrooms',
+                                                'grzybki' => 'mushrooms',
+                                                'piwo' => 'beer',
+                                                'browary' => 'beer',
+                                                'alko' => 'vodka',
+                                                'wóda' => 'vodka',
+                                                'wódka' => 'vodka',
+                                                'klej' => 'glue',
+                                                'kleje' => 'glue',
+                                                'mj' => 'weed',
+                                                'zioło' => 'weed',
+                                                'ziolo' => 'weed',
+                                                'zielone' => 'weed',
+                                                'marihuana' => 'weed'
+                                            ];
+
+                                            // Sprawdź czy trzeba zamapować klucz
+                                            if (isset($currency_mapping[$check_currency])) {
+                                                $mapped_currency = $currency_mapping[$check_currency];
+                                                $logger->debug_log("MAPOWANIE WALUTY: Zamieniono klucz '$check_currency' na '$mapped_currency'");
+                                                $check_currency = $mapped_currency;
+                                            }
+
+                                            if ($check_value < 0) { // Sprawdzamy tylko gdy zabieramy zasoby
+                                                $check_current = isset($backpack[$check_currency]) ? (int)$backpack[$check_currency] : 0;
+                                                $logger->debug_log("Sprawdzanie transakcji: waluta=$check_currency, wartość=$check_value, dostępne=$check_current");
+
+                                                if (abs($check_value) > $check_current) {
+                                                    $all_transactions_possible = false;
+                                                    $failed_currency = $check_currency;
+                                                    $failed_value = $check_value;
+                                                    $failed_current = $check_current;
+                                                    $logger->debug_log("NIEPOWODZENIE WERYFIKACJI TRANSAKCJI: Próba zabrania " . abs($check_value) . " $check_currency, ale użytkownik ma tylko $check_current");
+                                                    break; // Kończymy sprawdzanie gdy znajdziemy pierwszą niemożliwą transakcję
+                                                }
+                                            }
+                                        }
+
+                                        // Jeśli którakolwiek transakcja nie jest wykonalna, przerwij wszystkie
+                                        if (!$all_transactions_possible) {
+                                            $logger->debug_log("Nie można wykonać wszystkich transakcji. Transakcje zostały anulowane.");
 
                                             // Przygotuj powiadomienie o niewystarczających środkach
                                             $notification = [
-                                                'message' => "Nie masz wystarczającej ilości $currency! Potrzeba " . abs($value) . ", a masz $current_value.",
+                                                'message' => "Nie masz wystarczającej ilości $failed_currency! Potrzeba " . abs($failed_value) . ", a masz $failed_current.",
                                                 'status' => 'bad'
                                             ];
 
@@ -474,6 +766,16 @@ class DialogHandler
 
                                             return new \WP_REST_Response($response_data, 200);
                                         }
+
+                                        // Jeśli dotarliśmy tutaj, wszystkie transakcje są wykonalne, więc wykonaj tę transakcję
+                                        $currency = $action['backpack'] ?? '';
+                                        $value = (int)($action['value'] ?? 0);
+
+                                        $logger->debug_log("Wykonuję transakcję: waluta=$currency, wartość=$value");
+
+                                        // Zapisz obecną wartość waluty do logów
+                                        $current_value = isset($backpack[$currency]) ? (int)$backpack[$currency] : 0;
+                                        $logger->debug_log("Obecna wartość waluty $currency w plecaku dla użytkownika $user_id: $current_value");
 
                                         // Oblicz nową wartość
                                         $new_value = $current_value + $value;
