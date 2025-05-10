@@ -1146,12 +1146,31 @@ class DialogHandler
                                         if (!empty($task_id) && !empty($task_status)) {
                                             // Pobierz szczegóły zadania, jeśli możliwe
                                             $task_name = $task_id; // Domyślnie używamy ID zadania
+                                            // Usuń sufiks _N (np. _0, _1) z ID zadania przed wyświetleniem
+                                            $task_name = preg_replace('/_\d+$/', '', $task_name);
+
                                             $mission_tasks = get_field('mission_tasks', $mission_id);
+
                                             if (is_array($mission_tasks)) {
                                                 foreach ($mission_tasks as $task) {
-                                                    if (isset($task['task_id']) && $task['task_id'] === $task_id) {
-                                                        $task_name = $task['task_title'] ?? $task_id;
+                                                    // Sprawdź zarówno dokładne dopasowanie jak i dopasowanie bez sufiksu _N
+                                                    $task_id_no_suffix = preg_replace('/_\d+$/', '', $task_id);
+                                                    if (
+                                                        isset($task['task_id']) &&
+                                                        ($task['task_id'] === $task_id ||
+                                                            $task['task_id'] === $task_id_no_suffix)
+                                                    ) {
+                                                        $task_name = $task['task_title'] ?? $task_name;
                                                         break;
+                                                    }
+                                                }
+                                            } else {
+                                                // Jeśli nie znaleziono zadania, spróbujmy rozbić ID zadania na czytelną nazwę
+                                                if (strpos($task_name, '-') !== false) {
+                                                    $task_parts = explode('-', $task_name);
+                                                    if (!empty($task_parts)) {
+                                                        // Zamień myślniki na spacje i sformatuj tekst
+                                                        $task_name = ucfirst(implode(' ', $task_parts));
                                                     }
                                                 }
                                             }
