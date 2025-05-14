@@ -420,8 +420,8 @@ class DialogHandler
                             // -- NAJPIERW WERYFIKUJEMY WSZYSTKIE AKCJE --
                             // Zmienna określająca, czy wszystkie akcje są wykonalne
                             $all_actions_possible = true;
-                            // Komunikat o błędzie, który pojawi się jeśli jakaś akcja jest niemożliwa
-                            $error_notification = null;
+                            // Lista brakujących zasobów do wyświetlenia użytkownikowi
+                            $missing_resources = [];
 
                             // Pobierz dane plecaka i zasobów użytkownika za pomocą ACF
                             $backpack = get_field(BACKPACK['name'], 'user_' . $user_id);
@@ -483,6 +483,17 @@ class DialogHandler
                                             'marihuana' => 'weed'
                                         ];
 
+                                        // Słownik wyświetlanych nazw dla zasobów (do komunikatów)
+                                        $currency_display_names = [
+                                            'cigarettes' => 'papierosów',
+                                            'gold' => 'złota',
+                                            'mushrooms' => 'grzybów',
+                                            'beer' => 'piwa',
+                                            'vodka' => 'wódki',
+                                            'glue' => 'kleju',
+                                            'weed' => 'zioła'
+                                        ];
+
                                         // Sprawdź czy trzeba zamapować klucz
                                         if (isset($currency_mapping[$currency])) {
                                             $mapped_currency = $currency_mapping[$currency];
@@ -497,12 +508,14 @@ class DialogHandler
 
                                             if (abs($value) > $current_value) {
                                                 $all_actions_possible = false;
-                                                $error_notification = [
-                                                    'message' => "Nie masz wystarczającej ilości $currency! Potrzeba " . abs($value) . ", a masz $current_value.",
-                                                    'status' => 'bad'
+                                                $display_name = $currency_display_names[$currency] ?? $currency;
+                                                $missing_resources[] = [
+                                                    'resource' => $display_name,
+                                                    'required' => abs($value),
+                                                    'available' => $current_value,
+                                                    'type' => 'currency'
                                                 ];
                                                 $logger->debug_log("NIEPOWODZENIE WERYFIKACJI TRANSAKCJI: Próba zabrania " . abs($value) . " $currency, ale użytkownik ma tylko $current_value");
-                                                break 2; // Wyjdź z obydwu pętli (foreach i switch)
                                             }
                                         }
                                         break;
@@ -519,11 +532,13 @@ class DialogHandler
                                             if (!$item_id) {
                                                 $logger->debug_log("BŁĄD: Nieprawidłowe ID przedmiotu");
                                                 $all_actions_possible = false;
-                                                $error_notification = [
-                                                    'message' => "Błąd konfiguracji: nieprawidłowy przedmiot",
-                                                    'status' => 'bad'
+                                                $missing_resources[] = [
+                                                    'resource' => 'przedmiot (błędna konfiguracja)',
+                                                    'required' => $quantity,
+                                                    'available' => 0,
+                                                    'type' => 'item'
                                                 ];
-                                                break 2;
+                                                break;
                                             }
 
                                             // Pobierz informacje o przedmiocie
@@ -531,11 +546,13 @@ class DialogHandler
                                             if (!$item_post || $item_post->post_type !== 'item') {
                                                 $logger->debug_log("BŁĄD: Przedmiot o ID $item_id nie istnieje");
                                                 $all_actions_possible = false;
-                                                $error_notification = [
-                                                    'message' => "Błąd konfiguracji: przedmiot nie istnieje",
-                                                    'status' => 'bad'
+                                                $missing_resources[] = [
+                                                    'resource' => 'przedmiot (nieistniejący)',
+                                                    'required' => $quantity,
+                                                    'available' => 0,
+                                                    'type' => 'item'
                                                 ];
-                                                break 2;
+                                                break;
                                             }
 
                                             $item_name = $item_post->post_title;
@@ -555,12 +572,13 @@ class DialogHandler
 
                                             if (!$item_found || $current_quantity < $quantity) {
                                                 $all_actions_possible = false;
-                                                $error_notification = [
-                                                    'message' => "Nie posiadasz wystarczającej ilości przedmiotu $item_name! Potrzeba {$quantity}, a masz {$current_quantity}.",
-                                                    'status' => 'bad'
+                                                $missing_resources[] = [
+                                                    'resource' => $item_name,
+                                                    'required' => $quantity,
+                                                    'available' => $current_quantity,
+                                                    'type' => 'item'
                                                 ];
                                                 $logger->debug_log("NIEPOWODZENIE WERYFIKACJI PRZEDMIOTU: Próba zabrania $quantity x $item_name, ale użytkownik ma tylko $current_quantity");
-                                                break 2;
                                             }
                                         }
                                         break;
@@ -576,22 +594,26 @@ class DialogHandler
                                             if (empty($skill_type)) {
                                                 $logger->debug_log("BŁĄD: Nie podano typu umiejętności");
                                                 $all_actions_possible = false;
-                                                $error_notification = [
-                                                    'message' => "Błąd konfiguracji: nieprawidłowy typ umiejętności",
-                                                    'status' => 'bad'
+                                                $missing_resources[] = [
+                                                    'resource' => 'umiejętność (nieprawidłowa)',
+                                                    'required' => abs($skill_value),
+                                                    'available' => 0,
+                                                    'type' => 'skill'
                                                 ];
-                                                break 2;
+                                                break;
                                             }
 
                                             // Sprawdź, czy podany typ umiejętności istnieje w strukturze
                                             if (!isset(SKILLS['fields'][$skill_type])) {
                                                 $logger->debug_log("BŁĄD: Nieprawidłowy typ umiejętności: $skill_type");
                                                 $all_actions_possible = false;
-                                                $error_notification = [
-                                                    'message' => "Błąd konfiguracji: nieprawidłowy typ umiejętności",
-                                                    'status' => 'bad'
+                                                $missing_resources[] = [
+                                                    'resource' => 'umiejętność (nieistniejąca)',
+                                                    'required' => abs($skill_value),
+                                                    'available' => 0,
+                                                    'type' => 'skill'
                                                 ];
-                                                break 2;
+                                                break;
                                             }
 
                                             // Pobierz aktualną wartość umiejętności
@@ -600,12 +622,13 @@ class DialogHandler
                                             if (abs($skill_value) > $current_value) {
                                                 $skill_label = SKILLS['fields'][$skill_type]['label'];
                                                 $all_actions_possible = false;
-                                                $error_notification = [
-                                                    'message' => "Nie masz wystarczającego poziomu umiejętności {$skill_label}! Wymagane " . abs($skill_value) . ", a masz $current_value.",
-                                                    'status' => 'bad'
+                                                $missing_resources[] = [
+                                                    'resource' => $skill_label,
+                                                    'required' => abs($skill_value),
+                                                    'available' => $current_value,
+                                                    'type' => 'skill'
                                                 ];
                                                 $logger->debug_log("NIEPOWODZENIE WERYFIKACJI UMIEJĘTNOŚCI: Próba zmniejszenia {$skill_type} o " . abs($skill_value) . ", ale użytkownik ma tylko $current_value");
-                                                break 2;
                                             }
                                         }
                                         break;
@@ -620,8 +643,24 @@ class DialogHandler
                             if (!$all_actions_possible) {
                                 $logger->debug_log("Nie można wykonać wszystkich akcji. Akcje zostały anulowane.");
 
-                                // Jeśli nie ma komunikatu o błędzie, użyj domyślnego
-                                if (!$error_notification) {
+                                // Przygotuj komunikat o brakujących zasobach
+                                if (!empty($missing_resources)) {
+                                    // Przygotuj szczegółową wiadomość o wszystkich brakujących zasobach
+                                    $error_message = "Nie możesz wykonać tej akcji. Brakuje:<br>";
+
+                                    foreach ($missing_resources as $resource) {
+                                        $resource_name = $resource['resource'];
+                                        $required = $resource['required'];
+                                        $available = $resource['available'];
+                                        $error_message .= "• {$resource_name}: potrzeba {$required}, masz {$available}<br>";
+                                    }
+
+                                    $error_notification = [
+                                        'message' => $error_message,
+                                        'status' => 'bad'
+                                    ];
+                                } else {
+                                    // Jeśli nie ma szczegółowych informacji o brakujących zasobach, użyj domyślnej wiadomości
                                     $error_notification = [
                                         'message' => "Nie można wykonać wszystkich wymaganych akcji.",
                                         'status' => 'bad'
@@ -1587,6 +1626,109 @@ class DialogHandler
                                         ];
 
                                         $logger->debug_log("Utworzono powiadomienie dla zmiany rejonu:", $notification);
+                                        break;
+
+                                    case 'relation':
+                                        // Pobierz wartość zmiany relacji z pola 'change_relation'
+                                        $relation_value = (int)($action['change_relation'] ?? 0);
+                                        // ID NPC, dla którego zmieniamy relację
+                                        $target_npc_id = (int)($action['npc'] ?? $npc_id);
+                                        // Flaga 'poznaj' determinuje czy NPC ma zostać oznaczony jako poznany
+                                        $mark_as_known = (bool)($action['poznaj'] ?? false);
+
+                                        $logger->debug_log("Wykonuję akcję relacji: npc_id=$target_npc_id, wartość=$relation_value, poznaj=" . ($mark_as_known ? 'tak' : 'nie'));
+
+                                        // Sprawdź czy NPC istnieje
+                                        $target_npc = get_post($target_npc_id);
+                                        if (!$target_npc || $target_npc->post_type !== 'npc') {
+                                            $logger->debug_log("BŁĄD: NPC o ID $target_npc_id nie istnieje");
+                                            break;
+                                        }
+
+                                        $npc_name = $target_npc->post_title;
+
+                                        // Nazwy pól ACF dla relacji i poznania NPC
+                                        $relation_field_key = 'npc-relation-' . $target_npc_id;
+                                        $meet_field_key = 'npc-meet-' . $target_npc_id;
+
+                                        // Pobierz aktualny poziom relacji dla tego NPC
+                                        $current_relation = (int)get_field($relation_field_key, 'user_' . $user_id);
+                                        $logger->debug_log("Obecna relacja z NPC $npc_name dla użytkownika $user_id: $current_relation");
+
+                                        // Oblicz nowy poziom relacji (ograniczenia -100 do 100)
+                                        $new_relation = max(-100, min(100, $current_relation + $relation_value));
+                                        $logger->debug_log("Aktualne dane relacji przed aktualizacją:", [
+                                            'user_id' => $user_id,
+                                            'npc_id' => $target_npc_id,
+                                            'npc_name' => $npc_name,
+                                            'current_relation' => $current_relation,
+                                            'value_to_add' => $relation_value,
+                                            'new_relation' => $new_relation
+                                        ]);
+
+                                        $logger->debug_log("Nazwa pola do update: $relation_field_key");
+
+                                        // Zapisz nową wartość relacji
+                                        $result = update_field($relation_field_key, $new_relation, 'user_' . $user_id);
+
+                                        if ($result === false) {
+                                            // Spróbuj alternatywną metodę aktualizacji, jeśli update_field nie działa
+                                            update_user_meta($user_id, $relation_field_key, $new_relation);
+                                            $logger->debug_log("Używam update_user_meta jako alternatywę dla update_field");
+                                        }
+
+                                        $logger->debug_log("Rezultat update_field dla relacji z NPC: " . ($result ? 'SUKCES' : 'PRÓBA ALTERNATYWNA'));
+
+                                        // Sprawdź, czy aktualizacja się powiodła
+                                        $updated_relation = (int)get_field($relation_field_key, 'user_' . $user_id);
+                                        $logger->debug_log("Wartość relacji z NPC $npc_name po aktualizacji: $updated_relation");
+
+                                        // Oznacz NPC jako poznanego, jeśli flaga poznaj jest ustawiona
+                                        if ($mark_as_known) {
+                                            $already_met = get_field($meet_field_key, 'user_' . $user_id);
+
+                                            if (!$already_met) {
+                                                $meet_result = update_field($meet_field_key, true, 'user_' . $user_id);
+
+                                                if ($meet_result === false) {
+                                                    // Alternatywna metoda aktualizacji
+                                                    update_user_meta($user_id, $meet_field_key, true);
+                                                    $logger->debug_log("Używam update_user_meta jako alternatywę dla update_field (poznanie NPC)");
+                                                }
+
+                                                $logger->debug_log("Oznaczono NPC $npc_name jako poznanego przez użytkownika $user_id");
+                                            }
+                                        }
+
+                                        // Generowanie komunikatu dla gracza o zmianie relacji
+                                        if ($relation_value > 0) {
+                                            $notification = [
+                                                'message' => "Twoja relacja z {$npc_name} uległa polepszeniu",
+                                                'status' => 'success'
+                                            ];
+                                        } elseif ($relation_value < 0) {
+                                            $notification = [
+                                                'message' => "Twoja relacja z {$npc_name} uległa pogorszeniu",
+                                                'status' => 'bad'
+                                            ];
+                                        } else {
+                                            // Jeśli zmiana wynosi 0, ale poznaj=1, to informujemy o poznaniu NPC
+                                            if ($mark_as_known) {
+                                                $notification = [
+                                                    'message' => "Poznałeś {$npc_name}",
+                                                    'status' => 'info'
+                                                ];
+                                            } else {
+                                                // Jeśli zmiana wynosi 0 i nie poznajemy NPC, nie pokazujemy powiadomienia
+                                                $notification = null;
+                                            }
+                                        }
+
+                                        if ($notification) {
+                                            $logger->debug_log("Utworzono powiadomienie dla zmiany relacji:", $notification);
+                                        }
+
+                                        $logger->debug_log("Wykonano aktualizację relacji z NPC $npc_name. Nowa wartość: $new_relation");
                                         break;
 
                                     // Można dodać obsługę innych typów akcji w przyszłości

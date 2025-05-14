@@ -55,7 +55,7 @@ class NpcChecker
             wp_enqueue_script(
                 'npc-debug-script',
                 get_template_directory_uri() . '/js/modules/npc/npc-debug.js',
-                ['jquery', 'axios'],
+                ['axios'],
                 filemtime(get_template_directory() . '/js/modules/npc/npc-debug.js'),
                 true
             );

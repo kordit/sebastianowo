@@ -15,4 +15,5 @@ load_theme_files([
     'includes/class',
     'includes/functions',
     'includes/dynamic-fields',
+    'includes/oop',
 ]);

@@ -24,9 +24,10 @@ add_action('acf/include_fields', function () {
         'post_type' => 'mission',
         'numberposts' => -1,
         'post_status' => 'publish',
-        'orderby' => 'title',
+        'orderby' => 'date',
         'order' => 'ASC'
     ]);
+
 
     // Jeśli istnieją misje, tworzymy dla każdej grupę
     if (!empty($missions)) {

@@ -49,7 +49,7 @@ function process_svg_paths(string $svg_url, int $post_id, string $post_title, in
         if ($select === 'scena' || $select === 'page') {
             $color = '#fff';
         } elseif ($select === 'npc' && $npc) {
-            $relation_value = get_field('npc-relation-user-' . $current_user_id, $npc);
+            $relation_value = get_field('npc-relation-' . $npc, 'user_' . $current_user_id);
             $color = getRelationColor($relation_value);
         }
 
