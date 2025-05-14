@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const statName = button.dataset.stat;
         const statItem = button.closest('.stat-item');
         const statValueElement = statItem.querySelector('.stat-value');
-        const learningPointsInfo = document.querySelector('.learning-points-info strong');
+        const learningPointsInfo = document.querySelector('.learning-points-info');
 
         // Wyłącz przycisk na czas trwania żądania
         button.disabled = true;
@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Ścieżka do endpointu REST API
             const restEndpoint = '/wp-json/game/v1/upgrade-stat';
 
-            // Wyślij żądanie za pomocą Axios do REST API
-            const response = await axios.post(restEndpoint, {
+            // Użyj funkcji pomocniczej do zapytania API
+            const response = await postToApi(restEndpoint, {
                 stat_name: statName
             });
 
@@ -43,37 +43,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Aktualizuj UI
                 statValueElement.textContent = data.new_stat_value;
 
-                // Aktualizuj liczbę punktów nauki
-                const currentPoints = parseInt(learningPointsInfo.textContent.match(/\d+/)[0]) - 1;
-                learningPointsInfo.textContent = `Dostępne punkty nauki: ${currentPoints}`;
+                // Aktualizuj liczbę punktów nauki - szukaj liczby w całym tekście elementu .learning-points-info
+                const pointsText = learningPointsInfo.textContent;
+                const pointsMatch = pointsText.match(/\d+/);
+                
+                if (pointsMatch) {
+                    const currentPoints = parseInt(pointsMatch[0]) - 1;
+                    
+                    // Aktualizuj widok punktów nauki - bardziej niezawodna metoda
+                    // Całkowicie przebuduj zawartość
+                    learningPointsInfo.innerHTML = `<strong>Dostępne punkty nauki:</strong> ${currentPoints}`;
 
-                // Jeśli nie ma więcej punktów nauki, ukryj wszystkie przyciski
-                if (currentPoints <= 0) {
-                    document.querySelectorAll('.stat-upgrade-btn').forEach(btn => {
-                        btn.style.display = 'none';
-                    });
+                    // Jeśli nie ma więcej punktów nauki, ukryj wszystkie przyciski
+                    if (currentPoints <= 0) {
+                        document.querySelectorAll('.stat-upgrade-btn').forEach(btn => {
+                            btn.style.display = 'none';
+                        });
+                    }
                 }
 
-                // Opcjonalnie: Wyświetl komunikat o powodzeniu
-                if (window.showNotification) {
-                    window.showNotification('success', data.message);
+                // Wyświetl komunikat o powodzeniu używając systemu powiadomień gry
+                if (window.gameNotifications) {
+                    window.gameNotifications.show(data.message, 'success');
                 } else {
                     console.log(data.message);
                 }
             } else {
                 // Obsłuż błąd zwrócony przez serwer
-                if (window.showNotification) {
-                    window.showNotification('error', data.message || 'Wystąpił błąd podczas aktualizacji statystyki.');
+                const errorMessage = data.message || 'Wystąpił błąd podczas aktualizacji statystyki.';
+                if (window.gameNotifications) {
+                    window.gameNotifications.show(errorMessage, 'failed');
                 } else {
-                    console.error(data.message || 'Wystąpił błąd podczas aktualizacji statystyki.');
+                    console.error(errorMessage);
+                    alert(errorMessage);
                 }
             }
         } catch (error) {
             // Obsłuż błąd połączenia
             console.error('Błąd podczas komunikacji z serwerem:', error);
 
-            if (window.showNotification) {
-                window.showNotification('error', 'Wystąpił problem podczas komunikacji z serwerem. Spróbuj ponownie.');
+            // Użyj globalnego systemu powiadomień, jeśli jest dostępny
+            if (window.gameNotifications) {
+                window.gameNotifications.show(error.message || 'Wystąpił problem podczas komunikacji z serwerem.', 'failed');
+            } else {
+                alert(error.message || 'Wystąpił problem podczas komunikacji z serwerem. Spróbuj ponownie.');
+            }
+
+            // Automatycznie przeładuj stronę w przypadku błędu autoryzacji po 2 sekundach
+            if (error.message && error.message.includes('autoryzacji')) {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
             }
         } finally {
             // Włącz przycisk ponownie

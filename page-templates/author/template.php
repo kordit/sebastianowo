@@ -11,7 +11,17 @@
             <h2>Profil postaci</h2>
             <div class="profile-details">
                 <div class="profile-section">
-                    <h3>Informacje podstawowe</h3>
+                    <div class="person">
+                        <div class="profile-image">
+                            <?php echo wp_get_attachment_image(get_field('avatar_full', 'user_' . $user_id), 'full', false, ['class' => 'main_person_avatar']); ?>
+                        </div>
+                    </div>
+
+                    <!-- Tutaj możesz dodać więcej pól związanych z profilem -->
+                </div>
+
+                <div class="profile-section">
+                    <h3>Dane postaci</h3>
                     <div class="profile-field">
                         <span class="label">Nick:</span>
                         <span class="value"><?php echo esc_html(get_field('nick', 'user_' . $user_id) ?: $current_user->display_name); ?></span>
@@ -20,11 +30,6 @@
                         <span class="label">Klasa postaci:</span>
                         <span class="value"><?php echo $user_class ? esc_html($user_class['label']) : 'Brak klasy'; ?></span>
                     </div>
-                    <!-- Tutaj możesz dodać więcej pól związanych z profilem -->
-                </div>
-
-                <div class="profile-section">
-                    <h3>Historia postaci</h3>
                     <div class="story-content">
                         <?php echo get_field('story', 'user_' . $user_id) ?: 'Brak historii postaci'; ?>
                     </div>

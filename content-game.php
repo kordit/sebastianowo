@@ -31,11 +31,6 @@ if ($instance != 'kreator'): ?>
         } else {
             $scene = '';
         }
-        $npc_fields = get_fields(449);
-        $user_id = get_current_user_id();
-        $user_relation = get_field('mission_339', 'user_' . $user_id) ?? 0;
-        $user_has_met = get_fields('user_' . $user_id);
-        et_r(get_post(463));
 
 
         if ($instance) {

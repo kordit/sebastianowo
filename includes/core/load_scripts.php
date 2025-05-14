@@ -15,6 +15,25 @@ function game_load_scripts()
     );
     wp_enqueue_script('axios');
 
+    // Pomocnik API z funkcjami do komunikacji z REST API
+    wp_register_script(
+        'api-helper',
+        get_template_directory_uri() . '/js/utils/api-helper.js',
+        array('axios'),
+        filemtime(get_template_directory() . '/js/utils/api-helper.js'),
+        true
+    );
+    wp_enqueue_script('api-helper');
+
+    // Globalne dane dla wszystkich skryptów
+    wp_localize_script('api-helper', 'userManagerData', array(
+        'nonce'  => wp_create_nonce('wp_rest'),
+        'apiUrl' => admin_url('admin-ajax.php'),
+        'restUrl' => esc_url_raw(rest_url('game/v1')),
+        'userID' => get_current_user_id(),
+        'isLoggedIn' => is_user_logged_in()
+    ));
+
     // Własny skrypt inicjalizujący Alpine.js
     wp_register_script(
         'alpine-init',
@@ -59,19 +78,12 @@ function game_load_scripts()
         wp_register_script(
             'stat-upgrade',
             get_template_directory_uri() . '/js/modules/user/stat-upgrade.js',
-            array('axios'),
+            array('axios', 'api-helper'),
             '1.0.0',
             true
         );
         wp_enqueue_script('stat-upgrade');
     }
-
-    // Lokalizacja danych dla UserManager API
-    wp_localize_script('user-manager-api', 'userManagerData', array(
-        'nonce'  => wp_create_nonce('wp_rest'),
-        'apiUrl' => admin_url('admin-ajax.php'),
-        'restUrl' => esc_url_raw(rest_url()),
-    ));
 
     wp_register_script(
         'notifications',

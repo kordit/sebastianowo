@@ -1060,14 +1060,4 @@ function init_manager_user()
 }
 add_action('init', 'init_manager_user');
 
-/**
- * Dodaj REST API URL do skryptów JavaScript
- */
-add_action('wp_enqueue_scripts', 'add_user_manager_rest_api_data');
-function add_user_manager_rest_api_data()
-{
-    wp_localize_script('axios', 'userManagerData', [
-        'rest_url' => rest_url('game/v1'),
-        'nonce' => wp_create_nonce('game_user_manager_nonce')
-    ]);
-}
+// REST API URL jest już dodawany w load_scripts.php

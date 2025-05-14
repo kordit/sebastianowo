@@ -129,6 +129,65 @@ System powiadomień obsługuje różne typy powiadomień:
 - `failed` - powiadomienie o błędzie (czerwone)
 - `neutral` - neutralne powiadomienie (szare)
 
+#### Integracja systemu notyfikacji z API
+
+System notyfikacji jest dostępny globalnie jako obiekt `window.gameNotifications`, co pozwala na łatwą integrację z kodem obsługującym API:
+
+```javascript
+// Przykład integracji z kodem API
+async function handleUserAction() {
+    try {
+        // Próba wykonania operacji przez API
+        const response = await axios.post('/wp-json/game/v1/user-action', {
+            // dane
+        });
+        
+        // Obsługa sukcesu
+        if (response.data.success) {
+            window.gameNotifications.show(response.data.message, 'success');
+            // Aktualizuj UI lub wykonaj inne operacje
+            return true;
+        } else {
+            // Obsługa błędu biznesowego
+            window.gameNotifications.show(response.data.message, 'bad');
+            return false;
+        }
+    } catch (error) {
+        // Obsługa błędu połączenia lub wyjątku
+        let errorMessage = 'Wystąpił nieznany błąd';
+        
+        if (error.response) {
+            // Błąd z odpowiedzią serwera (status kod inny niż 2xx)
+            if (error.response.status === 401) {
+                errorMessage = 'Sesja wygasła. Zaloguj się ponownie.';
+                // Automatyczne przekierowanie do strony logowania po 2 sekundach
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else if (error.response.status === 403) {
+                errorMessage = 'Brak uprawnień do wykonania tej operacji.';
+            } else if (error.response.data && error.response.data.message) {
+                errorMessage = error.response.data.message;
+            }
+        } else if (error.request) {
+            // Brak odpowiedzi z serwera
+            errorMessage = 'Brak odpowiedzi z serwera. Sprawdź połączenie internetowe.';
+        } else {
+            // Błąd w konfiguracji żądania
+            errorMessage = `Błąd aplikacji: ${error.message}`;
+        }
+        
+        // Wyświetl komunikat błędu
+        window.gameNotifications.show(errorMessage, 'failed');
+        
+        // Opcjonalnie zapisz błąd do konsoli dla deweloperów
+        console.error('API Error:', error);
+        
+        return false;
+    }
+}
+```
+
 Style notyfikacji znajdują się w pliku `/assets/css/notification-system.css`.
 
 ### 👤 Klasa ManagerUser (PHP)
@@ -239,6 +298,133 @@ Wszystkie funkcje API zwracają obiekty Promise, co pozwala na łatwe używanie 
 - **Modułowość**: Utrzymuj modułową strukturę kodu
 - **Komentarze**: Dokumentuj skomplikowane fragmenty kodu
 
+## 🛡️ Walidacja danych użytkownika
+
+Walidacja danych użytkownika jest kluczowym elementem bezpieczeństwa aplikacji. Poniżej znajdują się najważniejsze zasady walidacji danych w projektach Game:
+
+### 🔒 Backend (PHP)
+
+```php
+// Przykład walidacji danych wejściowych w klasie ManagerUser
+public function updateStat(string $stat_name, $value): array
+{
+    // 1. Walidacja nazwy statystyki - czy jest dozwolona
+    if (!in_array($stat_name, $this->allowed_stats)) {
+        return [
+            'success' => false,
+            'message' => 'Nieprawidłowa nazwa statystyki'
+        ];
+    }
+
+    // 2. Walidacja typu danych
+    if (!is_numeric($value)) {
+        return [
+            'success' => false, 
+            'message' => 'Wartość statystyki musi być liczbą'
+        ];
+    }
+
+    // 3. Walidacja zakresu wartości
+    $value = intval($value);
+    if ($value < 0 || $value > 100) {
+        return [
+            'success' => false,
+            'message' => 'Wartość statystyki musi być w zakresie 0-100'
+        ];
+    }
+
+    // 4. Walidacja uprawnień użytkownika
+    if (!$this->canUpdateStat($stat_name)) {
+        return [
+            'success' => false,
+            'message' => 'Brak uprawnień do aktualizacji tej statystyki'
+        ];
+    }
+
+    // Dane są poprawne - kontynuuj aktualizację
+    // ...
+}
+```
+
+### 🔍 Frontend (JavaScript)
+
+Walidacja na frontendzie służy głównie do poprawy UX, ale nie zastępuje walidacji na backendzie:
+
+```javascript
+// Przykład walidacji formularza przed wysłaniem do API
+function validateStatUpgrade(statName, value) {
+    const errors = [];
+    
+    // 1. Walidacja wymaganych pól
+    if (!statName || !value) {
+        errors.push('Wszystkie pola są wymagane');
+    }
+    
+    // 2. Walidacja typu danych
+    if (isNaN(value)) {
+        errors.push('Wartość musi być liczbą');
+    }
+    
+    // 3. Walidacja zakresu
+    const numValue = parseInt(value);
+    if (numValue < 0 || numValue > 100) {
+        errors.push('Wartość musi być w zakresie 0-100');
+    }
+    
+    // 4. Sprawdź czy gracz ma wystarczającą ilość punktów
+    const availablePoints = getAvailablePoints();
+    if (numValue > availablePoints) {
+        errors.push('Niewystarczająca liczba dostępnych punktów');
+    }
+    
+    return {
+        isValid: errors.length === 0,
+        errors: errors
+    };
+}
+
+// Użycie walidacji przed wysłaniem do API
+function handleStatUpgrade(event) {
+    const statName = event.target.dataset.stat;
+    const value = document.getElementById('stat-value').value;
+    
+    const validation = validateStatUpgrade(statName, value);
+    if (!validation.isValid) {
+        // Wyświetl błędy
+        validation.errors.forEach(error => {
+            gameNotifications.show(error, 'failed');
+        });
+        return;
+    }
+    
+    // Wyślij dane do API
+    userManager.updateStat(statName, value)
+        .then(response => {
+            // Obsługa odpowiedzi
+        });
+}
+```
+
+### ✅ Najważniejsze zasady walidacji
+
+1. **Zawsze waliduj dane dwukrotnie**: na frontendzie dla lepszego UX oraz na backendzie dla bezpieczeństwa
+2. **Nigdy nie ufaj danym wejściowym** od użytkownika, nawet jeśli pochodzą z formularzy
+3. **Stosuj białe listy** dla dozwolonych wartości zamiast czarnych list
+4. **Sanityzuj dane wejściowe** przed zapisem do bazy danych:
+   - `sanitize_text_field()` dla tekstu jednoliniowego
+   - `sanitize_textarea_field()` dla pól tekstowych wieloliniowych
+   - `absint()` dla liczb całkowitych nieujemnych
+   - `intval()` dla dowolnych liczb całkowitych
+5. **Używaj przygotowanych zapytań** (prepared statements) dla wszelkich operacji na bazie danych
+6. **Escapuj dane wyjściowe** przed wyświetleniem:
+   - `esc_html()` dla tekstu w HTML
+   - `esc_url()` dla adresów URL
+   - `esc_attr()` dla atrybutów HTML
+7. **Loguj nieudane walidacje** do wykrywania potencjalnych ataków
+8. **Stosuj regularne wyrażenia** dla danych o strukturalnych wymaganiach (np. kody pocztowe, numery telefonów)
+9. **Zwracaj czytelne komunikaty o błędach** dla użytkownika, ale bez ujawniania technicznych szczegółów
+10. **Sprawdzaj uprawnienia** użytkownika przed wykonaniem operacji na danych
+
 ## 🧩 Referencje do istniejącego kodu
 
 Przy tworzeniu nowej funkcjonalności wzoruj się na:
@@ -268,6 +454,116 @@ axios.post('/wp-json/game/v1/user/update-stat', {
     console.error(error);
 });
 ```
+
+### 🔐 Rejestracja i walidacja endpointów REST API
+
+Poprawna rejestracja endpointu REST API powinna zawierać:
+
+```php
+// Rejestracja endpointu REST API
+register_rest_route('game/v1', '/update-stat', [
+    'methods'             => 'POST',
+    'callback'            => [$this, 'handleStatUpdate'],
+    'permission_callback' => [$this, 'checkPermission'],
+    'args'                => [
+        'stat_name' => [
+            'required'          => true,
+            'validate_callback' => function($param) {
+                return is_string($param) && in_array($param, ['strength', 'dexterity', 'intelligence', 'charisma']);
+            },
+            'sanitize_callback' => 'sanitize_text_field'
+        ],
+        'value' => [
+            'required'          => true,
+            'validate_callback' => function($param) {
+                return is_numeric($param) && $param >= 0 && $param <= 100;
+            },
+            'sanitize_callback' => 'absint'
+        ]
+    ]
+]);
+
+// Sprawdzenie uprawnień
+public function checkPermission(\WP_REST_Request $request) {
+    // Sprawdź czy użytkownik jest zalogowany
+    if (!is_user_logged_in()) {
+        return new \WP_Error(
+            'rest_forbidden',
+            __('Musisz być zalogowany, aby wykonać tę operację.', 'game'),
+            ['status' => 401]
+        );
+    }
+
+    // Sprawdź nonce
+    $nonce = $request->get_header('X-WP-Nonce');
+    if (!wp_verify_nonce($nonce, 'wp_rest')) {
+        return new \WP_Error(
+            'rest_cookie_invalid_nonce',
+            __('Nieprawidłowy token bezpieczeństwa.', 'game'),
+            ['status' => 403]
+        );
+    }
+
+    return true;
+}
+```
+
+### 📝 Poprawna obsługa błędów REST API
+
+```php
+// Obsługa żądania z prawidłową walidacją i komunikatami błędów
+public function handleStatUpdate(\WP_REST_Request $request) {
+    try {
+        // Pobierz dane z żądania (już zwalidowane przez args)
+        $stat_name = $request->get_param('stat_name');
+        $value = $request->get_param('value');
+        $user_id = get_current_user_id();
+
+        // Logger dla debugowania
+        $logger = null;
+        if (class_exists('GameLogger')) {
+            $logger = new GameLogger();
+            $logger->log("Próba aktualizacji statystyki $stat_name na $value dla użytkownika $user_id");
+        }
+
+        // Pobierz menedżera użytkownika
+        $user_manager = new ManagerUser($user_id);
+        
+        // Wykonaj aktualizację statystyki
+        $result = $user_manager->updateStat($stat_name, $value);
+
+        // Sprawdź wynik
+        if ($result['success']) {
+            if ($logger) {
+                $logger->log("Aktualizacja statystyki zakończona sukcesem");
+            }
+            
+            return new \WP_REST_Response([
+                'success' => true,
+                'message' => $result['message'] ?? 'Statystyka została zaktualizowana',
+                'new_stat_value' => $result['new_value'] ?? $value
+            ], 200);
+        } else {
+            if ($logger) {
+                $logger->log("Błąd aktualizacji statystyki: " . ($result['message'] ?? 'Nieznany błąd'));
+            }
+            
+            return new \WP_REST_Response([
+                'success' => false,
+                'message' => $result['message'] ?? 'Nie udało się zaktualizować statystyki'
+            ], 400);
+        }
+    } catch (\Exception $e) {
+        if (isset($logger)) {
+            $logger->log("Wyjątek podczas aktualizacji statystyki: " . $e->getMessage());
+        }
+        
+        return new \WP_REST_Response([
+            'success' => false,
+            'message' => 'Wystąpił błąd podczas przetwarzania żądania'
+        ], 500);
+    }
+}
 
 ---
 

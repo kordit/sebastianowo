@@ -109,7 +109,7 @@ function get_all_instance()
 }
 
 add_action('init', function () {
-    new InstanceManager('plecak', true);
+    new InstanceManager('backpack', true);
     new InstanceManager('zadania', true);
 
     $all_instance = get_all_instance();

@@ -39,7 +39,7 @@ $current_area = get_field('current_area', 'user_' . get_current_user_id());
                 <img src="<?= esc_url(PNG . '/spacer.png'); ?>" alt="">
                 <span class="icon-label">Rejon</span>
             </a>
-            <a href="/plecak">
+            <a href="/backpack">
                 <img src="<?= esc_url(PNG . '/plecak.png'); ?>" alt="">
                 <span class="icon-label">Plecak</span>
             </a>
