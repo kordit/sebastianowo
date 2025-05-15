@@ -17,3 +17,14 @@ load_theme_files([
     'includes/dynamic-fields',
     'includes/oop',
 ]);
+
+add_action('wp_footer', function () {
+    if (!is_front_page()) return;
+
+    $current_area_id = get_field('current_area', 'user_' . get_current_user_id());
+    if (!$current_area_id) return;
+
+    $url = get_permalink($current_area_id);
+
+    echo '<script>window.location.href = "' . esc_url($url) . '";</script>';
+});

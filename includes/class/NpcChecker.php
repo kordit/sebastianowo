@@ -134,4 +134,4 @@ class NpcChecker
 }
 
 // Inicjalizacja klasy
-$npc_checker = new NpcChecker();
+// $npc_checker = new NpcChecker();

@@ -11,8 +11,6 @@
 
 // Załaduj wymagane klasy
 require_once get_template_directory() . '/includes/class/NpcPopup/NpcLogger.php';
-require_once get_template_directory() . '/includes/class/NpcPopup/ConditionChecker.php';
-require_once get_template_directory() . '/includes/class/NpcPopup/ConditionCheckerFactory.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/DialogManager.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/LocationExtractor.php';
 
@@ -300,8 +298,7 @@ class DialogHandler
             $logger->debug_log("Pobrane dialogi dla NPC $npc_id", $dialogs);
 
             // Przygotuj zarządzanie dialogiem
-            $checker_factory = new ConditionCheckerFactory($logger);
-            $dialog_manager = new DialogManager($logger, $checker_factory);
+            $dialog_manager = new DialogManager($logger);
             $dialog_manager->setNpcId($npc_id);
             $dialog_manager->setUserId($user_id);
 

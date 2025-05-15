@@ -11,13 +11,6 @@
 
 // Załaduj wymagane klasy
 require_once get_template_directory() . '/includes/class/NpcPopup/NpcLogger.php';
-require_once get_template_directory() . '/includes/class/NpcPopup/ConditionChecker.php';
-require_once get_template_directory() . '/includes/class/NpcPopup/LocationConditionChecker.php';
-require_once get_template_directory() . '/includes/class/NpcPopup/RelationConditionChecker.php';
-require_once get_template_directory() . '/includes/class/NpcPopup/InventoryConditionChecker.php';
-require_once get_template_directory() . '/includes/class/NpcPopup/MissionConditionChecker.php';
-require_once get_template_directory() . '/includes/class/NpcPopup/TaskConditionChecker.php';
-require_once get_template_directory() . '/includes/class/NpcPopup/ConditionCheckerFactory.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/DialogManager.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/LocationExtractor.php';
 
@@ -61,17 +54,24 @@ class NpcPopup
         // Inicjalizuj logger
         $this->logger = new NpcLogger(get_template_directory() . '/npc_debug.log');
 
-        // Inicjalizuj fabrykę sprawdzaczy warunków
-        $checkerFactory = new ConditionCheckerFactory($this->logger);
-
-        // Inicjalizuj menedżera dialogów
-        $this->dialogManager = new DialogManager($this->logger, $checkerFactory);
+        // Inicjalizuj menedżer dialogów
+        $this->dialogManager = new DialogManager($this->logger);
 
         // Inicjalizuj ekstraktor lokalizacji
         $this->locationExtractor = new LocationExtractor();
 
         // Zarejestruj endpoint REST API
         add_action('rest_api_init', [$this, 'register_rest_endpoint']);
+    }
+
+    private function ensure_user_loaded(): void
+    {
+        if (!is_user_logged_in() && isset($_COOKIE[LOGGED_IN_COOKIE])) {
+            $user = wp_validate_auth_cookie($_COOKIE[LOGGED_IN_COOKIE], 'logged_in');
+            if ($user) {
+                wp_set_current_user($user);
+            }
+        }
     }
 
     /**
@@ -84,10 +84,8 @@ class NpcPopup
             'methods' => 'POST',  // Określenie metody HTTP jako POST
             'callback' => [$this, 'get_npc_data'],
             'permission_callback' => function (\WP_REST_Request $request): bool {
-                // Zapewnij, że WordPress wie, że jesteśmy zalogowani
-                if (!defined('DOING_AJAX')) {
-                    define('DOING_AJAX', true);
-                }
+                $this->ensure_user_loaded();
+
 
                 // W trybie deweloperskim zezwalaj na dostęp bez logowania
                 $is_dev_mode = defined('WP_DEBUG') && WP_DEBUG;
@@ -186,15 +184,12 @@ class NpcPopup
 
         // $this->logger->debug_log("Pobrane dialogi dla NPC {$npc_id}:", $dialogs);
 
-        // Filtruj dialogi na podstawie lokalizacji, relacji NPC i innych kryteriów
-        $filtered_dialog = $this->dialogManager->get_first_matching_dialog($dialogs, $criteria);
-        // $this->logger->debug_log("Wybrany dialog po filtrowaniu:", $filtered_dialog);
+        // Ustaw kontekst dla menedżera dialogów
+        $this->dialogManager->setNpcId($npc_id);
+        $this->dialogManager->setUserId($user_id);
 
-        // Jeśli znaleziono dialog, filtruj także jego odpowiedzi
-        if ($filtered_dialog) {
-            $filtered_dialog = $this->dialogManager->filter_answers($filtered_dialog, $criteria);
-            // $this->logger->debug_log("Dialog po filtrowaniu odpowiedzi:", $filtered_dialog);
-        }
+        // Wybierz pierwszy dostępny dialog
+        $filtered_dialog = !empty($dialogs) ? $dialogs[0] : null;
 
         // Pobierz URL obrazka miniatury dla NPC
         $thumbnail_url = '';
