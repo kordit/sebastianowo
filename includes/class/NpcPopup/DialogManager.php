@@ -1,5 +1,7 @@
 <?php
 
+require_once get_template_directory() . '/includes/class/NpcPopup/NpcLogger.php'; // Poprawiona ścieżka
+
 /**
  * Klasa DialogManager
  * 
@@ -31,6 +33,20 @@ class DialogManager
      * @var NpcLogger
      */
     private NpcLogger $logger;
+
+    /**
+     * Konfiguracja dialogów
+     *
+     * @var array
+     */
+    private array $dialogs_config;
+
+    /**
+     * LocationConditionChecker
+     *
+     * @var LocationConditionChecker|null
+     */
+    private ?LocationConditionChecker $locationConditionChecker = null;
 
     /**
      * Konstruktor klasy DialogManager
@@ -67,69 +83,61 @@ class DialogManager
     }
 
     /**
-     * Pobiera pierwszy pasujący dialog z listy dialogów
+     * Pobiera pierwszy pasujący dialog dla NPC, biorąc pod uwagę warunki.
      *
-     * @param array $dialogs Lista wszystkich dialogów NPC
-     * @param array $criteria Kryteria do sprawdzenia (type_page, location, user_id, npc_id)
-     * @return array|null Dialog lub null, jeśli nie znaleziono
+     * @param array $dialogs Tablica wszystkich dialogów dla NPC.
+     * @param array $context Kontekst do sprawdzania warunków (np. ['current_area_id' => 1, 'current_location_text' => 'slug']).
+     * @return array|null Pasujący dialog lub null, jeśli żaden nie pasuje.
      */
-    public function get_first_matching_dialog(array $dialogs, array $criteria): ?array
+    public function get_first_matching_dialog(array $dialogs, array $context): ?array
     {
-        if (isset($criteria['user_id'])) {
-            $this->setUserId((int)$criteria['user_id']);
-        }
+        $this->logger->debug_log('dialogi: ', $dialogs);
+        $this->logger->debug_log('kontekst: ', $context);
 
-        if (isset($criteria['npc_id'])) {
-            $this->setNpcId((int)$criteria['npc_id']);
-        }
-
-        $this->logger->log("Szukanie pasującego dialogu dla NPC ID: {$this->npc_id}, User ID: {$this->user_id}", 'info');
-
-        if (empty($dialogs)) {
-            $this->logger->log("Brak dialogów do przefiltrowania", 'warning');
-            return null;
-        }
-
-        foreach ($dialogs as $dialog) {
-            // Zwróć pierwszy dialog z listy - bez sprawdzania żadnych warunków
-            return $dialog;
-        }
-
-        $this->logger->log("Nie znaleziono pasującego dialogu", 'warning');
         return null;
     }
 
-
     /**
-     * Filtruje odpowiedzi w dialogu według warunków
-     * 
-     * @param array $dialog Dialog do przefiltrowania
-     * @param array $criteria Kryteria filtrowania
-     * @return array Przefiltrowany dialog
+     * Filtruje odpowiedzi dla danego dialogu na podstawie warunków.
+     *
+     * @param array $answers Tablica odpowiedzi.
+     * @param array $context Kontekst do sprawdzania warunków.
+     * @return array Przefiltrowana tablica odpowiedzi.
      */
-    public function filter_answers(array $dialog, array $criteria): array
+    public function filter_answers(array $answers, array $context): array
     {
-        // if (!isset($dialog['answers']) || !is_array($dialog['answers'])) {
-        //     return $dialog;
-        // }
+        $this->logger->debug_log("DialogManager: Rozpoczynam filtrowanie odpowiedzi.", ['count_answers_before' => count($answers), 'context' => $context]);
+        if (empty($answers)) {
+            $this->logger->debug_log("DialogManager: Brak odpowiedzi do filtrowania.");
+            return [];
+        }
 
-        // $filtered_answers = [];
+        $filtered_answers = [];
+        foreach ($answers as $answer_key => $answer_data) {
+            $answer_text_log = $answer_data['answer_text'] ?? (is_array($answer_key) ? json_encode($answer_key) : $answer_key);
+            $this->logger->debug_log("DialogManager: Sprawdzanie odpowiedzi: " . $answer_text_log, ['answer_data' => $answer_data]);
 
-        // foreach ($dialog['answers'] as $answer) {
-        //     // Tworzenie sprawdzacza warunków dla danego kontekstu
-        //     $condition_checker = $this->checkerFactory->create($this->user_id, $this->npc_id, $criteria);
+            $conditions = $answer_data['visibility_conditions'] ?? [];
+            if (!empty($conditions)) {
+                $this->logger->debug_log("DialogManager: Odpowiedź (" . $answer_text_log . ") ma zdefiniowane warunki widoczności. Rozpoczynam sprawdzanie.", ['conditions' => $conditions]);
+                try {
+                    if (!$this->getLocationConditionChecker()->check_conditions($conditions, $context)) {
+                        $this->logger->debug_log("DialogManager: Warunki dla odpowiedzi (" . $answer_text_log . ") NIESPEŁNIONE. Usuwanie odpowiedzi.", ['conditions' => $conditions, 'context' => $context]);
+                        continue;
+                    }
+                    $this->logger->debug_log("DialogManager: Warunki dla odpowiedzi (" . $answer_text_log . ") SPEŁNIONE.", ['conditions' => $conditions, 'context' => $context]);
+                } catch (\Exception $e) {
+                    $this->logger->log("DialogManager: Błąd podczas sprawdzania warunków dla odpowiedzi (" . $answer_text_log . ") - " . $e->getMessage(), 'error'); // Poprawione wywołanie loggera
+                    continue;
+                }
+            } else {
+                $this->logger->debug_log("DialogManager: Odpowiedź (" . $answer_text_log . ") nie ma zdefiniowanych warunków widoczności.");
+            }
+            $filtered_answers[$answer_key] = $answer_data;
+        }
 
-        //     // Sprawdzenie warunków odpowiedzi
-        //     $conditions = $answer['conditions'] ?? [];
-        //     if (!$condition_checker->check_conditions($conditions)) {
-        //         continue;
-        //     }
-
-        //     $filtered_answers[] = $answer;
-        // }
-
-        // $dialog['answers'] = $filtered_answers;
-        return $dialog;
+        $this->logger->debug_log("DialogManager: Zakończono filtrowanie odpowiedzi.", ['count_answers_after' => count($filtered_answers)]);
+        return $filtered_answers;
     }
 
     /**
@@ -527,5 +535,24 @@ class DialogManager
         update_user_meta($this->user_id, 'unlocked_areas', $unlocked_areas);
 
         return true;
+    }
+
+    /**
+     * Pobiera LocationConditionChecker
+     *
+     * @return LocationConditionChecker
+     * @throws \Exception
+     */
+    private function getLocationConditionChecker(): LocationConditionChecker
+    {
+        if ($this->locationConditionChecker === null) {
+            if (!isset($this->user_id) || $this->user_id === 0) {
+                $error_message = "DialogManager: user_id nie jest ustawione przed próbą utworzenia LocationConditionChecker.";
+                $this->logger->log_error($error_message);
+                throw new \Exception($error_message);
+            }
+            $this->locationConditionChecker = new LocationConditionChecker($this->user_id, $this->logger);
+        }
+        return $this->locationConditionChecker;
     }
 }

@@ -1,68 +1,1051 @@
-[2025-05-15 18:15:39] [INFO] Szukanie pasującego dialogu dla NPC ID: 449, User ID: 1
-[2025-05-15 18:15:39] [INFO] Sprawdzany dialog: nieznany
-[2025-05-15 18:15:39] [INFO] visibility_tab: "brak"
-[2025-05-15 18:15:39] [INFO] logic_operator: and
-[2025-05-15 18:15:39] [INFO] visibility_settings: [{"acf_fc_layout":"condition_mission","condition":"is_not","mission_id":339,"status":"completed"}]
-[2025-05-15 18:15:39] [DEBUG] Tworzenie sprawdzacza warunków dla User ID: 1, NPC ID: 449
-[2025-05-15 18:15:39] [DEBUG] Tworzenie nowego sprawdzacza warunków z przekazanym loggerem
-[2025-05-15 18:15:39] [DEBUG] Dialog nieznany: wykryto warunki do sprawdzenia
-[2025-05-15 18:15:39] [DEBUG] Przygotowano warunki do sprawdzenia z operatorem: and
-[2025-05-15 18:15:39] [DEBUG] Sprawdzanie warunków widoczności z operatorem: and
-[2025-05-15 18:15:39] [DEBUG] DefaultConditionChecker: Sprawdzanie warunku typu 'mission_active' z wartością: 339
-[2025-05-15 18:15:39] [DEBUG] Warunek mission_active dla misji 339: NIE
-[2025-05-15 18:15:39] [DEBUG] DefaultConditionChecker dla warunku 'condition_mission' zwrócił: NIE
-[2025-05-15 18:15:39] [DEBUG] AND: poprzedni wynik: TAK, bieżący warunek: NIE => nowy wynik: NIE
-[2025-05-15 18:15:39] [DEBUG] Przerywam sprawdzanie - warunek AND niezachowany
-[2025-05-15 18:15:39] [DEBUG] Ostateczny wynik sprawdzania warunków widoczności: NIE - dialog niedostępny
-[2025-05-15 18:15:39] [DEBUG] Dialog nieznany: Wynik sprawdzenia warunków: NIE - NIESPEŁNIONE
-[2025-05-15 18:15:39] [INFO] Dialog nieznany niedostępny - warunki niespełnione
-[2025-05-15 18:15:39] [INFO] Sprawdzany dialog: nieznany
-[2025-05-15 18:15:39] [INFO] visibility_tab: "brak"
-[2025-05-15 18:15:39] [INFO] logic_operator: and
-[2025-05-15 18:15:39] [INFO] visibility_settings: false
-[2025-05-15 18:15:39] [DEBUG] Tworzenie sprawdzacza warunków dla User ID: 1, NPC ID: 449
-[2025-05-15 18:15:39] [DEBUG] Tworzenie nowego sprawdzacza warunków z przekazanym loggerem
-[2025-05-15 18:15:39] [DEBUG] Dialog nieznany: Brak warunków do sprawdzenia - DIALOG DOMYŚLNIE DOSTĘPNY
-[2025-05-15 18:15:39] [INFO] Znaleziono pasujący dialog: nieznany
-[2025-05-15 18:20:11] [INFO] Szukanie pasującego dialogu dla NPC ID: 449, User ID: 1
-[2025-05-15 18:20:19] [INFO] Szukanie pasującego dialogu dla NPC ID: 449, User ID: 1
-[2025-05-15 18:24:01] [INFO] Szukanie pasującego dialogu dla NPC ID: 449, User ID: 1
-[2025-05-15 18:44:40] [DEBUG] Obsługa żądania danych użytkownika ID: 1
-[2025-05-15 18:44:40] [INFO] Pobrano dane plecaka użytkownika:
-[2025-05-15 18:44:40] [DATA] Array
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
 (
-    [gold] => 20
-    [cigarettes] => 31
+    [acf_fc_layout] => condition_mission
+    [condition] => is_not
+    [mission_id] => 339
+    [status] => not_started
 )
 
-[2025-05-15 18:44:40] [INFO] Pobrano dane witalności użytkownika:
-[2025-05-15 18:44:40] [DATA] Array
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
 (
-    [life] => 80
-    [max_life] => 100
-    [energy] => 70
-    [max_energy] => 100
-)
-
-[2025-05-15 18:44:40] [INFO] Zwracam dane użytkownika:
-[2025-05-15 18:44:40] [DATA] Array
-(
-    [success] => 1
-    [message] => Dane użytkownika pobrane pomyślnie
-    [data] => Array
+    [mission] => Array
         (
-            [backpack] => Array
+            [0] => Array
                 (
-                    [gold] => 20
-                    [cigarettes] => 31
+                    [id] => 247
+                    [name] => Flaszki od Dziadzi
+                    [id_on_user] => mission_247
+                    [slug] => flaszki-od-dziadzi
+                    [status] => in_progress
+                    [assigned_date] => 2025-04-27 13:05:30
+                    [completion_date] => 2025-04-29 16:43:16
                 )
 
-            [vitality] => Array
+            [1] => Array
                 (
-                    [life] => 80
-                    [max_life] => 100
-                    [energy] => 70
-                    [max_energy] => 100
+                    [id] => 339
+                    [name] => Przejdź samouczek
+                    [id_on_user] => mission_339
+                    [slug] => przejdz-samouczek
+                    [status] => in_progress
+                    [assigned_date] => 2025-04-29 18:04:25
+                    [completion_date] => 2025-05-15 18:20:13
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_mission
+    [condition] => is
+    [mission_id] => 339
+    [status] => in_progress
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [mission] => Array
+        (
+            [0] => Array
+                (
+                    [id] => 247
+                    [name] => Flaszki od Dziadzi
+                    [id_on_user] => mission_247
+                    [slug] => flaszki-od-dziadzi
+                    [status] => in_progress
+                    [assigned_date] => 2025-04-27 13:05:30
+                    [completion_date] => 2025-04-29 16:43:16
+                )
+
+            [1] => Array
+                (
+                    [id] => 339
+                    [name] => Przejdź samouczek
+                    [id_on_user] => mission_339
+                    [slug] => przejdz-samouczek
+                    [status] => in_progress
+                    [assigned_date] => 2025-04-29 18:04:25
+                    [completion_date] => 2025-05-15 18:20:13
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_mission
+    [condition] => is_not
+    [mission_id] => 339
+    [status] => completed
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [mission] => Array
+        (
+            [0] => Array
+                (
+                    [id] => 247
+                    [name] => Flaszki od Dziadzi
+                    [id_on_user] => mission_247
+                    [slug] => flaszki-od-dziadzi
+                    [status] => in_progress
+                    [assigned_date] => 2025-04-27 13:05:30
+                    [completion_date] => 2025-04-29 16:43:16
+                )
+
+            [1] => Array
+                (
+                    [id] => 339
+                    [name] => Przejdź samouczek
+                    [id_on_user] => mission_339
+                    [slug] => przejdz-samouczek
+                    [status] => in_progress
+                    [assigned_date] => 2025-04-29 18:04:25
+                    [completion_date] => 2025-05-15 18:20:13
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_mission
+    [condition] => is
+    [mission_id] => 339
+    [status] => failed
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [mission] => Array
+        (
+            [0] => Array
+                (
+                    [id] => 247
+                    [name] => Flaszki od Dziadzi
+                    [id_on_user] => mission_247
+                    [slug] => flaszki-od-dziadzi
+                    [status] => in_progress
+                    [assigned_date] => 2025-04-27 13:05:30
+                    [completion_date] => 2025-04-29 16:43:16
+                )
+
+            [1] => Array
+                (
+                    [id] => 339
+                    [name] => Przejdź samouczek
+                    [id_on_user] => mission_339
+                    [slug] => przejdz-samouczek
+                    [status] => in_progress
+                    [assigned_date] => 2025-04-29 18:04:25
+                    [completion_date] => 2025-05-15 18:20:13
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_npc_relation
+    [condition] => is_known
+    [npc_id] => 449
+    [relation_value] => 50
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [relations] => Array
+        (
+            [0] => Array
+                (
+                    [npc_id] => 464
+                    [npc_name] => Toworish
+                    [level] => 0
+                    [meet] => 
+                )
+
+            [1] => Array
+                (
+                    [npc_id] => 449
+                    [npc_name] => Papuga
+                    [level] => 30
+                    [meet] => 1
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_npc_relation
+    [condition] => is_not_known
+    [npc_id] => 449
+    [relation_value] => 50
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [relations] => Array
+        (
+            [0] => Array
+                (
+                    [npc_id] => 464
+                    [npc_name] => Toworish
+                    [level] => 0
+                    [meet] => 
+                )
+
+            [1] => Array
+                (
+                    [npc_id] => 449
+                    [npc_name] => Papuga
+                    [level] => 30
+                    [meet] => 1
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_npc_relation
+    [condition] => relation_above
+    [npc_id] => 449
+    [relation_value] => 50
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [relations] => Array
+        (
+            [0] => Array
+                (
+                    [npc_id] => 464
+                    [npc_name] => Toworish
+                    [level] => 0
+                    [meet] => 
+                )
+
+            [1] => Array
+                (
+                    [npc_id] => 449
+                    [npc_name] => Papuga
+                    [level] => 30
+                    [meet] => 1
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_npc_relation
+    [condition] => relation_below
+    [npc_id] => 449
+    [relation_value] => 50
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [relations] => Array
+        (
+            [0] => Array
+                (
+                    [npc_id] => 464
+                    [npc_name] => Toworish
+                    [level] => 0
+                    [meet] => 
+                )
+
+            [1] => Array
+                (
+                    [npc_id] => 449
+                    [npc_name] => Papuga
+                    [level] => 30
+                    [meet] => 1
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_npc_relation
+    [condition] => relation_equal
+    [npc_id] => 449
+    [relation_value] => 50
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [relations] => Array
+        (
+            [0] => Array
+                (
+                    [npc_id] => 464
+                    [npc_name] => Toworish
+                    [level] => 0
+                    [meet] => 
+                )
+
+            [1] => Array
+                (
+                    [npc_id] => 449
+                    [npc_name] => Papuga
+                    [level] => 30
+                    [meet] => 1
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_task
+    [condition] => is
+    [mission_id] => 339
+    [task_id] => test
+    [status] => in_progress
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [task] => Array
+        (
+            [247] => Array
+                (
+                    [zidentyfikuj-potencjalnych-klientow_0] => Array
+                        (
+                            [status] => completed
+                            [npc_target_449] => completed
+                            [npc_449] => completed
+                        )
+
+                    [rozlicz-sie-z-irasem_1] => Array
+                        (
+                            [status] => in_progress
+                        )
+
+                )
+
+            [339] => Array
+                (
+                    [jak-poruszac-sie-po-grze_0] => Array
+                        (
+                            [status] => completed
+                        )
+
+                    [jak-sie-tu-poruszac_1] => Array
+                        (
+                            [status] => not_started
+                        )
+
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_task
+    [condition] => is_not
+    [mission_id] => 339
+    [task_id] => test
+    [status] => not_started
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [task] => Array
+        (
+            [247] => Array
+                (
+                    [zidentyfikuj-potencjalnych-klientow_0] => Array
+                        (
+                            [status] => completed
+                            [npc_target_449] => completed
+                            [npc_449] => completed
+                        )
+
+                    [rozlicz-sie-z-irasem_1] => Array
+                        (
+                            [status] => in_progress
+                        )
+
+                )
+
+            [339] => Array
+                (
+                    [jak-poruszac-sie-po-grze_0] => Array
+                        (
+                            [status] => completed
+                        )
+
+                    [jak-sie-tu-poruszac_1] => Array
+                        (
+                            [status] => not_started
+                        )
+
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_task
+    [condition] => is
+    [mission_id] => 339
+    [task_id] => test
+    [status] => completed
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [task] => Array
+        (
+            [247] => Array
+                (
+                    [zidentyfikuj-potencjalnych-klientow_0] => Array
+                        (
+                            [status] => completed
+                            [npc_target_449] => completed
+                            [npc_449] => completed
+                        )
+
+                    [rozlicz-sie-z-irasem_1] => Array
+                        (
+                            [status] => in_progress
+                        )
+
+                )
+
+            [339] => Array
+                (
+                    [jak-poruszac-sie-po-grze_0] => Array
+                        (
+                            [status] => completed
+                        )
+
+                    [jak-sie-tu-poruszac_1] => Array
+                        (
+                            [status] => not_started
+                        )
+
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_task
+    [condition] => is
+    [mission_id] => 339
+    [task_id] => test
+    [status] => failed
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [task] => Array
+        (
+            [247] => Array
+                (
+                    [zidentyfikuj-potencjalnych-klientow_0] => Array
+                        (
+                            [status] => completed
+                            [npc_target_449] => completed
+                            [npc_449] => completed
+                        )
+
+                    [rozlicz-sie-z-irasem_1] => Array
+                        (
+                            [status] => in_progress
+                        )
+
+                )
+
+            [339] => Array
+                (
+                    [jak-poruszac-sie-po-grze_0] => Array
+                        (
+                            [status] => completed
+                        )
+
+                    [jak-sie-tu-poruszac_1] => Array
+                        (
+                            [status] => not_started
+                        )
+
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_task
+    [condition] => is
+    [mission_id] => 339
+    [task_id] => test
+    [status] => completed_npc
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [task] => Array
+        (
+            [247] => Array
+                (
+                    [zidentyfikuj-potencjalnych-klientow_0] => Array
+                        (
+                            [status] => completed
+                            [npc_target_449] => completed
+                            [npc_449] => completed
+                        )
+
+                    [rozlicz-sie-z-irasem_1] => Array
+                        (
+                            [status] => in_progress
+                        )
+
+                )
+
+            [339] => Array
+                (
+                    [jak-poruszac-sie-po-grze_0] => Array
+                        (
+                            [status] => completed
+                        )
+
+                    [jak-sie-tu-poruszac_1] => Array
+                        (
+                            [status] => not_started
+                        )
+
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_task
+    [condition] => is
+    [mission_id] => 339
+    [task_id] => test
+    [status] => failed_npc
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [task] => Array
+        (
+            [247] => Array
+                (
+                    [zidentyfikuj-potencjalnych-klientow_0] => Array
+                        (
+                            [status] => completed
+                            [npc_target_449] => completed
+                            [npc_449] => completed
+                        )
+
+                    [rozlicz-sie-z-irasem_1] => Array
+                        (
+                            [status] => in_progress
+                        )
+
+                )
+
+            [339] => Array
+                (
+                    [jak-poruszac-sie-po-grze_0] => Array
+                        (
+                            [status] => completed
+                        )
+
+                    [jak-sie-tu-poruszac_1] => Array
+                        (
+                            [status] => not_started
+                        )
+
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_task
+    [condition] => is
+    [mission_id] => 339
+    [task_id] => test
+    [status] => progress_npc
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [task] => Array
+        (
+            [247] => Array
+                (
+                    [zidentyfikuj-potencjalnych-klientow_0] => Array
+                        (
+                            [status] => completed
+                            [npc_target_449] => completed
+                            [npc_449] => completed
+                        )
+
+                    [rozlicz-sie-z-irasem_1] => Array
+                        (
+                            [status] => in_progress
+                        )
+
+                )
+
+            [339] => Array
+                (
+                    [jak-poruszac-sie-po-grze_0] => Array
+                        (
+                            [status] => completed
+                        )
+
+                    [jak-sie-tu-poruszac_1] => Array
+                        (
+                            [status] => not_started
+                        )
+
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_task
+    [condition] => is
+    [mission_id] => 339
+    [task_id] => test
+    [status] => not_started_npc
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [task] => Array
+        (
+            [247] => Array
+                (
+                    [zidentyfikuj-potencjalnych-klientow_0] => Array
+                        (
+                            [status] => completed
+                            [npc_target_449] => completed
+                            [npc_449] => completed
+                        )
+
+                    [rozlicz-sie-z-irasem_1] => Array
+                        (
+                            [status] => in_progress
+                        )
+
+                )
+
+            [339] => Array
+                (
+                    [jak-poruszac-sie-po-grze_0] => Array
+                        (
+                            [status] => completed
+                        )
+
+                    [jak-sie-tu-poruszac_1] => Array
+                        (
+                            [status] => not_started
+                        )
+
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => text
+    [area] => 
+    [location_text] => test
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [current_location_text] => park
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is_not
+    [location_type] => text
+    [area] => 
+    [location_text] => /test/test
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [current_location_text] => park
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_inventory
+    [condition] => has_item
+    [item_id] => 118
+    [quantity] => 1
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [items] => Array
+        (
+            [0] => Array
+                (
+                    [id] => 121
+                    [name] => Spodenki
+                    [quantity] => 5
+                )
+
+            [1] => Array
+                (
+                    [id] => 122
+                    [name] => Koszula flanelowa
+                    [quantity] => 1
+                )
+
+            [2] => Array
+                (
+                    [id] => 212
+                    [name] => Bimber Dziadzi
+                    [quantity] => 2
+                )
+
+            [3] => Array
+                (
+                    [id] => 124
+                    [name] => Bluza dresowa
+                    [quantity] => 1
+                )
+
+            [4] => Array
+                (
+                    [id] => 125
+                    [name] => Bluza z kapturem
+                    [quantity] => 1
+                )
+
+            [5] => Array
+                (
+                    [id] => 118
+                    [name] => Kurtka puchowa
+                    [quantity] => 1
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_inventory
+    [condition] => has_not_item
+    [item_id] => 122
+    [quantity] => 1
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [items] => Array
+        (
+            [0] => Array
+                (
+                    [id] => 121
+                    [name] => Spodenki
+                    [quantity] => 5
+                )
+
+            [1] => Array
+                (
+                    [id] => 122
+                    [name] => Koszula flanelowa
+                    [quantity] => 1
+                )
+
+            [2] => Array
+                (
+                    [id] => 212
+                    [name] => Bimber Dziadzi
+                    [quantity] => 2
+                )
+
+            [3] => Array
+                (
+                    [id] => 124
+                    [name] => Bluza dresowa
+                    [quantity] => 1
+                )
+
+            [4] => Array
+                (
+                    [id] => 125
+                    [name] => Bluza z kapturem
+                    [quantity] => 1
+                )
+
+            [5] => Array
+                (
+                    [id] => 118
+                    [name] => Kurtka puchowa
+                    [quantity] => 1
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_inventory
+    [condition] => quantity_above
+    [item_id] => 122
+    [quantity] => 5
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [items] => Array
+        (
+            [0] => Array
+                (
+                    [id] => 121
+                    [name] => Spodenki
+                    [quantity] => 5
+                )
+
+            [1] => Array
+                (
+                    [id] => 122
+                    [name] => Koszula flanelowa
+                    [quantity] => 1
+                )
+
+            [2] => Array
+                (
+                    [id] => 212
+                    [name] => Bimber Dziadzi
+                    [quantity] => 2
+                )
+
+            [3] => Array
+                (
+                    [id] => 124
+                    [name] => Bluza dresowa
+                    [quantity] => 1
+                )
+
+            [4] => Array
+                (
+                    [id] => 125
+                    [name] => Bluza z kapturem
+                    [quantity] => 1
+                )
+
+            [5] => Array
+                (
+                    [id] => 118
+                    [name] => Kurtka puchowa
+                    [quantity] => 1
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_inventory
+    [condition] => quantity_below
+    [item_id] => 122
+    [quantity] => 5
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [items] => Array
+        (
+            [0] => Array
+                (
+                    [id] => 121
+                    [name] => Spodenki
+                    [quantity] => 5
+                )
+
+            [1] => Array
+                (
+                    [id] => 122
+                    [name] => Koszula flanelowa
+                    [quantity] => 1
+                )
+
+            [2] => Array
+                (
+                    [id] => 212
+                    [name] => Bimber Dziadzi
+                    [quantity] => 2
+                )
+
+            [3] => Array
+                (
+                    [id] => 124
+                    [name] => Bluza dresowa
+                    [quantity] => 1
+                )
+
+            [4] => Array
+                (
+                    [id] => 125
+                    [name] => Bluza z kapturem
+                    [quantity] => 1
+                )
+
+            [5] => Array
+                (
+                    [id] => 118
+                    [name] => Kurtka puchowa
+                    [quantity] => 1
+                )
+
+        )
+
+)
+
+[2025-05-16 16:16:59] [INFO] dialogi: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [acf_fc_layout] => condition_inventory
+    [condition] => quantity_equal
+    [item_id] => 122
+    [quantity] => 5
+)
+
+[2025-05-16 16:16:59] [INFO] kontekst: 
+[2025-05-16 16:16:59] [DATA] Array
+(
+    [items] => Array
+        (
+            [0] => Array
+                (
+                    [id] => 121
+                    [name] => Spodenki
+                    [quantity] => 5
+                )
+
+            [1] => Array
+                (
+                    [id] => 122
+                    [name] => Koszula flanelowa
+                    [quantity] => 1
+                )
+
+            [2] => Array
+                (
+                    [id] => 212
+                    [name] => Bimber Dziadzi
+                    [quantity] => 2
+                )
+
+            [3] => Array
+                (
+                    [id] => 124
+                    [name] => Bluza dresowa
+                    [quantity] => 1
+                )
+
+            [4] => Array
+                (
+                    [id] => 125
+                    [name] => Bluza z kapturem
+                    [quantity] => 1
+                )
+
+            [5] => Array
+                (
+                    [id] => 118
+                    [name] => Kurtka puchowa
+                    [quantity] => 1
                 )
 
         )

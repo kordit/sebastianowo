@@ -25,11 +25,9 @@ class LocationExtractor
             'area_id' => 0
         ];
 
-        // Sprawdzamy, czy URL zawiera segment 'tereny'
-        if (preg_match('/\/tereny\/([^\/]+)\/?/', $url, $matches)) {
-            $location['area_slug'] = sanitize_title($matches[1]);
+        if (preg_match('/\/tereny\/(.+)/', $url, $matches)) {
+            $location['area_slug'] = rtrim($matches[1], '/');
 
-            // Pobierz ID i nazwę terenu na podstawie sluga
             $area = $this->get_area_by_slug($location['area_slug']);
             if ($area) {
                 $location['area_id'] = $area->ID;
@@ -39,6 +37,9 @@ class LocationExtractor
 
         return $location;
     }
+
+
+
 
     /**
      * Alias metody extract_from_url dla kompatybilności z istniejącym kodem

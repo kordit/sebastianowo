@@ -31,6 +31,7 @@ if ($instance != 'kreator'): ?>
         } else {
             $scene = '';
         }
+        et_r(get_fields('user_' . $current_user_id));
 
 
         if ($instance) {

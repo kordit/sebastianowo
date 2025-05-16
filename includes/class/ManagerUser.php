@@ -32,6 +32,11 @@ class ManagerUser
      * @param string $label Etykieta pola (dla komunikatów)
      * @return array Tablica z wynikiem operacji (success, message, new_value)
      */
+    public function getUserId()
+    {
+        return $this->user_id;
+    }
+
     public function updateNumericField($field_name, $value, $label = null)
     {
         // Sprawdź, czy użytkownik istnieje

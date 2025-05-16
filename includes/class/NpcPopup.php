@@ -13,6 +13,7 @@
 require_once get_template_directory() . '/includes/class/NpcPopup/NpcLogger.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/DialogManager.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/LocationExtractor.php';
+require_once get_template_directory() . '/includes/class/NpcPopup/UserContext.php';
 
 class NpcPopup
 {
@@ -127,86 +128,65 @@ class NpcPopup
     {
         $params = $request->get_params();
         $npc_id = isset($params['npc_id']) ? absint($params['npc_id']) : 0;
-        $page_data = isset($params['page_data']) ? $params['page_data'] : [];
         $current_url = isset($params['current_url']) ? esc_url_raw($params['current_url']) : '';
-
-        // Rozpocznij logowanie dla nowego żądania
-        // $this->logger->debug_log("===== ROZPOCZĘCIE PRZETWARZANIA ŻĄDANIA NPC =====");
-        // $this->logger->debug_log("Parametry żądania:", [
-        //     'npc_id' => $npc_id,
-        //     'page_data' => $page_data,
-        //     'current_url' => $current_url
-        // ]);
-
-        // Wyodrębnij informacje o lokalizacji
-        $location = $this->locationExtractor->extract_location_from_url($current_url);
-        $type_page = isset($page_data['TypePage']) ? sanitize_text_field($page_data['TypePage']) : '';
-        $location_value = isset($page_data['value']) ? sanitize_text_field($page_data['value']) : '';
-
-        // Pobierz ID użytkownika - używamy cookie do identyfikacji
         $user_id = get_current_user_id();
 
-        // Jeśli user_id to 0, ale mamy ciasteczko sesji, spróbujmy odtworzyć sesję
-        if ($user_id === 0 && isset($_COOKIE[LOGGED_IN_COOKIE])) {
-            // $this->logger->debug_log("Wykryto ciasteczko logowania, próba odtworzenia sesji");
-            $user = wp_validate_auth_cookie($_COOKIE[LOGGED_IN_COOKIE], 'logged_in');
-            if ($user) {
-                $user_id = $user;
-                // $this->logger->debug_log("Odtworzono sesję dla użytkownika: {$user_id}");
-            }
-        }
-
-        // $this->logger->debug_log("Wyodrębnione dane lokalizacji:", [
-        //     'location' => $location,
-        //     'type_page' => $type_page,
-        //     'location_value' => $location_value,
-        //     'user_id' => $user_id
-        // ]);
-
-        $criteria = [
-            'type_page' => $type_page,
-            'location' => $location_value,
-            'user_id' => $user_id,
-            'npc_id' => $npc_id
-        ];
-
         if (!$npc_id) {
-            // $this->logger->debug_log("BŁĄD: Nieprawidłowe ID NPC");
+            $this->logger->debug_log("BŁĄD: Nieprawidłowe ID NPC");
             return new \WP_REST_Response([
                 'status' => 'error',
                 'message' => 'Nieprawidłowe ID NPC'
             ], 400);
         }
 
-        // Pobierz pola ACF dla NPC
+        $location_info = $this->locationExtractor->extract_from_url($current_url);
+        $userContext = new UserContext(new ManagerUser($user_id));
+
         $fields = get_fields($npc_id);
         $dialogs = isset($fields['dialogs']) ? $fields['dialogs'] : [];
 
-        // $this->logger->debug_log("Pobrane dialogi dla NPC {$npc_id}:", $dialogs);
-
-        // Ustaw kontekst dla menedżera dialogów
         $this->dialogManager->setNpcId($npc_id);
         $this->dialogManager->setUserId($user_id);
 
-        // Wybierz pierwszy dostępny dialog
-        $filtered_dialog = !empty($dialogs) ? $dialogs[0] : null;
+        foreach ($dialogs as $dialog) {
+            $layout_settings = $dialog['layout_settings'];
+            $visibility_settings = $layout_settings['visibility_settings'];
+            if (isset($visibility_settings)) {
+                foreach ($visibility_settings as $condition) {
+                    $acf_layout = $condition['acf_fc_layout'] ?? '';
+                    switch ($acf_layout) {
+                        case 'condition_mission':
+                            $context_for_condition = ['mission' => $userContext->get_missions()];
+                            break;
+                        case 'condition_npc_relation':
+                            $context_for_condition = ['relations' => $userContext->get_relations()];
+                            break;
+                        case 'condition_task':
+                            $context_for_condition = ['task' => $userContext->get_tasks()];
+                            break;
+                        case 'condition_location':
+                            $context_for_condition = ['current_location_text' => $location_info['area_slug'] ?? null];
+                            break;
+                        case 'condition_inventory':
+                            $context_for_condition = ['items' => $userContext->get_item_counts()];
+                            break;
+                        default:
+                            $context_for_condition = [];
+                    }
+                    $filtered_dialog = $this->dialogManager->get_first_matching_dialog($condition, $context_for_condition);
+                }
+            }
+        }
 
-        // Pobierz URL obrazka miniatury dla NPC
         $thumbnail_url = '';
         if (has_post_thumbnail($npc_id)) {
-            // Pobierz URL obrazka w pełnym rozmiarze
             $thumbnail_url = get_the_post_thumbnail_url($npc_id, 'full');
         } else {
-            // Jeśli nie ma miniatury, można ustawić domyślny obrazek
             $thumbnail_url = get_template_directory_uri() . '/assets/images/png/postac.png';
         }
 
-        // $this->logger->debug_log("URL miniatury NPC: {$thumbnail_url}");
-
-        // Pobierz dodatkowe dane o wpisie
         $post_data = get_post($npc_id, ARRAY_A);
 
-        // Przygotuj dane odpowiedzi z pojedynczym dialogiem
         $response_data = [
             'status' => 'success',
             'npc_data' => [
@@ -219,9 +199,6 @@ class NpcPopup
                 'dialog' => $filtered_dialog ? $this->dialogManager->simplify_dialog($filtered_dialog) : null
             ]
         ];
-
-        // $this->logger->debug_log("Dane odpowiedzi:", $response_data);
-        // $this->logger->debug_log("===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA NPC =====");
 
         return new \WP_REST_Response($response_data, 200);
     }

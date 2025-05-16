@@ -79,7 +79,7 @@ class DialogHandler
         // Tymczasowo wyłączone sprawdzanie autoryzacji
         return true;
 
-        /* // Sprawdź, czy użytkownik jest zalogowany
+        // Sprawdź, czy użytkownik jest zalogowany
         if (!is_user_logged_in()) {
             return new \WP_Error(
                 'rest_forbidden',
@@ -100,7 +100,7 @@ class DialogHandler
             );
         }
 
-        return true; */
+        return true;
     }
 
     /**
@@ -255,23 +255,12 @@ class DialogHandler
 
             // Logger
             $logger = new NpcLogger();
-            $logger->debug_log("===== ROZPOCZĘCIE PRZETWARZANIA ŻĄDANIA DIALOGU =====");
-            $logger->debug_log("Żądanie dialogu: NPC ID: $npc_id, Dialog ID: $dialog_id, User ID: $user_id");
 
             // Zapisz całe dane żądania do logu
             $logger->debug_log("WSZYSTKIE DANE ŻĄDANIA:", $request->get_params());
 
-            if ($answer_id && $current_dialog_id) {
-                $logger->debug_log("Dane odpowiedzi: ID: $answer_id, Index: $answer_index, Poprzedni dialog: $current_dialog_id");
-            }
-
             // Sprawdź aktualny stan zasobów użytkownika na początku
             $current_backpack = get_field(BACKPACK['name'], 'user_' . $user_id);
-            if (is_array($current_backpack)) {
-                $logger->debug_log("STAN PLECAKA PRZED PRZETWARZANIEM DIALOGU:", $current_backpack);
-            } else {
-                $logger->debug_log("UWAGA: Brak inicjalizacji plecaka dla użytkownika $user_id przed przetwarzaniem dialogu");
-            }
 
             // Sprawdź, czy NPC istnieje
             $npc = get_post($npc_id);
@@ -287,15 +276,12 @@ class DialogHandler
             // Pobierz dane dialogu z ACF
             $dialogs = get_field('dialogs', $npc_id);
             if (!$dialogs || !is_array($dialogs)) {
-                $logger->debug_log("Błąd: NPC $npc_id nie ma zdefiniowanych dialogów");
                 return new \WP_Error(
                     'no_dialogs',
                     __('Ten NPC nie ma zdefiniowanych dialogów.', 'game'),
                     ['status' => 404]
                 );
             }
-
-            $logger->debug_log("Pobrane dialogi dla NPC $npc_id", $dialogs);
 
             // Przygotuj zarządzanie dialogiem
             $dialog_manager = new DialogManager($logger);
