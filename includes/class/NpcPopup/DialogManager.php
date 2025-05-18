@@ -751,11 +751,11 @@ class DialogManager
     public function get_first_matching_dialog(array $dialogs, $userContext, array $location_info): ?array
     {
         foreach ($dialogs as $dialog) {
-            // $this->logger->debug_log('Sprawdzanie dialogu', [
-            //     'dialog_id' => $dialog['dialog_id'] ?? 'brak id',
-            //     'answers_count' => is_array($dialog['anwsers'] ?? []) ? count($dialog['anwsers']) : 0
-            // ]);
-
+            $this->logger->debug_log('Sprawdzanie dialogu', [
+                'dialog_id' => $dialog['dialog_id'] ?? 'brak id',
+                'answers_count' => is_array($dialog['anwsers'] ?? []) ? count($dialog['anwsers']) : 0
+            ]);
+            
             $layout_settings = $dialog['layout_settings'] ?? [];
             $visibility_settings = $layout_settings['visibility_settings'] ?? [];
             $all_conditions_pass = true;
@@ -776,14 +776,92 @@ class DialogManager
                 }
             }
             if ($all_conditions_pass) {
-                foreach ($dialog['anwsers'] as $answer) {
-                    $visibility_settings = $answer['layout_settings']['visibility_settings'];
-                    if (is_array($visibility_settings)) {
-                        foreach ($visibility_settings as $condition) {
-                            $this->logger->debug_log('Sprawdzanie dialogu', $condition);
+                // Filtrowanie odpowiedzi dialogu
+                if (isset($dialog['anwsers']) && is_array($dialog['anwsers'])) {
+                    $this->logger->debug_log('Filtrowanie anwsers dla dialogu', [
+                        'dialog_id' => $dialog['dialog_id'] ?? 'brak id',
+                        'anwsers_count_before' => count($dialog['anwsers'])
+                    ]);
+                    
+                    $filtered_anwsers = [];
+                    foreach ($dialog['anwsers'] as $key => $answer) {
+                        $answer_settings = $answer['layout_settings'] ?? [];
+                        $answer_visibility = $answer_settings['visibility_settings'] ?? [];
+                        
+                        // Jeśli nie ma warunków widoczności, zachowaj odpowiedź
+                        if (empty($answer_visibility)) {
+                            $filtered_anwsers[$key] = $answer;
+                            continue;
+                        }
+                        
+                        $answer_passes = true;
+                        foreach ($answer_visibility as $answer_condition) {
+                            $this->logger->debug_log('Warunek dla odpowiedzi', [
+                                'answer_text' => $answer['anwser_text'] ?? 'brak tekstu',
+                                'condition' => $answer_condition
+                            ]);
+                            
+                            $acf_layout = $answer_condition['acf_fc_layout'] ?? '';
+                            $context_for_condition = $userContext->get_context_for_condition($acf_layout, $location_info);
+                            $result = $this->validate_dialog_condition($answer_condition, $context_for_condition);
+                            
+                            if (!$result) {
+                                $answer_passes = false;
+                                $this->logger->debug_log('Odpowiedź nie spełnia warunku', [
+                                    'answer_text' => $answer['anwser_text'] ?? 'brak tekstu',
+                                    'condition' => $answer_condition,
+                                    'result' => $result
+                                ]);
+                                break;
+                            }
+                        }
+                        
+                        if ($answer_passes) {
+                            $filtered_anwsers[$key] = $answer;
                         }
                     }
+                    
+                    $dialog['anwsers'] = $filtered_anwsers;
+                    
+                    $this->logger->debug_log('Po filtrowaniu anwsers', [
+                        'dialog_id' => $dialog['dialog_id'] ?? 'brak id',
+                        'anwsers_count_after' => count($filtered_anwsers),
+                        'anwsers_texts' => array_map(function($a) { return $a['anwser_text'] ?? 'brak tekstu'; }, $filtered_anwsers)
+                    ]);
                 }
+                
+                // Filtrowanie answers (jeśli istnieje)
+                if (isset($dialog['answers']) && is_array($dialog['answers'])) {
+                    $filtered_answers = [];
+                    foreach ($dialog['answers'] as $key => $answer) {
+                        $answer_settings = $answer['layout_settings'] ?? [];
+                        $answer_visibility = $answer_settings['visibility_settings'] ?? [];
+                        
+                        if (empty($answer_visibility)) {
+                            $filtered_answers[$key] = $answer;
+                            continue;
+                        }
+                        
+                        $answer_passes = true;
+                        foreach ($answer_visibility as $answer_condition) {
+                            $acf_layout = $answer_condition['acf_fc_layout'] ?? '';
+                            $context_for_condition = $userContext->get_context_for_condition($acf_layout, $location_info);
+                            $result = $this->validate_dialog_condition($answer_condition, $context_for_condition);
+                            
+                            if (!$result) {
+                                $answer_passes = false;
+                                break;
+                            }
+                        }
+                        
+                        if ($answer_passes) {
+                            $filtered_answers[$key] = $answer;
+                        }
+                    }
+                    
+                    $dialog['answers'] = $filtered_answers;
+                }
+                
                 return $dialog;
             }
         }

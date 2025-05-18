@@ -13,6 +13,8 @@
 require_once get_template_directory() . '/includes/class/NpcPopup/NpcLogger.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/DialogManager.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/LocationExtractor.php';
+require_once get_template_directory() . '/includes/class/NpcPopup/UserContext.php';
+require_once get_template_directory() . '/includes/class/ManagerUser.php';
 
 class DialogHandler
 {
@@ -1755,8 +1757,25 @@ class DialogHandler
                 );
             }
 
-            // Filtruj odpowiedzi w dialogu
-            $filtered_dialog = $dialog_manager->filter_answers($dialog, $criteria);
+            // Tworzymy obiekt UserContext dla odpowiedniego filtrowania odpowiedzi
+            $userContext = new UserContext(new ManagerUser($user_id));
+            
+            // Przygotuj dane lokalizacji dla kontekstu
+            $location_info = [
+                'area_slug' => $location,
+                'type_page' => $type_page,
+                'location_value' => $location_value
+            ];
+            
+            // Filtruj odpowiedzi w dialogu z wykorzystaniem UserContext
+            $dialog = $dialog_manager->get_first_matching_dialog([$dialog], $userContext, $location_info);
+            if (!$dialog) {
+                $logger->debug_log("UWAGA: Dialog nie przeszedł filtrowania z UserContext, używam podstawowego filtrowania");
+                $filtered_dialog = $dialog_manager->filter_answers($dialog, $criteria);
+            } else {
+                $filtered_dialog = $dialog;
+            }
+            
             $logger->debug_log("Dialog po filtrowaniu:", $filtered_dialog);
 
             // Uproszczenie struktury dialogu
