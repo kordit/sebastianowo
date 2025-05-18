@@ -168,6 +168,14 @@
     object-fit: contain;
 }
 
+.npc-dialog-text ul br {
+    display: none;
+}
+
+.npc-dialog-text ul+br {
+    display: none;
+}
+
 .npc-avatar-placeholder {
     width: 300px;
     height: 450px;

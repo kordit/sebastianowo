@@ -82,28 +82,6 @@ class DialogManager
         $this->user_id = $user_id;
     }
 
-    /**
-     * Pobiera pierwszy pasujący dialog dla NPC, biorąc pod uwagę warunki.
-     *
-     * @param array $dialogs Tablica wszystkich dialogów dla NPC.
-     * @param array $context Kontekst do sprawdzania warunków (np. ['current_area_id' => 1, 'current_location_text' => 'slug']).
-     * @return array|null Pasujący dialog lub null, jeśli żaden nie pasuje.
-     */
-    public function get_first_matching_dialog(array $dialogs, array $context): ?array
-    {
-        $this->logger->debug_log('dialogi: ', $dialogs);
-        $this->logger->debug_log('kontekst: ', $context);
-
-        return null;
-    }
-
-    /**
-     * Filtruje odpowiedzi dla danego dialogu na podstawie warunków.
-     *
-     * @param array $answers Tablica odpowiedzi.
-     * @param array $context Kontekst do sprawdzania warunków.
-     * @return array Przefiltrowana tablica odpowiedzi.
-     */
     public function filter_answers(array $answers, array $context): array
     {
         $this->logger->debug_log("DialogManager: Rozpoczynam filtrowanie odpowiedzi.", ['count_answers_before' => count($answers), 'context' => $context]);
@@ -554,5 +532,190 @@ class DialogManager
             $this->locationConditionChecker = new LocationConditionChecker($this->user_id, $this->logger);
         }
         return $this->locationConditionChecker;
+    }
+
+    /**
+     * Waliduje pojedynczy warunek dialogu na podstawie kontekstu.
+     *
+     * @param array $condition Warunek do sprawdzenia (z ACF)
+     * @param array $context Kontekst użytkownika (np. ['missions'=>[], 'relations'=>[], ...])
+     * @return bool
+     */
+    public function validate_dialog_condition(array $condition, array $context): bool
+    {
+        $type = $condition['acf_fc_layout'] ?? '';
+        switch ($type) {
+            case 'condition_mission': {
+                    $mission_id = (int)($condition['mission_id'] ?? 0);
+                    $operator = $condition['condition'] ?? 'is';
+                    $status = $condition['status'] ?? null;
+                    $missions = $context['mission'] ?? [];
+                    $found = false;
+                    foreach ($missions as $mission) {
+                        if ((int)$mission['id'] === $mission_id) {
+                            $found = true;
+                            if ($operator === 'is') {
+                                return $mission['status'] === $status;
+                            } elseif ($operator === 'is_not') {
+                                return $mission['status'] !== $status;
+                            }
+                        }
+                    }
+                    // Jeśli warunek is_not i misja nie istnieje, to spełniony
+                    if ($operator === 'is_not' && !$found) return true;
+                    return false;
+                }
+            case 'condition_npc_relation': {
+                    $npc_id = (int)($condition['npc_id'] ?? 0);
+                    $operator = $condition['condition'] ?? 'is_known';
+                    $value = isset($condition['relation_value']) ? (int)$condition['relation_value'] : null;
+                    $relations = $context['relations'] ?? [];
+                    foreach ($relations as $rel) {
+                        if ((int)$rel['npc_id'] === $npc_id) {
+                            switch ($operator) {
+                                case 'is_known':
+                                    return (bool)$rel['meet'];
+                                case 'is_not_known':
+                                    return !(bool)$rel['meet'];
+                                case 'relation_above':
+                                    return $rel['level'] > $value;
+                                case 'relation_below':
+                                    return $rel['level'] < $value;
+                                case 'relation_equal':
+                                    return $rel['level'] == $value;
+                            }
+                        }
+                    }
+                    // Jeśli warunek is_not_known i nie ma relacji, to spełniony
+                    if ($operator === 'is_not_known') return true;
+                    return false;
+                }
+            case 'condition_task': {
+                    $mission_id = (int)($condition['mission_id'] ?? 0);
+                    $task_id = $condition['task_id'] ?? '';
+                    $operator = $condition['condition'] ?? 'is';
+                    $status = $condition['status'] ?? null; // <-- poprawka: było 'task_status', powinno być 'status'
+                    $tasks = $context['task'] ?? [];
+                    if (isset($tasks[$mission_id][$task_id])) {
+                        $task = $tasks[$mission_id][$task_id];
+                        $task_status = is_array($task) ? ($task['status'] ?? null) : $task;
+                        if ($operator === 'is') {
+                            return $task_status === $status;
+                        } elseif ($operator === 'is_not') {
+                            return $task_status !== $status;
+                        }
+                    } else {
+                        // Jeśli warunek is_not i zadanie nie istnieje, to spełniony
+                        if ($operator === 'is_not') return true;
+                    }
+                    return false;
+                }
+            case 'condition_location': {
+                    $operator = $condition['condition'] ?? 'is';
+                    $location_text = $condition['location_text'] ?? '';
+                    $current_location = $context['current_location_text'] ?? '';
+                    if ($operator === 'is') {
+                        return $current_location === $location_text;
+                    } elseif ($operator === 'is_not') {
+                        return $current_location !== $location_text;
+                    }
+                    return false;
+                }
+            case 'condition_inventory': {
+                    $item_id = (int)($condition['item_id'] ?? 0);
+                    $operator = $condition['condition'] ?? 'has_item';
+                    $quantity = isset($condition['quantity']) ? (int)$condition['quantity'] : 1;
+                    $items = $context['items'] ?? [];
+                    $found = false;
+                    $item_quantity = 0;
+                    foreach ($items as $item) {
+                        if ((int)$item['id'] === $item_id) {
+                            $found = true;
+                            $item_quantity = (int)$item['quantity'];
+                            break;
+                        }
+                    }
+                    switch ($operator) {
+                        case 'has_item':
+                            return $found && $item_quantity > 0;
+                        case 'has_not_item':
+                            return !$found || $item_quantity <= 0;
+                        case 'quantity_above':
+                            return $found && $item_quantity > $quantity;
+                        case 'quantity_below':
+                            return !$found || $item_quantity < $quantity;
+                        case 'quantity_equal':
+                            return $found && $item_quantity == $quantity;
+                    }
+                    return false;
+                }
+            default:
+                $this->logger->debug_log('Nieznany typ warunku', $condition);
+                return false;
+        }
+    }
+
+    /**
+     * Zwraca pierwszy dialog, który spełnia WSZYSTKIE warunki visibility_settings
+     *
+     * @param array $dialogs Tablica wszystkich dialogów
+     * @param object $userContext Obiekt UserContext
+     * @param array $location_info Informacje o lokalizacji
+     * @return array|null Pełny dialog lub null
+     */
+    public function get_first_matching_dialog(array $dialogs, $userContext, array $location_info): ?array
+    {
+        foreach ($dialogs as $dialog) {
+            $layout_settings = $dialog['layout_settings'] ?? [];
+            $visibility_settings = $layout_settings['visibility_settings'] ?? [];
+            $all_conditions_pass = true;
+            $failed_reason = [];
+            foreach ($visibility_settings as $condition) {
+                $acf_layout = $condition['acf_fc_layout'] ?? '';
+                switch ($acf_layout) {
+                    case 'condition_mission':
+                        $context_for_condition = ['mission' => $userContext->get_missions()];
+                        break;
+                    case 'condition_npc_relation':
+                        $context_for_condition = ['relations' => $userContext->get_relations()];
+                        break;
+                    case 'condition_task':
+                        $context_for_condition = ['task' => $userContext->get_tasks()];
+                        break;
+                    case 'condition_location':
+                        $context_for_condition = ['current_location_text' => $location_info['area_slug'] ?? null];
+                        break;
+                    case 'condition_inventory':
+                        $context_for_condition = ['items' => $userContext->get_item_counts()];
+                        break;
+                    default:
+                        $context_for_condition = [];
+                }
+                $result = $this->validate_dialog_condition($condition, $context_for_condition);
+                if (!$result) {
+                    $all_conditions_pass = false;
+                    $failed_reason[] = [
+                        'dialog_id' => $dialog['dialog_id'] ?? null,
+                        'condition' => $condition,
+                        'context' => $context_for_condition,
+                        'reason' => 'Warunek nie został spełniony'
+                    ];
+                    // Można break, bo wystarczy jeden niespełniony warunek
+                    break;
+                }
+            }
+            if ($all_conditions_pass) {
+                $this->logger->debug_log('get_first_matching_dialog: Found matching dialog', $dialog);
+                return $dialog;
+            } else {
+                $this->logger->debug_log('get_first_matching_dialog: Dialog nie spełnił warunków', [
+                    'dialog_id' => $dialog['dialog_id'] ?? null,
+                    'reasons' => $failed_reason,
+                    'dialog' => $dialog
+                ]);
+            }
+        }
+        $this->logger->debug_log('get_first_matching_dialog: No matching dialog found');
+        return null;
     }
 }

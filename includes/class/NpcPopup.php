@@ -147,36 +147,8 @@ class NpcPopup
 
         $this->dialogManager->setNpcId($npc_id);
         $this->dialogManager->setUserId($user_id);
-
-        foreach ($dialogs as $dialog) {
-            $layout_settings = $dialog['layout_settings'];
-            $visibility_settings = $layout_settings['visibility_settings'];
-            if (isset($visibility_settings)) {
-                foreach ($visibility_settings as $condition) {
-                    $acf_layout = $condition['acf_fc_layout'] ?? '';
-                    switch ($acf_layout) {
-                        case 'condition_mission':
-                            $context_for_condition = ['mission' => $userContext->get_missions()];
-                            break;
-                        case 'condition_npc_relation':
-                            $context_for_condition = ['relations' => $userContext->get_relations()];
-                            break;
-                        case 'condition_task':
-                            $context_for_condition = ['task' => $userContext->get_tasks()];
-                            break;
-                        case 'condition_location':
-                            $context_for_condition = ['current_location_text' => $location_info['area_slug'] ?? null];
-                            break;
-                        case 'condition_inventory':
-                            $context_for_condition = ['items' => $userContext->get_item_counts()];
-                            break;
-                        default:
-                            $context_for_condition = [];
-                    }
-                    $filtered_dialog = $this->dialogManager->get_first_matching_dialog($condition, $context_for_condition);
-                }
-            }
-        }
+        $filtered_dialog = $this->dialogManager->get_first_matching_dialog($dialogs, $userContext, $location_info);
+        $this->logger->debug_log('Filtered dialog', $filtered_dialog);
 
         $thumbnail_url = '';
         if (has_post_thumbnail($npc_id)) {

@@ -1485,6 +1485,7 @@ class DialogHandler
                                                             $task['task_id'] === $task_id_no_suffix)
                                                     ) {
                                                         $task_name = $task['task_title'] ?? $task_name;
+                                                        $task_name = get_task_title_by_slug($task_name);
                                                         break;
                                                     }
                                                 }
@@ -1495,11 +1496,14 @@ class DialogHandler
                                                     if (!empty($task_parts)) {
                                                         // Zamień myślniki na spacje i sformatuj tekst
                                                         $task_name = ucfirst(implode(' ', $task_parts));
+                                                        $task_name = get_task_title_by_slug($task_name);
                                                     }
                                                 }
                                             }
 
                                             $status_display = str_replace('_npc', '', $task_status);
+
+                                            $task_name = get_task_title_by_slug($task_name);
 
                                             if ($status_display === 'completed') {
                                                 $notification = [

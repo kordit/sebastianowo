@@ -14,6 +14,28 @@ if ($instance != 'kreator'): ?>
     <div class="game-content--inner">
         <?php
 
+        $args = [
+            'post_type' => 'mission',
+            'posts_per_page' => -1,
+        ];
+
+        $query = new WP_Query($args);
+
+        if ($query->have_posts()) {
+            while ($query->have_posts()) {
+                $query->the_post();
+
+                $post_id = get_the_ID();
+                $fields = get_fields($post_id);
+
+                echo '<h3>' . get_the_title() . ' (ID: ' . $post_id . ')</h3>';
+                echo '<pre>';
+                print_r($fields);
+                echo '</pre>';
+            }
+            wp_reset_postdata();
+        }
+
         $current_user_id = get_current_user_id();
         $meta = get_user_meta($current_user_id);
         if (is_single() && get_the_ID() !== 24) {
@@ -31,7 +53,7 @@ if ($instance != 'kreator'): ?>
         } else {
             $scene = '';
         }
-        et_r(get_fields('user_' . $current_user_id));
+        // et_r(get_fields('user_' . $current_user_id));
 
 
         if ($instance) {
