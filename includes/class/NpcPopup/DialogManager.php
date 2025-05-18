@@ -1,6 +1,7 @@
 <?php
 
 require_once get_template_directory() . '/includes/class/NpcPopup/NpcLogger.php'; // Poprawiona ścieżka
+require_once get_template_directory() . '/includes/class/NpcPopup/ContextValidator.php';
 
 /**
  * Klasa DialogManager
@@ -82,41 +83,41 @@ class DialogManager
         $this->user_id = $user_id;
     }
 
-    public function filter_answers(array $answers, array $context): array
-    {
-        $this->logger->debug_log("DialogManager: Rozpoczynam filtrowanie odpowiedzi.", ['count_answers_before' => count($answers), 'context' => $context]);
-        if (empty($answers)) {
-            $this->logger->debug_log("DialogManager: Brak odpowiedzi do filtrowania.");
-            return [];
-        }
+    // public function filter_answers(array $answers, array $context): array
+    // {
+    //     $this->logger->debug_log("DialogManager: Rozpoczynam filtrowanie odpowiedzi.", ['count_answers_before' => count($answers), 'context' => $context]);
+    //     if (empty($answers)) {
+    //         $this->logger->debug_log("DialogManager: Brak odpowiedzi do filtrowania.");
+    //         return [];
+    //     }
 
-        $filtered_answers = [];
-        foreach ($answers as $answer_key => $answer_data) {
-            $answer_text_log = $answer_data['answer_text'] ?? (is_array($answer_key) ? json_encode($answer_key) : $answer_key);
-            $this->logger->debug_log("DialogManager: Sprawdzanie odpowiedzi: " . $answer_text_log, ['answer_data' => $answer_data]);
+    //     $filtered_answers = [];
+    //     foreach ($answers as $answer_key => $answer_data) {
+    //         $answer_text_log = $answer_data['answer_text'] ?? (is_array($answer_key) ? json_encode($answer_key) : $answer_key);
+    //         $this->logger->debug_log("DialogManager: Sprawdzanie odpowiedzi: " . $answer_text_log, ['answer_data' => $answer_data]);
 
-            $conditions = $answer_data['visibility_conditions'] ?? [];
-            if (!empty($conditions)) {
-                $this->logger->debug_log("DialogManager: Odpowiedź (" . $answer_text_log . ") ma zdefiniowane warunki widoczności. Rozpoczynam sprawdzanie.", ['conditions' => $conditions]);
-                try {
-                    if (!$this->getLocationConditionChecker()->check_conditions($conditions, $context)) {
-                        $this->logger->debug_log("DialogManager: Warunki dla odpowiedzi (" . $answer_text_log . ") NIESPEŁNIONE. Usuwanie odpowiedzi.", ['conditions' => $conditions, 'context' => $context]);
-                        continue;
-                    }
-                    $this->logger->debug_log("DialogManager: Warunki dla odpowiedzi (" . $answer_text_log . ") SPEŁNIONE.", ['conditions' => $conditions, 'context' => $context]);
-                } catch (\Exception $e) {
-                    $this->logger->log("DialogManager: Błąd podczas sprawdzania warunków dla odpowiedzi (" . $answer_text_log . ") - " . $e->getMessage(), 'error'); // Poprawione wywołanie loggera
-                    continue;
-                }
-            } else {
-                $this->logger->debug_log("DialogManager: Odpowiedź (" . $answer_text_log . ") nie ma zdefiniowanych warunków widoczności.");
-            }
-            $filtered_answers[$answer_key] = $answer_data;
-        }
+    //         $conditions = $answer_data['visibility_conditions'] ?? [];
+    //         if (!empty($conditions)) {
+    //             $this->logger->debug_log("DialogManager: Odpowiedź (" . $answer_text_log . ") ma zdefiniowane warunki widoczności. Rozpoczynam sprawdzanie.", ['conditions' => $conditions]);
+    //             try {
+    //                 if (!$this->getLocationConditionChecker()->check_conditions($conditions, $context)) {
+    //                     $this->logger->debug_log("DialogManager: Warunki dla odpowiedzi (" . $answer_text_log . ") NIESPEŁNIONE. Usuwanie odpowiedzi.", ['conditions' => $conditions, 'context' => $context]);
+    //                     continue;
+    //                 }
+    //                 $this->logger->debug_log("DialogManager: Warunki dla odpowiedzi (" . $answer_text_log . ") SPEŁNIONE.", ['conditions' => $conditions, 'context' => $context]);
+    //             } catch (\Exception $e) {
+    //                 $this->logger->log("DialogManager: Błąd podczas sprawdzania warunków dla odpowiedzi (" . $answer_text_log . ") - " . $e->getMessage(), 'error'); // Poprawione wywołanie loggera
+    //                 continue;
+    //             }
+    //         } else {
+    //             $this->logger->debug_log("DialogManager: Odpowiedź (" . $answer_text_log . ") nie ma zdefiniowanych warunków widoczności.");
+    //         }
+    //         $filtered_answers[$answer_key] = $answer_data;
+    //     }
 
-        $this->logger->debug_log("DialogManager: Zakończono filtrowanie odpowiedzi.", ['count_answers_after' => count($filtered_answers)]);
-        return $filtered_answers;
-    }
+    //     $this->logger->debug_log("DialogManager: Zakończono filtrowanie odpowiedzi.", ['count_answers_after' => count($filtered_answers)]);
+    //     return $filtered_answers;
+    // }
 
     /**
      * Filtrowanie odpowiedzi z wykorzystaniem UserContext i validate_dialog_condition
@@ -155,9 +156,9 @@ class DialogManager
             $conditions = $answer_data['visibility_conditions'] ?? [];
             $all_conditions_pass = true;
             $failed_reason = [];
+            $validator = new ContextValidator($userContext);
             foreach ($conditions as $condition) {
-                $acf_layout = $condition['acf_fc_layout'] ?? '';
-                $context_for_condition = $userContext->get_context_for_condition($acf_layout, $location_info);
+                $context_for_condition = $validator->validateCondition($condition, $location_info);
                 $this->logger->debug_log("DialogManager: Warunek do sprawdzenia", [
                     'answer_text' => $answer_text_log,
                     'condition' => $condition,
@@ -755,14 +756,14 @@ class DialogManager
                 'dialog_id' => $dialog['dialog_id'] ?? 'brak id',
                 'answers_count' => is_array($dialog['anwsers'] ?? []) ? count($dialog['anwsers']) : 0
             ]);
-            
+
             $layout_settings = $dialog['layout_settings'] ?? [];
             $visibility_settings = $layout_settings['visibility_settings'] ?? [];
             $all_conditions_pass = true;
             $failed_reason = [];
+            $validator = new ContextValidator($userContext);
             foreach ($visibility_settings as $condition) {
-                $acf_layout = $condition['acf_fc_layout'] ?? '';
-                $context_for_condition = $userContext->get_context_for_condition($acf_layout, $location_info);
+                $context_for_condition = $validator->validateCondition($condition, $location_info);
                 $result = $this->validate_dialog_condition($condition, $context_for_condition);
                 if (!$result) {
                     $all_conditions_pass = false;
@@ -782,29 +783,29 @@ class DialogManager
                         'dialog_id' => $dialog['dialog_id'] ?? 'brak id',
                         'anwsers_count_before' => count($dialog['anwsers'])
                     ]);
-                    
+
                     $filtered_anwsers = [];
                     foreach ($dialog['anwsers'] as $key => $answer) {
                         $answer_settings = $answer['layout_settings'] ?? [];
                         $answer_visibility = $answer_settings['visibility_settings'] ?? [];
-                        
+
                         // Jeśli nie ma warunków widoczności, zachowaj odpowiedź
                         if (empty($answer_visibility)) {
                             $filtered_anwsers[$key] = $answer;
                             continue;
                         }
-                        
+
                         $answer_passes = true;
+                        $validator = new ContextValidator($userContext);
                         foreach ($answer_visibility as $answer_condition) {
                             $this->logger->debug_log('Warunek dla odpowiedzi', [
                                 'answer_text' => $answer['anwser_text'] ?? 'brak tekstu',
                                 'condition' => $answer_condition
                             ]);
-                            
-                            $acf_layout = $answer_condition['acf_fc_layout'] ?? '';
-                            $context_for_condition = $userContext->get_context_for_condition($acf_layout, $location_info);
+
+                            $context_for_condition = $validator->validateCondition($answer_condition, $location_info);
                             $result = $this->validate_dialog_condition($answer_condition, $context_for_condition);
-                            
+
                             if (!$result) {
                                 $answer_passes = false;
                                 $this->logger->debug_log('Odpowiedź nie spełnia warunku', [
@@ -815,53 +816,55 @@ class DialogManager
                                 break;
                             }
                         }
-                        
+
                         if ($answer_passes) {
                             $filtered_anwsers[$key] = $answer;
                         }
                     }
-                    
+
                     $dialog['anwsers'] = $filtered_anwsers;
-                    
+
                     $this->logger->debug_log('Po filtrowaniu anwsers', [
                         'dialog_id' => $dialog['dialog_id'] ?? 'brak id',
                         'anwsers_count_after' => count($filtered_anwsers),
-                        'anwsers_texts' => array_map(function($a) { return $a['anwser_text'] ?? 'brak tekstu'; }, $filtered_anwsers)
+                        'anwsers_texts' => array_map(function ($a) {
+                            return $a['anwser_text'] ?? 'brak tekstu';
+                        }, $filtered_anwsers)
                     ]);
                 }
-                
+
                 // Filtrowanie answers (jeśli istnieje)
                 if (isset($dialog['answers']) && is_array($dialog['answers'])) {
                     $filtered_answers = [];
                     foreach ($dialog['answers'] as $key => $answer) {
                         $answer_settings = $answer['layout_settings'] ?? [];
                         $answer_visibility = $answer_settings['visibility_settings'] ?? [];
-                        
+
                         if (empty($answer_visibility)) {
                             $filtered_answers[$key] = $answer;
                             continue;
                         }
-                        
+
                         $answer_passes = true;
+                        $validator = new ContextValidator($userContext);
                         foreach ($answer_visibility as $answer_condition) {
-                            $acf_layout = $answer_condition['acf_fc_layout'] ?? '';
-                            $context_for_condition = $userContext->get_context_for_condition($acf_layout, $location_info);
+                            $context_for_condition = $validator->validateCondition($answer_condition, $location_info);
                             $result = $this->validate_dialog_condition($answer_condition, $context_for_condition);
-                            
+
                             if (!$result) {
                                 $answer_passes = false;
                                 break;
                             }
                         }
-                        
+
                         if ($answer_passes) {
                             $filtered_answers[$key] = $answer;
                         }
                     }
-                    
+
                     $dialog['answers'] = $filtered_answers;
                 }
-                
+
                 return $dialog;
             }
         }

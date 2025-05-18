@@ -4297,3 +4297,213 @@ Może Ci się wydaje, że jesteś kimś, że Twoja historia się liczy, że coś
 
 )
 
+[2025-05-18 19:25:59] [INFO] Sprawdzanie dialogu
+[2025-05-18 19:25:59] [DATA] Array
+(
+    [dialog_id] => brak id
+    [answers_count] => 1
+)
+
+[2025-05-18 19:25:59] [INFO] Sprawdzanie dialogu
+[2025-05-18 19:25:59] [DATA] Array
+(
+    [dialog_id] => brak id
+    [answers_count] => 1
+)
+
+[2025-05-18 19:25:59] [INFO] Filtrowanie anwsers dla dialogu
+[2025-05-18 19:25:59] [DATA] Array
+(
+    [dialog_id] => brak id
+    [anwsers_count_before] => 1
+)
+
+[2025-05-18 19:25:59] [INFO] Warunek dla odpowiedzi
+[2025-05-18 19:25:59] [DATA] Array
+(
+    [answer_text] => Jak poruszać się po grze?
+    [condition] => Array
+        (
+            [acf_fc_layout] => condition_task
+            [condition] => is_not
+            [mission_id] => 339
+            [task_id] => jak-poruszac-sie-po-grze_0
+            [status] => completed
+        )
+
+)
+
+[2025-05-18 19:25:59] [INFO] Odpowiedź nie spełnia warunku
+[2025-05-18 19:25:59] [DATA] Array
+(
+    [answer_text] => Jak poruszać się po grze?
+    [condition] => Array
+        (
+            [acf_fc_layout] => condition_task
+            [condition] => is_not
+            [mission_id] => 339
+            [task_id] => jak-poruszac-sie-po-grze_0
+            [status] => completed
+        )
+
+    [result] => 
+)
+
+[2025-05-18 19:25:59] [INFO] Po filtrowaniu anwsers
+[2025-05-18 19:25:59] [DATA] Array
+(
+    [dialog_id] => brak id
+    [anwsers_count_after] => 0
+    [anwsers_texts] => Array
+        (
+        )
+
+)
+
+[2025-05-18 19:26:01] [DEBUG] Obsługa żądania danych użytkownika ID: 1
+[2025-05-18 19:26:01] [INFO] Pobrano dane plecaka użytkownika:
+[2025-05-18 19:26:01] [DATA] Array
+(
+    [gold] => 100
+    [cigarettes] => 31
+)
+
+[2025-05-18 19:26:01] [INFO] Pobrano dane witalności użytkownika:
+[2025-05-18 19:26:01] [DATA] Array
+(
+    [life] => 80
+    [max_life] => 100
+    [energy] => 70
+    [max_energy] => 100
+)
+
+[2025-05-18 19:26:01] [INFO] Zwracam dane użytkownika:
+[2025-05-18 19:26:01] [DATA] Array
+(
+    [success] => 1
+    [message] => Dane użytkownika pobrane pomyślnie
+    [data] => Array
+        (
+            [backpack] => Array
+                (
+                    [gold] => 100
+                    [cigarettes] => 31
+                )
+
+            [vitality] => Array
+                (
+                    [life] => 80
+                    [max_life] => 100
+                    [energy] => 70
+                    [max_energy] => 100
+                )
+
+        )
+
+)
+
+[2025-05-18 19:26:30] [INFO] Sprawdzanie dialogu
+[2025-05-18 19:26:30] [DATA] Array
+(
+    [dialog_id] => brak id
+    [answers_count] => 1
+)
+
+[2025-05-18 19:26:30] [INFO] Sprawdzanie dialogu
+[2025-05-18 19:26:30] [DATA] Array
+(
+    [dialog_id] => brak id
+    [answers_count] => 1
+)
+
+[2025-05-18 19:26:30] [INFO] Filtrowanie anwsers dla dialogu
+[2025-05-18 19:26:30] [DATA] Array
+(
+    [dialog_id] => brak id
+    [anwsers_count_before] => 1
+)
+
+[2025-05-18 19:26:30] [INFO] Warunek dla odpowiedzi
+[2025-05-18 19:26:30] [DATA] Array
+(
+    [answer_text] => Jak poruszać się po grze?
+    [condition] => Array
+        (
+            [acf_fc_layout] => condition_task
+            [condition] => is_not
+            [mission_id] => 339
+            [task_id] => jak-poruszac-sie-po-grze_0
+            [status] => completed
+        )
+
+)
+
+[2025-05-18 19:26:30] [INFO] Odpowiedź nie spełnia warunku
+[2025-05-18 19:26:30] [DATA] Array
+(
+    [answer_text] => Jak poruszać się po grze?
+    [condition] => Array
+        (
+            [acf_fc_layout] => condition_task
+            [condition] => is_not
+            [mission_id] => 339
+            [task_id] => jak-poruszac-sie-po-grze_0
+            [status] => completed
+        )
+
+    [result] => 
+)
+
+[2025-05-18 19:26:30] [INFO] Po filtrowaniu anwsers
+[2025-05-18 19:26:30] [DATA] Array
+(
+    [dialog_id] => brak id
+    [anwsers_count_after] => 0
+    [anwsers_texts] => Array
+        (
+        )
+
+)
+
+[2025-05-18 19:26:32] [DEBUG] Obsługa żądania danych użytkownika ID: 1
+[2025-05-18 19:26:32] [INFO] Pobrano dane plecaka użytkownika:
+[2025-05-18 19:26:32] [DATA] Array
+(
+    [gold] => 100
+    [cigarettes] => 31
+)
+
+[2025-05-18 19:26:32] [INFO] Pobrano dane witalności użytkownika:
+[2025-05-18 19:26:32] [DATA] Array
+(
+    [life] => 80
+    [max_life] => 100
+    [energy] => 70
+    [max_energy] => 100
+)
+
+[2025-05-18 19:26:32] [INFO] Zwracam dane użytkownika:
+[2025-05-18 19:26:32] [DATA] Array
+(
+    [success] => 1
+    [message] => Dane użytkownika pobrane pomyślnie
+    [data] => Array
+        (
+            [backpack] => Array
+                (
+                    [gold] => 100
+                    [cigarettes] => 31
+                )
+
+            [vitality] => Array
+                (
+                    [life] => 80
+                    [max_life] => 100
+                    [energy] => 70
+                    [max_energy] => 100
+                )
+
+        )
+
+)
+
