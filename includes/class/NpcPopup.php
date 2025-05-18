@@ -148,7 +148,6 @@ class NpcPopup
         $this->dialogManager->setNpcId($npc_id);
         $this->dialogManager->setUserId($user_id);
         $filtered_dialog = $this->dialogManager->get_first_matching_dialog($dialogs, $userContext, $location_info);
-        $this->logger->debug_log('Filtered dialog', $filtered_dialog);
 
         $thumbnail_url = '';
         if (has_post_thumbnail($npc_id)) {

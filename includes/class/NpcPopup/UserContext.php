@@ -171,4 +171,31 @@ class UserContext
     {
         return $this->location;
     }
+
+    /**
+     * Zwraca kontekst wymagany do walidacji warunku dialogu na podstawie typu warunku (acf_fc_layout).
+     *
+     * @param string $acf_layout Typ warunku (np. 'condition_mission', 'condition_npc_relation', ...)
+     * @param array $location_info Informacje o lokalizacji (opcjonalnie)
+     * @return array Kontekst do walidacji warunku
+     */
+    public function get_context_for_condition(string $acf_layout, array $location_info = []): array
+    {
+        switch ($acf_layout) {
+            case 'condition_mission':
+                return ['mission' => $this->get_missions()];
+            case 'condition_npc_relation':
+                return ['relations' => $this->get_relations()];
+            case 'condition_task':
+                return ['task' => $this->get_tasks()];
+            case 'condition_location':
+                // Preferuj przekazany location_info, fallback na własne get_location()
+                $area_slug = $location_info['area_slug'] ?? ($this->get_location()['area_slug'] ?? null);
+                return ['current_location_text' => $area_slug];
+            case 'condition_inventory':
+                return ['items' => $this->get_item_counts()];
+            default:
+                return [];
+        }
+    }
 }

@@ -339,13 +339,13 @@ class DialogHandler
                             ['status' => 404]
                         );
                     }
-
                     // Filtruj odpowiedzi w dialogu
                     $filtered_dialog = $dialog_manager->filter_answers($dialog, $criteria);
                     $logger->debug_log("Dialog po filtrowaniu:", $filtered_dialog);
 
                     // Uproszczenie struktury dialogu
                     $simplified_dialog = $dialog_manager->simplify_dialog($filtered_dialog);
+
                     // $logger->debug_log("Uproszczona struktura dialogu:", $simplified_dialog);
 
                     // Pobierz URL obrazka miniatury dla NPC

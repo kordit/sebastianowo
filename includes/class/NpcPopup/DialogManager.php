@@ -119,6 +119,91 @@ class DialogManager
     }
 
     /**
+     * Filtrowanie odpowiedzi z wykorzystaniem UserContext i validate_dialog_condition
+     * @param array $answers
+     * @param object $userContext
+     * @param array $location_info
+     * @return array
+     */
+    public function filter_answers_with_user_context(array $answers, $userContext, array $location_info): array
+    {
+        $this->logger->debug_log("DialogManager: Rozpoczynam filtrowanie odpowiedzi (UserContext).", [
+            'count_answers_before' => count($answers),
+            'location_info' => $location_info,
+            'user_context' => [
+                'missions' => $userContext->get_missions(),
+                'relations' => $userContext->get_relations(),
+                'tasks' => $userContext->get_tasks(),
+                'items' => $userContext->get_item_counts(),
+                'location' => $userContext->get_location(),
+            ]
+        ]);
+        if (empty($answers)) {
+            $this->logger->debug_log("DialogManager: Brak odpowiedzi do filtrowania.");
+            return [];
+        }
+
+        $filtered_answers = [];
+        foreach ($answers as $answer_key => $answer_data) {
+            $answer_text_log = $answer_data['answer_text'] ?? (is_array($answer_key) ? json_encode($answer_key) : $answer_key);
+            $this->logger->debug_log("DialogManager: Sprawdzanie odpowiedzi: " . $answer_text_log, [
+                'answer_data_keys' => array_keys($answer_data),
+                'answer_data_id' => $answer_data['answer_id'] ?? null,
+                'answer_data_text' => $answer_data['answer_text'] ?? null
+            ]);
+
+            $conditions = $answer_data['visibility_conditions'] ?? [];
+            $all_conditions_pass = true;
+            $failed_reason = [];
+            foreach ($conditions as $condition) {
+                $acf_layout = $condition['acf_fc_layout'] ?? '';
+                $context_for_condition = $userContext->get_context_for_condition($acf_layout, $location_info);
+                $this->logger->debug_log("DialogManager: Warunek do sprawdzenia", [
+                    'answer_text' => $answer_text_log,
+                    'condition' => $condition,
+                    'context_for_condition' => $context_for_condition
+                ]);
+                $result = $this->validate_dialog_condition($condition, $context_for_condition);
+                if (!$result) {
+                    $all_conditions_pass = false;
+                    $failed_reason[] = [
+                        'condition' => $condition,
+                        'context' => $context_for_condition,
+                        'reason' => 'Warunek nie został spełniony'
+                    ];
+                    $this->logger->debug_log("DialogManager: Warunek NIE SPEŁNIONY", [
+                        'answer_text' => $answer_text_log,
+                        'condition' => $condition,
+                        'context_for_condition' => $context_for_condition
+                    ]);
+                    break;
+                } else {
+                    $this->logger->debug_log("DialogManager: Warunek SPEŁNIONY", [
+                        'answer_text' => $answer_text_log,
+                        'condition' => $condition,
+                        'context_for_condition' => $context_for_condition
+                    ]);
+                }
+            }
+            if ($all_conditions_pass) {
+                $filtered_answers[$answer_key] = $answer_data;
+                $this->logger->debug_log("DialogManager: Warunki dla odpowiedzi (" . $answer_text_log . ") SPEŁNIONE.", [
+                    'answer_id' => $answer_data['answer_id'] ?? null,
+                    'answer_text' => $answer_text_log
+                ]);
+            } else {
+                $this->logger->debug_log("DialogManager: Warunki dla odpowiedzi (" . $answer_text_log . ") NIESPEŁNIONE. Usuwanie odpowiedzi.", [
+                    'answer_id' => $answer_data['answer_id'] ?? null,
+                    'answer_text' => $answer_text_log,
+                    'reasons' => $failed_reason
+                ]);
+            }
+        }
+        $this->logger->debug_log("DialogManager: Zakończono filtrowanie odpowiedzi (UserContext).", ['count_answers_after' => count($filtered_answers)]);
+        return $filtered_answers;
+    }
+
+    /**
      * Upraszcza strukturę dialogu do formatu używanego przez frontend
      * 
      * @param array $dialog Dialog do uproszczenia
@@ -666,31 +751,14 @@ class DialogManager
     public function get_first_matching_dialog(array $dialogs, $userContext, array $location_info): ?array
     {
         foreach ($dialogs as $dialog) {
+            $this->logger->debug_log('Dialog', $dialog['anwsers']);
             $layout_settings = $dialog['layout_settings'] ?? [];
             $visibility_settings = $layout_settings['visibility_settings'] ?? [];
             $all_conditions_pass = true;
             $failed_reason = [];
             foreach ($visibility_settings as $condition) {
                 $acf_layout = $condition['acf_fc_layout'] ?? '';
-                switch ($acf_layout) {
-                    case 'condition_mission':
-                        $context_for_condition = ['mission' => $userContext->get_missions()];
-                        break;
-                    case 'condition_npc_relation':
-                        $context_for_condition = ['relations' => $userContext->get_relations()];
-                        break;
-                    case 'condition_task':
-                        $context_for_condition = ['task' => $userContext->get_tasks()];
-                        break;
-                    case 'condition_location':
-                        $context_for_condition = ['current_location_text' => $location_info['area_slug'] ?? null];
-                        break;
-                    case 'condition_inventory':
-                        $context_for_condition = ['items' => $userContext->get_item_counts()];
-                        break;
-                    default:
-                        $context_for_condition = [];
-                }
+                $context_for_condition = $userContext->get_context_for_condition($acf_layout, $location_info);
                 $result = $this->validate_dialog_condition($condition, $context_for_condition);
                 if (!$result) {
                     $all_conditions_pass = false;
@@ -700,22 +768,19 @@ class DialogManager
                         'context' => $context_for_condition,
                         'reason' => 'Warunek nie został spełniony'
                     ];
-                    // Można break, bo wystarczy jeden niespełniony warunek
                     break;
                 }
             }
             if ($all_conditions_pass) {
-                $this->logger->debug_log('get_first_matching_dialog: Found matching dialog', $dialog);
+                // Filtrowanie odpowiedzi dialogu przez filter_answers_with_user_context
+                $dialog['answers'] = $this->filter_answers_with_user_context(
+                    $dialog['answers'] ?? [],
+                    $userContext,
+                    $location_info
+                );
                 return $dialog;
-            } else {
-                $this->logger->debug_log('get_first_matching_dialog: Dialog nie spełnił warunków', [
-                    'dialog_id' => $dialog['dialog_id'] ?? null,
-                    'reasons' => $failed_reason,
-                    'dialog' => $dialog
-                ]);
             }
         }
-        $this->logger->debug_log('get_first_matching_dialog: No matching dialog found');
         return null;
     }
 }
