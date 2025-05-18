@@ -751,7 +751,11 @@ class DialogManager
     public function get_first_matching_dialog(array $dialogs, $userContext, array $location_info): ?array
     {
         foreach ($dialogs as $dialog) {
-            $this->logger->debug_log('Dialog', $dialog['anwsers']);
+            // $this->logger->debug_log('Sprawdzanie dialogu', [
+            //     'dialog_id' => $dialog['dialog_id'] ?? 'brak id',
+            //     'answers_count' => is_array($dialog['anwsers'] ?? []) ? count($dialog['anwsers']) : 0
+            // ]);
+
             $layout_settings = $dialog['layout_settings'] ?? [];
             $visibility_settings = $layout_settings['visibility_settings'] ?? [];
             $all_conditions_pass = true;
@@ -772,12 +776,14 @@ class DialogManager
                 }
             }
             if ($all_conditions_pass) {
-                // Filtrowanie odpowiedzi dialogu przez filter_answers_with_user_context
-                $dialog['answers'] = $this->filter_answers_with_user_context(
-                    $dialog['answers'] ?? [],
-                    $userContext,
-                    $location_info
-                );
+                foreach ($dialog['anwsers'] as $answer) {
+                    $visibility_settings = $answer['layout_settings']['visibility_settings'];
+                    if (is_array($visibility_settings)) {
+                        foreach ($visibility_settings as $condition) {
+                            $this->logger->debug_log('Sprawdzanie dialogu', $condition);
+                        }
+                    }
+                }
                 return $dialog;
             }
         }
