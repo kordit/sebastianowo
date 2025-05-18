@@ -64,6 +64,16 @@ function game_load_scripts()
     );
     wp_enqueue_script('svg-interactions');
 
+    // Moduł obsługi lootboxów
+    wp_register_script(
+        'lootbox-popup',
+        get_template_directory_uri() . '/js/modules/areas/lootbox-popup.js',
+        array('axios', 'ui-helpers'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('lootbox-popup');
+
     // Moduł obsługi dialogów NPC
     wp_register_script(
         'npc-dialogs',

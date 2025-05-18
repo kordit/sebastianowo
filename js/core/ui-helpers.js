@@ -39,6 +39,32 @@ class UIHelpers {
     }
 
     /**
+     * Wyświetla powiadomienie używając systemu powiadomień
+     * 
+     * @param {String} message - Treść powiadomienia
+     * @param {String} type - Typ powiadomienia (success, error, info, warn)
+     */
+    static showNotification(message, type = 'info') {
+        // Mapowanie typów na system powiadomień
+        const typeMap = {
+            'success': 'success',
+            'error': 'failed',
+            'info': 'neutral',
+            'warn': 'bad'
+        };
+
+        const status = typeMap[type] || 'neutral';
+
+        if (window.gameNotifications) {
+            window.gameNotifications.show(message, status);
+        } else if (window.showPopup) {
+            window.showPopup(message, type);
+        } else {
+            console.log(`Powiadomienie (${type}): ${message}`);
+        }
+    }
+
+    /**
      * Pobiera dane o aktualnej stronie na podstawie URL i klas dokumentu
      * 
      * @returns {Object} - Obiekt zawierający typ strony i jej wartość
@@ -297,7 +323,7 @@ class UIHelpers {
     }
 
     /**
-     * Aktualizuje paski statusu w sidebarze (życie, energia)
+     * Aktualizuje paski statusu in sidebarze (życie, energia)
      * 
      * @param {Object} userData - Dane użytkownika z API
      */

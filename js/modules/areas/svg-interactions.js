@@ -78,6 +78,60 @@ function initSvgInteractions() {
                     }
                 });
         }
+        else if (selectType === 'lootbox') {
+            const lootboxId = el.getAttribute('data-lootbox');
+            if (!lootboxId) {
+                console.error("Brak atrybutu data-lootbox dla elementu.");
+                return;
+            }
+
+            // Emituj zdarzenie lootboxClicked
+            document.dispatchEvent(new CustomEvent('lootboxClicked', {
+                detail: {
+                    lootboxId: lootboxId,
+                    currentUrl: window.location.href
+                }
+            }));
+
+            // Dodaj nonce dla autoryzacji
+            const restNonce = userManagerData?.nonce || '';
+
+            // Bezpośrednio przeszukaj lootbox
+            axios({
+                method: 'POST',
+                url: '/wp-json/game/v1/lootbox/search',
+                headers: {
+                    'X-WP-Nonce': restNonce,
+                    'Content-Type': 'application/json'
+                },
+                data: {
+                    lootbox_id: lootboxId
+                }
+            })
+                .then(response => {
+                    const data = response?.data;
+                    console.log("Wyniki przeszukania:", data);
+
+                    if (data.error) {
+                        UIHelpers.showNotification(data.error, 'error');
+                        return;
+                    }
+
+                    if (data.already_searched) {
+                        UIHelpers.showNotification("Już przeszukałeś ten obiekt.", 'info');
+                        return;
+                    }
+
+                    if (data.success && data.results) {
+                        // Pokaż popup z wynikami
+                        buildLootboxPopup(data);
+                    }
+                })
+                .catch(error => {
+                    console.error("Błąd zapytania:", error);
+                    UIHelpers.showNotification("Wystąpił błąd podczas przeszukiwania.", 'error');
+                });
+        }
         else if (selectType === 'scena') {
             const target = el.getAttribute('data-target');
             if (!target) return;
