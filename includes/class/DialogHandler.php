@@ -14,6 +14,7 @@ require_once get_template_directory() . '/includes/class/NpcPopup/NpcLogger.php'
 require_once get_template_directory() . '/includes/class/NpcPopup/DialogManager.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/LocationExtractor.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/UserContext.php';
+require_once get_template_directory() . '/includes/class/NpcPopup/ContextValidator.php';
 require_once get_template_directory() . '/includes/class/ManagerUser.php';
 
 class DialogHandler
@@ -341,8 +342,19 @@ class DialogHandler
                             ['status' => 404]
                         );
                     }
-                    // Filtruj odpowiedzi w dialogu
-                    $filtered_dialog = $dialog_manager->filter_answers($dialog, $criteria);
+                    // Filtruj odpowiedzi w dialogu z wykorzystaniem UserContext
+                    $userContext = self::get_user_context($user_id);
+                    $location_info = [
+                        'type_page' => $criteria['type_page'] ?? null,
+                        'location_value' => $criteria['location_value'] ?? null
+                    ];
+                    $filtered_dialog = $dialog_manager->get_first_matching_dialog([$dialog], $userContext, $location_info);
+                    if (!$filtered_dialog) {
+                        $logger->debug_log("UWAGA: Dialog nie przeszedł filtrowania z UserContext");
+                        $filtered_dialog = $dialog; // Używamy oryginalnego dialogu jeśli filtrowanie nie zwróciło wyników
+                    } else {
+                        $filtered_dialog = $filtered_dialog[0]; // get_first_matching_dialog zwraca tablicę, bierzemy pierwszy element
+                    }
                     $logger->debug_log("Dialog po filtrowaniu:", $filtered_dialog);
 
                     // Uproszczenie struktury dialogu
@@ -1768,12 +1780,12 @@ class DialogHandler
             ];
             
             // Filtruj odpowiedzi w dialogu z wykorzystaniem UserContext
-            $dialog = $dialog_manager->get_first_matching_dialog([$dialog], $userContext, $location_info);
-            if (!$dialog) {
-                $logger->debug_log("UWAGA: Dialog nie przeszedł filtrowania z UserContext, używam podstawowego filtrowania");
-                $filtered_dialog = $dialog_manager->filter_answers($dialog, $criteria);
+            $filtered_dialog = $dialog_manager->get_first_matching_dialog([$dialog], $userContext, $location_info);
+            if (!$filtered_dialog) {
+                $logger->debug_log("UWAGA: Dialog nie przeszedł filtrowania z UserContext");
+                $filtered_dialog = $dialog; // Używamy oryginalnego dialogu jeśli filtrowanie nie zwróciło wyników
             } else {
-                $filtered_dialog = $dialog;
+                $filtered_dialog = $filtered_dialog[0]; // get_first_matching_dialog zwraca tablicę, bierzemy pierwszy element
             }
             
             $logger->debug_log("Dialog po filtrowaniu:", $filtered_dialog);
@@ -1818,6 +1830,17 @@ class DialogHandler
                 ['status' => 500]
             );
         }
+    }
+    
+    /**
+     * Pobiera kontekst użytkownika
+     *
+     * @param int $user_id ID użytkownika
+     * @return UserContext Obiekt kontekstu użytkownika
+     */
+    private static function get_user_context(int $user_id): UserContext
+    {
+        return new UserContext(new ManagerUser($user_id));
     }
 }
 DialogHandler::init();

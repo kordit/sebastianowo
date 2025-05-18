@@ -275,6 +275,7 @@ add_action('init', function () {
                         'choices' => array(
                             'npc'   => 'NPC',
                             'scena' => 'Scena',
+                            'lootbox' => 'Lootbox',
                             'page'  => 'Przekieruj',
                         ),
                         'default_value' => false,
@@ -337,6 +338,27 @@ add_action('init', function () {
                                     'field'    => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_select",
                                     'operator' => '==',
                                     'value'    => 'npc',
+                                ),
+                            ),
+                        ),
+                        'wrapper' => array(
+                            'width' => '25',
+                        ),
+                    );
+                    $all_path_fields[] = array(
+                        'key'   => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_lootbox",
+                        'label' => 'lootbox do sceny',
+                        'name'  => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_lootbox",
+                        'type'  => 'post_object',
+                        'return_format' => 'object',
+                        'post_type' => array('lootbox'),
+                        'allow_null' => 1,
+                        'conditional_logic' => array(
+                            array(
+                                array(
+                                    'field'    => "field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_select",
+                                    'operator' => '==',
+                                    'value'    => 'lootbox',
                                 ),
                             ),
                         ),

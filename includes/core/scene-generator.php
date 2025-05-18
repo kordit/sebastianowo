@@ -43,11 +43,14 @@ function process_svg_paths(string $svg_url, int $post_id, string $post_title, in
         $npc     = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_npc", $post_id);
         $name    = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_name", $post_id);
         $link    = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_page", $post_id) ?: '';
+        $lootbox     = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_lootbox", $post_id);
 
         // Określenie koloru w zależności od typu elementu
         $color = '#000'; // Domyślny kolor
         if ($select === 'scena' || $select === 'page') {
             $color = '#fff';
+        } elseif ($select === 'lootbox') {
+            $color = '#0000ff'; // Przykładowy kolor dla lootboxa
         } elseif ($select === 'npc' && $npc) {
             $relation_value = get_field('npc-relation-' . $npc, 'user_' . $current_user_id);
             $color = getRelationColor($relation_value);
@@ -58,7 +61,7 @@ function process_svg_paths(string $svg_url, int $post_id, string $post_title, in
             $link = $link['url'];
         }
 
-        if (!empty($select) || !empty($path_id) || !empty($npc) || !empty($name)) {
+        if (!empty($select) || !empty($path_id) || !empty($npc) || !empty($name) || !empty($lootbox)) {
             // Inicjalizacja podstawowych danych wspólnych dla wszystkich typów
             $path_data = [
                 'select' => $select,
@@ -74,6 +77,7 @@ function process_svg_paths(string $svg_url, int $post_id, string $post_title, in
                     if ($npc) {
                         $path_data['npc-id'] = $npc;
                         $path_data['npc-name'] = get_the_title($npc);
+                        $path_data['relation'] = $current_user_id;
                     }
                     break;
 
@@ -82,15 +86,15 @@ function process_svg_paths(string $svg_url, int $post_id, string $post_title, in
                     $path_data['target'] = get_site_url() . '/' . $post_type . '/' . $post_name . '/' . $path_id;
                     break;
 
+                case 'lootbox':
+                    // Dane dla sceny - tylko target
+                    $path_data['lootbox'] = $lootbox;
+                    break;
+
                 case 'page':
                     // Dane dla strony
                     $path_data['page'] = $link;
                     break;
-            }
-
-            // Dodaj pole relacji tylko dla głównej sceny (indeks 0)
-            if ($scene_index === 0) {
-                $path_data['relation'] = $current_user_id;
             }
 
             $selected_paths[] = $path_data;

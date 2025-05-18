@@ -83,49 +83,6 @@ class DialogManager
         $this->user_id = $user_id;
     }
 
-    // public function filter_answers(array $answers, array $context): array
-    // {
-    //     $this->logger->debug_log("DialogManager: Rozpoczynam filtrowanie odpowiedzi.", ['count_answers_before' => count($answers), 'context' => $context]);
-    //     if (empty($answers)) {
-    //         $this->logger->debug_log("DialogManager: Brak odpowiedzi do filtrowania.");
-    //         return [];
-    //     }
-
-    //     $filtered_answers = [];
-    //     foreach ($answers as $answer_key => $answer_data) {
-    //         $answer_text_log = $answer_data['answer_text'] ?? (is_array($answer_key) ? json_encode($answer_key) : $answer_key);
-    //         $this->logger->debug_log("DialogManager: Sprawdzanie odpowiedzi: " . $answer_text_log, ['answer_data' => $answer_data]);
-
-    //         $conditions = $answer_data['visibility_conditions'] ?? [];
-    //         if (!empty($conditions)) {
-    //             $this->logger->debug_log("DialogManager: Odpowiedź (" . $answer_text_log . ") ma zdefiniowane warunki widoczności. Rozpoczynam sprawdzanie.", ['conditions' => $conditions]);
-    //             try {
-    //                 if (!$this->getLocationConditionChecker()->check_conditions($conditions, $context)) {
-    //                     $this->logger->debug_log("DialogManager: Warunki dla odpowiedzi (" . $answer_text_log . ") NIESPEŁNIONE. Usuwanie odpowiedzi.", ['conditions' => $conditions, 'context' => $context]);
-    //                     continue;
-    //                 }
-    //                 $this->logger->debug_log("DialogManager: Warunki dla odpowiedzi (" . $answer_text_log . ") SPEŁNIONE.", ['conditions' => $conditions, 'context' => $context]);
-    //             } catch (\Exception $e) {
-    //                 $this->logger->log("DialogManager: Błąd podczas sprawdzania warunków dla odpowiedzi (" . $answer_text_log . ") - " . $e->getMessage(), 'error'); // Poprawione wywołanie loggera
-    //                 continue;
-    //             }
-    //         } else {
-    //             $this->logger->debug_log("DialogManager: Odpowiedź (" . $answer_text_log . ") nie ma zdefiniowanych warunków widoczności.");
-    //         }
-    //         $filtered_answers[$answer_key] = $answer_data;
-    //     }
-
-    //     $this->logger->debug_log("DialogManager: Zakończono filtrowanie odpowiedzi.", ['count_answers_after' => count($filtered_answers)]);
-    //     return $filtered_answers;
-    // }
-
-    /**
-     * Filtrowanie odpowiedzi z wykorzystaniem UserContext i validate_dialog_condition
-     * @param array $answers
-     * @param object $userContext
-     * @param array $location_info
-     * @return array
-     */
     public function filter_answers_with_user_context(array $answers, $userContext, array $location_info): array
     {
         $this->logger->debug_log("DialogManager: Rozpoczynam filtrowanie odpowiedzi (UserContext).", [
@@ -147,11 +104,6 @@ class DialogManager
         $filtered_answers = [];
         foreach ($answers as $answer_key => $answer_data) {
             $answer_text_log = $answer_data['answer_text'] ?? (is_array($answer_key) ? json_encode($answer_key) : $answer_key);
-            $this->logger->debug_log("DialogManager: Sprawdzanie odpowiedzi: " . $answer_text_log, [
-                'answer_data_keys' => array_keys($answer_data),
-                'answer_data_id' => $answer_data['answer_id'] ?? null,
-                'answer_data_text' => $answer_data['answer_text'] ?? null
-            ]);
 
             $conditions = $answer_data['visibility_conditions'] ?? [];
             $all_conditions_pass = true;
@@ -159,11 +111,6 @@ class DialogManager
             $validator = new ContextValidator($userContext);
             foreach ($conditions as $condition) {
                 $context_for_condition = $validator->validateCondition($condition, $location_info);
-                $this->logger->debug_log("DialogManager: Warunek do sprawdzenia", [
-                    'answer_text' => $answer_text_log,
-                    'condition' => $condition,
-                    'context_for_condition' => $context_for_condition
-                ]);
                 $result = $this->validate_dialog_condition($condition, $context_for_condition);
                 if (!$result) {
                     $all_conditions_pass = false;
@@ -172,18 +119,8 @@ class DialogManager
                         'context' => $context_for_condition,
                         'reason' => 'Warunek nie został spełniony'
                     ];
-                    $this->logger->debug_log("DialogManager: Warunek NIE SPEŁNIONY", [
-                        'answer_text' => $answer_text_log,
-                        'condition' => $condition,
-                        'context_for_condition' => $context_for_condition
-                    ]);
+
                     break;
-                } else {
-                    $this->logger->debug_log("DialogManager: Warunek SPEŁNIONY", [
-                        'answer_text' => $answer_text_log,
-                        'condition' => $condition,
-                        'context_for_condition' => $context_for_condition
-                    ]);
                 }
             }
             if ($all_conditions_pass) {
@@ -200,7 +137,6 @@ class DialogManager
                 ]);
             }
         }
-        $this->logger->debug_log("DialogManager: Zakończono filtrowanie odpowiedzi (UserContext).", ['count_answers_after' => count($filtered_answers)]);
         return $filtered_answers;
     }
 
@@ -409,8 +345,6 @@ class DialogManager
      */
     private function action_start_mission($mission_id): bool
     {
-        $this->logger->log("Rozpoczynanie misji {$mission_id} dla użytkownika {$this->user_id}");
-
         // Sprawdź, czy misja istnieje
         $mission = get_post($mission_id);
         if (!$mission || get_post_type($mission) !== 'mission') {
@@ -452,7 +386,6 @@ class DialogManager
      */
     private function action_complete_mission($mission_id): bool
     {
-        $this->logger->log("Kończenie misji {$mission_id} dla użytkownika {$this->user_id}");
 
         // Pobierz aktualne dane o misjach
         $active_missions = get_user_meta($this->user_id, 'active_missions', true);
@@ -495,7 +428,6 @@ class DialogManager
      */
     private function action_change_relation(int $change_value): bool
     {
-        $this->logger->log("Zmiana relacji z NPC {$this->npc_id} o {$change_value} dla użytkownika {$this->user_id}");
 
         // Pobierz aktualne dane o relacjach
         $relations = get_user_meta($this->user_id, 'npc_relations', true);
@@ -525,7 +457,6 @@ class DialogManager
      */
     private function action_give_exp(int $exp_value): bool
     {
-        $this->logger->log("Dodawanie {$exp_value} doświadczenia dla użytkownika {$this->user_id}");
 
         // Pobierz aktualne doświadczenie
         $current_exp = (int) get_user_meta($this->user_id, 'player_exp', true);
@@ -607,18 +538,18 @@ class DialogManager
      * @return LocationConditionChecker
      * @throws \Exception
      */
-    private function getLocationConditionChecker(): LocationConditionChecker
-    {
-        if ($this->locationConditionChecker === null) {
-            if (!isset($this->user_id) || $this->user_id === 0) {
-                $error_message = "DialogManager: user_id nie jest ustawione przed próbą utworzenia LocationConditionChecker.";
-                $this->logger->log_error($error_message);
-                throw new \Exception($error_message);
-            }
-            $this->locationConditionChecker = new LocationConditionChecker($this->user_id, $this->logger);
-        }
-        return $this->locationConditionChecker;
-    }
+    // private function getLocationConditionChecker(): LocationConditionChecker
+    // {
+    //     if ($this->locationConditionChecker === null) {
+    //         if (!isset($this->user_id) || $this->user_id === 0) {
+    //             $error_message = "DialogManager: user_id nie jest ustawione przed próbą utworzenia LocationConditionChecker.";
+    //             $this->logger->log_error($error_message);
+    //             throw new \Exception($error_message);
+    //         }
+    //         $this->locationConditionChecker = new LocationConditionChecker($this->user_id, $this->logger);
+    //     }
+    //     return $this->locationConditionChecker;
+    // }
 
     /**
      * Waliduje pojedynczy warunek dialogu na podstawie kontekstu.
