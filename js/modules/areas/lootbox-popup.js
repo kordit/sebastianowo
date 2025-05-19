@@ -5,8 +5,9 @@
 /**
  * Buduje popup z wynikami przeszukania lootboxa
  * @param {Object} data - Dane przeszukania lootboxa
+ * @param {Number} lootboxId - ID lootboxa
  */
-function buildLootboxPopup(data) {
+function buildLootboxPopup(data, lootboxId) {
     // Stwórz kontener popupu
     const popupOverlay = document.createElement('div');
     popupOverlay.className = 'popup-overlay';
@@ -88,7 +89,32 @@ function buildLootboxPopup(data) {
 
     // Dodaj stopkę popupu
     const footer = document.createElement('div');
-    footer.className = 'popup-footer';
+    footer.className = 'popup-footer';    // Jeśli mamy wystarczająco energii na kolejne przeszukanie, dodaj przycisk "Przeszukuj dalej"
+    const energy_cost = data.energy_cost || 0;
+    const user_energy = data.user_energy || 0;
+
+    if (user_energy >= energy_cost) {
+        const searchMoreBtn = document.createElement('button');
+        searchMoreBtn.className = 'popup-button search-more-btn';
+        searchMoreBtn.textContent = 'Przeszukuj dalej';
+        searchMoreBtn.addEventListener('click', () => {
+            // Usuń stary popup
+            document.body.removeChild(popupOverlay);
+
+            // Wywołaj ponowne przeszukanie lootboxa
+            searchLootbox(lootboxId);
+        });
+
+        footer.appendChild(searchMoreBtn);
+    } else {
+        // Dodaj informację o niewystarczającej energii
+        const noEnergyInfo = document.createElement('div');
+        noEnergyInfo.className = 'not-enough-energy-info';
+        noEnergyInfo.textContent = 'Brak wystarczającej energii na kolejne przeszukanie.';
+        noEnergyInfo.style.color = '#ff6666';
+        noEnergyInfo.style.marginRight = '10px';
+        footer.appendChild(noEnergyInfo);
+    }
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'popup-button';

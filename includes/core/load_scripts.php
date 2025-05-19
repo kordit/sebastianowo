@@ -74,6 +74,48 @@ function game_load_scripts()
     );
     wp_enqueue_script('lootbox-popup');
 
+    // Style dla lootboxów
+    wp_register_script(
+        'lootbox-styles',
+        get_template_directory_uri() . '/js/modules/areas/lootbox-styles.js',
+        array(),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('lootbox-styles');
+
+    // Nowy moduł obsługi lootboxów (ulepszona wersja z pojedynczym losowaniem)
+    wp_register_script(
+        'lootbox-handler',
+        get_template_directory_uri() . '/js/modules/areas/lootbox-handler.js',
+        array('axios', 'ui-helpers', 'lootbox-styles'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('lootbox-handler');
+
+    // Moduł wyszukiwania lootboxów
+    wp_register_script(
+        'lootbox-search',
+        get_template_directory_uri() . '/js/modules/areas/lootbox-search.js',
+        array('axios', 'ui-helpers', 'lootbox-popup'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('lootbox-search');
+
+    // Moduł administracyjny lootboxów (tylko dla adminów)
+    if (current_user_can('administrator')) {
+        wp_register_script(
+            'lootbox-admin',
+            get_template_directory_uri() . '/js/modules/areas/lootbox-admin.js',
+            array('axios', 'ui-helpers'),
+            '1.0.0',
+            true
+        );
+        wp_enqueue_script('lootbox-admin');
+    }
+
     // Moduł obsługi dialogów NPC
     wp_register_script(
         'npc-dialogs',

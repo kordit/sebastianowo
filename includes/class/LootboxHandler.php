@@ -143,6 +143,7 @@ class LootboxHandler
     public function search_lootbox($request)
     {
         $lootbox_id = intval($request->get_param('lootbox_id'));
+        $single_draw = (bool)$request->get_param('single_draw');
 
         if (!$lootbox_id) {
             return new WP_REST_Response(['error' => 'Brak ID lootboxa'], 400);
@@ -153,7 +154,7 @@ class LootboxHandler
             return new WP_REST_Response(['error' => 'Użytkownik niezalogowany'], 401);
         }
 
-        // Sprawdź, czy użytkownik już przeszukał ten lootbox
+        // Sprawdź, czy użytkownik już przeszukał ten lootbox całkowicie
         $searched_lootboxes = $this->get_user_searched_lootboxes($user_id);
         if (in_array($lootbox_id, $searched_lootboxes)) {
             return new WP_REST_Response([
@@ -175,10 +176,40 @@ class LootboxHandler
             ], 200);
         }
 
-        // Pobierz liczbę rund losowania
-        $min_rounds = intval(get_field('lootbox_rounds_from', $lootbox_id));
-        $max_rounds = intval(get_field('lootbox_rounds_to', $lootbox_id));
-        $rounds = rand($min_rounds, $max_rounds);
+        // Dla pojedynczego losowania zawsze ustawiamy 1 rundę
+        if ($single_draw) {
+            $rounds = 1;
+
+            // Śledzenie postępu przeszukania
+            $progress_key = 'lootbox_' . $lootbox_id . '_progress';
+            $current_progress = intval(get_user_meta($user_id, $progress_key, true));
+
+            // Pobierz maksymalną liczbę rund dla tego lootboxa
+            $min_rounds = intval(get_field('lootbox_rounds_from', $lootbox_id));
+            $max_rounds = intval(get_field('lootbox_rounds_to', $lootbox_id));
+            $total_rounds = rand($min_rounds, $max_rounds);
+
+            // Jeśli to pierwsze losowanie, zapisz całkowitą liczbę rund
+            if ($current_progress === 0) {
+                update_user_meta($user_id, $progress_key . '_total', $total_rounds);
+            }
+
+            // Pobierz zapisaną całkowitą liczbę rund
+            $total_rounds = intval(get_user_meta($user_id, $progress_key . '_total', true));
+            if ($total_rounds === 0) {
+                $total_rounds = rand($min_rounds, $max_rounds);
+                update_user_meta($user_id, $progress_key . '_total', $total_rounds);
+            }
+
+            // Sprawdź czy to ostatnie losowanie
+            $completely_searched = ($current_progress + 1) >= $total_rounds;
+        } else {
+            // Stary sposób - wszystkie losowania naraz
+            $min_rounds = intval(get_field('lootbox_rounds_from', $lootbox_id));
+            $max_rounds = intval(get_field('lootbox_rounds_to', $lootbox_id));
+            $rounds = rand($min_rounds, $max_rounds);
+            $completely_searched = true; // W starym trybie zawsze oznaczamy jako całkowicie przeszukany
+        }
 
         // Pobierz nagrody
         $rewards = get_field('lootbox_rewards', $lootbox_id);
@@ -199,7 +230,7 @@ class LootboxHandler
             return new WP_REST_Response(['error' => 'Brak nagród do wylosowania'], 500);
         }
 
-        // Wykonaj losowania
+        // Wykonaj losowania (tylko jedno losowanie dla single_draw=true)
         $results = [];
         for ($i = 0; $i < $rounds; $i++) {
             // Losuj nagrodę z puli
@@ -243,15 +274,41 @@ class LootboxHandler
         $new_energy = $user_energy - $search_cost;
         update_field('vitality_energy', $new_energy, 'user_' . $user_id);
 
-        // Oznacz lootbox jako przeszukany
-        $this->mark_lootbox_as_searched($user_id, $lootbox_id);
+        // Aktualizuj licznik postępu dla pojedynczego losowania
+        if ($single_draw) {
+            $progress_key = 'lootbox_' . $lootbox_id . '_progress';
+            $current_progress = intval(get_user_meta($user_id, $progress_key, true));
+            $new_progress = $current_progress + 1;
+            update_user_meta($user_id, $progress_key, $new_progress);
+
+            // Pobierz całkowitą liczbę rund dla tego lootboxa
+            $total_rounds = intval(get_user_meta($user_id, $progress_key . '_total', true));
+
+            // Jeśli to ostatnie losowanie, oznacz lootbox jako przeszukany
+            if ($completely_searched) {
+                $this->mark_lootbox_as_searched($user_id, $lootbox_id);
+
+                // Wyczyść metadane postępu
+                delete_user_meta($user_id, $progress_key);
+                delete_user_meta($user_id, $progress_key . '_total');
+            }
+        } else {
+            // W starym trybie zawsze oznaczamy jako przeszukany
+            $this->mark_lootbox_as_searched($user_id, $lootbox_id);
+        }
+
+        // Pobierz maksymalną energię użytkownika
+        $max_energy = intval(get_field('vitality_max_energy', 'user_' . $user_id));
 
         return new WP_REST_Response([
             'success' => true,
             'results' => $results,
             'rounds' => $rounds,
             'energy_cost' => $search_cost,
-            'user_energy' => $new_energy
+            'user_energy' => $new_energy,
+            'max_energy' => $max_energy,
+            'completely_searched' => $completely_searched,
+            'single_draw' => $single_draw
         ]);
     }
 
@@ -265,17 +322,48 @@ class LootboxHandler
     {
         $user_id = $request->get_param('user_id');
         $reset_all = $request->get_param('reset_all');
+        $lootbox_id = $request->get_param('lootbox_id');
 
         if ($reset_all) {
             // Reset dla wszystkich użytkowników
             $users = get_users();
             foreach ($users as $user) {
+                // Usuń informację o przeszukanych lootboxach
                 delete_field('searched_lootboxes', 'user_' . $user->ID);
+
+                // Usuń metadane postępu przeszukania
+                global $wpdb;
+                $wpdb->query("DELETE FROM $wpdb->usermeta WHERE user_id = {$user->ID} AND meta_key LIKE 'lootbox_%_progress%'");
             }
             return new WP_REST_Response(['success' => true, 'message' => 'Zresetowano wszystkie lootboxy dla wszystkich użytkowników']);
+        } elseif ($user_id && $lootbox_id) {
+            // Reset dla konkretnego lootboxa dla konkretnego użytkownika
+            $searched = get_field('searched_lootboxes', 'user_' . $user_id);
+            if (is_array($searched)) {
+                foreach ($searched as $key => $entry) {
+                    if (intval($entry['lootbox_id']) == intval($lootbox_id)) {
+                        unset($searched[$key]);
+                        break;
+                    }
+                }
+                // Zreindeksuj tablicę
+                $searched = array_values($searched);
+                update_field('searched_lootboxes', $searched, 'user_' . $user_id);
+            }
+
+            // Usuń metadane postępu przeszukania dla tego lootboxa
+            delete_user_meta($user_id, 'lootbox_' . $lootbox_id . '_progress');
+            delete_user_meta($user_id, 'lootbox_' . $lootbox_id . '_progress_total');
+
+            return new WP_REST_Response(['success' => true, 'message' => 'Zresetowano lootbox ID: ' . $lootbox_id . ' dla użytkownika ID: ' . $user_id]);
         } elseif ($user_id) {
             // Reset dla konkretnego użytkownika
             delete_field('searched_lootboxes', 'user_' . $user_id);
+
+            // Usuń metadane postępu przeszukania
+            global $wpdb;
+            $wpdb->query("DELETE FROM $wpdb->usermeta WHERE user_id = {$user_id} AND meta_key LIKE 'lootbox_%_progress%'");
+
             return new WP_REST_Response(['success' => true, 'message' => 'Zresetowano lootboxy dla użytkownika ID: ' . $user_id]);
         } else {
             return new WP_REST_Response(['error' => 'Brak parametru user_id lub reset_all'], 400);
