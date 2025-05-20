@@ -388,12 +388,25 @@ class DialogHandler
                 if ($prev_dialog) {
 
 
-                    // Znajdź odpowiedź na podstawie indeksu
-                    $answers = isset($prev_dialog['anwsers']) ? $prev_dialog['anwsers'] : [];
+                    // Pobierz kontext użytkownika i informacje o lokalizacji
+                    $userContext = self::get_user_context($user_id);
+                    $location_info = [
+                        'type_page' => $type_page ?? null,
+                        'location_value' => $location_value ?? null
+                    ];
+
+                    // Filtruj odpowiedzi według kontekstu użytkownika
+                    $filtered_dialog = $dialog_manager->get_first_matching_dialog([$prev_dialog], $userContext, $location_info);
+                    if ($filtered_dialog) {
+                        // Używamy przefiltrowanych odpowiedzi zamiast oryginalnych
+                        $answers = isset($filtered_dialog['anwsers']) ? $filtered_dialog['anwsers'] : [];
+                    } else {
+                        // Jeśli filtracja nie zwróciła wyników, użyj oryginalnego dialogu
+                        $answers = isset($prev_dialog['anwsers']) ? $prev_dialog['anwsers'] : [];
+                    }
 
                     if (is_array($answers) && isset($answers[$answer_index])) {
                         $answer = $answers[$answer_index];
-                        $logger->debug_log("index", $answer_index);
 
                         // Sprawdź, czy odpowiedź ma transakcję lub inną akcję
                         if (isset($answer['type_anwser']) && !empty($answer['type_anwser'])) {
@@ -668,13 +681,10 @@ class DialogHandler
                             }
 
                             // -- JEŚLI DOTARLIŚMY TUTAJ, WSZYSTKIE AKCJE SĄ WYKONALNE --
-                            $logger->debug_log("WSZYSTKIE AKCJE SĄ WYKONALNE, PRZYSTĘPUJĘ DO ICH REALIZACJI");
 
                             // Przetwórz każdą akcję w odpowiedzi
                             foreach ($answer['type_anwser'] as $action) {
-                                $logger->debug_log("Przetwarzanie akcji:", $action);
                                 $action_type = $action['acf_fc_layout'] ?? '';
-                                $logger->debug_log("Typ akcji: $action_type");
 
                                 switch ($action_type) {
                                     case 'transaction':
@@ -1156,8 +1166,7 @@ class DialogHandler
                                         break;
 
                                     case 'function':
-                                        $function_name = $action['function'] ?? '';
-                                        $logger->debug_log("test jebac: ", $function_name);
+                                        $logger->debug_log("akcja: ", $action);
                                         break;
 
                                     case 'unlock_area':
