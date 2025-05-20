@@ -1,6 +1,103 @@
 /**
- * Moduł obsługi lootboxów - ulepszony
+ * Kompletny moduł obsługi lootboxów
+ * 
+ * Ten moduł łączy wszystkie funkcje związane z lootboxami:
+ * - resetowanie lootboxów dla administratorów
+ * - wyświetlanie popupu lootboxa
+ * - przeszukiwanie lootboxów
+ * - animacje i efekty wizualne
  */
+
+// Przechowujemy zmienne kolorów CSS
+const lootboxColors = {
+    // Podstawowe kolory
+    background: 'var(--color-background, #1a1a1a)',
+    backgroundLight: 'var(--color-background-light, #272727)',
+    accent: 'var(--color-accent, #4CAF50)',
+    accentHover: 'var(--color-accent-hover, #45a049)',
+    text: 'var(--color-text, #ffffff)',
+    textMuted: 'var(--color-text-muted, #aaaaaa)',
+    border: 'var(--color-border, #333333)',
+    success: 'var(--color-success, #4CAF50)',
+    error: 'var(--color-error, #ff6666)',
+    info: 'var(--color-info, #2196F3)',
+    warning: 'var(--color-warning, #FFC107)',
+};
+
+/**
+ * Moduł dla administratora do zarządzania lootboxami
+ */
+
+/**
+ * Resetuje przeszukane lootboxy dla konkretnego gracza
+ * @param {Number} userId - ID użytkownika
+ */
+function resetPlayerLootboxes(userId) {
+    // Dodaj nonce dla autoryzacji
+    const restNonce = userManagerData?.nonce || '';
+
+    // Wykonaj zapytanie
+    axios({
+        method: 'POST',
+        url: '/wp-json/game/v1/lootbox/reset',
+        headers: {
+            'X-WP-Nonce': restNonce,
+            'Content-Type': 'application/json'
+        },
+        data: {
+            user_id: userId
+        }
+    })
+        .then(response => {
+            const data = response?.data;
+            console.log("Reset lootboxów:", data);
+
+            if (data.success) {
+                UIHelpers.showNotification(data.message, 'success');
+            } else if (data.error) {
+                UIHelpers.showNotification(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            console.error("Błąd zapytania:", error);
+            UIHelpers.showNotification("Wystąpił błąd podczas resetowania lootboxów.", 'error');
+        });
+}
+
+/**
+ * Resetuje przeszukane lootboxy dla wszystkich graczy
+ */
+function resetAllLootboxes() {
+    // Dodaj nonce dla autoryzacji
+    const restNonce = userManagerData?.nonce || '';
+
+    // Wykonaj zapytanie
+    axios({
+        method: 'POST',
+        url: '/wp-json/game/v1/lootbox/reset',
+        headers: {
+            'X-WP-Nonce': restNonce,
+            'Content-Type': 'application/json'
+        },
+        data: {
+            reset_all: true
+        }
+    })
+        .then(response => {
+            const data = response?.data;
+            console.log("Reset wszystkich lootboxów:", data);
+
+            if (data.success) {
+                UIHelpers.showNotification(data.message, 'success');
+            } else if (data.error) {
+                UIHelpers.showNotification(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            console.error("Błąd zapytania:", error);
+            UIHelpers.showNotification("Wystąpił błąd podczas resetowania lootboxów.", 'error');
+        });
+}
 
 /**
  * Pokazuje popup lootboxa bez automatycznego losowania
@@ -24,7 +121,6 @@ function showLootboxPopup(lootboxId) {
     })
         .then(response => {
             const data = response?.data;
-            console.log("Dane lootboxa:", data);
 
             if (data.error) {
                 UIHelpers.showNotification(data.error, 'error');
@@ -86,6 +182,19 @@ function buildInitialLootboxPopup(data, lootboxId) {
     const lootboxInfo = document.createElement('div');
     lootboxInfo.className = 'lootbox-info';
 
+    // Dodaj thumbnail lootboxa jeśli istnieje
+    if (data.thumbnail) {
+        const thumbnailContainer = document.createElement('div');
+        thumbnailContainer.className = 'lootbox-thumbnail';
+
+        const thumbnail = document.createElement('img');
+        thumbnail.src = data.thumbnail;
+        thumbnail.alt = data.title || 'Lootbox';
+
+        thumbnailContainer.appendChild(thumbnail);
+        lootboxInfo.appendChild(thumbnailContainer);
+    }
+
     if (data.type) {
         const typeInfo = document.createElement('p');
         typeInfo.innerHTML = `Typ: <strong>${data.type}</strong>`;
@@ -131,8 +240,8 @@ function buildInitialLootboxPopup(data, lootboxId) {
         // Informacja o niewystarczającej energii
         const noEnergyInfo = document.createElement('div');
         noEnergyInfo.className = 'not-enough-energy-info';
-        noEnergyInfo.textContent = 'Nie masz wystarczająco energii, aby przeszukać ten obiekt.';
-        noEnergyInfo.style.color = '#ff6666';
+        noEnergyInfo.textContent = 'Za mało energii.';
+        noEnergyInfo.style.color = lootboxColors.error;
         noEnergyInfo.style.marginRight = '10px';
         footer.appendChild(noEnergyInfo);
     }
@@ -151,9 +260,6 @@ function buildInitialLootboxPopup(data, lootboxId) {
     // Dodaj popup do strony
     popupOverlay.appendChild(popupContent);
     document.body.appendChild(popupOverlay);
-
-    // Dodaj style CSS dla popupu
-    addLootboxPopupStyles();
 }
 
 /**
@@ -222,6 +328,14 @@ function performSingleSearch(lootboxId, popupOverlay) {
 
             // Aktualizuj pasek energii w UI
             updateEnergyUI(data);
+
+            // Aktualizuj złoto i szlugi, jeśli zostały zwrócone w odpowiedzi
+            if (data.current_gold !== undefined) {
+                updateGoldUI(data.current_gold);
+            }
+            if (data.current_cigarettes !== undefined) {
+                updateCigarettesUI(data.current_cigarettes);
+            }
 
             // Aktualizuj przyciski w stopce
             updateFooterButtons(popupOverlay, lootboxId, data);
@@ -315,6 +429,58 @@ function updateEnergyUI(data) {
 }
 
 /**
+ * Aktualizuje złoto w interfejsie użytkownika
+ * @param {number} amount - Nowa ilość złota
+ */
+function updateGoldUI(amount) {
+    // Aktualizuj wyświetlaną wartość złota w odpowiednich miejscach UI
+    const goldDisplays = document.querySelectorAll('.ud-stats-gold');
+    goldDisplays.forEach(element => {
+        element.textContent = amount;
+    });
+
+    // Dodaj animację podświetlenia dla złota (opcjonalne)
+    const goldContainers = document.querySelectorAll('.gold-container');
+    goldContainers.forEach(container => {
+        container.classList.add('resource-updated');
+        setTimeout(() => {
+            container.classList.remove('resource-updated');
+        }, 1000);
+    });
+
+    // Wyemituj zdarzenie dla innych komponentów
+    document.dispatchEvent(new CustomEvent('gold-updated', {
+        detail: { amount: amount }
+    }));
+}
+
+/**
+ * Aktualizuje szlugi w interfejsie użytkownika
+ * @param {number} amount - Nowa ilość szlugów
+ */
+function updateCigarettesUI(amount) {
+    // Aktualizuj wyświetlaną wartość szlugów w odpowiednich miejscach UI
+    const cigarettesDisplays = document.querySelectorAll('.ud-stats-cigarettes');
+    cigarettesDisplays.forEach(element => {
+        element.textContent = amount;
+    });
+
+    // Dodaj animację podświetlenia dla szlugów (opcjonalne)
+    const cigarettesContainers = document.querySelectorAll('.cigarettes-container');
+    cigarettesContainers.forEach(container => {
+        container.classList.add('resource-updated');
+        setTimeout(() => {
+            container.classList.remove('resource-updated');
+        }, 1000);
+    });
+
+    // Wyemituj zdarzenie dla innych komponentów
+    document.dispatchEvent(new CustomEvent('cigarettes-updated', {
+        detail: { amount: amount }
+    }));
+}
+
+/**
  * Aktualizuje przyciski w stopce popupu
  * @param {HTMLElement} popupOverlay - Element popupu
  * @param {Number} lootboxId - ID lootboxa
@@ -336,7 +502,7 @@ function updateFooterButtons(popupOverlay, lootboxId, data) {
         const completeInfo = document.createElement('div');
         completeInfo.className = 'search-complete-info';
         completeInfo.textContent = 'Całkowicie przeszukałeś ten obiekt.';
-        completeInfo.style.color = '#4CAF50';
+        completeInfo.style.color = lootboxColors.success;
         completeInfo.style.marginRight = '10px';
         footer.appendChild(completeInfo);
     }
@@ -356,7 +522,7 @@ function updateFooterButtons(popupOverlay, lootboxId, data) {
         const noEnergyInfo = document.createElement('div');
         noEnergyInfo.className = 'not-enough-energy-info';
         noEnergyInfo.textContent = 'Brak wystarczającej energii na kolejne przeszukanie.';
-        noEnergyInfo.style.color = '#ff6666';
+        noEnergyInfo.style.color = lootboxColors.error;
         noEnergyInfo.style.marginRight = '10px';
         footer.appendChild(noEnergyInfo);
     }
@@ -372,6 +538,20 @@ function updateFooterButtons(popupOverlay, lootboxId, data) {
     footer.appendChild(closeBtn);
 }
 
+/**
+ * Funkcja wcześniejszej wersji - dla wstecznej kompatybilności
+ * @param {Number} lootboxId - ID lootboxa
+ */
+function searchLootbox(lootboxId) {
+    // Przekierowanie do nowej funkcji
+    showLootboxPopup(lootboxId);
+}
+
 // Eksportuj funkcje dla globalnego dostępu
+window.resetPlayerLootboxes = resetPlayerLootboxes;
+window.resetAllLootboxes = resetAllLootboxes;
 window.showLootboxPopup = showLootboxPopup;
 window.performSingleSearch = performSingleSearch;
+window.searchLootbox = searchLootbox;
+window.updateGoldUI = updateGoldUI;
+window.updateCigarettesUI = updateCigarettesUI;

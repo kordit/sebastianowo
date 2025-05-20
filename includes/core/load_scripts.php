@@ -54,67 +54,18 @@ function game_load_scripts()
     );
     wp_enqueue_script('alpinejs');
 
-    // Moduł interakcji SVG - ładowany domyślnie
-    wp_register_script(
-        'svg-interactions',
-        get_template_directory_uri() . '/js/modules/areas/svg-interactions.js',
-        array('axios'),
-        '1.0.0',
-        true
-    );
-    wp_enqueue_script('svg-interactions');
 
-    // Moduł obsługi lootboxów
+    // Kompletny moduł obsługi lootboxów (scentralizowana wersja)
     wp_register_script(
-        'lootbox-popup',
-        get_template_directory_uri() . '/js/modules/areas/lootbox-popup.js',
+        'lootboxes',
+        get_template_directory_uri() . '/js/modules/areas/lootboxes.js',
         array('axios', 'ui-helpers'),
-        '1.0.0',
+        filemtime(get_template_directory() . '/js/modules/areas/lootboxes.js'),
         true
     );
-    wp_enqueue_script('lootbox-popup');
+    wp_enqueue_script('lootboxes');
 
-    // Style dla lootboxów
-    wp_register_script(
-        'lootbox-styles',
-        get_template_directory_uri() . '/js/modules/areas/lootbox-styles.js',
-        array(),
-        '1.0.0',
-        true
-    );
-    wp_enqueue_script('lootbox-styles');
 
-    // Nowy moduł obsługi lootboxów (ulepszona wersja z pojedynczym losowaniem)
-    wp_register_script(
-        'lootbox-handler',
-        get_template_directory_uri() . '/js/modules/areas/lootbox-handler.js',
-        array('axios', 'ui-helpers', 'lootbox-styles'),
-        '1.0.0',
-        true
-    );
-    wp_enqueue_script('lootbox-handler');
-
-    // Moduł wyszukiwania lootboxów
-    wp_register_script(
-        'lootbox-search',
-        get_template_directory_uri() . '/js/modules/areas/lootbox-search.js',
-        array('axios', 'ui-helpers', 'lootbox-popup'),
-        '1.0.0',
-        true
-    );
-    wp_enqueue_script('lootbox-search');
-
-    // Moduł administracyjny lootboxów (tylko dla adminów)
-    if (current_user_can('administrator')) {
-        wp_register_script(
-            'lootbox-admin',
-            get_template_directory_uri() . '/js/modules/areas/lootbox-admin.js',
-            array('axios', 'ui-helpers'),
-            '1.0.0',
-            true
-        );
-        wp_enqueue_script('lootbox-admin');
-    }
 
     // Moduł obsługi dialogów NPC
     wp_register_script(
@@ -145,6 +96,16 @@ function game_load_scripts()
         true
     );
     wp_enqueue_script('notifications');
+
+    // Moduł interakcji SVG - ładowany domyślnie
+    wp_register_script(
+        'svg-interactions',
+        get_template_directory_uri() . '/js/modules/areas/svg-interactions.js',
+        array('axios'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script('svg-interactions');
 
     // wp_register_script(
     //     'npc-debug',

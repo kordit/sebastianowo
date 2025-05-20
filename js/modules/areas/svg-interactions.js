@@ -97,7 +97,8 @@ function initSvgInteractions() {
             if (window.showLootboxPopup && typeof window.showLootboxPopup === 'function') {
                 window.showLootboxPopup(lootboxId);
             } else {
-                console.error("Funkcja showLootboxPopup nie jest dostępna");
+                console.error("Funkcja showLootboxPopup nie jest dostępna. Sprawdź, czy plik lootboxes.js został prawidłowo załadowany.");
+                UIHelpers.showNotification("Wystąpił błąd podczas ładowania lootboxa.", 'error');
             }
         }
         else if (selectType === 'scena') {

@@ -117,4 +117,3 @@ add_action('init', function () {
         new InstanceManager(sanitize_title($istance), true); // Ustawienie parametru load_assets na true dla wszystkich instancji
     }
 });
-flush_rewrite_rules();

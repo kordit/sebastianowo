@@ -52,6 +52,18 @@ function game_load_styles()
         );
     }
 
+    // Ładujemy style dla lootboxów
+    $lootboxes_css_path = get_stylesheet_directory() . '/assets/css/lootboxes.css';
+    if (file_exists($lootboxes_css_path)) {
+        $lootboxes_css_version = filemtime($lootboxes_css_path);
+        wp_enqueue_style(
+            'game-lootboxes-style',
+            get_stylesheet_directory_uri() . '/assets/css/lootboxes.css',
+            [],
+            $lootboxes_css_version
+        );
+    }
+
     // Określenie aktualnego szablonu i typu widoku (main/archive vs single)
     $current_template = '';
     $view_type = '';

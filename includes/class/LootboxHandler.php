@@ -120,6 +120,9 @@ class LootboxHandler
         $searched_lootboxes = $this->get_user_searched_lootboxes($user_id);
         $already_searched = in_array($lootbox_id, $searched_lootboxes);
 
+        // Pobierz thumbnail lootboxa
+        $thumbnail_url = get_the_post_thumbnail_url($lootbox_id, 'medium');
+
         // Pobierz dane lootboxa
         $lootbox_data = [
             'id' => $lootbox_id,
@@ -129,6 +132,7 @@ class LootboxHandler
             'already_searched' => $already_searched,
             'user_energy' => intval(get_field('vitality_energy', 'user_' . $user_id)),
             'max_user_energy' => intval(get_field('vitality_max_energy', 'user_' . $user_id)),
+            'thumbnail' => $thumbnail_url ? $thumbnail_url : null,
         ];
 
         return new WP_REST_Response($lootbox_data);
@@ -425,28 +429,47 @@ class LootboxHandler
         switch ($type) {
             case 'gold':
                 $current = intval(get_field('backpack_gold', 'user_' . $user_id));
-                update_field('backpack_gold', $current + $amount, 'user_' . $user_id);
+                $new_amount = $current + $amount;
+                update_field('backpack_gold', $new_amount, 'user_' . $user_id);
                 break;
 
             case 'szlugi':
                 $current = intval(get_field('backpack_cigarettes', 'user_' . $user_id));
-                update_field('backpack_cigarettes', $current + $amount, 'user_' . $user_id);
+                $new_amount = $current + $amount;
+                update_field('backpack_cigarettes', $new_amount, 'user_' . $user_id);
+
+                // Dodaj informację o aktualizacji do zmiennej globalnej, aby GUI mogło się zaktualizować
+                add_action('wp_footer', function () use ($new_amount) {
+                    echo '<script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            // Zaktualizuj GUI dla szlugów
+                            if (window.updateCigarettesAmount) {
+                                window.updateCigarettesAmount(' . $new_amount . ');
+                            }
+                            // Lub wyemituj zdarzenie, które zostanie złapane przez Alpine.js lub inny framework
+                            document.dispatchEvent(new CustomEvent("cigarettes-updated", { 
+                                detail: { amount: ' . $new_amount . ' } 
+                            }));
+                        });
+                    </script>';
+                }, 99);
                 break;
 
             case 'item':
                 if ($item_id) {
                     // Sprawdź, czy użytkownik ma już ten przedmiot w ekwipunku
-                    $backpack_items = get_field('backpack_items', 'user_' . $user_id);
-                    if (!$backpack_items) {
-                        $backpack_items = [];
+                    // Zgodnie z definicją ACF, pole nazywa się 'items'
+                    $items = get_field('items', 'user_' . $user_id);
+                    if (!$items) {
+                        $items = [];
                     }
 
                     // Sprawdź czy przedmiot już istnieje w ekwipunku
                     $item_exists = false;
-                    foreach ($backpack_items as $key => $backpack_item) {
-                        if ($backpack_item['item'] == $item_id) {
+                    foreach ($items as $key => $user_item) {
+                        if ($user_item['item'] == $item_id) {
                             // Przedmiot istnieje, zwiększ ilość
-                            $backpack_items[$key]['quantity'] += $amount;
+                            $items[$key]['quantity'] += $amount;
                             $item_exists = true;
                             break;
                         }
@@ -454,13 +477,14 @@ class LootboxHandler
 
                     // Jeśli przedmiotu nie ma w ekwipunku, dodaj go
                     if (!$item_exists) {
-                        $backpack_items[] = [
+                        $items[] = [
                             'item' => $item_id,
                             'quantity' => $amount
                         ];
                     }
 
-                    update_field('backpack_items', $backpack_items, 'user_' . $user_id);
+                    // Aktualizacja pola 'items' zgodnie z konfiguracją ACF
+                    update_field('items', $items, 'user_' . $user_id);
                 }
                 break;
         }

@@ -29,6 +29,7 @@ return array(
             'choices' => array(
                 'SetClass' => 'Wybierz klasę',
                 'go-to-page' => 'Przejdź do podstrony',
+                'start-fight' => 'Zacznij bójkę',
             ),
             'default_value' => false,
             'return_format' => 'value',
@@ -55,6 +56,35 @@ return array(
                         'field' => 'field_67b4ef5f6a17f',
                         'operator' => '==',
                         'value' => 'go-to-page',
+                    ),
+                ),
+            ),
+            'wrapper' => array(
+                'width' => '',
+                'class' => '',
+                'id' => '',
+            ),
+            'default_value' => '',
+            'maxlength' => '',
+            'allow_in_bindings' => 0,
+            'placeholder' => '',
+            'prepend' => '',
+            'append' => '',
+        ),
+        array(
+            'key' => 'field_68013a77aaa4c',
+            'label' => 'ID po przegranej',
+            'name' => 'lose_id',
+            'aria-label' => '',
+            'type' => 'acfe_slug',
+            'instructions' => '',
+            'required' => 0,
+            'conditional_logic' => array(
+                array(
+                    array(
+                        'field' => 'field_67b4ef5f6a17f',
+                        'operator' => '==',
+                        'value' => 'start-fight',
                     ),
                 ),
             ),
