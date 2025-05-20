@@ -124,7 +124,7 @@ class DialogManager
                 }
             }
             if ($all_conditions_pass) {
-                $filtered_answers[$answer_key] = $answer_data;
+                $filtered_answers[] = $answer_data; // Zmieniono z $filtered_answers[$answer_key] = $answer_data;
                 $this->logger->debug_log("DialogManager: Warunki dla odpowiedzi (" . $answer_text_log . ") SPEŁNIONE.", [
                     'answer_id' => $answer_data['answer_id'] ?? null,
                     'answer_text' => $answer_text_log
@@ -683,10 +683,6 @@ class DialogManager
     public function get_first_matching_dialog(array $dialogs, $userContext, array $location_info): ?array
     {
         foreach ($dialogs as $dialog) {
-            $this->logger->debug_log('Sprawdzanie dialogu', [
-                'dialog_id' => $dialog['dialog_id'] ?? 'brak id',
-                'answers_count' => is_array($dialog['anwsers'] ?? []) ? count($dialog['anwsers']) : 0
-            ]);
 
             $layout_settings = $dialog['layout_settings'] ?? [];
             $visibility_settings = $layout_settings['visibility_settings'] ?? [];
@@ -710,11 +706,6 @@ class DialogManager
             if ($all_conditions_pass) {
                 // Filtrowanie odpowiedzi dialogu
                 if (isset($dialog['anwsers']) && is_array($dialog['anwsers'])) {
-                    $this->logger->debug_log('Filtrowanie anwsers dla dialogu', [
-                        'dialog_id' => $dialog['dialog_id'] ?? 'brak id',
-                        'anwsers_count_before' => count($dialog['anwsers'])
-                    ]);
-
                     $filtered_anwsers = [];
                     foreach ($dialog['anwsers'] as $key => $answer) {
                         $answer_settings = $answer['layout_settings'] ?? [];
@@ -722,46 +713,29 @@ class DialogManager
 
                         // Jeśli nie ma warunków widoczności, zachowaj odpowiedź
                         if (empty($answer_visibility)) {
-                            $filtered_anwsers[$key] = $answer;
+                            $filtered_anwsers[] = $answer; // Usuwamy zachowywanie oryginalnego klucza
                             continue;
                         }
 
                         $answer_passes = true;
                         $validator = new ContextValidator($userContext);
                         foreach ($answer_visibility as $answer_condition) {
-                            $this->logger->debug_log('Warunek dla odpowiedzi', [
-                                'answer_text' => $answer['anwser_text'] ?? 'brak tekstu',
-                                'condition' => $answer_condition
-                            ]);
 
                             $context_for_condition = $validator->validateCondition($answer_condition, $location_info);
                             $result = $this->validate_dialog_condition($answer_condition, $context_for_condition);
 
                             if (!$result) {
                                 $answer_passes = false;
-                                $this->logger->debug_log('Odpowiedź nie spełnia warunku', [
-                                    'answer_text' => $answer['anwser_text'] ?? 'brak tekstu',
-                                    'condition' => $answer_condition,
-                                    'result' => $result
-                                ]);
                                 break;
                             }
                         }
 
                         if ($answer_passes) {
-                            $filtered_anwsers[$key] = $answer;
+                            $filtered_anwsers[] = $answer; // Usuwamy zachowywanie oryginalnego klucza
                         }
                     }
 
                     $dialog['anwsers'] = $filtered_anwsers;
-
-                    $this->logger->debug_log('Po filtrowaniu anwsers', [
-                        'dialog_id' => $dialog['dialog_id'] ?? 'brak id',
-                        'anwsers_count_after' => count($filtered_anwsers),
-                        'anwsers_texts' => array_map(function ($a) {
-                            return $a['anwser_text'] ?? 'brak tekstu';
-                        }, $filtered_anwsers)
-                    ]);
                 }
 
                 // Filtrowanie answers (jeśli istnieje)
@@ -772,7 +746,7 @@ class DialogManager
                         $answer_visibility = $answer_settings['visibility_settings'] ?? [];
 
                         if (empty($answer_visibility)) {
-                            $filtered_answers[$key] = $answer;
+                            $filtered_answers[] = $answer; // Usuwamy zachowywanie oryginalnego klucza
                             continue;
                         }
 
@@ -789,7 +763,7 @@ class DialogManager
                         }
 
                         if ($answer_passes) {
-                            $filtered_answers[$key] = $answer;
+                            $filtered_answers[] = $answer; // Usuwamy zachowywanie oryginalnego klucza
                         }
                     }
 

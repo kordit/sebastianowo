@@ -30,7 +30,7 @@ if ($instance != 'kreator'): ?>
             $scene = '';
         }
 
-
+        et_r(get_fields('449'));
         if ($instance) {
             include(THEME_SRC . '/page-templates/' . $instance . '/template.php');
         } elseif (is_author()) {

@@ -259,9 +259,6 @@ class DialogHandler
             // Logger
             $logger = new NpcLogger();
 
-            // Zapisz całe dane żądania do logu
-            $logger->debug_log("WSZYSTKIE DANE ŻĄDANIA:", $request->get_params());
-
             // Sprawdź aktualny stan zasobów użytkownika na początku
             $current_backpack = get_field(BACKPACK['name'], 'user_' . $user_id);
 
@@ -297,11 +294,6 @@ class DialogHandler
             $type_page = isset($page_data['TypePage']) ? sanitize_text_field($page_data['TypePage']) : '';
             $location_value = isset($page_data['value']) ? sanitize_text_field($page_data['value']) : '';
 
-            $logger->debug_log("Wyodrębnione dane lokalizacji:", [
-                'location' => $location,
-                'type_page' => $type_page,
-                'location_value' => $location_value
-            ]);
 
             $criteria = [
                 'type_page' => $type_page,
@@ -315,14 +307,14 @@ class DialogHandler
 
             // Sprawdź, czy mamy do przetworzenia transakcję z poprzedniego dialogu
             if ($current_dialog_id && $answer_index !== null) {
-                $logger->debug_log("ROZPOCZYNAM PRZETWARZANIE PRZYCISKÓW ODPOWIEDZI");
+                // $logger->debug_log("ROZPOCZYNAM PRZETWARZANIE PRZYCISKÓW ODPOWIEDZI");
 
                 // Unikalny klucz transakcji
                 $transaction_key = "npc_{$npc_id}_dialog_{$current_dialog_id}_answer_{$answer_index}";
 
                 // Sprawdź, czy można przetworzyć transakcję (zabezpieczenie przed szybkim klikaniem)
                 if (!self::can_process_transaction($user_id, $transaction_key, $logger)) {
-                    $logger->debug_log("Pomijam przetwarzanie transakcji z powodu ochrony przed szybkim klikaniem: $transaction_key");
+                    // $logger->debug_log("Pomijam przetwarzanie transakcji z powodu ochrony przed szybkim klikaniem: $transaction_key");
 
                     // Zwróć aktualny dialog bez przetwarzania transakcji
                     // Znajdź dialog o określonym ID
@@ -350,12 +342,12 @@ class DialogHandler
                     ];
                     $filtered_dialog = $dialog_manager->get_first_matching_dialog([$dialog], $userContext, $location_info);
                     if (!$filtered_dialog) {
-                        $logger->debug_log("UWAGA: Dialog nie przeszedł filtrowania z UserContext");
+                        // $logger->debug_log("UWAGA: Dialog nie przeszedł filtrowania z UserContext");
                         $filtered_dialog = $dialog; // Używamy oryginalnego dialogu jeśli filtrowanie nie zwróciło wyników
                     } else {
                         $filtered_dialog = $filtered_dialog[0]; // get_first_matching_dialog zwraca tablicę, bierzemy pierwszy element
                     }
-                    $logger->debug_log("Dialog po filtrowaniu:", $filtered_dialog);
+                    // $logger->debug_log("Dialog po filtrowaniu:", $filtered_dialog);
 
                     // Uproszczenie struktury dialogu
                     $simplified_dialog = $dialog_manager->simplify_dialog($filtered_dialog);
@@ -381,9 +373,6 @@ class DialogHandler
                         'status' => 'warning'
                     ];
 
-                    $logger->debug_log("Dane odpowiedzi (pomijam transakcję):", $response_data);
-                    $logger->debug_log("===== ZAKOŃCZENIE PRZETWARZANIA ŻĄDANIA DIALOGU =====");
-
                     return new \WP_REST_Response($response_data, 200);
                 }
 
@@ -392,29 +381,22 @@ class DialogHandler
                 foreach ($dialogs as $d) {
                     if (isset($d['id_pola']) && $d['id_pola'] === $current_dialog_id) {
                         $prev_dialog = $d;
-                        $logger->debug_log("Znaleziono dialog o ID: {$d['id_pola']}");
                         break;
                     }
                 }
 
                 if ($prev_dialog) {
-                    $logger->debug_log("Znaleziono poprzedni dialog ID: $current_dialog_id");
-                    $logger->debug_log("Pełne dane dialogu:", $prev_dialog);
+
 
                     // Znajdź odpowiedź na podstawie indeksu
                     $answers = isset($prev_dialog['anwsers']) ? $prev_dialog['anwsers'] : [];
-                    $logger->debug_log("Odpowiedzi w dialogu:", $answers);
 
                     if (is_array($answers) && isset($answers[$answer_index])) {
                         $answer = $answers[$answer_index];
-                        $logger->debug_log("Znaleziono odpowiedź o indeksie: $answer_index");
-                        $logger->debug_log("Dane odpowiedzi:", $answer);
+                        $logger->debug_log("index", $answer_index);
 
                         // Sprawdź, czy odpowiedź ma transakcję lub inną akcję
                         if (isset($answer['type_anwser']) && !empty($answer['type_anwser'])) {
-                            $logger->debug_log("Odpowiedź zawiera akcje do wykonania:", $answer['type_anwser']);
-
-                            // -- NAJPIERW WERYFIKUJEMY WSZYSTKIE AKCJE --
                             // Zmienna określająca, czy wszystkie akcje są wykonalne
                             $all_actions_possible = true;
                             // Lista brakujących zasobów do wyświetlenia użytkownikowi
@@ -449,7 +431,7 @@ class DialogHandler
                             // Sprawdź każdą akcję, czy jest wykonalna, ale jej nie wykonuj
                             foreach ($answer['type_anwser'] as $action) {
                                 $action_type = $action['acf_fc_layout'] ?? '';
-                                $logger->debug_log("Weryfikacja akcji:", $action);
+
 
                                 switch ($action_type) {
                                     case 'transaction':
@@ -1173,6 +1155,11 @@ class DialogHandler
                                         $logger->debug_log("Wykonano aktualizację $type. Nowa wartość: $new_value");
                                         break;
 
+                                    case 'function':
+                                        $function_name = $action['function'] ?? '';
+                                        $logger->debug_log("test jebac: ", $function_name);
+                                        break;
+
                                     case 'unlock_area':
                                         $area_id = (int)($action['area'] ?? 0);
 
@@ -1734,7 +1721,7 @@ class DialogHandler
 
                                     // Można dodać obsługę innych typów akcji w przyszłości
                                     default:
-                                        $logger->debug_log("Nieobsługiwany typ akcji: $action_type");
+                                        // $logger->debug_log("Nieobsługiwany typ akcji: $action_type");
                                         break;
                                 }
                             }
@@ -1771,14 +1758,14 @@ class DialogHandler
 
             // Tworzymy obiekt UserContext dla odpowiedniego filtrowania odpowiedzi
             $userContext = new UserContext(new ManagerUser($user_id));
-            
+
             // Przygotuj dane lokalizacji dla kontekstu
             $location_info = [
                 'area_slug' => $location,
                 'type_page' => $type_page,
                 'location_value' => $location_value
             ];
-            
+
             // Filtruj odpowiedzi w dialogu z wykorzystaniem UserContext
             $filtered_dialog = $dialog_manager->get_first_matching_dialog([$dialog], $userContext, $location_info);
             if (!$filtered_dialog) {
@@ -1787,7 +1774,7 @@ class DialogHandler
             } else {
                 $filtered_dialog = $filtered_dialog[0]; // get_first_matching_dialog zwraca tablicę, bierzemy pierwszy element
             }
-            
+
             $logger->debug_log("Dialog po filtrowaniu:", $filtered_dialog);
 
             // Uproszczenie struktury dialogu
@@ -1831,7 +1818,7 @@ class DialogHandler
             );
         }
     }
-    
+
     /**
      * Pobiera kontekst użytkownika
      *
