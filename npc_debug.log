@@ -1,14 +1,25 @@
-[2025-05-20 18:47:07] [INFO] index
-[2025-05-20 18:47:07] [DEBUG] WSZYSTKIE AKCJE SĄ WYKONALNE, PRZYSTĘPUJĘ DO ICH REALIZACJI
-[2025-05-20 18:47:07] [INFO] akcja: 
-[2025-05-20 18:47:07] [DATA] Array
+[2025-05-20 18:51:55] [DEBUG] BŁĄD: Nieznana funkcja do wykonania: SetClass
+[2025-05-20 18:51:55] [INFO] akcja: 
+[2025-05-20 18:51:55] [DATA] Array
 (
     [acf_fc_layout] => function
     [acfe_flexible_toggle] => 
-    [do_function] => go-to-page
+    [do_function] => SetClass
     [page_url] => /test
     [lose_id] => chuj-w-dupe
     [user_class] => zawijacz
 )
 
-[2025-05-20 18:47:07] [DEBUG] Dialog po filtrowaniu:
+[2025-05-20 18:51:55] [DEBUG] Dialog po filtrowaniu:
+[2025-05-20 18:53:33] [INFO] akcja: 
+[2025-05-20 18:53:33] [DATA] Array
+(
+    [acf_fc_layout] => function
+    [acfe_flexible_toggle] => 
+    [do_function] => SetClass
+    [page_url] => /test
+    [lose_id] => chuj-w-dupe
+    [user_class] => zawijacz
+)
+
+[2025-05-20 18:53:33] [DEBUG] Dialog po filtrowaniu:

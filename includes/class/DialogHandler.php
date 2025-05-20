@@ -1166,6 +1166,29 @@ class DialogHandler
                                         break;
 
                                     case 'function':
+                                        $function_name = $action['do_function'] ?? '';
+                                        switch ($function_name) {
+                                            case 'go-to-page':
+                                                $page_url = $action['page_url'] ?? '';
+                                                $notification = [
+                                                    "redirect" => $page_url,
+                                                    'message' => "Przeniesiono do strony: $page_url",
+                                                    'status' => 'success',
+                                                ];
+                                                break;
+                                            case 'SetClass':
+                                                $user_class = $action['user_class'] ?? '';
+                                                $result = update_field('user_class', $user_class, 'user_' . $user_id);
+                                                $notification = [
+                                                    'message' => "Ustawiono klasę użytkownika: $user_class",
+                                                    'status' => 'success',
+                                                ];
+                                                break;
+
+                                            default:
+                                                $logger->debug_log("BŁĄD: Nieznana funkcja do wykonania: $function_name");
+                                        }
+
                                         $logger->debug_log("akcja: ", $action);
                                         break;
 
