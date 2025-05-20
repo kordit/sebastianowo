@@ -822,15 +822,7 @@ class DialogHandler
 
                                         // Zaktualizuj wartość w plecaku
                                         $backpack[$currency] = $new_value;
-
-                                        // Zapisz cały plecak z powrotem do meta danych użytkownika za pomocą ACF
                                         $result = update_field(BACKPACK['name'], $backpack, 'user_' . $user_id);
-                                        $logger->debug_log("Rezultat update_field dla plecaka: " . ($result ? 'SUKCES' : 'BŁĄD'));
-
-                                        // Sprawdź czy meta została zaktualizowana
-                                        $updated_backpack = get_field(BACKPACK['name'], 'user_' . $user_id);
-                                        $updated_value = isset($updated_backpack[$currency]) ? (int)$updated_backpack[$currency] : 0;
-                                        $logger->debug_log("Wartość $currency po aktualizacji plecaka: $updated_value");
 
                                         // Przygotuj powiadomienie na podstawie typu transakcji
                                         $notification = [
@@ -1184,9 +1176,16 @@ class DialogHandler
                                                     'status' => 'success',
                                                 ];
                                                 break;
+                                            case 'start-fight':
+                                                $notification = [
+                                                    'message' => "Zaczynamy walkę $npc_id",
+                                                    'status' => 'success',
+                                                    'npc_id' => $npc_id,
+                                                ];
+                                                break;
 
                                             default:
-                                                $logger->debug_log("BŁĄD: Nieznana funkcja do wykonania: $function_name");
+                                                // $logger->debug_log("BŁĄD: Nieznana funkcja do wykonania: $function_name");
                                         }
 
                                         $logger->debug_log("akcja: ", $action);
@@ -1803,8 +1802,6 @@ class DialogHandler
             if (!$filtered_dialog) {
                 $logger->debug_log("UWAGA: Dialog nie przeszedł filtrowania z UserContext");
                 $filtered_dialog = $dialog; // Używamy oryginalnego dialogu jeśli filtrowanie nie zwróciło wyników
-            } else {
-                $filtered_dialog = $filtered_dialog[0]; // get_first_matching_dialog zwraca tablicę, bierzemy pierwszy element
             }
 
             $logger->debug_log("Dialog po filtrowaniu:", $filtered_dialog);

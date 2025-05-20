@@ -532,32 +532,6 @@ class DialogManager
         return true;
     }
 
-    /**
-     * Pobiera LocationConditionChecker
-     *
-     * @return LocationConditionChecker
-     * @throws \Exception
-     */
-    // private function getLocationConditionChecker(): LocationConditionChecker
-    // {
-    //     if ($this->locationConditionChecker === null) {
-    //         if (!isset($this->user_id) || $this->user_id === 0) {
-    //             $error_message = "DialogManager: user_id nie jest ustawione przed próbą utworzenia LocationConditionChecker.";
-    //             $this->logger->log_error($error_message);
-    //             throw new \Exception($error_message);
-    //         }
-    //         $this->locationConditionChecker = new LocationConditionChecker($this->user_id, $this->logger);
-    //     }
-    //     return $this->locationConditionChecker;
-    // }
-
-    /**
-     * Waliduje pojedynczy warunek dialogu na podstawie kontekstu.
-     *
-     * @param array $condition Warunek do sprawdzenia (z ACF)
-     * @param array $context Kontekst użytkownika (np. ['missions'=>[], 'relations'=>[], ...])
-     * @return bool
-     */
     public function validate_dialog_condition(array $condition, array $context): bool
     {
         $type = $condition['acf_fc_layout'] ?? '';

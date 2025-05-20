@@ -116,6 +116,20 @@ class NpcPopup
                 ],
             ],
         ]);
+
+        add_action('rest_api_init', function () {
+            register_rest_route('game/v1', '/battle', [
+                'methods' => 'POST',
+                'callback' => function ($request) {
+                    $user_id = get_current_user_id();
+                    $npc_id = $request->get_param('npc_id');
+                    require_once __DIR__ . '/BattlePopup.php';
+                    $data = BattlePopup::get_battle_data($user_id, $npc_id);
+                    return rest_ensure_response($data);
+                },
+                'permission_callback' => '__return_true',
+            ]);
+        });
     }
 
     /**
