@@ -14,6 +14,7 @@ require_once get_template_directory() . '/includes/class/NpcPopup/NpcLogger.php'
 require_once get_template_directory() . '/includes/class/NpcPopup/DialogManager.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/LocationExtractor.php';
 require_once get_template_directory() . '/includes/class/NpcPopup/UserContext.php';
+require_once get_template_directory() . '/includes/class/ManagerUser.php';
 
 class NpcPopup
 {
@@ -36,7 +37,7 @@ class NpcPopup
      * 
      * @var DialogManager
      */
-    private DialogManager $dialogManager;
+    private $dialogManager;
 
     /**
      * Ekstraktor lokalizacji z URL
@@ -138,6 +139,7 @@ class NpcPopup
      * @param WP_REST_Request $request Obiekt żądania
      * @return WP_REST_Response
      */
+
     public function get_npc_data(\WP_REST_Request $request): \WP_REST_Response
     {
         $params = $request->get_params();
@@ -146,22 +148,35 @@ class NpcPopup
         $user_id = get_current_user_id();
 
         if (!$npc_id) {
-            $this->logger->debug_log("BŁĄD: Nieprawidłowe ID NPC");
             return new \WP_REST_Response([
                 'status' => 'error',
                 'message' => 'Nieprawidłowe ID NPC'
             ], 400);
         }
-
         $location_info = $this->locationExtractor->extract_from_url($current_url);
-        $userContext = new UserContext(new ManagerUser($user_id));
+        $manager_user = new ManagerUser();
+        $user_context = new UserContext($manager_user);
 
         $fields = get_fields($npc_id);
         $dialogs = isset($fields['dialogs']) ? $fields['dialogs'] : [];
 
+        // Ustaw kontekst dla DialogManager
         $this->dialogManager->setNpcId($npc_id);
         $this->dialogManager->setUserId($user_id);
-        $filtered_dialog = $this->dialogManager->get_first_matching_dialog($dialogs, $userContext, $location_info);
+
+        // Przefiltruj dialogi
+        $filtered_dialogs = $this->dialogManager->filter_questions_with_user_context($dialogs, $user_context, $location_info);
+
+        // $this->logger->debug_log("filtrowane dialogi", $filtered_dialogs);
+
+
+        // Weź pierwszy dialog z przefiltrowanych
+        $filtered_dialog = !empty($filtered_dialogs) ? $filtered_dialogs[0] : null;
+        // Zastąp oryginalne dialogi przefiltrowanymi
+        $dialogs = $filtered_dialogs;
+
+        // Weź pierwszy dialog z przefiltrowanych
+        $filtered_dialog = !empty($dialogs) ? $dialogs[0] : null;
 
         $thumbnail_url = '';
         if (has_post_thumbnail($npc_id)) {
