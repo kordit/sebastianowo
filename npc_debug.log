@@ -1,67 +1,54 @@
-[2025-05-21 18:28:58] [INFO] Array
-[2025-05-21 18:28:58] [DATA] Array
+[2025-05-22 15:32:50] [WARNING] Answer
+[2025-05-22 15:33:01] [INFO] Answer
+[2025-05-22 15:33:01] [DATA] Array
 (
-    [current_location_text] => park
-)
-
-[2025-05-21 18:28:58] [INFO] Array
-[2025-05-21 18:28:58] [DATA] Array
-(
-    [acf_fc_layout] => condition_location
-    [condition] => is
-    [location_type] => area
-    [area] => 451
-    [location_text] => 
-)
-
-[2025-05-21 18:29:32] [INFO] CONTEXT (location)
-[2025-05-21 18:29:32] [DATA] Array
-(
-    [current_location_text] => park
-)
-
-[2025-05-21 18:29:32] [INFO] CONDITION (location)
-[2025-05-21 18:29:32] [DATA] Array
-(
-    [acf_fc_layout] => condition_location
-    [condition] => is
-    [location_type] => area
-    [area] => 451
-    [location_text] => 
-)
-
-[2025-05-21 18:29:32] [INFO] DialogManager: Warunek dialogu niespełniony
-[2025-05-21 18:29:32] [DATA] Array
-(
-    [condition] => Array
+    [0] => Array
         (
-            [acf_fc_layout] => condition_location
-            [condition] => is
-            [location_type] => area
-            [area] => 451
-            [location_text] => 
-        )
+            [acf_fc_layout] => anwser
+            [layout_settings] => Array
+                (
+                    [visibility_tab] => 
+                    [logic_operator] => and
+                    [visibility_settings] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => condition_npc_relation
+                                    [condition] => is_not_known
+                                    [npc_id] => 449
+                                    [relation_value] => 50
+                                )
 
-    [context] => Array
-        (
-            [current_location_text] => park
+                        )
+
+                )
+
+            [anwser_text] => Jak się w to w ogóle gra?
+            [type_anwser] => 
+            [go_to_id] => jak-sie-w-to-gra
         )
 
 )
 
-[2025-05-21 18:29:42] [INFO] CONTEXT (location)
-[2025-05-21 18:29:42] [DATA] Array
+[2025-05-22 15:33:05] [DEBUG] ===== ROZPOCZĘCIE PRZETWARZANIA ŻĄDANIA DIALOGU =====
+[2025-05-22 15:33:05] [INFO] Parametry żądania:
+[2025-05-22 15:33:05] [DATA] Array
 (
-    [current_location_text] => park
+    [npc_id] => 449
+    [dialog_id] => jak-sie-w-to-gra
+    [current_url] => http://seb.soeasy.it/tereny/park/
+    [user_id] => 1
+    [answer_id] => answer-0
+    [answer_index] => 0
+    [current_dialog_id] => przy-wiezieniu
 )
 
-[2025-05-21 18:29:42] [INFO] CONDITION (location)
-[2025-05-21 18:29:42] [DATA] Array
+[2025-05-22 15:33:05] [DEBUG] Filtrowanie wszystkich dialogów NPC według kontekstu użytkownika...
+[2025-05-22 15:33:05] [INFO] Sprawdzanie warunków widoczności dla dialogu
+[2025-05-22 15:33:05] [DATA] Array
 (
-    [acf_fc_layout] => condition_location
-    [condition] => is
-    [location_type] => area
-    [area] => 207
-    [location_text] => 
+    [dialog_id] => przy-wiezieniu
+    [conditions_count] => 2
+    [logic_operator] => and
 )
 

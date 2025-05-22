@@ -225,15 +225,12 @@ class DialogManager
     {
         $user_area_slug = $context['current_location_text'] ?? '';
         $area_id = $condition['area'] ?? null;
-
-        $this->logger->debug_log('CONTEXT (location)', $context);
-        $this->logger->debug_log('CONDITION (location)', $condition);
+        $condition_type = $condition['condition'] ?? 'is';
 
         if (!$area_id) {
-            return true; // brak wymaganego area – przepuszczamy
+            return true;
         }
 
-        // Pobierz slug lokalizacji z ID
         $required_slug = get_post_field('post_name', $area_id);
 
         if (!$required_slug) {
@@ -241,8 +238,13 @@ class DialogManager
             return false;
         }
 
+        if ($condition_type === 'is_not') {
+            return $user_area_slug !== $required_slug;
+        }
+
         return $user_area_slug === $required_slug;
     }
+
 
 
     private function validate_task_condition(array $condition, array $context): bool
@@ -287,22 +289,34 @@ class DialogManager
      */
     private function validate_mission_condition(array $condition, array $context): bool
     {
-        $missions = $context['missions'] ?? [];
+        $missions = $context['mission'] ?? [];
         $mission_id = $condition['mission_id'] ?? 0;
-        $required_status = $condition['mission_status'] ?? '';
+        $required_status = $condition['status'] ?? '';
+        $condition_type = $condition['condition'] ?? 'is';
 
         if (empty($mission_id) || empty($required_status)) {
-            return true; // Jeśli brakuje wymaganych danych, przepuszczamy
+            return true;
         }
 
+        $current_status = 'not_started';
+
         foreach ($missions as $mission) {
-            if ($mission['id'] == $mission_id && $mission['status'] === $required_status) {
-                return true;
+            if ($mission['id'] == $mission_id) {
+                $current_status = $mission['status'];
+                break;
             }
         }
 
-        return false;
+        $result = $current_status === $required_status;
+
+        if ($condition_type === 'is_not') {
+            $result = !$result;
+        }
+
+        return $result;
     }
+
+
 
     /**
      * Waliduje warunek przedmiotu
@@ -409,7 +423,7 @@ class DialogManager
 
         // Obsługa odpowiedzi (sprawdź oba możliwe klucze: anwsers i answers)
         $answers = $dialog['anwsers'] ?? ($dialog['answers'] ?? []);
-
+        $this->logger->log("Answer", $answers);
         if (is_array($answers)) {
             foreach ($answers as $answer) {
                 $simplified['answers'][] = [
