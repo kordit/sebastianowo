@@ -255,14 +255,16 @@ const handleDialogNavigation = async (goToId, npcData, userId, answerData = {}) 
                 console.log('Dialog: wyświetlanie powiadomienia za pomocą gameNotifications');
                 window.gameNotifications.show(
                     dialogData.notification.message,
-                    dialogData.notification.status || 'success'
+                    dialogData.notification.status === 'error' ? 'error' :
+                        dialogData.notification.status === 'bad' ? 'bad' : 'success'
                 );
             } else if (window.showPopup) {
                 // Spadek do starego systemu powiadomień, jeśli dostępny
                 console.log('Dialog: wyświetlanie powiadomienia za pomocą showPopup');
                 window.showPopup(
                     dialogData.notification.message,
-                    dialogData.notification.status === 'bad' ? 'error' : 'success'
+                    dialogData.notification.status === 'bad' ? 'error' :
+                        dialogData.notification.status === 'error' ? 'error' : 'success'
                 );
             } else {
                 console.warn('Dialog: brak systemu powiadomień do wyświetlenia informacji:', dialogData.notification);

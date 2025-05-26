@@ -31,7 +31,7 @@ Array
 
     [backpack] => Array
         (
-            [gold] => 1342
+            [gold] => 442
             [cigarettes] => 48
         )
 
@@ -45,7 +45,7 @@ Array
 
     [progress] => Array
         (
-            [exp] => 400
+            [exp] => 1100
             [learning_points] => 10
             [reputation] => 0
         )
@@ -72,32 +72,32 @@ Array
 
             [3] => Array
                 (
-                    [item] => 124
-                    [quantity] => 11
-                )
-
-            [4] => Array
-                (
                     [item] => 125
                     [quantity] => 1
                 )
 
-            [5] => Array
+            [4] => Array
                 (
                     [item] => 118
                     [quantity] => 1
                 )
 
-            [6] => Array
+            [5] => Array
                 (
                     [item] => 484
                     [quantity] => 6
                 )
 
-            [7] => Array
+            [6] => Array
                 (
                     [item] => 483
                     [quantity] => 10
+                )
+
+            [7] => Array
+                (
+                    [item] => 124
+                    [quantity] => 6
                 )
 
         )
@@ -156,6 +156,43 @@ Array
 
     [npc-relation-449] => 77
     [npc-meet-449] => 
+    [missions] => Array
+        (
+            [] => 
+            [mission_339] => Array
+                (
+                    [status] => not_started
+                    [assigned_date] => 
+                    [completion_date] => 
+                    [tasks] => Array
+                        (
+                            [jak-poruszac-sie-po-grze_0] => not_started
+                            [jak-sie-tu-poruszac_1] => not_started
+                        )
+
+                )
+
+            [mission_247] => Array
+                (
+                    [status] => not_started
+                    [assigned_date] => 
+                    [completion_date] => 
+                    [tasks] => Array
+                        (
+                            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                                (
+                                    [status] => not_started
+                                    [npc_target_449] => completed
+                                    [npc_449] => completed
+                                )
+
+                            [rozlicz-sie-z-irasem_1] => not_started
+                        )
+
+                )
+
+        )
+
     [npc-relation-464] => 10
     [npc-meet-464] => 1
     [npc-relation-473] => -42

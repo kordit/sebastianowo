@@ -1,0 +1,514 @@
+Array
+(
+    [dialogs] => Array
+        (
+            [0] => Array
+                (
+                    [acf_fc_layout] => question
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is
+                                            [location_type] => text
+                                            [area] => 
+                                            [location_text] => park/osiedle
+                                        )
+
+                                    [1] => Array
+                                        (
+                                            [acf_fc_layout] => condition_location
+                                            [condition] => is_not
+                                            [location_type] => area
+                                            [area] => 207
+                                            [location_text] => 
+                                        )
+
+                                    [2] => Array
+                                        (
+                                            [acf_fc_layout] => condition_mission
+                                            [condition] => is
+                                            [mission_id] => 339
+                                            [status] => in_progress
+                                        )
+
+                                    [3] => Array
+                                        (
+                                            [acf_fc_layout] => condition_mission
+                                            [condition] => is_not
+                                            [mission_id] => 339
+                                            [status] => completed
+                                        )
+
+                                    [4] => Array
+                                        (
+                                            [acf_fc_layout] => condition_task
+                                            [condition] => is
+                                            [mission_id] => 339
+                                            [task_id] => jak-poruszac-sie-po-grze_0
+                                            [status] => completed
+                                        )
+
+                                    [5] => Array
+                                        (
+                                            [acf_fc_layout] => condition_task
+                                            [condition] => is_not
+                                            [mission_id] => 339
+                                            [task_id] => jak-poruszac-sie-po-grze_0
+                                            [status] => in_progress
+                                        )
+
+                                    [6] => Array
+                                        (
+                                            [acf_fc_layout] => condition_npc_relation
+                                            [condition] => is_known
+                                            [npc_id] => 464
+                                            [relation_value] => 50
+                                        )
+
+                                    [7] => Array
+                                        (
+                                            [acf_fc_layout] => condition_npc_relation
+                                            [condition] => is_not_known
+                                            [npc_id] => 449
+                                            [relation_value] => 50
+                                        )
+
+                                    [8] => Array
+                                        (
+                                            [acf_fc_layout] => condition_npc_relation
+                                            [condition] => relation_above
+                                            [npc_id] => 473
+                                            [relation_value] => 50
+                                        )
+
+                                    [9] => Array
+                                        (
+                                            [acf_fc_layout] => condition_npc_relation
+                                            [condition] => relation_below
+                                            [npc_id] => 473
+                                            [relation_value] => -50
+                                        )
+
+                                    [10] => Array
+                                        (
+                                            [acf_fc_layout] => condition_npc_relation
+                                            [condition] => relation_equal
+                                            [npc_id] => 464
+                                            [relation_value] => 50
+                                        )
+
+                                    [11] => Array
+                                        (
+                                            [acf_fc_layout] => condition_inventory
+                                            [condition] => has_item
+                                            [item_id] => 124
+                                            [quantity] => 1
+                                        )
+
+                                    [12] => Array
+                                        (
+                                            [acf_fc_layout] => condition_inventory
+                                            [condition] => has_not_item
+                                            [item_id] => 125
+                                            [quantity] => 1
+                                        )
+
+                                    [13] => Array
+                                        (
+                                            [acf_fc_layout] => condition_inventory
+                                            [condition] => quantity_above
+                                            [item_id] => 118
+                                            [quantity] => 30
+                                        )
+
+                                    [14] => Array
+                                        (
+                                            [acf_fc_layout] => condition_inventory
+                                            [condition] => quantity_below
+                                            [item_id] => 157
+                                            [quantity] => 1
+                                        )
+
+                                    [15] => Array
+                                        (
+                                            [acf_fc_layout] => condition_inventory
+                                            [condition] => quantity_equal
+                                            [item_id] => 483
+                                            [quantity] => 10
+                                        )
+
+                                )
+
+                        )
+
+                    [acfe_flexible_toggle] => 
+                    [acfe_flexible_layout_title] => Dialog
+                    [id_pola] => testowy-dialog
+                    [question] => 
+Tutaj pytanie
+
+
+
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [visibility_tab] => 
+                                            [logic_operator] => and
+                                            [visibility_settings] => 
+                                        )
+
+                                    [anwser_text] => Odpowiedź
+                                    [type_anwser] => 
+                                    [go_to_id] => wybor-klasy
+                                )
+
+                            [1] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [visibility_tab] => 
+                                            [logic_operator] => or
+                                            [visibility_settings] => Array
+                                                (
+                                                    [0] => Array
+                                                        (
+                                                            [acf_fc_layout] => condition_inventory
+                                                            [condition] => has_item
+                                                            [item_id] => 125
+                                                            [quantity] => 1
+                                                        )
+
+                                                    [1] => Array
+                                                        (
+                                                            [acf_fc_layout] => condition_mission
+                                                            [condition] => is
+                                                            [mission_id] => 247
+                                                            [status] => in_progress
+                                                        )
+
+                                                )
+
+                                        )
+
+                                    [anwser_text] => Filtrowana odpowiedź
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [acf_fc_layout] => question
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => 
+                        )
+
+                    [acfe_flexible_toggle] => 
+                    [acfe_flexible_layout_title] => Dialog
+                    [id_pola] => wybor-klasy
+                    [question] => 
+Elo
+
+
+
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [visibility_tab] => 
+                                            [logic_operator] => and
+                                            [visibility_settings] => 
+                                        )
+
+                                    [anwser_text] => Wybieram klase
+                                    [type_anwser] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => function
+                                                    [acfe_flexible_toggle] => 
+                                                    [do_function] => SetClass
+                                                    [page_url] => 
+                                                    [lose_id] => 
+                                                    [user_class] => kombinator
+                                                )
+
+                                        )
+
+                                    [go_to_id] => dobry-wybor
+                                )
+
+                            [1] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [visibility_tab] => 
+                                            [logic_operator] => and
+                                            [visibility_settings] => 
+                                        )
+
+                                    [anwser_text] => Zabierz 100
+                                    [type_anwser] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => transaction
+                                                    [acfe_flexible_toggle] => 
+                                                    [backpack] => gold
+                                                    [value] => -100
+                                                )
+
+                                        )
+
+                                    [go_to_id] => wybor-klasy
+                                )
+
+                            [2] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [visibility_tab] => 
+                                            [logic_operator] => and
+                                            [visibility_settings] => 
+                                        )
+
+                                    [anwser_text] => daj walke
+                                    [type_anwser] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => function
+                                                    [acfe_flexible_toggle] => 
+                                                    [do_function] => start-fight
+                                                    [page_url] => 
+                                                    [lose_id] => wybor-klasy
+                                                    [user_class] => zadymiarz
+                                                )
+
+                                        )
+
+                                    [go_to_id] => wybor-klasy
+                                )
+
+                            [3] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [visibility_tab] => 
+                                            [logic_operator] => and
+                                            [visibility_settings] => 
+                                        )
+
+                                    [anwser_text] => Daj respekt
+                                    [type_anwser] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => exp_rep
+                                                    [acfe_flexible_toggle] => 
+                                                    [type] => exp
+                                                    [value] => 100
+                                                )
+
+                                        )
+
+                                    [go_to_id] => wybor-klasy
+                                )
+
+                            [4] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [visibility_tab] => 
+                                            [logic_operator] => and
+                                            [visibility_settings] => 
+                                        )
+
+                                    [anwser_text] => Zalicz misję
+                                    [type_anwser] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => mission
+                                                    [acfe_flexible_toggle] => 
+                                                    [mission_id] => 339
+                                                    [mission_status] => in_progress
+                                                    [mission_task_id] => jak-poruszac-sie-po-grze_0
+                                                    [mission_task_status] => in_progress
+                                                )
+
+                                        )
+
+                                    [go_to_id] => wybor-klasy
+                                )
+
+                            [5] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [visibility_tab] => 
+                                            [logic_operator] => and
+                                            [visibility_settings] => 
+                                        )
+
+                                    [anwser_text] => Daj bluzę
+                                    [type_anwser] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => item
+                                                    [acfe_flexible_toggle] => 
+                                                    [item_action] => give
+                                                    [item] => 124
+                                                    [quantity] => 1
+                                                )
+
+                                        )
+
+                                    [go_to_id] => wybor-klasy
+                                )
+
+                            [6] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [visibility_tab] => 
+                                            [logic_operator] => and
+                                            [visibility_settings] => 
+                                        )
+
+                                    [anwser_text] => Zabierz bluzę
+                                    [type_anwser] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => item
+                                                    [acfe_flexible_toggle] => 
+                                                    [item_action] => take
+                                                    [item] => 124
+                                                    [quantity] => 1
+                                                )
+
+                                        )
+
+                                    [go_to_id] => wybor-klasy
+                                )
+
+                            [7] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [visibility_tab] => 
+                                            [logic_operator] => and
+                                            [visibility_settings] => 
+                                        )
+
+                                    [anwser_text] => Odblokuj rejon
+                                    [type_anwser] => Array
+                                        (
+                                            [0] => Array
+                                                (
+                                                    [acf_fc_layout] => unlock_area
+                                                    [acfe_flexible_toggle] => 
+                                                    [area] => 207
+                                                )
+
+                                        )
+
+                                    [go_to_id] => wybor-klasy
+                                )
+
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [acf_fc_layout] => question
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => 
+                        )
+
+                    [acfe_flexible_toggle] => 
+                    [acfe_flexible_layout_title] => Dialog
+                    [id_pola] => dobry-wybor
+                    [question] => 
+spoko
+
+
+
+                    [anwsers] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [acf_fc_layout] => anwser
+                                    [layout_settings] => Array
+                                        (
+                                            [visibility_tab] => 
+                                            [logic_operator] => and
+                                            [visibility_settings] => 
+                                        )
+
+                                    [anwser_text] => ok
+                                    [type_anwser] => 
+                                    [go_to_id] => 0
+                                )
+
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [acf_fc_layout] => question
+                    [layout_settings] => Array
+                        (
+                            [visibility_tab] => 
+                            [logic_operator] => and
+                            [visibility_settings] => 
+                        )
+
+                    [acfe_flexible_toggle] => 
+                    [acfe_flexible_layout_title] => Dialog
+                    [id_pola] => elo
+                    [question] => 
+bez warunkow
+
+
+
+                    [anwsers] => 
+                )
+
+        )
+
+)

@@ -126,13 +126,6 @@ class NpcPopup
             // Zapisz aktualny czas i pozwól na wykonanie zapytania
             set_transient($transient_key, $current_time, 60); // Transient ważny przez 60 sekund
 
-            $this->log_debug("Throttling check passed", [
-                'user_id' => $user_id,
-                'last_request_time' => $last_request_time,
-                'current_time' => $current_time,
-                'time_diff' => $last_request_time ? ($current_time - $last_request_time) : 'first_request'
-            ]);
-
             return true;
         }
 
@@ -496,6 +489,26 @@ class NpcPopup
                 $result = $this->check_mission_condition($condition, $user_id);
                 break;
 
+            case 'condition_inventory':
+                $result = $this->check_item_condition($condition, $user_id);
+                break;
+
+            case 'condition_mission':
+                $result = $this->check_mission_condition($condition, $user_id);
+                break;
+
+            case 'condition_location':
+                $result = $this->check_location_condition($condition, $user_id, $page_data);
+                break;
+
+            case 'condition_task':
+                $result = $this->check_task_condition($condition, $user_id);
+                break;
+
+            case 'condition_npc_relation':
+                $result = $this->check_relation_condition($condition, $user_id);
+                break;
+
             case 'user_class':
                 $result = $this->check_user_class_condition($condition, $user_id);
                 break;
@@ -562,9 +575,26 @@ class NpcPopup
      */
     private function check_item_condition($condition, $user_id)
     {
-        $item_id = intval($condition['item'] ?? 0);
-        $operator = $condition['operator'] ?? '>=';
+        // Obsługa parametrów zarówno z item jak i condition_inventory
+        $item_id = intval($condition['item'] ?? $condition['item_id'] ?? 0);
+        $condition_type = $condition['condition'] ?? '';
         $required_quantity = intval($condition['quantity'] ?? 1);
+
+        // Mapowanie warunku na operator
+        $operator = '>=';
+        if ($condition_type === 'has_item') {
+            $operator = '>=';
+        } elseif ($condition_type === 'has_not_item') {
+            $operator = '<';
+        } elseif ($condition_type === 'quantity_above') {
+            $operator = '>';
+        } elseif ($condition_type === 'quantity_below') {
+            $operator = '<';
+        } elseif ($condition_type === 'quantity_equal') {
+            $operator = '==';
+        } else {
+            $operator = $condition['operator'] ?? '>=';
+        }
 
         $user_items = get_field('items', 'user_' . $user_id) ?: [];
         $current_quantity = 0;
@@ -585,8 +615,34 @@ class NpcPopup
     private function check_relation_condition($condition, $user_id)
     {
         $npc_id = intval($condition['npc'] ?? 0);
-        $operator = $condition['operator'] ?? '>=';
+        $condition_type = $condition['condition'] ?? 'relation_above';
         $value = intval($condition['value'] ?? 0);
+
+        // Sprawdzenie czy NPC jest poznany
+        if ($condition_type === 'is_known') {
+            $meet_field = 'npc-meet-' . $npc_id;
+            $is_known = get_field($meet_field, 'user_' . $user_id);
+            return (bool)$is_known;
+        }
+
+        // Sprawdzenie czy NPC nie jest poznany
+        if ($condition_type === 'is_not_known') {
+            $meet_field = 'npc-meet-' . $npc_id;
+            $is_known = get_field($meet_field, 'user_' . $user_id);
+            return !(bool)$is_known;
+        }
+
+        // Obsługa operatorów porównania wartości relacji
+        $operator = '>=';
+        if ($condition_type === 'relation_above') {
+            $operator = '>';
+        } elseif ($condition_type === 'relation_below') {
+            $operator = '<';
+        } elseif ($condition_type === 'relation_equal') {
+            $operator = '==';
+        } else {
+            $operator = $condition['operator'] ?? '>=';
+        }
 
         $user_relations = get_field('relation_npc', 'user_' . $user_id) ?: [];
         $current_value = 0;
@@ -606,15 +662,30 @@ class NpcPopup
      */
     private function check_mission_condition($condition, $user_id)
     {
-        $mission_id = intval($condition['mission'] ?? 0);
+        // Obsługa parametrów zarówno z mission jak i condition_mission
+        $mission_id = intval($condition['mission'] ?? $condition['mission_id'] ?? 0);
         $status = $condition['status'] ?? 'completed';
+        $condition_type = $condition['condition'] ?? 'is';
 
         $user_missions = get_field('user_missions', 'user_' . $user_id) ?: [];
 
         foreach ($user_missions as $mission) {
             if (intval($mission['mission']) === $mission_id) {
+                // Obsługa różnych typów warunków misji
+                if ($condition_type === 'is') {
+                    return $mission['status'] === $status;
+                } elseif ($condition_type === 'is_not') {
+                    return $mission['status'] !== $status;
+                }
+
+                // Domyślne sprawdzenie
                 return $mission['status'] === $status;
             }
+        }
+
+        // Dla warunku "is_not" zwracamy true jeśli misja nie istnieje
+        if ($condition_type === 'is_not') {
+            return true;
         }
 
         return false;
@@ -630,6 +701,84 @@ class NpcPopup
         $user_class = is_array($user_class_data) ? ($user_class_data['value'] ?? '') : $user_class_data;
 
         return $user_class === $required_class;
+    }
+
+    /**
+     * Sprawdza warunek lokalizacji
+     */
+    private function check_location_condition($condition, $user_id, $page_data = [])
+    {
+        $condition_type = $condition['condition'] ?? 'is';
+        $location_type = $condition['location_type'] ?? 'text';
+        $location_value = '';
+
+        if ($location_type === 'text') {
+            $location_value = $condition['location_text'] ?? '';
+            $current_location = $page_data['value'] ?? '';
+        } else {
+            $area_id = intval($condition['area'] ?? 0);
+            $location_value = $area_id;
+
+            // Sprawdź czy użytkownik ma dostęp do obszaru
+            $user_areas = get_field('available_areas', 'user_' . $user_id) ?: [];
+            $current_location = in_array($area_id, $user_areas);
+
+            // Dla obszarów używamy boolean, więc dostosujemy warunek
+            if ($condition_type === 'is') {
+                return $current_location === true;
+            } else {
+                return $current_location === false;
+            }
+        }
+
+        // Dla tekstowej lokalizacji porównujemy stringi
+        if ($condition_type === 'is') {
+            return $current_location === $location_value;
+        } else {
+            return $current_location !== $location_value;
+        }
+    }
+
+    /**
+     * Sprawdza warunek zadania
+     */
+    private function check_task_condition($condition, $user_id)
+    {
+        $mission_id = intval($condition['mission_id'] ?? 0);
+        $task_id = $condition['task_id'] ?? '';
+        $status = $condition['status'] ?? 'completed';
+        $condition_type = $condition['condition'] ?? 'is';
+
+        if (empty($mission_id) || empty($task_id)) {
+            return false;
+        }
+
+        // Pobierz dane misji użytkownika
+        $mission_field = 'mission_' . $mission_id;
+        $user_mission_data = get_field($mission_field, 'user_' . $user_id);
+
+        // Sprawdź czy istnieje pole zadania
+        if (!$user_mission_data || !isset($user_mission_data['tasks']) || !isset($user_mission_data['tasks'][$task_id])) {
+            // Dla warunku "is_not" zwracamy true, jeśli zadanie nie istnieje
+            return $condition_type === 'is_not';
+        }
+
+        $task_status = '';
+
+        // Zadanie może być prostym stringiem lub złożonym obiektem z polami
+        $task_data = $user_mission_data['tasks'][$task_id];
+        if (is_array($task_data) && isset($task_data['status'])) {
+            $task_status = $task_data['status'];
+        } else {
+            $task_status = $task_data;
+        }
+
+        // Sprawdź warunek
+        if ($condition_type === 'is') {
+            return $task_status === $status;
+        } else {
+            return $task_status !== $status;
+        }
     }
 
     /**
@@ -739,7 +888,7 @@ class NpcPopup
                     $result = $this->execute_transaction_action($action, $manager_user);
                     if ($result) {
                         $notifications[] = $result['message'];
-                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                        if ($result['status'] === 'bad' || $result['status'] === 'error') $overall_status = 'bad';
                     }
                     break;
 
@@ -747,7 +896,7 @@ class NpcPopup
                     $result = $this->execute_item_action($action, $user_id);
                     if ($result) {
                         $notifications[] = $result['message'];
-                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                        if ($result['status'] === 'bad' || $result['status'] === 'error') $overall_status = 'bad';
                     }
                     break;
 
@@ -755,7 +904,7 @@ class NpcPopup
                     $result = $this->execute_exp_rep_action($action, $manager_user);
                     if ($result) {
                         $notifications[] = $result['message'];
-                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                        if ($result['status'] === 'bad' || $result['status'] === 'error') $overall_status = 'bad';
                     }
                     break;
 
@@ -763,7 +912,7 @@ class NpcPopup
                     $result = $this->execute_relation_action($action, $user_id);
                     if ($result) {
                         $notifications[] = $result['message'];
-                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                        if ($result['status'] === 'bad' || $result['status'] === 'error') $overall_status = 'bad';
                     }
                     break;
 
@@ -771,7 +920,7 @@ class NpcPopup
                     $result = $this->execute_function_action($action, $user_id);
                     if ($result) {
                         $notifications[] = $result['message'];
-                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                        if ($result['status'] === 'bad' || $result['status'] === 'error') $overall_status = 'bad';
                     }
                     break;
 
@@ -779,7 +928,7 @@ class NpcPopup
                     $result = $this->execute_skills_action($action, $manager_user);
                     if ($result) {
                         $notifications[] = $result['message'];
-                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                        if ($result['status'] === 'bad' || $result['status'] === 'error') $overall_status = 'bad';
                     }
                     break;
 
@@ -787,7 +936,7 @@ class NpcPopup
                     $result = $this->execute_mission_action($action, $user_id);
                     if ($result) {
                         $notifications[] = $result['message'];
-                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                        if ($result['status'] === 'bad' || $result['status'] === 'error') $overall_status = 'bad';
                     }
                     break;
             }
@@ -821,9 +970,13 @@ class NpcPopup
                 'message' => $result['message'],
                 'status' => $status
             ];
+        } else {
+            // Jeśli operacja nie powiodła się (np. brak wystarczającej ilości waluty)
+            return [
+                'message' => $result['message'],
+                'status' => 'error'
+            ];
         }
-
-        return null;
     }
 
     /**
@@ -846,8 +999,28 @@ class NpcPopup
 
         $user_items = get_field('items', 'user_' . $user_id) ?: [];
         $item_found = false;
+        $current_quantity = 0;
 
-        // Sprawdź czy użytkownik już ma ten przedmiot
+        // Sprawdź czy użytkownik już ma ten przedmiot i jego ilość
+        foreach ($user_items as $item) {
+            if (intval($item['item']) === $item_id) {
+                $current_quantity = intval($item['quantity']);
+                $item_found = true;
+                break;
+            }
+        }
+
+        // Sprawdź czy użytkownik ma wystarczającą ilość przedmiotów do zabrania
+        if ($item_action === 'take' && ($current_quantity < abs($quantity) || !$item_found)) {
+            $item_name = get_the_title($item_id);
+            return [
+                'message' => "Nie masz wystarczającej ilości przedmiotu: {$item_name}",
+                'status' => 'error'
+            ];
+        }
+
+        // Aktualizuj ilości przedmiotów
+        $item_updated = false;
         foreach ($user_items as &$user_item) {
             if (intval($user_item['item']) === $item_id) {
                 $user_item['quantity'] = intval($user_item['quantity']) + $quantity;
@@ -855,13 +1028,13 @@ class NpcPopup
                 if ($user_item['quantity'] <= 0) {
                     $user_item['quantity'] = 0;
                 }
-                $item_found = true;
+                $item_updated = true;
                 break;
             }
         }
 
         // Jeśli nie ma przedmiotu i próbujemy dodać (nie zabierać)
-        if (!$item_found && $quantity > 0) {
+        if (!$item_updated && $quantity > 0) {
             $user_items[] = [
                 'item' => $item_id,
                 'quantity' => $quantity
@@ -888,7 +1061,7 @@ class NpcPopup
         } else {
             return [
                 'message' => "Otrzymano {$quantity}x {$item_name}",
-                'status' => 'success'  // Otrzymywanie przedmiotu to pozytywny wpływ
+                'status' => 'success'  // Otrzymywanie przedmiotu to pozytywne wpływ
             ];
         }
     }
