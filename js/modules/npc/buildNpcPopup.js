@@ -249,7 +249,7 @@ const handleDialogNavigation = async (goToId, npcData, userId, answerData = {}) 
         // Sprawdź, czy otrzymaliśmy powiadomienie o transakcji
         if (dialogData.notification) {
             console.log('Dialog: otrzymano powiadomienie z API:', dialogData.notification);
-            
+
             // Wyświetl powiadomienie, jeśli jest dostępny system powiadomień
             if (window.gameNotifications) {
                 console.log('Dialog: wyświetlanie powiadomienia za pomocą gameNotifications');
@@ -267,7 +267,7 @@ const handleDialogNavigation = async (goToId, npcData, userId, answerData = {}) 
             } else {
                 console.warn('Dialog: brak systemu powiadomień do wyświetlenia informacji:', dialogData.notification);
             }
-            
+
             // Odśwież dane interfejsu użytkownika po transakcji
             if (window.UIHelpers && typeof window.UIHelpers.refreshUserData === 'function') {
                 console.log('Dialog: odświeżanie danych użytkownika po transakcji');

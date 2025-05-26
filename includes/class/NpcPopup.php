@@ -83,12 +83,6 @@ class NpcPopup
 
         $user_id = wp_validate_auth_cookie($auth_cookie, 'logged_in');
 
-        $this->log_debug("Sprawdzenie uprawnień (z auth cookie)", [
-            'auth_cookie_present' => !empty($auth_cookie),
-            'auth_cookie_value' => $auth_cookie,
-            'validated_user_id' => $user_id,
-        ]);
-
         if ($user_id) {
             wp_set_current_user($user_id);
             return true;
@@ -107,13 +101,42 @@ class NpcPopup
     {
         $user_id = get_current_user_id();
 
-        $this->log_debug("get_secure_user_id() wywołane", [
-            'raw_user_id' => $user_id,
-            'is_logged_in' => is_user_logged_in(),
-            'current_user_exists' => wp_get_current_user()->exists()
-        ]);
-
         return $user_id;
+    }
+
+    /**
+     * Sprawdza throttling zapytań - zapobiega zbyt częstym wywołaniom
+     * Używa WordPress transients do przechowywania czasów ostatnich zapytań
+     * 
+     * @param int $user_id ID użytkownika
+     * @param float $throttle_seconds Minimalna liczba sekund między zapytaniami (domyślnie 0.5 sekundy)
+     * @return bool true jeśli zapytanie może być przetworzone, false jeśli jest zbyt szybkie
+     */
+    private function check_request_throttling($user_id, $throttle_seconds = 0.5)
+    {
+        // Unikalna nazwa transient dla każdego użytkownika
+        $transient_key = 'npc_dialog_throttle_' . $user_id;
+
+        // Pobierz czas ostatniego zapytania (używamy microtime dla większej precyzji)
+        $last_request_time = get_transient($transient_key);
+        $current_time = microtime(true);
+
+        // Jeśli to pierwsze zapytanie lub minął wystarczający czas
+        if ($last_request_time === false || ($current_time - $last_request_time) >= $throttle_seconds) {
+            // Zapisz aktualny czas i pozwól na wykonanie zapytania
+            set_transient($transient_key, $current_time, 60); // Transient ważny przez 60 sekund
+
+            $this->log_debug("Throttling check passed", [
+                'user_id' => $user_id,
+                'last_request_time' => $last_request_time,
+                'current_time' => $current_time,
+                'time_diff' => $last_request_time ? ($current_time - $last_request_time) : 'first_request'
+            ]);
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -131,6 +154,15 @@ class NpcPopup
         try {
             // Bezpieczne pobranie user_id
             $user_id = $this->get_secure_user_id();
+
+            // Sprawdź throttling - blokuj zbyt częste zapytania
+            if (!$this->check_request_throttling($user_id)) {
+                return new WP_REST_Response([
+                    'success' => true,
+                    'status' => 'neutral',
+                    'message' => 'Zbyt szybkie kolejne działania. Poczekaj chwilę przed następnym kliknięciem.'
+                ], 200);
+            }
 
             $this->log_debug("===== ROZPOCZĘCIE ŻĄDANIA NPC POPUP =====");
             $this->log_debug("Parametry żądania", [
@@ -221,6 +253,15 @@ class NpcPopup
             // Bezpieczne pobranie user_id
             $user_id = $this->get_secure_user_id();
 
+            // Sprawdź throttling - blokuj zbyt częste zapytania
+            if (!$this->check_request_throttling($user_id)) {
+                return new WP_REST_Response([
+                    'success' => true,
+                    'status' => 'neutral',
+                    'message' => 'Zbyt szybkie kolejne działania. Poczekaj chwilę przed następnym kliknięciem.'
+                ], 200);
+            }
+
             $this->log_debug("===== PRZETWARZANIE PRZEJŚCIA DIALOGU =====");
             $this->log_debug("Parametry przejścia", [
                 'npc_id' => $npc_id,
@@ -260,7 +301,10 @@ class NpcPopup
                 ]);
                 $notification = $this->execute_answer_actions($dialogs, $current_dialog_id, $answer_index, $user_id);
                 if ($notification) {
-                    $this->log_debug("Otrzymano powiadomienie z akcji: {$notification}");
+                    $this->log_debug("Otrzymano powiadomienie z akcji", [
+                        'message' => $notification['message'],
+                        'status' => $notification['status']
+                    ]);
                 }
             }
 
@@ -298,8 +342,8 @@ class NpcPopup
             // Dodaj powiadomienie jeśli istnieje
             if ($notification) {
                 $response_data['notification'] = [
-                    'message' => $notification,
-                    'status' => 'success'
+                    'message' => $notification['message'],
+                    'status' => $notification['status']
                 ];
             }
 
@@ -669,32 +713,22 @@ class NpcPopup
      * 
      * @param array $dialogs Lista wszystkich dialogów
      * @param string $dialog_id ID aktualnego dialogu
-     * @param int $answer_index Indeks wybranej odpowiedzi (z oryginalnej, nieprzefiltrowanej tablicy)
+     * @param int $answer_index Indeks wybranej odpowiedzi
      * @param int $user_id ID użytkownika
-     * @return string|null Powiadomienie o wykonanych akcjach
+     * @return array|null Powiadomienie o wykonanych akcjach z statusem
      */
     private function execute_answer_actions($dialogs, $dialog_id, $answer_index, $user_id)
     {
         $dialog = $this->find_dialog_by_id($dialogs, $dialog_id);
         if (!$dialog || !isset($dialog['anwsers'][$answer_index])) {
-            $this->log_debug("BŁĄD: Nie znaleziono odpowiedzi", [
-                'dialog_id' => $dialog_id,
-                'answer_index' => $answer_index,
-                'available_answers' => $dialog ? count($dialog['anwsers']) : 'dialog not found'
-            ]);
             return null;
         }
 
         $answer = $dialog['anwsers'][$answer_index];
         $actions = $answer['type_anwser'] ?? [];
-        
-        $this->log_debug("Znaleziono odpowiedź do wykonania", [
-            'answer_text' => $answer['anwser_text'] ?? 'brak tekstu',
-            'actions_count' => count($actions),
-            'go_to_id' => $answer['go_to_id'] ?? 'brak'
-        ]);
 
         $notifications = [];
+        $overall_status = 'success'; // Domyślny status
         $manager_user = new ManagerUser($user_id);
 
         foreach ($actions as $action) {
@@ -703,42 +737,70 @@ class NpcPopup
             switch ($action_type) {
                 case 'transaction':
                     $result = $this->execute_transaction_action($action, $manager_user);
-                    if ($result) $notifications[] = $result;
+                    if ($result) {
+                        $notifications[] = $result['message'];
+                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                    }
                     break;
 
                 case 'item':
                     $result = $this->execute_item_action($action, $user_id);
-                    if ($result) $notifications[] = $result;
+                    if ($result) {
+                        $notifications[] = $result['message'];
+                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                    }
                     break;
 
                 case 'exp_rep':
                     $result = $this->execute_exp_rep_action($action, $manager_user);
-                    if ($result) $notifications[] = $result;
+                    if ($result) {
+                        $notifications[] = $result['message'];
+                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                    }
                     break;
 
                 case 'relation':
                     $result = $this->execute_relation_action($action, $user_id);
-                    if ($result) $notifications[] = $result;
+                    if ($result) {
+                        $notifications[] = $result['message'];
+                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                    }
                     break;
 
                 case 'function':
                     $result = $this->execute_function_action($action, $user_id);
-                    if ($result) $notifications[] = $result;
+                    if ($result) {
+                        $notifications[] = $result['message'];
+                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                    }
                     break;
 
                 case 'skills':
                     $result = $this->execute_skills_action($action, $manager_user);
-                    if ($result) $notifications[] = $result;
+                    if ($result) {
+                        $notifications[] = $result['message'];
+                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                    }
                     break;
 
                 case 'mission':
                     $result = $this->execute_mission_action($action, $user_id);
-                    if ($result) $notifications[] = $result;
+                    if ($result) {
+                        $notifications[] = $result['message'];
+                        if ($result['status'] === 'bad') $overall_status = 'bad';
+                    }
                     break;
             }
         }
 
-        return !empty($notifications) ? implode(', ', $notifications) : null;
+        if (!empty($notifications)) {
+            return [
+                'message' => implode(', ', $notifications),
+                'status' => $overall_status
+            ];
+        }
+
+        return null;
     }
 
     /**
@@ -753,7 +815,12 @@ class NpcPopup
         $result = $manager_user->updateNumericField($field_name, $value);
 
         if ($result['success']) {
-            return $result['message'];
+            // Jeśli wartość jest ujemna, to tracisz walutę (bad)
+            $status = $value < 0 ? 'bad' : 'success';
+            return [
+                'message' => $result['message'],
+                'status' => $status
+            ];
         }
 
         return null;
@@ -766,8 +833,16 @@ class NpcPopup
     {
         $item_id = intval($action['item'] ?? 0);
         $quantity = intval($action['quantity'] ?? 1);
+        $item_action = $action['item_action'] ?? 'give';
 
         if ($item_id <= 0) return null;
+
+        // Dla akcji 'take' (zabierz), ilość powinna być ujemna
+        if ($item_action === 'take') {
+            $quantity = -abs($quantity);
+        } else {
+            $quantity = abs($quantity);
+        }
 
         $user_items = get_field('items', 'user_' . $user_id) ?: [];
         $item_found = false;
@@ -776,23 +851,46 @@ class NpcPopup
         foreach ($user_items as &$user_item) {
             if (intval($user_item['item']) === $item_id) {
                 $user_item['quantity'] = intval($user_item['quantity']) + $quantity;
+                // Usuń przedmiot jeśli ilość spadła do 0 lub poniżej
+                if ($user_item['quantity'] <= 0) {
+                    $user_item['quantity'] = 0;
+                }
                 $item_found = true;
                 break;
             }
         }
 
-        // Jeśli nie ma przedmiotu, dodaj nowy
-        if (!$item_found) {
+        // Jeśli nie ma przedmiotu i próbujemy dodać (nie zabierać)
+        if (!$item_found && $quantity > 0) {
             $user_items[] = [
                 'item' => $item_id,
                 'quantity' => $quantity
             ];
         }
 
+        // Usuń przedmioty z ilością 0
+        $user_items = array_filter($user_items, function ($item) {
+            return intval($item['quantity']) > 0;
+        });
+
+        // Resetuj indeksy tablicy
+        $user_items = array_values($user_items);
+
         update_field('items', $user_items, 'user_' . $user_id);
 
         $item_name = get_the_title($item_id);
-        return ($quantity > 0 ? 'Otrzymano' : 'Utracono') . " {$quantity}x {$item_name}";
+
+        if ($item_action === 'take') {
+            return [
+                'message' => "Zabrano " . abs($quantity) . "x {$item_name}",
+                'status' => 'bad'  // Zabieranie przedmiotu to negatywny wpływ
+            ];
+        } else {
+            return [
+                'message' => "Otrzymano {$quantity}x {$item_name}",
+                'status' => 'success'  // Otrzymywanie przedmiotu to pozytywny wpływ
+            ];
+        }
     }
 
     /**
@@ -806,7 +904,16 @@ class NpcPopup
         $field_name = 'progress_' . $type;
         $result = $manager_user->updateNumericField($field_name, $value);
 
-        return $result['success'] ? $result['message'] : null;
+        if ($result['success']) {
+            // Jeśli wartość jest ujemna, to tracisz exp/reputację (bad)
+            $status = $value < 0 ? 'bad' : 'success';
+            return [
+                'message' => $result['message'],
+                'status' => $status
+            ];
+        }
+
+        return null;
     }
 
     /**
@@ -844,9 +951,19 @@ class NpcPopup
 
         $npc_name = get_the_title($npc_id);
         if ($poznaj) {
-            return "Poznano postać: {$npc_name}";
+            return [
+                'message' => "Poznano postać: {$npc_name}",
+                'status' => 'success'  // Poznanie nowej postaci to pozytyw
+            ];
         }
-        return ($change > 0 ? 'Poprawiono' : 'Pogorszono') . " relację z {$npc_name}";
+
+        $message = ($change > 0 ? 'Poprawiono' : 'Pogorszono') . " relację z {$npc_name}";
+        $status = $change > 0 ? 'success' : 'bad';  // Pogorszenie relacji to negatywny wpływ
+
+        return [
+            'message' => $message,
+            'status' => $status
+        ];
     }
 
     /**
@@ -861,7 +978,10 @@ class NpcPopup
                 $class = $action['user_class'] ?? '';
                 if ($class) {
                     update_field('user_class', ['value' => $class], 'user_' . $user_id);
-                    return "Ustawiono klasę: {$class}";
+                    return [
+                        'message' => "Ustawiono klasę: {$class}",
+                        'status' => 'success'  // Ustawienie klasy to pozytywna akcja
+                    ];
                 }
                 break;
 
@@ -884,7 +1004,16 @@ class NpcPopup
         $field_name = 'skills_' . $skill;
         $result = $manager_user->updateNumericField($field_name, $value);
 
-        return $result['success'] ? $result['message'] : null;
+        if ($result['success']) {
+            // Jeśli wartość jest ujemna, to tracisz umiejętność (bad)
+            $status = $value < 0 ? 'bad' : 'success';
+            return [
+                'message' => $result['message'],
+                'status' => $status
+            ];
+        }
+
+        return null;
     }
 
     /**
@@ -918,7 +1047,15 @@ class NpcPopup
         update_field('user_missions', $user_missions, 'user_' . $user_id);
 
         $mission_name = get_the_title($mission_id);
-        return "Misja '{$mission_name}' - status: {$status}";
+
+        // Określ status powiadomienia na podstawie statusu misji
+        $negative_statuses = ['failed', 'failed_npc', 'oblej_npc'];
+        $status_type = in_array($status, $negative_statuses) ? 'bad' : 'success';
+
+        return [
+            'message' => "Misja '{$mission_name}' - status: {$status}",
+            'status' => $status_type
+        ];
     }
 }
 
