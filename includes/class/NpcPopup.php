@@ -255,15 +255,6 @@ class NpcPopup
                 ], 200);
             }
 
-            $this->log_debug("===== PRZETWARZANIE PRZEJŚCIA DIALOGU =====");
-            $this->log_debug("Parametry przejścia", [
-                'npc_id' => $npc_id,
-                'dialog_id' => $dialog_id,
-                'answer_index' => $answer_index,
-                'current_dialog_id' => $current_dialog_id,
-                'user_id' => $user_id
-            ]);
-
             // Sprawdź czy NPC istnieje
             $npc_post = get_post($npc_id);
             if (!$npc_post || $npc_post->post_type !== 'npc') {
@@ -288,10 +279,6 @@ class NpcPopup
             // Wykonaj akcje z poprzedniej odpowiedzi (jeśli wybrano odpowiedź)
             $notification = null;
             if ($current_dialog_id && is_numeric($answer_index)) {
-                $this->log_debug("Wykonywanie akcji z odpowiedzi", [
-                    'current_dialog_id' => $current_dialog_id,
-                    'answer_index' => $answer_index
-                ]);
                 $notification = $this->execute_answer_actions($dialogs, $current_dialog_id, $answer_index, $user_id);
                 if ($notification) {
                     $this->log_debug("Otrzymano powiadomienie z akcji", [
