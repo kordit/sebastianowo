@@ -220,16 +220,6 @@
     transform: translateY(0);
 }
 
-.npc-answer-button.special {
-    background-color: var(--npc-dialog-special-bg);
-    border-color: #34495e;
-}
-
-.npc-answer-button.special:hover {
-    background-color: var(--npc-dialog-special-hover);
-    border-color: #3d566e;
-}
-
 /* Responsywność */
 @media (max-width: 1024px) {
     .npc-dialog-body {

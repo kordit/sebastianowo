@@ -1,54 +1,180 @@
-[2025-05-22 15:32:50] [WARNING] Answer
-[2025-05-22 15:33:01] [INFO] Answer
-[2025-05-22 15:33:01] [DATA] Array
+[2025-05-26 16:11:38] [DEBUG] Sprawdzenie uprawnień (z auth cookie)
+[2025-05-26 16:11:38] [DATA] Array
 (
-    [0] => Array
-        (
-            [acf_fc_layout] => anwser
-            [layout_settings] => Array
-                (
-                    [visibility_tab] => 
-                    [logic_operator] => and
-                    [visibility_settings] => Array
-                        (
-                            [0] => Array
-                                (
-                                    [acf_fc_layout] => condition_npc_relation
-                                    [condition] => is_not_known
-                                    [npc_id] => 449
-                                    [relation_value] => 50
-                                )
-
-                        )
-
-                )
-
-            [anwser_text] => Jak się w to w ogóle gra?
-            [type_anwser] => 
-            [go_to_id] => jak-sie-w-to-gra
-        )
-
+    [auth_cookie_present] => 1
+    [auth_cookie_value] => easy-web|1748444492|MPHC247uwUkpjEMmTv3FapvtPLOuBLEvJC7PdSlZmdi|591691a68505dfb720fb265ad78ba52cbea458ac8dd1c88dbf71c42a9a7926f0
+    [validated_user_id] => 1
 )
 
-[2025-05-22 15:33:05] [DEBUG] ===== ROZPOCZĘCIE PRZETWARZANIA ŻĄDANIA DIALOGU =====
-[2025-05-22 15:33:05] [INFO] Parametry żądania:
-[2025-05-22 15:33:05] [DATA] Array
+[2025-05-26 16:11:38] [DEBUG] get_secure_user_id() wywołane
+[2025-05-26 16:11:38] [DATA] Array
 (
-    [npc_id] => 449
-    [dialog_id] => jak-sie-w-to-gra
-    [current_url] => http://seb.soeasy.it/tereny/park/
+    [raw_user_id] => 1
+    [is_logged_in] => 1
+    [current_user_exists] => 1
+)
+
+[2025-05-26 16:11:38] [DEBUG] ===== PRZETWARZANIE PRZEJŚCIA DIALOGU =====
+[2025-05-26 16:11:38] [DEBUG] Parametry przejścia
+[2025-05-26 16:11:38] [DATA] Array
+(
+    [npc_id] => 464
+    [dialog_id] => wybor-klasy
+    [answer_index] => 6
+    [current_dialog_id] => wybor-klasy
     [user_id] => 1
-    [answer_id] => answer-0
-    [answer_index] => 0
-    [current_dialog_id] => przy-wiezieniu
 )
 
-[2025-05-22 15:33:05] [DEBUG] Filtrowanie wszystkich dialogów NPC według kontekstu użytkownika...
-[2025-05-22 15:33:05] [INFO] Sprawdzanie warunków widoczności dla dialogu
-[2025-05-22 15:33:05] [DATA] Array
+[2025-05-26 16:11:38] [DEBUG] Wykonywanie akcji z odpowiedzi
+[2025-05-26 16:11:38] [DATA] Array
 (
-    [dialog_id] => przy-wiezieniu
-    [conditions_count] => 2
-    [logic_operator] => and
+    [current_dialog_id] => wybor-klasy
+    [answer_index] => 6
+)
+
+[2025-05-26 16:11:38] [DEBUG] Otrzymano powiadomienie z akcji: Otrzymano 1x Bluza dresowa
+[2025-05-26 16:11:38] [DEBUG] Sprawdzanie widoczności dialogu: wybor-klasy
+[2025-05-26 16:11:38] [DEBUG] Dialog wybor-klasy: Brak ustawień widoczności - domyślnie widoczny
+[2025-05-26 16:11:38] [DEBUG] Sprawdzenie uprawnień (z auth cookie)
+[2025-05-26 16:11:38] [DATA] Array
+(
+    [auth_cookie_present] => 1
+    [auth_cookie_value] => easy-web|1748444492|MPHC247uwUkpjEMmTv3FapvtPLOuBLEvJC7PdSlZmdi|591691a68505dfb720fb265ad78ba52cbea458ac8dd1c88dbf71c42a9a7926f0
+    [validated_user_id] => 1
+)
+
+[2025-05-26 16:12:45] [DEBUG] Sprawdzenie uprawnień (z auth cookie)
+[2025-05-26 16:12:45] [DATA] Array
+(
+    [auth_cookie_present] => 1
+    [auth_cookie_value] => easy-web|1748444492|MPHC247uwUkpjEMmTv3FapvtPLOuBLEvJC7PdSlZmdi|591691a68505dfb720fb265ad78ba52cbea458ac8dd1c88dbf71c42a9a7926f0
+    [validated_user_id] => 1
+)
+
+[2025-05-26 16:12:45] [DEBUG] get_secure_user_id() wywołane
+[2025-05-26 16:12:45] [DATA] Array
+(
+    [raw_user_id] => 1
+    [is_logged_in] => 1
+    [current_user_exists] => 1
+)
+
+[2025-05-26 16:12:45] [DEBUG] ===== PRZETWARZANIE PRZEJŚCIA DIALOGU =====
+[2025-05-26 16:12:45] [DEBUG] Parametry przejścia
+[2025-05-26 16:12:45] [DATA] Array
+(
+    [npc_id] => 464
+    [dialog_id] => wybor-klasy
+    [answer_index] => 1
+    [current_dialog_id] => wybor-klasy
+    [user_id] => 1
+)
+
+[2025-05-26 16:12:45] [DEBUG] Wykonywanie akcji z odpowiedzi
+[2025-05-26 16:12:45] [DATA] Array
+(
+    [current_dialog_id] => wybor-klasy
+    [answer_index] => 1
+)
+
+[2025-05-26 16:12:45] [DEBUG] Otrzymano powiadomienie z akcji: Odjęto 100 Złote
+[2025-05-26 16:12:45] [DEBUG] Sprawdzanie widoczności dialogu: wybor-klasy
+[2025-05-26 16:12:45] [DEBUG] Dialog wybor-klasy: Brak ustawień widoczności - domyślnie widoczny
+[2025-05-26 16:12:45] [DEBUG] Sprawdzenie uprawnień (z auth cookie)
+[2025-05-26 16:12:45] [DATA] Array
+(
+    [auth_cookie_present] => 1
+    [auth_cookie_value] => easy-web|1748444492|MPHC247uwUkpjEMmTv3FapvtPLOuBLEvJC7PdSlZmdi|591691a68505dfb720fb265ad78ba52cbea458ac8dd1c88dbf71c42a9a7926f0
+    [validated_user_id] => 1
+)
+
+[2025-05-26 16:12:48] [DEBUG] Sprawdzenie uprawnień (z auth cookie)
+[2025-05-26 16:12:48] [DATA] Array
+(
+    [auth_cookie_present] => 1
+    [auth_cookie_value] => easy-web|1748444492|MPHC247uwUkpjEMmTv3FapvtPLOuBLEvJC7PdSlZmdi|591691a68505dfb720fb265ad78ba52cbea458ac8dd1c88dbf71c42a9a7926f0
+    [validated_user_id] => 1
+)
+
+[2025-05-26 16:12:48] [DEBUG] get_secure_user_id() wywołane
+[2025-05-26 16:12:48] [DATA] Array
+(
+    [raw_user_id] => 1
+    [is_logged_in] => 1
+    [current_user_exists] => 1
+)
+
+[2025-05-26 16:12:48] [DEBUG] ===== PRZETWARZANIE PRZEJŚCIA DIALOGU =====
+[2025-05-26 16:12:48] [DEBUG] Parametry przejścia
+[2025-05-26 16:12:48] [DATA] Array
+(
+    [npc_id] => 464
+    [dialog_id] => wybor-klasy
+    [answer_index] => 2
+    [current_dialog_id] => wybor-klasy
+    [user_id] => 1
+)
+
+[2025-05-26 16:12:48] [DEBUG] Wykonywanie akcji z odpowiedzi
+[2025-05-26 16:12:48] [DATA] Array
+(
+    [current_dialog_id] => wybor-klasy
+    [answer_index] => 2
+)
+
+[2025-05-26 16:12:48] [DEBUG] Otrzymano powiadomienie z akcji: Poznano postać: Toworish
+[2025-05-26 16:12:48] [DEBUG] Sprawdzanie widoczności dialogu: wybor-klasy
+[2025-05-26 16:12:48] [DEBUG] Dialog wybor-klasy: Brak ustawień widoczności - domyślnie widoczny
+[2025-05-26 16:12:48] [DEBUG] Sprawdzenie uprawnień (z auth cookie)
+[2025-05-26 16:12:48] [DATA] Array
+(
+    [auth_cookie_present] => 1
+    [auth_cookie_value] => easy-web|1748444492|MPHC247uwUkpjEMmTv3FapvtPLOuBLEvJC7PdSlZmdi|591691a68505dfb720fb265ad78ba52cbea458ac8dd1c88dbf71c42a9a7926f0
+    [validated_user_id] => 1
+)
+
+[2025-05-26 16:12:51] [DEBUG] Sprawdzenie uprawnień (z auth cookie)
+[2025-05-26 16:12:51] [DATA] Array
+(
+    [auth_cookie_present] => 1
+    [auth_cookie_value] => easy-web|1748444492|MPHC247uwUkpjEMmTv3FapvtPLOuBLEvJC7PdSlZmdi|591691a68505dfb720fb265ad78ba52cbea458ac8dd1c88dbf71c42a9a7926f0
+    [validated_user_id] => 1
+)
+
+[2025-05-26 16:12:51] [DEBUG] get_secure_user_id() wywołane
+[2025-05-26 16:12:51] [DATA] Array
+(
+    [raw_user_id] => 1
+    [is_logged_in] => 1
+    [current_user_exists] => 1
+)
+
+[2025-05-26 16:12:51] [DEBUG] ===== PRZETWARZANIE PRZEJŚCIA DIALOGU =====
+[2025-05-26 16:12:51] [DEBUG] Parametry przejścia
+[2025-05-26 16:12:51] [DATA] Array
+(
+    [npc_id] => 464
+    [dialog_id] => wybor-klasy
+    [answer_index] => 2
+    [current_dialog_id] => wybor-klasy
+    [user_id] => 1
+)
+
+[2025-05-26 16:12:51] [DEBUG] Wykonywanie akcji z odpowiedzi
+[2025-05-26 16:12:51] [DATA] Array
+(
+    [current_dialog_id] => wybor-klasy
+    [answer_index] => 2
+)
+
+[2025-05-26 16:12:51] [DEBUG] Otrzymano powiadomienie z akcji: Poznano postać: Toworish
+[2025-05-26 16:12:51] [DEBUG] Sprawdzanie widoczności dialogu: wybor-klasy
+[2025-05-26 16:12:51] [DEBUG] Dialog wybor-klasy: Brak ustawień widoczności - domyślnie widoczny
+[2025-05-26 16:12:51] [DEBUG] Sprawdzenie uprawnień (z auth cookie)
+[2025-05-26 16:12:51] [DATA] Array
+(
+    [auth_cookie_present] => 1
+    [auth_cookie_value] => easy-web|1748444492|MPHC247uwUkpjEMmTv3FapvtPLOuBLEvJC7PdSlZmdi|591691a68505dfb720fb265ad78ba52cbea458ac8dd1c88dbf71c42a9a7926f0
+    [validated_user_id] => 1
 )
 

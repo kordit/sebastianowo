@@ -16,8 +16,8 @@ add_action('acf/include_fields', function () {
         'failed' => 'Oblana',
     );
 
-    // Przygotowanie pól dla misji użytkownika
-    $mission_fields = [];
+    // Przygotowanie pól dla grupy missions
+    $missions_sub_fields = [];
 
     // Pobieranie wszystkich misji
     $missions = get_posts([
@@ -29,7 +29,7 @@ add_action('acf/include_fields', function () {
     ]);
 
 
-    // Jeśli istnieją misje, tworzymy dla każdej grupę
+    // Jeśli istnieją misje, tworzymy dla każdej tab wewnątrz grupy
     if (!empty($missions)) {
         foreach ($missions as $mission) {
             // Pobierz zadania przypisane do tej misji
@@ -182,8 +182,8 @@ add_action('acf/include_fields', function () {
                 }
             }
 
-            // Tworzenie taba dla misji
-            $mission_fields[] = array(
+            // Tworzenie taba dla misji wewnątrz grupy missions
+            $missions_sub_fields[] = array(
                 'key' => 'field_mission_tab_' . $mission->ID,
                 'label' => $mission->post_title,
                 'name' => '',
@@ -200,8 +200,8 @@ add_action('acf/include_fields', function () {
                 'endpoint' => 0,
             );
 
-            // Dodajemy grupę wewnątrz taba do przechowywania danych misji
-            $mission_fields[] = array(
+            // Dodajemy grupę dla danych misji po tabie
+            $missions_sub_fields[] = array(
                 'key' => 'field_mission_' . $mission->ID,
                 'label' => 'Dane misji: ' . $mission->post_title,
                 'name' => 'mission_' . $mission->ID,
@@ -293,34 +293,25 @@ add_action('acf/include_fields', function () {
                 ),
             );
         }
-    }    // Zakładka "Wszystkie misje" jako accordion
-    $all_missions_tab = array(
-        'key' => 'field_tab_all_missions',
-        'label' => 'Wszystkie misje',
-        'name' => '',
-        'type' => 'accordion',
-        'instructions' => '',
-        'required' => 0,
-        'conditional_logic' => 0,
-        'wrapper' => array(
-            'width' => '',
-            'class' => '',
-            'id' => '',
-        ),
-        'open' => 0,
-        'multi_expand' => 1,
-        'endpoint' => 0,
-    );
-
-    // Dodajemy accordion na początku tablicy pól misji
-    array_unshift($mission_fields, $all_missions_tab);
+    }
 
     // Grupa pól do zarządzania misjami użytkownika
     acf_add_local_field_group(array(
         'key' => 'group_user_missions',
         'name' => 'user_missions',
         'title' => 'Misje Użytkownika',
-        'fields' => $mission_fields,
+        'fields' => array(
+            array(
+                'key' => 'field_missions',
+                'label' => 'Misje',
+                'name' => 'missions',
+                'type' => 'group',
+                'instructions' => '',
+                'required' => 0,
+                'layout' => 'block',
+                'sub_fields' => $missions_sub_fields,
+            ),
+        ),
         'location' => array(
             array(
                 array(

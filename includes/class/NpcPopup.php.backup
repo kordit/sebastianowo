@@ -1,6 +1,5 @@
 <?php
-class NpcPopup
-{
+class NpcPopup {
 
     public function __construct()
     {
@@ -75,30 +74,22 @@ class NpcPopup
      */
     public function check_user_permission($request)
     {
-        $auth_cookie = '';
-
-        if (isset($_COOKIE[LOGGED_IN_COOKIE])) {
-            $auth_cookie = $_COOKIE[LOGGED_IN_COOKIE];
+        // Sprawdź czy użytkownik jest zalogowany
+        if (!is_user_logged_in()) {
+            $this->log_debug("BŁĄD: Użytkownik nie jest zalogowany");
+            return false;
         }
-
-        $user_id = wp_validate_auth_cookie($auth_cookie, 'logged_in');
-
-        $this->log_debug("Sprawdzenie uprawnień (z auth cookie)", [
-            'auth_cookie_present' => !empty($auth_cookie),
-            'auth_cookie_value' => $auth_cookie,
-            'validated_user_id' => $user_id,
-        ]);
-
-        if ($user_id) {
-            wp_set_current_user($user_id);
-            return true;
+        
+        // Sprawdź czy user_id istnieje
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            $this->log_debug("BŁĄD: Brak user_id");
+            return false;
         }
-
-        $this->log_debug("Sprawdzenie uprawnień: ODRZUCONO (brak poprawnego cookie)");
-        return false;
+        
+        $this->log_debug("Sprawdzenie uprawnień: użytkownik {$user_id} zalogowany");
+        return true;
     }
-
-
 
     /**
      * Bezpiecznie pobiera ID aktualnego użytkownika
@@ -106,13 +97,11 @@ class NpcPopup
     private function get_secure_user_id()
     {
         $user_id = get_current_user_id();
-
-        $this->log_debug("get_secure_user_id() wywołane", [
-            'raw_user_id' => $user_id,
-            'is_logged_in' => is_user_logged_in(),
-            'current_user_exists' => wp_get_current_user()->exists()
-        ]);
-
+        
+        if (!$user_id) {
+            throw new Exception('Użytkownik nie jest zalogowany');
+        }
+        
         return $user_id;
     }
 
@@ -122,93 +111,7 @@ class NpcPopup
      * @param WP_REST_Request $request Dane żądania
      * @return WP_REST_Response Odpowiedź API
      */
-    public function get_npc_popup($request)
-    {
-        $npc_id = $request->get_param('npc_id');
-        $page_data = $request->get_param('page_data');
-        $current_url = $request->get_param('current_url');
-
-        try {
-            // Bezpieczne pobranie user_id
-            $user_id = $this->get_secure_user_id();
-
-            $this->log_debug("===== ROZPOCZĘCIE ŻĄDANIA NPC POPUP =====");
-            $this->log_debug("Parametry żądania", [
-                'npc_id' => $npc_id,
-                'user_id' => $user_id,
-                'page_data' => $page_data,
-                'current_url' => $current_url
-            ]);
-
-            // Sprawdź czy NPC istnieje
-            $npc_post = get_post($npc_id);
-            if (!$npc_post || $npc_post->post_type !== 'npc') {
-                return new WP_REST_Response([
-                    'success' => false,
-                    'message' => 'NPC nie istnieje'
-                ], 404);
-            }            // Pobierz dane NPC
-            $npc_data = $this->get_npc_data($npc_id);
-
-            // Pobierz dialogi NPC
-            $dialogs = get_field('dialogs', $npc_id);
-            $this->log_debug("Pobrano dialogi z ACF", [
-                'field_name' => 'dialogs',
-                'npc_id' => $npc_id,
-                'dialogs_count' => is_array($dialogs) ? count($dialogs) : 'null/false',
-                'dialogs_type' => gettype($dialogs)
-            ]);
-
-            if (!$dialogs || !is_array($dialogs)) {
-                $this->log_debug("BŁĄD: Brak dialogów dla NPC");
-                return new WP_REST_Response([
-                    'success' => false,
-                    'message' => 'Brak dialogów dla tego NPC'
-                ], 404);
-            }
-
-            // Znajdź pierwszy dostępny dialog
-            $first_dialog = $this->find_first_available_dialog($dialogs, $user_id, $page_data);
-            $this->log_debug("Rezultat wyszukiwania pierwszego dialogu", [
-                'found' => $first_dialog !== null,
-                'dialog_id' => $first_dialog ? $first_dialog['id_pola'] : 'null'
-            ]);
-
-            if (!$first_dialog) {
-                $this->log_debug("BŁĄD: Brak dostępnych dialogów dla użytkownika");
-                return new WP_REST_Response([
-                    'success' => false,
-                    'message' => 'Brak dostępnych dialogów'
-                ], 404);
-            }
-
-            // Przefiltruj odpowiedzi w dialogu
-            $filtered_dialog = $this->filter_dialog_answers($first_dialog, $user_id, $page_data);
-            $this->log_debug("Dialog po filtrowaniu odpowiedzi", $filtered_dialog);
-
-            // Przygotuj dane odpowiedzi
-            $response_data = [
-                'success' => true,
-                'npc_data' => [
-                    'id' => $npc_id,
-                    'name' => $npc_data['name'],
-                    'title' => $npc_data['title'],
-                    'thumbnail_url' => $npc_data['thumbnail_url'],
-                    'dialog' => $filtered_dialog,
-                    'user_id' => $user_id
-                ]
-            ];
-
-            return new WP_REST_Response($response_data, 200);
-        } catch (Exception $e) {
-            error_log('NpcPopup error: ' . $e->getMessage());
-            return new WP_REST_Response([
-                'success' => false,
-                'message' => 'Wystąpił błąd podczas ładowania NPC'
-            ], 500);
-        }
-    }
-
+   
 
     public function handle_dialog_transition($request)
     {
@@ -216,11 +119,11 @@ class NpcPopup
         $dialog_id = $request->get_param('dialog_id');
         $answer_index = $request->get_param('answer_index');
         $current_dialog_id = $request->get_param('current_dialog_id');
-
+        
         try {
             // Bezpieczne pobranie user_id
             $user_id = $this->get_secure_user_id();
-
+            
             $this->log_debug("===== PRZETWARZANIE PRZEJŚCIA DIALOGU =====");
             $this->log_debug("Parametry przejścia", [
                 'npc_id' => $npc_id,
@@ -230,6 +133,7 @@ class NpcPopup
                 'user_id' => $user_id
             ]);
 
+        try {
             // Sprawdź czy NPC istnieje
             $npc_post = get_post($npc_id);
             if (!$npc_post || $npc_post->post_type !== 'npc') {
@@ -297,10 +201,7 @@ class NpcPopup
 
             // Dodaj powiadomienie jeśli istnieje
             if ($notification) {
-                $response_data['notification'] = [
-                    'message' => $notification,
-                    'status' => 'success'
-                ];
+                $response_data['notification'] = $notification;
             }
 
             return new WP_REST_Response($response_data, 200);
@@ -669,7 +570,7 @@ class NpcPopup
      * 
      * @param array $dialogs Lista wszystkich dialogów
      * @param string $dialog_id ID aktualnego dialogu
-     * @param int $answer_index Indeks wybranej odpowiedzi (z oryginalnej, nieprzefiltrowanej tablicy)
+     * @param int $answer_index Indeks wybranej odpowiedzi
      * @param int $user_id ID użytkownika
      * @return string|null Powiadomienie o wykonanych akcjach
      */
@@ -677,22 +578,11 @@ class NpcPopup
     {
         $dialog = $this->find_dialog_by_id($dialogs, $dialog_id);
         if (!$dialog || !isset($dialog['anwsers'][$answer_index])) {
-            $this->log_debug("BŁĄD: Nie znaleziono odpowiedzi", [
-                'dialog_id' => $dialog_id,
-                'answer_index' => $answer_index,
-                'available_answers' => $dialog ? count($dialog['anwsers']) : 'dialog not found'
-            ]);
             return null;
         }
 
         $answer = $dialog['anwsers'][$answer_index];
         $actions = $answer['type_anwser'] ?? [];
-        
-        $this->log_debug("Znaleziono odpowiedź do wykonania", [
-            'answer_text' => $answer['anwser_text'] ?? 'brak tekstu',
-            'actions_count' => count($actions),
-            'go_to_id' => $answer['go_to_id'] ?? 'brak'
-        ]);
 
         $notifications = [];
         $manager_user = new ManagerUser($user_id);
@@ -752,11 +642,7 @@ class NpcPopup
         $field_name = 'backpack_' . $currency;
         $result = $manager_user->updateNumericField($field_name, $value);
 
-        if ($result['success']) {
-            return $result['message'];
-        }
-
-        return null;
+        return $result['success'] ? $result['message'] : null;
     }
 
     /**
@@ -919,6 +805,42 @@ class NpcPopup
 
         $mission_name = get_the_title($mission_id);
         return "Misja '{$mission_name}' - status: {$status}";
+    }
+
+    /**
+     * Sprawdza uprawnienia użytkownika do korzystania z endpointów
+     */
+    public function check_user_permission($request)
+    {
+        // Sprawdź czy użytkownik jest zalogowany
+        if (!is_user_logged_in()) {
+            $this->log_debug("BŁĄD: Użytkownik nie jest zalogowany");
+            return false;
+        }
+        
+        // Sprawdź czy user_id istnieje
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            $this->log_debug("BŁĄD: Brak user_id");
+            return false;
+        }
+        
+        $this->log_debug("Sprawdzenie uprawnień: użytkownik {$user_id} zalogowany");
+        return true;
+    }
+
+    /**
+     * Bezpiecznie pobiera ID aktualnego użytkownika
+     */
+    private function get_secure_user_id()
+    {
+        $user_id = get_current_user_id();
+        
+        if (!$user_id) {
+            throw new Exception('Użytkownik nie jest zalogowany');
+        }
+        
+        return $user_id;
     }
 }
 
