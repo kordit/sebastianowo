@@ -23,6 +23,12 @@ add_action('acf/include_fields', function () {
                 'rows_per_page' => 20,
                 'sub_fields' => array(
                     array(
+                        'key' => 'field_id_sceny',
+                        'label' => 'ID sceny',
+                        'name' => 'id_sceny',
+                        'type' => 'text',
+                    ),
+                    array(
                         'key' => 'field_67acf8f448138',
                         'label' => 'Tło',
                         'name' => 'tlo',
@@ -41,12 +47,6 @@ add_action('acf/include_fields', function () {
                         'return_format' => 'url',
                         'mime_types' => 'svg',
                         'preview_size' => 'medium',
-                    ),
-                    array(
-                        'key' => 'field_id_sceny',
-                        'label' => 'ID sceny',
-                        'name' => 'id_sceny',
-                        'type' => 'text',
                     ),
                     array(
                         'key' => 'field_event_autostart',
@@ -74,16 +74,19 @@ add_action('acf/include_fields', function () {
             array(
                 array(
                     'param' => 'post_type',
-                    'operator' => '!=',
-                    'value' => 'post',
+                    'operator' => '==',
+                    'value' => 'tereny',
                 ),
+            ),
+            array(
                 array(
                     'param' => 'post_type',
-                    'operator' => '!=',
-                    'value' => 'npc',
+                    'operator' => '==',
+                    'value' => 'events',
                 ),
             ),
         ),
+
         'menu_order' => 0,
         'style' => 'default',
         'label_placement' => 'top',

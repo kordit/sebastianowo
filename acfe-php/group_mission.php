@@ -31,6 +31,26 @@ if (function_exists('acf_add_local_field_group')):
 				'step' => 1,
 			),
 			array(
+				'key' => 'field_mission_type',
+				'label' => 'Typ misji',
+				'name' => 'mission_type',
+				'type' => 'select',
+				'instructions' => 'Wybierz typ misji (jak często może być wykonywana)',
+				'required' => 1,
+				'choices' => array(
+					'one-time' => 'Jednorazowa',
+					'daily' => 'Dzienna',
+					'weekly' => 'Tygodniowa',
+				),
+				'default_value' => 'one-time',
+				'ui' => 1,
+				'return_format' => 'value',
+				'allow_null' => 0,
+				'multiple' => 0,
+				'search_placeholder' => 'Wybierz typ misji',
+				'allow_custom' => 0,
+			),
+			array(
 				'key' => 'field_mission_tasks',
 				'label' => 'Zadania',
 				'name' => 'mission_tasks',
@@ -47,7 +67,7 @@ if (function_exists('acf_add_local_field_group')):
 						'key' => 'field_task_id',
 						'label' => 'ID zadania',
 						'name' => 'task_id',
-						'type' => 'text',
+						'type' => 'acfe_slug',
 						'instructions' => 'Unikalny identyfikator zadania (slug)',
 						'required' => 1,
 						'wrapper' => array(
@@ -81,6 +101,24 @@ if (function_exists('acf_add_local_field_group')):
 						'instructions' => 'Czy zadanie jest opcjonalne?',
 						'default_value' => 0,
 						'ui' => 1,
+						'wrapper' => array(
+							'width' => '50',
+						),
+					),
+					array(
+						'key' => 'field_task_attempt_limit',
+						'label' => 'Limit prób',
+						'name' => 'task_attempt_limit',
+						'type' => 'number',
+						'instructions' => 'Maksymalna liczba prób wykonania zadania (0 = bez limitu)',
+						'required' => 0,
+						'default_value' => 0,
+						'min' => 0,
+						'max' => 100,
+						'step' => 1,
+						'wrapper' => array(
+							'width' => '50',
+						),
 					),
 					array(
 						'key' => 'field_task_type',
@@ -109,12 +147,36 @@ if (function_exists('acf_add_local_field_group')):
 						'label' => 'Lokalizacja',
 						'name' => 'task_location',
 						'type' => 'post_object',
-						'instructions' => 'Wybierz lokalizację (teren)',
-						'post_type' => array('tereny'),
+						'instructions' => 'Wybierz lokalizację (teren lub event)',
+						'post_type' => array('tereny', 'events'),
 						'return_format' => 'id',
 						'ui' => 1,
 						'allow_null' => 0,
 						'save_custom' => 0,
+						'wrapper' => array(
+							'width' => '50',
+						),
+						'conditional_logic' => array(
+							array(
+								array(
+									'field' => 'field_task_type',
+									'operator' => '==',
+									'value' => 'checkpoint',
+								),
+							),
+						),
+					),
+					// Pole wyboru konkretnej sceny (jeśli istnieje)
+					array(
+						'key' => 'field_task_location_scene',
+						'label' => 'Konkretna scena',
+						'name' => 'task_location_scene',
+						'type' => 'text',
+						'instructions' => 'Wpisz ID konkretnej sceny (opcjonalnie). Pozostaw puste, aby uznać zadanie za wykonane po wejściu na teren/event.',
+						'placeholder' => 'np. main, scene_1, itd.',
+						'wrapper' => array(
+							'width' => '50',
+						),
 						'conditional_logic' => array(
 							array(
 								array(
