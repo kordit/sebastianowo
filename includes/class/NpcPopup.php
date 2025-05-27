@@ -157,14 +157,6 @@ class NpcPopup
                 ], 200);
             }
 
-            $this->log_debug("===== ROZPOCZĘCIE ŻĄDANIA NPC POPUP =====");
-            $this->log_debug("Parametry żądania", [
-                'npc_id' => $npc_id,
-                'user_id' => $user_id,
-                'page_data' => $page_data,
-                'current_url' => $current_url
-            ]);
-
             // Sprawdź czy NPC istnieje
             $npc_post = get_post($npc_id);
             if (!$npc_post || $npc_post->post_type !== 'npc') {
@@ -177,12 +169,6 @@ class NpcPopup
 
             // Pobierz dialogi NPC
             $dialogs = get_field('dialogs', $npc_id);
-            $this->log_debug("Pobrano dialogi z ACF", [
-                'field_name' => 'dialogs',
-                'npc_id' => $npc_id,
-                'dialogs_count' => is_array($dialogs) ? count($dialogs) : 'null/false',
-                'dialogs_type' => gettype($dialogs)
-            ]);
 
             if (!$dialogs || !is_array($dialogs)) {
                 $this->log_debug("BŁĄD: Brak dialogów dla NPC");
@@ -209,7 +195,6 @@ class NpcPopup
 
             // Przefiltruj odpowiedzi w dialogu
             $filtered_dialog = $this->filter_dialog_answers($first_dialog, $user_id, $page_data);
-            $this->log_debug("Dialog po filtrowaniu odpowiedzi", $filtered_dialog);
 
             // Przygotuj dane odpowiedzi
             $response_data = [
@@ -402,21 +387,17 @@ class NpcPopup
     private function is_dialog_visible($dialog, $user_id, $page_data = [])
     {
         $dialog_id = $dialog['id_pola'] ?? 'unknown';
-        $this->log_debug("Sprawdzanie widoczności dialogu: {$dialog_id}");
+
 
         // Sprawdź ustawienia widoczności
-        if (!isset($dialog['dialog_settings']) || !is_array($dialog['dialog_settings'])) {
-            $this->log_debug("Dialog {$dialog_id}: Brak ustawień widoczności - domyślnie widoczny");
+        if (!isset($dialog['layout_settings']['visibility_settings']) || !is_array($dialog['layout_settings']['visibility_settings'])) {
             return true; // Domyślnie widoczny jeśli brak ustawień
         }
 
-        $visibility_settings = $dialog['dialog_settings']['visibility_settings'] ?? [];
-        $logic_operator = $dialog['dialog_settings']['logic_operator'] ?? 'and';
+        $visibility_settings = $dialog['layout_settings']['visibility_settings'] ?? [];
+        $logic_operator = $dialog['layout_settings']['logic_operator'] ?? 'and';
 
-        $this->log_debug("Dialog {$dialog_id}: Ustawienia widoczności", [
-            'logic_operator' => $logic_operator,
-            'conditions_count' => count($visibility_settings)
-        ]);
+
 
         if (empty($visibility_settings)) {
             $this->log_debug("Dialog {$dialog_id}: Brak warunków - domyślnie widoczny");
@@ -452,27 +433,30 @@ class NpcPopup
     private function evaluate_visibility_condition($condition, $user_id, $page_data = [])
     {
         $type = $condition['acf_fc_layout'] ?? '';
-        $this->log_debug("Ocena warunku typu: {$type}", $condition);
+
+        // $this->log_debug("Warunek widoczności widoczności", [
+        //     'type' => $type,
+        // ]);
 
         $result = false;
         switch ($type) {
-            case 'stat':
+            case 'condition_stat':
                 $result = $this->check_stat_condition($condition, $user_id);
                 break;
 
-            case 'skill':
+            case 'condition_skill':
                 $result = $this->check_skill_condition($condition, $user_id);
                 break;
 
-            case 'item':
+            case 'condition_item':
                 $result = $this->check_item_condition($condition, $user_id);
                 break;
 
-            case 'relation':
+            case 'condition_relation':
                 $result = $this->check_relation_condition($condition, $user_id);
                 break;
 
-            case 'mission':
+            case 'condition_mission':
                 $result = $this->check_mission_condition($condition, $user_id);
                 break;
 
@@ -505,7 +489,6 @@ class NpcPopup
                 $result = true; // Nieznane warunki są domyślnie spełnione
         }
 
-        $this->log_debug("Wynik warunku {$type}: " . ($result ? 'SPEŁNIONY' : 'NIE SPEŁNIONY'));
         return $result;
     }
     /**
@@ -731,6 +714,7 @@ class NpcPopup
      */
     private function check_task_condition($condition, $user_id)
     {
+
         $mission_id = intval($condition['mission_id'] ?? 0);
         $task_id = $condition['task_id'] ?? '';
         $status = $condition['status'] ?? 'completed';
@@ -740,33 +724,29 @@ class NpcPopup
             return false;
         }
 
-        // Pobierz dane misji użytkownika
-        $mission_field = 'mission_' . $mission_id;
-        $user_mission_data = get_field($mission_field, 'user_' . $user_id);
+        $missions = get_field('missions', 'user_' . $user_id);
 
-        // Sprawdź czy istnieje pole zadania
-        if (!$user_mission_data || !isset($user_mission_data['tasks']) || !isset($user_mission_data['tasks'][$task_id])) {
-            // Dla warunku "is_not" zwracamy true, jeśli zadanie nie istnieje
+
+        if (!$missions || !isset($missions['mission_' . $mission_id])) {
             return $condition_type === 'is_not';
         }
 
-        $task_status = '';
+        $user_mission_data = $missions['mission_' . $mission_id];
 
-        // Zadanie może być prostym stringiem lub złożonym obiektem z polami
-        $task_data = $user_mission_data['tasks'][$task_id];
-        if (is_array($task_data) && isset($task_data['status'])) {
-            $task_status = $task_data['status'];
-        } else {
-            $task_status = $task_data;
+        if (!isset($user_mission_data['tasks']) || !isset($user_mission_data['tasks'][$task_id])) {
+            return $condition_type === 'is_not';
         }
 
-        // Sprawdź warunek
+        $task_data = $user_mission_data['tasks'][$task_id];
+        $task_status = is_array($task_data) && isset($task_data['status']) ? $task_data['status'] : $task_data;
+
         if ($condition_type === 'is') {
             return $task_status === $status;
-        } else {
-            return $task_status !== $status;
         }
+
+        return $task_status !== $status;
     }
+
 
     /**
      * Porównuje wartości według operatora
