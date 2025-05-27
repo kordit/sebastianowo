@@ -100,6 +100,8 @@ if (function_exists('acf_add_local_field_group')):
 						'allow_null' => 0,
 						'multiple' => 0,
 						'ajax' => 0,
+						'search_placeholder' => 'Szukaj typu zadania',
+						'allow_custom' => 0,
 					),
 					// Checkpoint - miejsce
 					array(
@@ -112,6 +114,7 @@ if (function_exists('acf_add_local_field_group')):
 						'return_format' => 'id',
 						'ui' => 1,
 						'allow_null' => 0,
+						'save_custom' => 0,
 						'conditional_logic' => array(
 							array(
 								array(
@@ -151,6 +154,7 @@ if (function_exists('acf_add_local_field_group')):
 								'ui' => 1,
 								'allow_null' => 0,
 								'required' => 1,
+								'save_custom' => 0,
 							),
 							array(
 								'key' => 'field_task_checkpoint_npc_status',
@@ -169,6 +173,8 @@ if (function_exists('acf_add_local_field_group')):
 								'allow_null' => 0,
 								'multiple' => 0,
 								'ajax' => 0,
+								'search_placeholder' => 'Szukaj statusu',
+								'allow_custom' => 0,
 							),
 						),
 					),
@@ -177,9 +183,14 @@ if (function_exists('acf_add_local_field_group')):
 						'key' => 'field_task_defeat_enemies',
 						'label' => 'Przeciwnicy do pokonania',
 						'name' => 'task_defeat_enemies',
-						'type' => 'group',
-						'instructions' => 'Ustawienia walki',
-						'layout' => 'block',
+						'type' => 'post_object',
+						'instructions' => 'Wybierz NPC do pokonania',
+						'post_type' => array('npc'),
+						'multiple' => 1,
+						'return_format' => 'id',
+						'ui' => 1,
+						'allow_null' => 0,
+						'save_custom' => 0,
 						'conditional_logic' => array(
 							array(
 								array(
@@ -187,53 +198,6 @@ if (function_exists('acf_add_local_field_group')):
 									'operator' => '==',
 									'value' => 'defeat_enemies',
 								),
-							),
-						),
-						'sub_fields' => array(
-							array(
-								'key' => 'field_enemy_type',
-								'label' => 'Typ przeciwnika',
-								'name' => 'enemy_type',
-								'type' => 'select',
-								'choices' => array(
-									'any' => 'Dowolny przeciwnik',
-									'specific_npc' => 'Konkretny NPC',
-									'player' => 'Inny gracz',
-								),
-								'default_value' => 'any',
-								'ui' => 1,
-								'return_format' => 'value',
-								'allow_null' => 0,
-								'multiple' => 0,
-								'ajax' => 0,
-							),
-							array(
-								'key' => 'field_specific_enemy',
-								'label' => 'Konkretny przeciwnik',
-								'name' => 'specific_enemy',
-								'type' => 'post_object',
-								'post_type' => array('npc'),
-								'return_format' => 'id',
-								'ui' => 1,
-								'allow_null' => 0,
-								'conditional_logic' => array(
-									array(
-										array(
-											'field' => 'field_enemy_type',
-											'operator' => '==',
-											'value' => 'specific_npc',
-										),
-									),
-								),
-							),
-							array(
-								'key' => 'field_battles_required',
-								'label' => 'Liczba wygranych walk',
-								'name' => 'battles_required',
-								'type' => 'number',
-								'min' => 1,
-								'default_value' => 1,
-								'step' => 1,
 							),
 						),
 					),
