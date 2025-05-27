@@ -84,6 +84,10 @@ class GameDatabaseManager
             gold int(11) DEFAULT 0,
             cigarettes int(11) DEFAULT 0,
             
+            -- Grafiki
+            graphic_1 bigint DEFAULT 0,
+            graphic_2 bigint DEFAULT 0,
+            
             -- Timestamps
             created_at timestamp DEFAULT CURRENT_TIMESTAMP,
             updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

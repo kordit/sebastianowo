@@ -88,6 +88,12 @@ class GameAdminPanel
             return;
         }
 
+        // Obsługa aktualizacji danych użytkownika
+        if (isset($_POST['action']) && $_POST['action'] === 'update_user_data') {
+            $this->handle_user_data_update();
+            return;
+        }
+
         // Obsługa aktualizacji danych misji
         if (isset($_POST['action']) && $_POST['action'] === 'update_mission_tasks') {
             $this->handle_mission_update();
@@ -99,6 +105,78 @@ class GameAdminPanel
             $this->handle_create_mission();
             return;
         }
+    }
+    /**
+     * Obsługuje aktualizację danych użytkownika
+     */
+    private function handle_user_data_update()
+    {
+        // Sprawdź nonce dla bezpieczeństwa
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'update_user_data')) {
+            wp_die('Błąd bezpieczeństwa');
+        }
+
+        // Sprawdź dane
+        if (empty($_POST['user_id'])) {
+            wp_die('Brakujące dane użytkownika');
+        }
+
+        $user_id = intval($_POST['user_id']);
+        $game_user = new GameUserModel($user_id);
+
+        // Przygotuj dane do aktualizacji podstawowych informacji
+        $basic_data = [];
+        $allowed_basic_fields = [
+            'nick',
+            'user_class',
+            'strength',
+            'defense',
+            'dexterity',
+            'perception',
+            'technical',
+            'charisma',
+            'max_life',
+            'current_life',
+            'max_energy',
+            'current_energy',
+            'exp',
+            'learning_points',
+            'reputation',
+            'gold',
+            'cigarettes',
+            'graphic_1',
+            'graphic_2'
+        ];
+
+        foreach ($allowed_basic_fields as $field) {
+            if (isset($_POST[$field])) {
+                $basic_data[$field] = sanitize_text_field($_POST[$field]);
+            }
+        }
+
+        // Przygotuj dane umiejętności
+        $skills_data = [];
+        $allowed_skill_fields = ['combat', 'steal', 'craft', 'trade', 'relations', 'street'];
+
+        foreach ($allowed_skill_fields as $field) {
+            if (isset($_POST[$field])) {
+                $skills_data[$field] = intval($_POST[$field]);
+            }
+        }
+
+        // Aktualizuj dane
+        $basic_result = !empty($basic_data) ? $game_user->update_basic_data($basic_data) : true;
+        $skills_result = !empty($skills_data) ? $game_user->update_skills_data($skills_data) : true;
+
+        // Przekieruj z komunikatem
+        $redirect_url = add_query_arg([
+            'page' => 'game-user-details',
+            'user_id' => $user_id,
+            'updated' => ($basic_result !== false && $skills_result !== false) ? 'success' : 'error'
+        ], admin_url('admin.php'));
+
+        wp_redirect($redirect_url);
+        exit;
     }
 
     /**
@@ -427,6 +505,15 @@ class GameAdminPanel
 
         $game_user = new GameUserModel($user_id);
 
+        // Wyświetl komunikaty z URL
+        if (isset($_GET['updated'])) {
+            if ($_GET['updated'] === 'success') {
+                echo '<div class="notice notice-success"><p>Dane zostały pomyślnie zaktualizowane.</p></div>';
+            } else {
+                echo '<div class="notice notice-error"><p>Wystąpił błąd podczas aktualizacji danych.</p></div>';
+            }
+        }
+
         // Obsługa inicjalizacji
         if ($action === 'init') {
             if ($game_user->initialize_new_user()) {
@@ -455,544 +542,933 @@ class GameAdminPanel
 
             <?php if ($user_data['basic']): ?>
 
-                <!-- Podstawowe dane -->
+                <!-- Podstawowe dane z witalnoscia -->
                 <div class="game-data-section">
-                    <h3>Podstawowe dane</h3>
-                    <table class="form-table">
-                        <tr>
-                            <th>Nick w grze</th>
-                            <td><?php echo esc_html($user_data['basic']['nick'] ?: 'Brak'); ?></td>
-                        </tr>
-                        <tr>
-                            <th>Klasa</th>
-                            <td><?php echo esc_html($user_data['basic']['user_class'] ?: 'Brak'); ?></td>
-                        </tr>
-                        <tr>
-                            <th>Level</th>
-                            <td><?php echo $this->calculate_level($user_data['basic']['exp']); ?></td>
-                        </tr>
-                        <tr>
-                            <th>Doświadczenie</th>
-                            <td><?php echo number_format($user_data['basic']['exp']); ?> XP</td>
-                        </tr>
-                        <tr>
-                            <th>Punkty nauki</th>
-                            <td><?php echo $user_data['basic']['learning_points']; ?></td>
-                        </tr>
-                        <tr>
-                            <th>Reputacja</th>
-                            <td>
-                                <span class="reputation-badge reputation-<?php echo $this->get_reputation_class($user_data['basic']['reputation']); ?>">
-                                    <?php echo $user_data['basic']['reputation']; ?>
-                                </span>
-                            </td>
-                        </tr>
-                    </table>
+                    <h3>Dane Podstawowe</h3>
+                    <form method="post" action="" class="user-data-form">
+                        <?php wp_nonce_field('update_user_data'); ?>
+                        <input type="hidden" name="action" value="update_user_data">
+                        <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
+
+                        <table class="form-table">
+                            <tr>
+                                <th>Nick w grze</th>
+                                <td>
+                                    <input type="text" name="nick" value="<?php echo esc_attr($user_data['basic']['nick'] ?: ''); ?>" class="regular-text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Klasa</th>
+                                <td>
+                                    <select name="user_class">
+                                        <option value="">Brak klasy</option>
+                                        <option value="zadymiarz" <?php selected($user_data['basic']['user_class'], 'zadymiarz'); ?>>Zadymiarz</option>
+                                        <option value="kombinator" <?php selected($user_data['basic']['user_class'], 'kombinator'); ?>>Kombinator</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Level</th>
+                                <td>
+                                    <strong><?php echo $this->calculate_level($user_data['basic']['exp']); ?></strong>
+                                    <small>(na podstawie doświadczenia)</small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Doświadczenie</th>
+                                <td>
+                                    <input type="number" name="exp" value="<?php echo $user_data['basic']['exp']; ?>" min="0" class="small-text"> XP
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Punkty nauki</th>
+                                <td>
+                                    <input type="number" name="learning_points" value="<?php echo $user_data['basic']['learning_points']; ?>" min="0" class="small-text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Reputacja</th>
+                                <td>
+                                    <input type="number" name="reputation" value="<?php echo $user_data['basic']['reputation']; ?>" class="small-text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Życie</th>
+                                <td>
+                                    <input type="number" name="current_life" value="<?php echo $user_data['basic']['current_life']; ?>" min="0" class="small-text"> /
+                                    <input type="number" name="max_life" value="<?php echo $user_data['basic']['max_life']; ?>" min="1" class="small-text">
+                                    <div class="vitality-progress">
+                                        <div class="progress-bar life" style="width: <?php echo ($user_data['basic']['current_life'] / $user_data['basic']['max_life']) * 100; ?>%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Energia</th>
+                                <td>
+                                    <input type="number" name="current_energy" value="<?php echo $user_data['basic']['current_energy']; ?>" min="0" class="small-text"> /
+                                    <input type="number" name="max_energy" value="<?php echo $user_data['basic']['max_energy']; ?>" min="1" class="small-text">
+                                    <div class="vitality-progress">
+                                        <div class="progress-bar energy" style="width: <?php echo ($user_data['basic']['current_energy'] / $user_data['basic']['max_energy']) * 100; ?>%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Złoto</th>
+                                <td>
+                                    <input type="number" name="gold" value="<?php echo $user_data['basic']['gold'] ?? 0; ?>" min="0" class="small-text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Papierosy</th>
+                                <td>
+                                    <input type="number" name="cigarettes" value="<?php echo $user_data['basic']['cigarettes'] ?? 0; ?>" min="0" class="small-text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Grafika 1</th>
+                                <td>
+                                    <div class="media-upload-field">
+                                        <input type="hidden" name="graphic_1" value="<?php echo esc_attr($user_data['basic']['graphic_1'] ?? ''); ?>" id="graphic_1_id">
+                                        <button type="button" class="button media-upload-btn" data-target="graphic_1_id">Wybierz obraz</button>
+                                        <div class="media-preview" id="graphic_1_preview">
+                                            <?php if (!empty($user_data['basic']['graphic_1'])): ?>
+                                                <?php echo wp_get_attachment_image($user_data['basic']['graphic_1'], 'thumbnail'); ?>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Grafika 2</th>
+                                <td>
+                                    <div class="media-upload-field">
+                                        <input type="hidden" name="graphic_2" value="<?php echo esc_attr($user_data['basic']['graphic_2'] ?? ''); ?>" id="graphic_2_id">
+                                        <button type="button" class="button media-upload-btn" data-target="graphic_2_id">Wybierz obraz</button>
+                                        <div class="media-preview" id="graphic_2_preview">
+                                            <?php if (!empty($user_data['basic']['graphic_2'])): ?>
+                                                <?php echo wp_get_attachment_image($user_data['basic']['graphic_2'], 'thumbnail'); ?>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p class="submit">
+                            <input type="submit" name="submit" class="button-primary" value="Zapisz zmiany">
+                        </p>
+                    </form>
                 </div>
 
                 <!-- Statystyki -->
                 <div class="game-data-section">
                     <h3>Statystyki</h3>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <label>Siła</label>
-                            <span class="stat-value"><?php echo $user_data['basic']['strength']; ?></span>
-                        </div>
-                        <div class="stat-item">
-                            <label>Obrona</label>
-                            <span class="stat-value"><?php echo $user_data['basic']['defense']; ?></span>
-                        </div>
-                        <div class="stat-item">
-                            <label>Zręczność</label>
-                            <span class="stat-value"><?php echo $user_data['basic']['dexterity']; ?></span>
-                        </div>
-                        <div class="stat-item">
-                            <label>Percepcja</label>
-                            <span class="stat-value"><?php echo $user_data['basic']['perception']; ?></span>
-                        </div>
-                        <div class="stat-item">
-                            <label>Technika</label>
-                            <span class="stat-value"><?php echo $user_data['basic']['technical']; ?></span>
-                        </div>
-                        <div class="stat-item">
-                            <label>Charyzma</label>
-                            <span class="stat-value"><?php echo $user_data['basic']['charisma']; ?></span>
-                        </div>
-                    </div>
-                </div>
+                    <form method="post" action="" class="user-data-form">
+                        <?php wp_nonce_field('update_user_data'); ?>
+                        <input type="hidden" name="action" value="update_user_data">
+                        <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
 
-                <!-- Witalność -->
-                <div class="game-data-section">
-                    <h3>Witalność</h3>
-                    <div class="vitality-bars">
-                        <div class="vitality-item">
-                            <label>Życie</label>
-                            <div class="progress-bar">
-                                <div class="progress-fill life" style="width: <?php echo ($user_data['basic']['current_life'] / $user_data['basic']['max_life']) * 100; ?>%"></div>
-                                <span class="progress-text"><?php echo $user_data['basic']['current_life']; ?> / <?php echo $user_data['basic']['max_life']; ?></span>
-                            </div>
-                        </div>
-                        <div class="vitality-item">
-                            <label>Energia</label>
-                            <div class="progress-bar">
-                                <div class="progress-fill energy" style="width: <?php echo ($user_data['basic']['current_energy'] / $user_data['basic']['max_energy']) * 100; ?>%"></div>
-                                <span class="progress-text"><?php echo $user_data['basic']['current_energy']; ?> / <?php echo $user_data['basic']['max_energy']; ?></span>
-                            </div>
-                        </div>
-                    </div>
+                        <table class="form-table">
+                            <tr>
+                                <th>Siła</th>
+                                <td><input type="number" name="strength" value="<?php echo $user_data['basic']['strength']; ?>" min="1" class="small-text"></td>
+                            </tr>
+                            <tr>
+                                <th>Obrona</th>
+                                <td><input type="number" name="defense" value="<?php echo $user_data['basic']['defense']; ?>" min="1" class="small-text"></td>
+                            </tr>
+                            <tr>
+                                <th>Zręczność</th>
+                                <td><input type="number" name="dexterity" value="<?php echo $user_data['basic']['dexterity']; ?>" min="1" class="small-text"></td>
+                            </tr>
+                            <tr>
+                                <th>Percepcja</th>
+                                <td><input type="number" name="perception" value="<?php echo $user_data['basic']['perception']; ?>" min="1" class="small-text"></td>
+                            </tr>
+                            <tr>
+                                <th>Technika</th>
+                                <td><input type="number" name="technical" value="<?php echo $user_data['basic']['technical']; ?>" min="1" class="small-text"></td>
+                            </tr>
+                            <tr>
+                                <th>Charyzma</th>
+                                <td><input type="number" name="charisma" value="<?php echo $user_data['basic']['charisma']; ?>" min="1" class="small-text"></td>
+                            </tr>
+                        </table>
+
+                        <p class="submit">
+                            <input type="submit" name="submit" class="button-primary" value="Zapisz statystyki">
+                        </p>
+                    </form>
                 </div>
 
                 <!-- Umiejętności -->
-                <?php if ($user_data['skills']): ?>
-                    <div class="game-data-section">
-                        <h3>Umiejętności</h3>
-                        <div class="skills-grid">
-                            <div class="skill-item">
-                                <label>Walka</label>
-                                <span class="skill-value"><?php echo $user_data['skills']['combat']; ?></span>
-                            </div>
-                            <div class="skill-item">
-                                <label>Kradzież</label>
-                                <span class="skill-value"><?php echo $user_data['skills']['steal']; ?></span>
-                            </div>
-                            <div class="skill-item">
-                                <label>Rzemiosło</label>
-                                <span class="skill-value"><?php echo $user_data['skills']['craft']; ?></span>
-                            </div>
-                            <div class="skill-item">
-                                <label>Handel</label>
-                                <span class="skill-value"><?php echo $user_data['skills']['trade']; ?></span>
-                            </div>
-                            <div class="skill-item">
-                                <label>Relacje</label>
-                                <span class="skill-value"><?php echo $user_data['skills']['relations']; ?></span>
-                            </div>
-                            <div class="skill-item">
-                                <label>Ulica</label>
-                                <span class="skill-value"><?php echo $user_data['skills']['street']; ?></span>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
+                <div class="game-data-section">
+                    <h3>Umiejętności</h3>
+                    <form method="post" action="">
+                        <?php wp_nonce_field('update_user_data'); ?>
+                        <input type="hidden" name="action" value="update_user_data">
+                        <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
 
-                <!-- Przedmioty -->
-                <?php if (!empty($user_data['items'])): ?>
-                    <div class="game-data-section">
-                        <h3>Ekwipunek (<?php echo count($user_data['items']); ?> przedmiotów)</h3>
+                        <table class="form-table">
+                            <tr>
+                                <th>Walka</th>
+                                <td>
+                                    <input type="number" name="combat" value="<?php echo $user_data['skills']['combat']; ?>" min="0" class="small-text">
+                                    <p class="description">Zwiększa obrażenia, inicjatywę</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Kradzież</th>
+                                <td>
+                                    <input type="number" name="steal" value="<?php echo $user_data['skills']['steal']; ?>" min="0" class="small-text">
+                                    <p class="description">Większa skuteczność, mniejsze ryzyko</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Produkcja</th>
+                                <td>
+                                    <input type="number" name="craft" value="<?php echo $user_data['skills']['craft']; ?>" min="0" class="small-text">
+                                    <p class="description">Krótszy czas, więcej towaru</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Handel</th>
+                                <td>
+                                    <input type="number" name="trade" value="<?php echo $user_data['skills']['trade']; ?>" min="0" class="small-text">
+                                    <p class="description">Lepsze ceny, więcej zarobku</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Relacje</th>
+                                <td>
+                                    <input type="number" name="relations" value="<?php echo $user_data['skills']['relations']; ?>" min="0" class="small-text">
+                                    <p class="description">Bonusy, unikalne misje</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Uliczna wiedza</th>
+                                <td>
+                                    <input type="number" name="street" value="<?php echo $user_data['skills']['street']; ?>" min="0" class="small-text">
+                                    <p class="description">Dostęp do sekretnych przejść, schowków</p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p class="submit">
+                            <input type="submit" name="submit" class="button-primary" value="Zapisz umiejętności">
+                        </p>
+                    </form>
+                </div>
+            <?php endif; ?>
+
+            <!-- Zarządzanie przedmiotami -->
+            <div class="game-data-section">
+                <h3>Zarządzanie przedmiotami</h3>
+
+                <!-- Waluty (już obsługiwane w podstawowych danych) -->
+                <div class="items-currencies">
+                    <h4>Waluty</h4>
+                    <table class="form-table">
+                        <tr>
+                            <th>Złoto</th>
+                            <td><strong><?php echo $user_data['basic']['gold'] ?? 0; ?></strong> (edytowalne w sekcji podstawowych danych)</td>
+                        </tr>
+                        <tr>
+                            <th>Papierosy</th>
+                            <td><strong><?php echo $user_data['basic']['cigarettes'] ?? 0; ?></strong> (edytowalne w sekcji podstawowych danych)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Założone przedmioty -->
+                <div class="items-equipped">
+                    <h4>Założone przedmioty</h4>
+                    <?php
+                    $equipped_items = get_field('equipped_items', 'user_' . $user_id) ?: [];
+                    $equipped_slots = ['chest_item' => 'Na klatę', 'bottom_item' => 'Na poślady', 'legs_item' => 'Na giczuły'];
+                    ?>
+                    <table class="wp-list-table widefat">
+                        <thead>
+                            <tr>
+                                <th>Slot</th>
+                                <th>Przedmiot</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($equipped_slots as $slot_key => $slot_name): ?>
+                                <tr>
+                                    <td><strong><?php echo $slot_name; ?></strong></td>
+                                    <td>
+                                        <?php if (!empty($equipped_items[$slot_key])): ?>
+                                            <?php
+                                            $equipped_item = get_post($equipped_items[$slot_key]);
+                                            if ($equipped_item): ?>
+                                                <strong><?php echo esc_html($equipped_item->post_title); ?></strong>
+                                                <br><small>ID: <?php echo $equipped_item->ID; ?></small>
+                                            <?php else: ?>
+                                                <em>Przedmiot nie istnieje (ID: <?php echo $equipped_items[$slot_key]; ?>)</em>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <em>Pusty slot</em>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($equipped_items[$slot_key])): ?>
+                                            <button type="button" class="button item-unequip-btn"
+                                                data-user-id="<?php echo $user_id; ?>"
+                                                data-item-id="<?php echo $equipped_items[$slot_key]; ?>"
+                                                data-slot="<?php echo $slot_key; ?>">
+                                                Zdejmij
+                                            </button>
+                                        <?php else: ?>
+                                            —
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Wszystkie przedmioty w ekwipunku -->
+                <div class="items-inventory">
+                    <h4>Ekwipunek</h4>
+                    <?php
+                    $user_items = get_field('items', 'user_' . $user_id) ?: [];
+                    if (!empty($user_items)): ?>
                         <table class="wp-list-table widefat">
                             <thead>
                                 <tr>
                                     <th>Przedmiot</th>
                                     <th>Ilość</th>
-                                    <th>Założony</th>
-                                    <th>Slot</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($user_data['items'] as $item): ?>
-                                    <tr class="<?php echo $item['equipped'] ? 'item-equipped' : ''; ?>">
-                                        <td>
-                                            <strong><?php echo esc_html($item['item_name'] ?: 'Nieznany przedmiot'); ?></strong>
-                                            <br><small>ID: <?php echo $item['item_id']; ?></small>
-                                        </td>
-                                        <td><?php echo $item['quantity']; ?></td>
-                                        <td>
-                                            <?php if ($item['equipped']): ?>
-                                                <span class="equipped">✓ Założony</span>
-                                            <?php else: ?>
-                                                <span class="not-equipped">Nie założony</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><?php echo esc_html($item['slot'] ?: '—'); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Misje -->
-                <?php if (!empty($user_data['missions'])): ?>
-                    <div class="game-data-section">
-                        <h3>Misje (<?php echo count($user_data['missions']); ?>)</h3>
-                        <table class="wp-list-table widefat">
-                            <thead>
-                                <tr>
-                                    <th>Misja</th>
-                                    <th>Status</th>
-                                    <th>Typ</th>
-                                    <th>Rozpoczęta</th>
+                                    <th>Kategoria</th>
                                     <th>Akcje</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($user_data['missions'] as $mission): ?>
+                                <?php foreach ($user_items as $index => $user_item): ?>
+                                    <?php
+                                    $item = $user_item['item'];
+                                    $quantity = $user_item['quantity'] ?? 1;
+                                    $item_categories = wp_get_post_terms($item->ID, 'item_type', ['fields' => 'names']);
+                                    ?>
                                     <tr>
                                         <td>
-                                            <strong><?php echo esc_html($mission['mission_name'] ?: 'Nieznana misja'); ?></strong>
-                                            <br><small>ID: <?php echo $mission['mission_id']; ?></small>
+                                            <strong><?php echo esc_html($item->post_title); ?></strong>
+                                            <br><small>ID: <?php echo $item->ID; ?></small>
                                         </td>
                                         <td>
-                                            <span class="mission-status status-<?php echo esc_attr($mission['status']); ?>">
-                                                <?php
-                                                $statuses = [
-                                                    'not_started' => 'Niezaczęta',
-                                                    'in_progress' => 'W trakcie',
-                                                    'completed' => 'Ukończona',
-                                                    'failed' => 'Nieudana'
-                                                ];
-                                                echo esc_html($statuses[$mission['status']] ?? $mission['status']);
-                                                ?>
-                                            </span>
+                                            <input type="number"
+                                                class="item-quantity-input small-text"
+                                                value="<?php echo $quantity; ?>"
+                                                min="0"
+                                                data-user-id="<?php echo $user_id; ?>"
+                                                data-item-id="<?php echo $item->ID; ?>"
+                                                data-index="<?php echo $index; ?>">
                                         </td>
+                                        <td><?php echo !empty($item_categories) ? implode(', ', $item_categories) : 'Brak kategorii'; ?></td>
                                         <td>
-                                            <?php
-                                            $types = [
-                                                'one-time' => 'Jednorazowa',
-                                                'daily' => 'Dzienna',
-                                                'weekly' => 'Tygodniowa'
-                                            ];
-                                            echo esc_html($types[$mission['mission_type']] ?? $mission['mission_type']);
-                                            ?>
-                                        </td>
-                                        <td><?php echo $mission['start_date'] ? date('d.m.Y H:i', strtotime($mission['start_date'])) : $this->format_time_ago($mission['created_at']); ?></td>
-                                        <td>
-                                            <button type="button" class="button button-primary show-mission-details" data-mission-id="<?php echo $mission['id']; ?>">
-                                                Szczegóły
+                                            <button type="button" class="button button-small item-remove-btn"
+                                                data-user-id="<?php echo $user_id; ?>"
+                                                data-item-id="<?php echo $item->ID; ?>"
+                                                data-index="<?php echo $index; ?>">
+                                                Usuń
                                             </button>
-                                        </td>
-                                    </tr>
-                                    <tr class="mission-details-row hidden" id="mission-details-<?php echo $mission['id']; ?>">
-                                        <td colspan="5">
-                                            <div class="mission-details-container">
-                                                <h4>Szczegóły misji "<?php echo esc_html($mission['mission_name']); ?>"</h4>
-
-                                                <div class="mission-stats">
-                                                    <p><strong>Bilans walk:</strong> Wygrane: <?php echo $mission['wins']; ?>, Przegrane: <?php echo $mission['losses']; ?>, Remisy: <?php echo $mission['draws']; ?></p>
-                                                </div>
-
-                                                <?php if (!empty($mission['tasks_data'])): ?>
-                                                    <div class="mission-tasks">
-                                                        <h5>Zadania:</h5>
-                                                        <?php
-                                                        $tasks = json_decode($mission['tasks_data'], true);
-                                                        if (is_array($tasks)):
-                                                        ?>
-                                                            <form method="post" class="mission-tasks-form">
-                                                                <input type="hidden" name="action" value="update_mission_tasks">
-                                                                <input type="hidden" name="mission_id" value="<?php echo $mission['id']; ?>">
-                                                                <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
-                                                                <table class="wp-list-table widefat striped mission-tasks-table">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th>Zadanie</th>
-                                                                            <th>Typ</th>
-                                                                            <th>Status</th>
-                                                                            <th>Szczegóły</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        <?php foreach ($tasks as $task_index => $task): ?>
-                                                                            <tr>
-                                                                                <td>
-                                                                                    <strong><?php echo esc_html($task['task_title']); ?></strong>
-                                                                                    <?php if (!empty($task['task_optional'])): ?>
-                                                                                        <span class="optional-tag">(Opcjonalne)</span>
-                                                                                    <?php endif; ?>
-                                                                                    <br>
-                                                                                    <small><?php echo esc_html($task['task_description']); ?></small>
-                                                                                </td>
-                                                                                <td>
-                                                                                    <?php
-                                                                                    $task_types = [
-                                                                                        'checkpoint' => 'Checkpoint',
-                                                                                        'checkpoint_npc' => 'Rozmowa z NPC',
-                                                                                        'defeat_enemies' => 'Walka'
-                                                                                    ];
-                                                                                    echo $task_types[$task['task_type']] ?? $task['task_type'];
-                                                                                    ?>
-                                                                                </td>
-                                                                                <td>
-                                                                                    <select name="tasks[<?php echo $task_index; ?>][status]" class="task-status-select">
-                                                                                        <option value="not_started" <?php selected($task['status'], 'not_started'); ?>>Niezaczęte</option>
-                                                                                        <option value="in_progress" <?php selected($task['status'], 'in_progress'); ?>>W trakcie</option>
-                                                                                        <option value="completed" <?php selected($task['status'], 'completed'); ?>>Ukończone</option>
-                                                                                        <option value="failed" <?php selected($task['status'], 'failed'); ?>>Nieudane</option>
-                                                                                    </select>
-                                                                                    <input type="hidden" name="tasks[<?php echo $task_index; ?>][task_id]" value="<?php echo $task['task_id']; ?>">
-                                                                                </td>
-                                                                                <td>
-                                                                                    <?php if ($task['task_type'] == 'checkpoint'): ?>
-                                                                                        <p>Lokalizacja: <?php echo $task['location_id'] ? get_the_title($task['location_id']) : '—'; ?></p>
-                                                                                        <p>Scena: <?php echo $task['scene'] ?: '—'; ?></p>
-                                                                                        <p>
-                                                                                            <input type="checkbox" name="tasks[<?php echo $task_index; ?>][location_visited]" value="1" <?php checked(!empty($task['location_visited'])); ?>>
-                                                                                            Lokacja odwiedzona
-                                                                                        </p>
-                                                                                    <?php elseif ($task['task_type'] == 'checkpoint_npc'): ?>
-                                                                                        <?php if (!empty($task['npcs']) && is_array($task['npcs'])): ?>
-                                                                                            <table class="wp-list-table widefat">
-                                                                                                <thead>
-                                                                                                    <tr>
-                                                                                                        <th>NPC</th>
-                                                                                                        <th>Wymagany status</th>
-                                                                                                        <th>Obecny status</th>
-                                                                                                    </tr>
-                                                                                                </thead>
-                                                                                                <tbody>
-                                                                                                    <?php foreach ($task['npcs'] as $npc_index => $npc): ?>
-                                                                                                        <tr>
-                                                                                                            <td><?php echo get_the_title($npc['npc_id']); ?></td>
-                                                                                                            <td>
-                                                                                                                <?php
-                                                                                                                $npc_statuses = [
-                                                                                                                    'not_started' => 'Niezaczęte',
-                                                                                                                    'in_progress' => 'W trakcie',
-                                                                                                                    'completed' => 'Ukończone',
-                                                                                                                    'failed' => 'Nieudane'
-                                                                                                                ];
-                                                                                                                echo $npc_statuses[$npc['required_status']] ?? $npc['required_status'];
-                                                                                                                ?>
-                                                                                                            </td>
-                                                                                                            <td>
-                                                                                                                <select name="tasks[<?php echo $task_index; ?>][npcs][<?php echo $npc_index; ?>][current_status]">
-                                                                                                                    <option value="not_started" <?php selected($npc['current_status'], 'not_started'); ?>>Niezaczęte</option>
-                                                                                                                    <option value="in_progress" <?php selected($npc['current_status'], 'in_progress'); ?>>W trakcie</option>
-                                                                                                                    <option value="completed" <?php selected($npc['current_status'], 'completed'); ?>>Ukończone</option>
-                                                                                                                    <option value="failed" <?php selected($npc['current_status'], 'failed'); ?>>Nieudane</option>
-                                                                                                                </select>
-                                                                                                                <input type="hidden" name="tasks[<?php echo $task_index; ?>][npcs][<?php echo $npc_index; ?>][npc_id]" value="<?php echo $npc['npc_id']; ?>">
-                                                                                                            </td>
-                                                                                                        </tr>
-                                                                                                    <?php endforeach; ?>
-                                                                                                </tbody>
-                                                                                            </table>
-                                                                                        <?php else: ?>
-                                                                                            <p>Brak zdefiniowanych NPC</p>
-                                                                                        <?php endif; ?>
-                                                                                    <?php elseif ($task['task_type'] == 'defeat_enemies'): ?>
-                                                                                        <?php if (!empty($task['enemies']) && is_array($task['enemies'])): ?>
-                                                                                            <table class="wp-list-table widefat">
-                                                                                                <thead>
-                                                                                                    <tr>
-                                                                                                        <th>Przeciwnik</th>
-                                                                                                        <th>Status</th>
-                                                                                                    </tr>
-                                                                                                </thead>
-                                                                                                <tbody>
-                                                                                                    <?php foreach ($task['enemies'] as $enemy_index => $enemy): ?>
-                                                                                                        <tr>
-                                                                                                            <td><?php echo get_the_title($enemy['enemy_id']); ?></td>
-                                                                                                            <td>
-                                                                                                                <input type="checkbox" name="tasks[<?php echo $task_index; ?>][enemies][<?php echo $enemy_index; ?>][defeated]" value="1" <?php checked(!empty($enemy['defeated'])); ?>>
-                                                                                                                Pokonany
-                                                                                                                <input type="hidden" name="tasks[<?php echo $task_index; ?>][enemies][<?php echo $enemy_index; ?>][enemy_id]" value="<?php echo $enemy['enemy_id']; ?>">
-                                                                                                            </td>
-                                                                                                        </tr>
-                                                                                                    <?php endforeach; ?>
-                                                                                                </tbody>
-                                                                                            </table>
-                                                                                        <?php else: ?>
-                                                                                            <p>Brak zdefiniowanych przeciwników</p>
-                                                                                        <?php endif; ?>
-                                                                                    <?php endif; ?>
-
-                                                                                    <?php if ($task['task_attempt_limit'] > 0): ?>
-                                                                                        <p>Limit prób: <?php echo $task['task_attempt_limit']; ?></p>
-                                                                                        <p>
-                                                                                            Wykonane próby:
-                                                                                            <input type="number" name="tasks[<?php echo $task_index; ?>][attempts]" value="<?php echo isset($task['attempts']) ? $task['attempts'] : 0; ?>" min="0" max="<?php echo $task['task_attempt_limit']; ?>">
-                                                                                        </p>
-                                                                                    <?php endif; ?>
-                                                                                </td>
-                                                                            </tr>
-                                                                        <?php endforeach; ?>
-                                                                    </tbody>
-                                                                </table>
-                                                                <div class="mission-battle-stats">
-                                                                    <h5>Statystyki walk:</h5>
-                                                                    <div class="stats-inputs">
-                                                                        <label>
-                                                                            Wygrane:
-                                                                            <input type="number" name="mission_stats[wins]" value="<?php echo $mission['wins']; ?>" min="0">
-                                                                        </label>
-                                                                        <label>
-                                                                            Przegrane:
-                                                                            <input type="number" name="mission_stats[losses]" value="<?php echo $mission['losses']; ?>" min="0">
-                                                                        </label>
-                                                                        <label>
-                                                                            Remisy:
-                                                                            <input type="number" name="mission_stats[draws]" value="<?php echo $mission['draws']; ?>" min="0">
-                                                                        </label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="mission-status-update">
-                                                                    <h5>Status misji:</h5>
-                                                                    <select name="mission_status">
-                                                                        <option value="not_started" <?php selected($mission['status'], 'not_started'); ?>>Niezaczęta</option>
-                                                                        <option value="in_progress" <?php selected($mission['status'], 'in_progress'); ?>>W trakcie</option>
-                                                                        <option value="completed" <?php selected($mission['status'], 'completed'); ?>>Ukończona</option>
-                                                                        <option value="failed" <?php selected($mission['status'], 'failed'); ?>>Nieudana</option>
-                                                                    </select>
-                                                                </div>
-                                                                <?php wp_nonce_field('update_mission_tasks'); ?>
-                                                                <div class="submit-container">
-                                                                    <button type="submit" class="button button-primary">Zapisz zmiany</button>
-                                                                </div>
-                                                            </form>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                <?php else: ?>
-                                                    <p>Brak danych o zadaniach dla tej misji.</p>
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <script>
-                        jQuery(document).ready(function($) {
-                            $('.show-mission-details').on('click', function() {
-                                const missionId = $(this).data('mission-id');
-                                $('#mission-details-' + missionId).toggleClass('hidden');
-                            });
-                        });
-                    </script>
-                    <style>
-                        .mission-details-row.hidden {
-                            display: none;
-                        }
-
-                        .mission-details-container {
-                            padding: 15px;
-                            background: #f9f9f9;
-                            border: 1px solid #e5e5e5;
-                            margin: 10px 0;
-                        }
-
-                        .mission-tasks-table {
-                            margin-bottom: 15px;
-                        }
-
-                        .mission-status {
-                            font-weight: bold;
-                            padding: 3px 8px;
-                            border-radius: 3px;
-                        }
-
-                        .status-not_started {
-                            background-color: #e0e0e0;
-                            color: #666;
-                        }
-
-                        .status-in_progress {
-                            background-color: #c5e1f5;
-                            color: #0073aa;
-                        }
-
-                        .status-completed {
-                            background-color: #d0e8c3;
-                            color: #46b450;
-                        }
-
-                        .status-failed {
-                            background-color: #f1c9c9;
-                            color: #dc3232;
-                        }
-
-                        .optional-tag {
-                            font-style: italic;
-                            color: #888;
-                            font-size: 0.9em;
-                        }
-
-                        .mission-battle-stats,
-                        .mission-status-update {
-                            margin: 15px 0;
-                            padding: 10px;
-                            background: #fff;
-                            border: 1px solid #e5e5e5;
-                        }
-
-                        .stats-inputs {
-                            display: flex;
-                            gap: 20px;
-                        }
-
-                        .stats-inputs label {
-                            display: flex;
-                            align-items: center;
-                            gap: 5px;
-                        }
-
-                        .submit-container {
-                            margin-top: 15px;
-                        }
-
-                        .submit-container .success {
-                            color: #46b450;
-                        }
-
-                        .submit-container .error {
-                            color: #dc3232;
-                        }
-                    </style>
-                <?php endif; ?>
-
-                <!-- Relacje z NPC -->
-                <?php if (!empty($user_data['relations'])): ?>
-                    <div class="game-data-section">
-                        <h3>Relacje z NPC (<?php echo count($user_data['relations']); ?>)</h3>
-                        <table class="wp-list-table widefat">
-                            <thead>
-                                <tr>
-                                    <th>NPC</th>
-                                    <th>Relacja</th>
-                                    <th>Poznany</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($user_data['relations'] as $relation): ?>
-                                    <tr>
-                                        <td>
-                                            <strong><?php echo esc_html($relation['npc_name'] ?: 'Nieznany NPC'); ?></strong>
-                                            <br><small>ID: <?php echo $relation['npc_id']; ?></small>
-                                        </td>
-                                        <td>
-                                            <span class="relation-value relation-<?php echo $this->get_relation_class($relation['relation_value']); ?>">
-                                                <?php echo $relation['relation_value']; ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <?php if ($relation['is_known']): ?>
-                                                <span class="known">✓ Poznany</span>
-                                            <?php else: ?>
-                                                <span class="unknown">Nieznany</span>
+                                            <?php if (in_array(3, wp_get_post_terms($item->ID, 'item_type', ['fields' => 'ids']))): ?>
+                                                <button type="button" class="button button-small item-equip-btn"
+                                                    data-user-id="<?php echo $user_id; ?>"
+                                                    data-item-id="<?php echo $item->ID; ?>"
+                                                    data-slot="chest_item">
+                                                    Załóż na klatę
+                                                </button>
+                                            <?php endif; ?>
+                                            <?php if (in_array(4, wp_get_post_terms($item->ID, 'item_type', ['fields' => 'ids']))): ?>
+                                                <button type="button" class="button button-small item-equip-btn"
+                                                    data-user-id="<?php echo $user_id; ?>"
+                                                    data-item-id="<?php echo $item->ID; ?>"
+                                                    data-slot="bottom_item">
+                                                    Załóż na poślady
+                                                </button>
+                                            <?php endif; ?>
+                                            <?php if (in_array(7, wp_get_post_terms($item->ID, 'item_type', ['fields' => 'ids']))): ?>
+                                                <button type="button" class="button button-small item-equip-btn"
+                                                    data-user-id="<?php echo $user_id; ?>"
+                                                    data-item-id="<?php echo $item->ID; ?>"
+                                                    data-slot="legs_item">
+                                                    Załóż na giczuły
+                                                </button>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
-                    </div>
-                <?php endif; ?>
+                    <?php else: ?>
+                        <p><em>Ekwipunek jest pusty</em></p>
+                    <?php endif; ?>
+                </div>
 
-                <!-- Obszary -->
-                <?php if (!empty($user_data['areas'])): ?>
-                    <div class="game-data-section">
-                        <h3>Dostępne obszary (<?php echo count($user_data['areas']); ?>)</h3>
-                        <div class="areas-grid">
-                            <?php foreach ($user_data['areas'] as $area): ?>
-                                <div class="area-item">
-                                    <strong><?php echo esc_html($area['area_name'] ?: 'Nieznany obszar'); ?></strong>
-                                    <small>ID: <?php echo $area['area_id']; ?></small>
-                                </div>
+                <!-- Dodawanie nowych przedmiotów -->
+                <div class="items-add">
+                    <h4>Dodaj przedmiot</h4>
+                    <form method="post" class="item-management-form" style="margin-top: 15px;">
+                        <?php wp_nonce_field('manage_user_items', 'item_management_nonce'); ?>
+                        <input type="hidden" name="action" value="add_item">
+                        <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
+
+                        <table class="form-table">
+                            <tr>
+                                <th>Przedmiot</th>
+                                <td>
+                                    <select name="item_id" required style="min-width: 300px;">
+                                        <option value="">Wybierz przedmiot...</option>
+                                        <?php
+                                        $all_items = get_posts([
+                                            'post_type' => 'item',
+                                            'posts_per_page' => -1,
+                                            'post_status' => 'publish',
+                                            'orderby' => 'title',
+                                            'order' => 'ASC'
+                                        ]);
+                                        foreach ($all_items as $item): ?>
+                                            <option value="<?php echo $item->ID; ?>"><?php echo esc_html($item->post_title); ?> (ID: <?php echo $item->ID; ?>)</option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Ilość</th>
+                                <td>
+                                    <input type="number" name="quantity" value="1" min="1" max="999" class="small-text" required>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p class="submit">
+                            <input type="submit" name="submit" class="button-primary" value="Dodaj przedmiot">
+                        </p>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Misje -->
+            <?php if (!empty($user_data['missions'])): ?>
+                <div class="game-data-section">
+                    <h3>Misje (<?php echo count($user_data['missions']); ?>)</h3>
+                    <table class="wp-list-table widefat">
+                        <thead>
+                            <tr>
+                                <th>Misja</th>
+                                <th>Status</th>
+                                <th>Typ</th>
+                                <th>Rozpoczęta</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($user_data['missions'] as $mission): ?>
+                                <tr>
+                                    <td>
+                                        <strong><?php echo esc_html($mission['mission_name'] ?: 'Nieznana misja'); ?></strong>
+                                        <br><small>ID: <?php echo $mission['mission_id']; ?></small>
+                                    </td>
+                                    <td>
+                                        <span class="mission-status status-<?php echo esc_attr($mission['status']); ?>">
+                                            <?php
+                                            $statuses = [
+                                                'not_started' => 'Niezaczęta',
+                                                'in_progress' => 'W trakcie',
+                                                'completed' => 'Ukończona',
+                                                'failed' => 'Nieudana'
+                                            ];
+                                            echo esc_html($statuses[$mission['status']] ?? $mission['status']);
+                                            ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php
+                                        $types = [
+                                            'one-time' => 'Jednorazowa',
+                                            'daily' => 'Dzienna',
+                                            'weekly' => 'Tygodniowa'
+                                        ];
+                                        echo esc_html($types[$mission['mission_type']] ?? $mission['mission_type']);
+                                        ?>
+                                    </td>
+                                    <td><?php echo $mission['start_date'] ? date('d.m.Y H:i', strtotime($mission['start_date'])) : $this->format_time_ago($mission['created_at']); ?></td>
+                                    <td>
+                                        <button type="button" class="button button-primary show-mission-details" data-mission-id="<?php echo $mission['id']; ?>">
+                                            Szczegóły
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="mission-details-row hidden" id="mission-details-<?php echo $mission['id']; ?>">
+                                    <td colspan="5">
+                                        <div class="mission-details-container">
+                                            <h4>Szczegóły misji "<?php echo esc_html($mission['mission_name']); ?>"</h4>
+
+                                            <div class="mission-stats">
+                                                <p><strong>Bilans walk:</strong> Wygrane: <?php echo $mission['wins']; ?>, Przegrane: <?php echo $mission['losses']; ?>, Remisy: <?php echo $mission['draws']; ?></p>
+                                            </div>
+
+                                            <?php if (!empty($mission['tasks_data'])): ?>
+                                                <div class="mission-tasks">
+                                                    <h5>Zadania:</h5>
+                                                    <?php
+                                                    $tasks = json_decode($mission['tasks_data'], true);
+                                                    if (is_array($tasks)):
+                                                    ?>
+                                                        <form method="post" class="mission-tasks-form">
+                                                            <input type="hidden" name="action" value="update_mission_tasks">
+                                                            <input type="hidden" name="mission_id" value="<?php echo $mission['id']; ?>">
+                                                            <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
+                                                            <table class="wp-list-table widefat striped mission-tasks-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Zadanie</th>
+                                                                        <th>Typ</th>
+                                                                        <th>Status</th>
+                                                                        <th>Szczegóły</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <?php foreach ($tasks as $task_index => $task): ?>
+                                                                        <tr>
+                                                                            <td>
+                                                                                <strong><?php echo esc_html($task['task_title']); ?></strong>
+                                                                                <?php if (!empty($task['task_optional'])): ?>
+                                                                                    <span class="optional-tag">(Opcjonalne)</span>
+                                                                                <?php endif; ?>
+                                                                                <br>
+                                                                                <small><?php echo esc_html($task['task_description']); ?></small>
+                                                                            </td>
+                                                                            <td>
+                                                                                <?php
+                                                                                $task_types = [
+                                                                                    'checkpoint' => 'Checkpoint',
+                                                                                    'checkpoint_npc' => 'Rozmowa z NPC',
+                                                                                    'defeat_enemies' => 'Walka'
+                                                                                ];
+                                                                                echo $task_types[$task['task_type']] ?? $task['task_type'];
+                                                                                ?>
+                                                                            </td>
+                                                                            <td>
+                                                                                <select name="tasks[<?php echo $task_index; ?>][status]" class="task-status-select">
+                                                                                    <option value="not_started" <?php selected($task['status'], 'not_started'); ?>>Niezaczęte</option>
+                                                                                    <option value="in_progress" <?php selected($task['status'], 'in_progress'); ?>>W trakcie</option>
+                                                                                    <option value="completed" <?php selected($task['status'], 'completed'); ?>>Ukończone</option>
+                                                                                    <option value="failed" <?php selected($task['status'], 'failed'); ?>>Nieudane</option>
+                                                                                </select>
+                                                                                <input type="hidden" name="tasks[<?php echo $task_index; ?>][task_id]" value="<?php echo $task['task_id']; ?>">
+                                                                            </td>
+                                                                            <td>
+                                                                                <?php if ($task['task_type'] == 'checkpoint'): ?>
+                                                                                    <p>Lokalizacja: <?php echo $task['location_id'] ? get_the_title($task['location_id']) : '—'; ?></p>
+                                                                                    <p>Scena: <?php echo $task['scene'] ?: '—'; ?></p>
+                                                                                    <p>
+                                                                                        <input type="checkbox" name="tasks[<?php echo $task_index; ?>][location_visited]" value="1" <?php checked(!empty($task['location_visited'])); ?>>
+                                                                                        Lokacja odwiedzona
+                                                                                    </p>
+                                                                                <?php elseif ($task['task_type'] == 'checkpoint_npc'): ?>
+                                                                                    <?php if (!empty($task['npcs']) && is_array($task['npcs'])): ?>
+                                                                                        <table class="wp-list-table widefat">
+                                                                                            <thead>
+                                                                                                <tr>
+                                                                                                    <th>NPC</th>
+                                                                                                    <th>Wymagany status</th>
+                                                                                                    <th>Obecny status</th>
+                                                                                                </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                                <?php foreach ($task['npcs'] as $npc_index => $npc): ?>
+                                                                                                    <tr>
+                                                                                                        <td><?php echo get_the_title($npc['npc_id']); ?></td>
+                                                                                                        <td>
+                                                                                                            <?php
+                                                                                                            $npc_statuses = [
+                                                                                                                'not_started' => 'Niezaczęte',
+                                                                                                                'in_progress' => 'W trakcie',
+                                                                                                                'completed' => 'Ukończone',
+                                                                                                                'failed' => 'Nieudane'
+                                                                                                            ];
+                                                                                                            echo $npc_statuses[$npc['required_status']] ?? $npc['required_status'];
+                                                                                                            ?>
+                                                                                                        </td>
+                                                                                                        <td>
+                                                                                                            <select name="tasks[<?php echo $task_index; ?>][npcs][<?php echo $npc_index; ?>][current_status]">
+                                                                                                                <option value="not_started" <?php selected($npc['current_status'], 'not_started'); ?>>Niezaczęte</option>
+                                                                                                                <option value="in_progress" <?php selected($npc['current_status'], 'in_progress'); ?>>W trakcie</option>
+                                                                                                                <option value="completed" <?php selected($npc['current_status'], 'completed'); ?>>Ukończone</option>
+                                                                                                                <option value="failed" <?php selected($npc['current_status'], 'failed'); ?>>Nieudane</option>
+                                                                                                            </select>
+                                                                                                            <input type="hidden" name="tasks[<?php echo $task_index; ?>][npcs][<?php echo $npc_index; ?>][npc_id]" value="<?php echo $npc['npc_id']; ?>">
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                <?php endforeach; ?>
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    <?php else: ?>
+                                                                                        <p>Brak zdefiniowanych NPC</p>
+                                                                                    <?php endif; ?>
+                                                                                <?php elseif ($task['task_type'] == 'defeat_enemies'): ?>
+                                                                                    <?php if (!empty($task['enemies']) && is_array($task['enemies'])): ?>
+                                                                                        <table class="wp-list-table widefat">
+                                                                                            <thead>
+                                                                                                <tr>
+                                                                                                    <th>Przeciwnik</th>
+                                                                                                    <th>Status</th>
+                                                                                                </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                                <?php foreach ($task['enemies'] as $enemy_index => $enemy): ?>
+                                                                                                    <tr>
+                                                                                                        <td><?php echo get_the_title($enemy['enemy_id']); ?></td>
+                                                                                                        <td>
+                                                                                                            <input type="checkbox" name="tasks[<?php echo $task_index; ?>][enemies][<?php echo $enemy_index; ?>][defeated]" value="1" <?php checked(!empty($enemy['defeated'])); ?>>
+                                                                                                            Pokonany
+                                                                                                            <input type="hidden" name="tasks[<?php echo $task_index; ?>][enemies][<?php echo $enemy_index; ?>][enemy_id]" value="<?php echo $enemy['enemy_id']; ?>">
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                <?php endforeach; ?>
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    <?php else: ?>
+                                                                                        <p>Brak zdefiniowanych przeciwników</p>
+                                                                                    <?php endif; ?>
+                                                                                <?php endif; ?>
+
+                                                                                <?php if ($task['task_attempt_limit'] > 0): ?>
+                                                                                    <p>Limit prób: <?php echo $task['task_attempt_limit']; ?></p>
+                                                                                    <p>
+                                                                                        Wykonane próby:
+                                                                                        <input type="number" name="tasks[<?php echo $task_index; ?>][attempts]" value="<?php echo isset($task['attempts']) ? $task['attempts'] : 0; ?>" min="0" max="<?php echo $task['task_attempt_limit']; ?>">
+                                                                                    </p>
+                                                                                <?php endif; ?>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <?php endforeach; ?>
+                                                                </tbody>
+                                                            </table>
+                                                            <div class="mission-battle-stats">
+                                                                <h5>Statystyki walk:</h5>
+                                                                <div class="stats-inputs">
+                                                                    <label>
+                                                                        Wygrane:
+                                                                        <input type="number" name="mission_stats[wins]" value="<?php echo $mission['wins']; ?>" min="0">
+                                                                    </label>
+                                                                    <label>
+                                                                        Przegrane:
+                                                                        <input type="number" name="mission_stats[losses]" value="<?php echo $mission['losses']; ?>" min="0">
+                                                                    </label>
+                                                                    <label>
+                                                                        Remisy:
+                                                                        <input type="number" name="mission_stats[draws]" value="<?php echo $mission['draws']; ?>" min="0">
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mission-status-update">
+                                                                <h5>Status misji:</h5>
+                                                                <select name="mission_status">
+                                                                    <option value="not_started" <?php selected($mission['status'], 'not_started'); ?>>Niezaczęta</option>
+                                                                    <option value="in_progress" <?php selected($mission['status'], 'in_progress'); ?>>W trakcie</option>
+                                                                    <option value="completed" <?php selected($mission['status'], 'completed'); ?>>Ukończona</option>
+                                                                    <option value="failed" <?php selected($mission['status'], 'failed'); ?>>Nieudana</option>
+                                                                </select>
+                                                            </div>
+                                                            <?php wp_nonce_field('update_mission_tasks'); ?>
+                                                            <div class="submit-container">
+                                                                <button type="submit" class="button button-primary">Zapisz zmiany</button>
+                                                            </div>
+                                                        </form>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php else: ?>
+                                                <p>Brak danych o zadaniach dla tej misji.</p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                </tr>
                             <?php endforeach; ?>
-                        </div>
+                        </tbody>
+                    </table>
+                </div>
+                <script>
+                    jQuery(document).ready(function($) {
+                        $('.show-mission-details').on('click', function() {
+                            const missionId = $(this).data('mission-id');
+                            $('#mission-details-' + missionId).toggleClass('hidden');
+                        });
+                    });
+                </script>
+                <style>
+                    .mission-details-row.hidden {
+                        display: none;
+                    }
+
+                    .mission-details-container {
+                        padding: 15px;
+                        background: #f9f9f9;
+                        border: 1px solid #e5e5e5;
+                        margin: 10px 0;
+                    }
+
+                    .mission-tasks-table {
+                        margin-bottom: 15px;
+                    }
+
+                    .mission-status {
+                        font-weight: bold;
+                        padding: 3px 8px;
+                        border-radius: 3px;
+                    }
+
+                    .status-not_started {
+                        background-color: #e0e0e0;
+                        color: #666;
+                    }
+
+                    .status-in_progress {
+                        background-color: #c5e1f5;
+                        color: #0073aa;
+                    }
+
+                    .status-completed {
+                        background-color: #d0e8c3;
+                        color: #46b450;
+                    }
+
+                    .status-failed {
+                        background-color: #f1c9c9;
+                        color: #dc3232;
+                    }
+
+                    .optional-tag {
+                        font-style: italic;
+                        color: #888;
+                        font-size: 0.9em;
+                    }
+
+                    .mission-battle-stats,
+                    .mission-status-update {
+                        margin: 15px 0;
+                        padding: 10px;
+                        background: #fff;
+                        border: 1px solid #e5e5e5;
+                    }
+
+                    .stats-inputs {
+                        display: flex;
+                        gap: 20px;
+                    }
+
+                    .stats-inputs label {
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                    }
+
+                    .submit-container {
+                        margin-top: 15px;
+                    }
+
+                    .submit-container .success {
+                        color: #46b450;
+                    }
+
+                    .submit-container .error {
+                        color: #dc3232;
+                    }
+                </style>
+            <?php endif; ?>
+
+            <!-- Relacje z NPC -->
+            <?php if (!empty($user_data['relations'])): ?>
+                <div class="game-data-section">
+                    <h3>Relacje z NPC (<?php echo count($user_data['relations']); ?>)</h3>
+                    <table class="wp-list-table widefat">
+                        <thead>
+                            <tr>
+                                <th>NPC</th>
+                                <th>Relacja</th>
+                                <th>Poznany</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($user_data['relations'] as $relation): ?>
+                                <tr>
+                                    <td>
+                                        <strong><?php echo esc_html($relation['npc_name'] ?: 'Nieznany NPC'); ?></strong>
+                                        <br><small>ID: <?php echo $relation['npc_id']; ?></small>
+                                    </td>
+                                    <td>
+                                        <span class="relation-value relation-<?php echo $this->get_relation_class($relation['relation_value']); ?>">
+                                            <?php echo $relation['relation_value']; ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php if ($relation['is_known']): ?>
+                                            <span class="known">✓ Poznany</span>
+                                        <?php else: ?>
+                                            <span class="unknown">Nieznany</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Obszary/Rejony -->
+                <div class="areas-management">
+                    <h3>Zarządzanie obszarami/rejonami</h3>
+
+                    <?php
+                    // Pobierz aktualne pole current_area z ACF
+                    $current_area = get_field('current_area', 'user_' . $user_id);
+                    $available_areas = get_field('available_areas', 'user_' . $user_id);
+
+                    // Pobierz wszystkie dostępne tereny
+                    $all_areas = get_posts([
+                        'post_type' => 'tereny',
+                        'posts_per_page' => -1,
+                        'post_status' => 'publish',
+                        'orderby' => 'title',
+                        'order' => 'ASC'
+                    ]);
+                    ?>
+
+                    <!-- Aktualny rejon -->
+                    <div class="areas-current">
+                        <h4>Aktualny rejon</h4>
+                        <?php if ($current_area): ?>
+                            <div class="current-area-display">
+                                <?php if (has_post_thumbnail($current_area->ID)): ?>
+                                    <div class="area-thumbnail">
+                                        <?php echo get_the_post_thumbnail($current_area->ID, [60, 60]); ?>
+                                    </div>
+                                <?php endif; ?>
+                                <div class="current-area-info">
+                                    <h4><?php echo esc_html($current_area->post_title); ?></h4>
+                                    <p>ID: <?php echo $current_area->ID; ?></p>
+                                    <?php
+                                    $area_description = get_field('teren_opis', $current_area->ID);
+                                    if ($area_description): ?>
+                                        <p><?php echo esc_html(wp_trim_words($area_description, 15)); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <p><em>Brak przypisanego rejonu</em></p>
+                        <?php endif; ?>
+
+                        <!-- Formularz zmiany aktualnego rejonu -->
+                        <form method="post" action="" class="area-select-form">
+                            <?php wp_nonce_field('update_user_data'); ?>
+                            <input type="hidden" name="action" value="update_user_area">
+                            <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
+
+                            <div class="form-field">
+                                <label for="current_area">Zmień aktualny rejon:</label>
+                                <select name="current_area" id="current_area">
+                                    <option value="">-- Brak rejonu --</option>
+                                    <?php foreach ($all_areas as $area): ?>
+                                        <option value="<?php echo $area->ID; ?>" <?php selected($current_area ? $current_area->ID : '', $area->ID); ?>>
+                                            <?php echo esc_html($area->post_title); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <input type="submit" class="button-primary" value="Zmień rejon">
+                        </form>
                     </div>
-                <?php endif; ?>
+
+                    <!-- Dostępne rejony -->
+                    <div class="areas-available">
+                        <h4>Dostępne rejony dla gracza</h4>
+                        <?php if (!empty($available_areas)): ?>
+                            <div class="available-areas-list">
+                                <?php foreach ($available_areas as $area_id): ?>
+                                    <?php
+                                    $area = get_post($area_id);
+                                    if ($area):
+                                        $is_current = ($current_area && $current_area->ID == $area_id);
+                                        $area_description = get_field('teren_opis', $area_id);
+                                        $events = get_field('events', $area_id);
+                                    ?>
+                                        <div class="available-area-item <?php echo $is_current ? 'current' : ''; ?>">
+                                            <?php if (has_post_thumbnail($area_id)): ?>
+                                                <div class="area-thumb">
+                                                    <?php echo get_the_post_thumbnail($area_id, [40, 40]); ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            <h5><?php echo esc_html($area->post_title); ?></h5>
+                                            <p>ID: <?php echo $area_id; ?></p>
+                                            <?php if ($area_description): ?>
+                                                <p><?php echo esc_html(wp_trim_words($area_description, 10)); ?></p>
+                                            <?php endif; ?>
+                                            <?php if (!empty($events)): ?>
+                                                <p><small>Zdarzenia: <?php echo count($events); ?></small></p>
+                                            <?php endif; ?>
+                                            <?php if ($is_current): ?>
+                                                <span class="current-badge">Aktualny</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+
+                            <!-- Formularz zarządzania dostępnymi rejonami -->
+                            <form method="post" action="" style="margin-top: 20px;">
+                                <?php wp_nonce_field('update_user_data'); ?>
+                                <input type="hidden" name="action" value="update_available_areas">
+                                <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
+
+                                <h5>Zarządzaj dostępnymi rejonami:</h5>
+                                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
+                                    <?php foreach ($all_areas as $area): ?>
+                                        <label style="display: block; margin: 5px 0;">
+                                            <input type="checkbox"
+                                                name="available_areas[]"
+                                                value="<?php echo $area->ID; ?>"
+                                                <?php checked(in_array($area->ID, $available_areas ?: [])); ?>>
+                                            <?php echo esc_html($area->post_title); ?>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+
+                                <p class="submit" style="margin-top: 15px;">
+                                    <input type="submit" class="button-primary" value="Zaktualizuj dostępne rejony">
+                                </p>
+                            </form>
+
+                        <?php else: ?>
+                            <p><em>Gracz nie ma dostępu do żadnych rejonów</em></p>
+
+                            <!-- Formularz dodawania pierwszych rejonów -->
+                            <form method="post" action="" style="margin-top: 15px;">
+                                <?php wp_nonce_field('update_user_data'); ?>
+                                <input type="hidden" name="action" value="update_available_areas">
+                                <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
+
+                                <h5>Dodaj dostępne rejony:</h5>
+                                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
+                                    <?php foreach ($all_areas as $area): ?>
+                                        <label style="display: block; margin: 5px 0;">
+                                            <input type="checkbox" name="available_areas[]" value="<?php echo $area->ID; ?>">
+                                            <?php echo esc_html($area->post_title); ?>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+
+                                <p class="submit" style="margin-top: 15px;">
+                                    <input type="submit" class="button-primary" value="Dodaj rejony">
+                                </p>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
             <?php else: ?>
 
