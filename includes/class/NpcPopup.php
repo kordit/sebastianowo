@@ -1,6 +1,7 @@
 <?php
 class NpcPopup
 {
+    private $dialog_filter;
 
     public function __construct()
     {
@@ -167,23 +168,12 @@ class NpcPopup
             }            // Pobierz dane NPC
             $npc_data = $this->get_npc_data($npc_id);
 
-            // Pobierz dialogi NPC
-            $dialogs = get_field('dialogs', $npc_id);
-
-            if (!$dialogs || !is_array($dialogs)) {
-                $this->log_debug("BŁĄD: Brak dialogów dla NPC");
-                return new WP_REST_Response([
-                    'success' => false,
-                    'message' => 'Brak dialogów dla tego NPC'
-                ], 404);
-            }
+            // Inicjalizuj dialog filter z kontekstem użytkownika
+            $this->dialog_filter = new DialogFilter($user_id, $page_data);
 
             // Znajdź pierwszy dostępny dialog
-            $first_dialog = $this->find_first_available_dialog($dialogs, $user_id, $page_data);
-            $this->log_debug("Rezultat wyszukiwania pierwszego dialogu", [
-                'found' => $first_dialog !== null,
-                'dialog_id' => $first_dialog ? $first_dialog['id_pola'] : 'null'
-            ]);
+            $first_dialog = $this->dialog_filter->get_first_available_dialog($npc_id);
+
 
             if (!$first_dialog) {
                 $this->log_debug("BŁĄD: Brak dostępnych dialogów dla użytkownika");
@@ -193,9 +183,6 @@ class NpcPopup
                 ], 404);
             }
 
-            // Przefiltruj odpowiedzi w dialogu
-            $filtered_dialog = $this->filter_dialog_answers($first_dialog, $user_id, $page_data);
-
             // Przygotuj dane odpowiedzi
             $response_data = [
                 'success' => true,
@@ -204,7 +191,7 @@ class NpcPopup
                     'name' => $npc_data['name'],
                     'title' => $npc_data['title'],
                     'thumbnail_url' => $npc_data['thumbnail_url'],
-                    'dialog' => $filtered_dialog,
+                    'dialog' => $first_dialog,
                     'user_id' => $user_id
                 ]
             ];
@@ -252,19 +239,13 @@ class NpcPopup
             // Pobierz dane NPC
             $npc_data = $this->get_npc_data($npc_id);
 
-            // Pobierz dialogi NPC
-            $dialogs = get_field('dialogs', $npc_id);
-            if (!$dialogs || !is_array($dialogs)) {
-                return new WP_REST_Response([
-                    'success' => false,
-                    'message' => 'Brak dialogów dla tego NPC'
-                ], 404);
-            }
+            // Inicjalizuj dialog filter z kontekstem użytkownika
+            $this->dialog_filter = new DialogFilter($user_id);
 
             // Wykonaj akcje z poprzedniej odpowiedzi (jeśli wybrano odpowiedź)
             $notification = null;
             if ($current_dialog_id && is_numeric($answer_index)) {
-                $notification = $this->execute_answer_actions($dialogs, $current_dialog_id, $answer_index, $user_id);
+                $notification = $this->execute_answer_actions($npc_id, $current_dialog_id, $answer_index, $user_id);
                 if ($notification) {
                     $this->log_debug("Otrzymano powiadomienie z akcji", [
                         'message' => $notification['message'],
@@ -274,30 +255,19 @@ class NpcPopup
             }
 
             // Znajdź docelowy dialog
-            $target_dialog = $this->find_dialog_by_id($dialogs, $dialog_id);
+            $target_dialog = $this->dialog_filter->get_dialog_by_id($npc_id, $dialog_id);
 
             if (!$target_dialog) {
                 return new WP_REST_Response([
                     'success' => false,
-                    'message' => 'Dialog nie został znaleziony'
+                    'message' => 'Dialog nie został znaleziony lub nie jest dostępny'
                 ], 404);
             }
-
-            // Sprawdź widoczność docelowego dialogu
-            if (!$this->is_dialog_visible($target_dialog, $user_id)) {
-                return new WP_REST_Response([
-                    'success' => false,
-                    'message' => 'Dialog nie jest dostępny'
-                ], 403);
-            }
-
-            // Przefiltruj odpowiedzi w dialogu
-            $filtered_dialog = $this->filter_dialog_answers($target_dialog, $user_id);
 
             // Przygotuj dane odpowiedzi
             $response_data = [
                 'success' => true,
-                'dialog' => $filtered_dialog,
+                'dialog' => $target_dialog,
                 'npc' => [
                     'name' => $npc_data['name'],
                     'image' => $npc_data['thumbnail_url']
@@ -342,500 +312,20 @@ class NpcPopup
     }
 
     /**
-     * Znajduje pierwszy dostępny dialog dla użytkownika
-     * 
-     * @param array $dialogs Lista dialogów
-     * @param int $user_id ID użytkownika
-     * @param array $page_data Dane strony
-     * @return array|null Pierwszy dostępny dialog
-     */
-    private function find_first_available_dialog($dialogs, $user_id, $page_data = [])
-    {
-        foreach ($dialogs as $dialog) {
-            if ($this->is_dialog_visible($dialog, $user_id, $page_data)) {
-                return $dialog;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Znajduje dialog po ID
-     * 
-     * @param array $dialogs Lista dialogów
-     * @param string $dialog_id ID dialogu
-     * @return array|null Znaleziony dialog
-     */
-    private function find_dialog_by_id($dialogs, $dialog_id)
-    {
-        foreach ($dialogs as $dialog) {
-            if (isset($dialog['id_pola']) && $dialog['id_pola'] === $dialog_id) {
-                return $dialog;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Sprawdza czy dialog jest widoczny dla użytkownika
-     * 
-     * @param array $dialog Dane dialogu
-     * @param int $user_id ID użytkownika
-     * @param array $page_data Dane strony
-     * @return bool True jeśli dialog jest widoczny
-     */
-    private function is_dialog_visible($dialog, $user_id, $page_data = [])
-    {
-        $dialog_id = $dialog['id_pola'] ?? 'unknown';
-
-
-        // Sprawdź ustawienia widoczności
-        if (!isset($dialog['layout_settings']['visibility_settings']) || !is_array($dialog['layout_settings']['visibility_settings'])) {
-            return true; // Domyślnie widoczny jeśli brak ustawień
-        }
-
-        $visibility_settings = $dialog['layout_settings']['visibility_settings'] ?? [];
-        $logic_operator = $dialog['layout_settings']['logic_operator'] ?? 'and';
-
-
-
-        if (empty($visibility_settings)) {
-            $this->log_debug("Dialog {$dialog_id}: Brak warunków - domyślnie widoczny");
-            return true; // Brak warunków = widoczny
-        }
-
-        $results = [];
-        foreach ($visibility_settings as $index => $condition) {
-            $result = $this->evaluate_visibility_condition($condition, $user_id, $page_data);
-            $results[] = $result;
-            $this->log_debug("Dialog {$dialog_id}: Warunek #{$index} - wynik: " . ($result ? 'SPEŁNIONY' : 'NIE SPEŁNIONY'), $condition);
-        }
-
-        // Zastosuj operator logiczny
-        $final_result = false;
-        if ($logic_operator === 'or') {
-            $final_result = in_array(true, $results);
-        } else {
-            $final_result = !in_array(false, $results);
-        }
-
-        $this->log_debug("Dialog {$dialog_id}: Końcowy wynik widoczności: " . ($final_result ? 'WIDOCZNY' : 'UKRYTY'));
-        return $final_result;
-    }
-    /**
-     * Ocenia pojedynczy warunek widoczności
-     * 
-     * @param array $condition Warunek widoczności
-     * @param int $user_id ID użytkownika
-     * @param array $page_data Dane strony
-     * @return bool Wynik oceny warunku
-     */
-    private function evaluate_visibility_condition($condition, $user_id, $page_data = [])
-    {
-        $type = $condition['acf_fc_layout'] ?? '';
-
-        // $this->log_debug("Warunek widoczności widoczności", [
-        //     'type' => $type,
-        // ]);
-
-        $result = false;
-        switch ($type) {
-            case 'condition_stat':
-                $result = $this->check_stat_condition($condition, $user_id);
-                break;
-
-            case 'condition_skill':
-                $result = $this->check_skill_condition($condition, $user_id);
-                break;
-
-            case 'condition_item':
-                $result = $this->check_item_condition($condition, $user_id);
-                break;
-
-            case 'condition_relation':
-                $result = $this->check_relation_condition($condition, $user_id);
-                break;
-
-            case 'condition_mission':
-                $result = $this->check_mission_condition($condition, $user_id);
-                break;
-
-            case 'condition_inventory':
-                $result = $this->check_item_condition($condition, $user_id);
-                break;
-
-            case 'condition_mission':
-                $result = $this->check_mission_condition($condition, $user_id);
-                break;
-
-            case 'condition_location':
-                $result = $this->check_location_condition($condition, $user_id, $page_data);
-                break;
-
-            case 'condition_task':
-                $result = $this->check_task_condition($condition, $user_id);
-                break;
-
-            case 'condition_npc_relation':
-                $result = $this->check_relation_condition($condition, $user_id);
-                break;
-
-            case 'user_class':
-                $result = $this->check_user_class_condition($condition, $user_id);
-                break;
-
-            default:
-                $this->log_debug("NIEROZPOZNANY typ warunku: {$type}");
-                $result = true; // Nieznane warunki są domyślnie spełnione
-        }
-
-        return $result;
-    }
-    /**
-     * Sprawdza warunek statystyki
-     */
-    private function check_stat_condition($condition, $user_id)
-    {
-        $stat_name = $condition['stat'] ?? '';
-        $operator = $condition['operator'] ?? '>=';
-        $value = intval($condition['value'] ?? 0);
-
-        $user_stats = get_field('stats', 'user_' . $user_id) ?: [];
-        $current_value = intval($user_stats[$stat_name] ?? 0);
-
-        $result = $this->compare_values($current_value, $operator, $value);
-
-        $this->log_debug("Warunek statystyki", [
-            'stat_name' => $stat_name,
-            'operator' => $operator,
-            'required_value' => $value,
-            'current_value' => $current_value,
-            'result' => $result
-        ]);
-
-        return $result;
-    }
-    /**
-     * Sprawdza warunek umiejętności
-     */
-    private function check_skill_condition($condition, $user_id)
-    {
-        $skill_name = $condition['skill'] ?? '';
-        $operator = $condition['operator'] ?? '>=';
-        $value = intval($condition['value'] ?? 0);
-
-        $user_skills = get_field('skills', 'user_' . $user_id) ?: [];
-        $current_value = intval($user_skills[$skill_name] ?? 0);
-
-        $result = $this->compare_values($current_value, $operator, $value);
-
-        $this->log_debug("Warunek umiejętności", [
-            'skill_name' => $skill_name,
-            'operator' => $operator,
-            'required_value' => $value,
-            'current_value' => $current_value,
-            'result' => $result
-        ]);
-
-        return $result;
-    }
-
-    /**
-     * Sprawdza warunek przedmiotu
-     */
-    private function check_item_condition($condition, $user_id)
-    {
-        // Obsługa parametrów zarówno z item jak i condition_inventory
-        $item_id = intval($condition['item'] ?? $condition['item_id'] ?? 0);
-        $condition_type = $condition['condition'] ?? '';
-        $required_quantity = intval($condition['quantity'] ?? 1);
-
-        // Mapowanie warunku na operator
-        $operator = '>=';
-        if ($condition_type === 'has_item') {
-            $operator = '>=';
-        } elseif ($condition_type === 'has_not_item') {
-            $operator = '<';
-        } elseif ($condition_type === 'quantity_above') {
-            $operator = '>';
-        } elseif ($condition_type === 'quantity_below') {
-            $operator = '<';
-        } elseif ($condition_type === 'quantity_equal') {
-            $operator = '==';
-        } else {
-            $operator = $condition['operator'] ?? '>=';
-        }
-
-        $user_items = get_field('items', 'user_' . $user_id) ?: [];
-        $current_quantity = 0;
-
-        foreach ($user_items as $user_item) {
-            if (intval($user_item['item']) === $item_id) {
-                $current_quantity = intval($user_item['quantity'] ?? 0);
-                break;
-            }
-        }
-
-        return $this->compare_values($current_quantity, $operator, $required_quantity);
-    }
-
-    /**
-     * Sprawdza warunek relacji z NPC
-     */
-    private function check_relation_condition($condition, $user_id)
-    {
-        $npc_id = intval($condition['npc'] ?? 0);
-        $condition_type = $condition['condition'] ?? 'relation_above';
-        $value = intval($condition['value'] ?? 0);
-
-        // Sprawdzenie czy NPC jest poznany
-        if ($condition_type === 'is_known') {
-            $meet_field = 'npc-meet-' . $npc_id;
-            $is_known = get_field($meet_field, 'user_' . $user_id);
-            return (bool)$is_known;
-        }
-
-        // Sprawdzenie czy NPC nie jest poznany
-        if ($condition_type === 'is_not_known') {
-            $meet_field = 'npc-meet-' . $npc_id;
-            $is_known = get_field($meet_field, 'user_' . $user_id);
-            return !(bool)$is_known;
-        }
-
-        // Obsługa operatorów porównania wartości relacji
-        $operator = '>=';
-        if ($condition_type === 'relation_above') {
-            $operator = '>';
-        } elseif ($condition_type === 'relation_below') {
-            $operator = '<';
-        } elseif ($condition_type === 'relation_equal') {
-            $operator = '==';
-        } else {
-            $operator = $condition['operator'] ?? '>=';
-        }
-
-        $user_relations = get_field('relation_npc', 'user_' . $user_id) ?: [];
-        $current_value = 0;
-
-        foreach ($user_relations as $relation) {
-            if (intval($relation['npc']) === $npc_id) {
-                $current_value = intval($relation['relation'] ?? 0);
-                break;
-            }
-        }
-
-        return $this->compare_values($current_value, $operator, $value);
-    }
-
-    /**
-     * Sprawdza warunek misji
-     */
-    private function check_mission_condition($condition, $user_id)
-    {
-        // Obsługa parametrów zarówno z mission jak i condition_mission
-        $mission_id = intval($condition['mission'] ?? $condition['mission_id'] ?? 0);
-        $status = $condition['status'] ?? 'completed';
-        $condition_type = $condition['condition'] ?? 'is';
-
-        $user_missions = get_field('user_missions', 'user_' . $user_id) ?: [];
-
-        foreach ($user_missions as $mission) {
-            if (intval($mission['mission']) === $mission_id) {
-                // Obsługa różnych typów warunków misji
-                if ($condition_type === 'is') {
-                    return $mission['status'] === $status;
-                } elseif ($condition_type === 'is_not') {
-                    return $mission['status'] !== $status;
-                }
-
-                // Domyślne sprawdzenie
-                return $mission['status'] === $status;
-            }
-        }
-
-        // Dla warunku "is_not" zwracamy true jeśli misja nie istnieje
-        if ($condition_type === 'is_not') {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Sprawdza warunek klasy użytkownika
-     */
-    private function check_user_class_condition($condition, $user_id)
-    {
-        $required_class = $condition['class'] ?? '';
-        $user_class_data = get_field('user_class', 'user_' . $user_id);
-        $user_class = is_array($user_class_data) ? ($user_class_data['value'] ?? '') : $user_class_data;
-
-        return $user_class === $required_class;
-    }
-
-    /**
-     * Sprawdza warunek lokalizacji
-     */
-    private function check_location_condition($condition, $user_id, $page_data = [])
-    {
-        $condition_type = $condition['condition'] ?? 'is';
-        $location_type = $condition['location_type'] ?? 'text';
-        $location_value = '';
-
-        if ($location_type === 'text') {
-            $location_value = $condition['location_text'] ?? '';
-            $current_location = $page_data['value'] ?? '';
-        } else {
-            $area_id = intval($condition['area'] ?? 0);
-            $location_value = $area_id;
-
-            // Sprawdź czy użytkownik ma dostęp do obszaru
-            $user_areas = get_field('available_areas', 'user_' . $user_id) ?: [];
-            $current_location = in_array($area_id, $user_areas);
-
-            // Dla obszarów używamy boolean, więc dostosujemy warunek
-            if ($condition_type === 'is') {
-                return $current_location === true;
-            } else {
-                return $current_location === false;
-            }
-        }
-
-        // Dla tekstowej lokalizacji porównujemy stringi
-        if ($condition_type === 'is') {
-            return $current_location === $location_value;
-        } else {
-            return $current_location !== $location_value;
-        }
-    }
-
-    /**
-     * Sprawdza warunek zadania
-     */
-    private function check_task_condition($condition, $user_id)
-    {
-
-        $mission_id = intval($condition['mission_id'] ?? 0);
-        $task_id = $condition['task_id'] ?? '';
-        $status = $condition['status'] ?? 'completed';
-        $condition_type = $condition['condition'] ?? 'is';
-
-        if (empty($mission_id) || empty($task_id)) {
-            return false;
-        }
-
-        $missions = get_field('missions', 'user_' . $user_id);
-
-
-        if (!$missions || !isset($missions['mission_' . $mission_id])) {
-            return $condition_type === 'is_not';
-        }
-
-        $user_mission_data = $missions['mission_' . $mission_id];
-
-        if (!isset($user_mission_data['tasks']) || !isset($user_mission_data['tasks'][$task_id])) {
-            return $condition_type === 'is_not';
-        }
-
-        $task_data = $user_mission_data['tasks'][$task_id];
-        $task_status = is_array($task_data) && isset($task_data['status']) ? $task_data['status'] : $task_data;
-
-        if ($condition_type === 'is') {
-            return $task_status === $status;
-        }
-
-        return $task_status !== $status;
-    }
-
-
-    /**
-     * Porównuje wartości według operatora
-     */
-    private function compare_values($current, $operator, $required)
-    {
-        switch ($operator) {
-            case '>=':
-                return $current >= $required;
-            case '>':
-                return $current > $required;
-            case '<=':
-                return $current <= $required;
-            case '<':
-                return $current < $required;
-            case '==':
-                return $current == $required;
-            case '!=':
-                return $current != $required;
-            default:
-                return $current >= $required;
-        }
-    }
-
-    /**
-     * Filtruje odpowiedzi w dialogu na podstawie warunków widoczności
-     * 
-     * @param array $dialog Dane dialogu
-     * @param int $user_id ID użytkownika
-     * @param array $page_data Dane strony
-     * @return array Przefiltrowany dialog
-     */
-    private function filter_dialog_answers($dialog, $user_id, $page_data = [])
-    {
-        if (!isset($dialog['anwsers']) || !is_array($dialog['anwsers'])) {
-            return $dialog;
-        }
-
-        $filtered_answers = [];
-        foreach ($dialog['anwsers'] as $answer) {
-            if ($this->is_answer_visible($answer, $user_id, $page_data)) {
-                $filtered_answers[] = $answer;
-            }
-        }
-
-        $dialog['anwsers'] = $filtered_answers;
-        return $dialog;
-    }
-
-    /**
-     * Sprawdza czy odpowiedź jest widoczna dla użytkownika
-     */
-    private function is_answer_visible($answer, $user_id, $page_data = [])
-    {
-        if (!isset($answer['layout_settings']) || !is_array($answer['layout_settings'])) {
-            return true;
-        }
-
-        $visibility_settings = $answer['layout_settings']['visibility_settings'] ?? [];
-        $logic_operator = $answer['layout_settings']['logic_operator'] ?? 'and';
-
-        if (empty($visibility_settings)) {
-            return true;
-        }
-
-        $results = [];
-        foreach ($visibility_settings as $condition) {
-            $results[] = $this->evaluate_visibility_condition($condition, $user_id, $page_data);
-        }
-
-        if ($logic_operator === 'or') {
-            return in_array(true, $results);
-        } else {
-            return !in_array(false, $results);
-        }
-    }
-
-    /**
      * Wykonuje akcje związane z wybraną odpowiedzią
      * 
-     * @param array $dialogs Lista wszystkich dialogów
+     * @param int $npc_id ID NPC
      * @param string $dialog_id ID aktualnego dialogu
      * @param int $answer_index Indeks wybranej odpowiedzi
      * @param int $user_id ID użytkownika
      * @return array|null Powiadomienie o wykonanych akcjach z statusem
      */
-    private function execute_answer_actions($dialogs, $dialog_id, $answer_index, $user_id)
+    private function execute_answer_actions($npc_id, $dialog_id, $answer_index, $user_id)
     {
-        $dialog = $this->find_dialog_by_id($dialogs, $dialog_id);
+        $dialog = $this->dialog_filter->find_dialog_by_id_raw($npc_id, $dialog_id);
+        $this->log_debug("Dialog kurwa", [
+            'dialog' => $dialog
+        ]);
         if (!$dialog || !isset($dialog['anwsers'][$answer_index])) {
             return null;
         }

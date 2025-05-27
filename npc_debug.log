@@ -1,158 +1,20 @@
-[2025-05-27 15:28:43] [DEBUG] Dialog przy-wiezieniu: Warunek #0 - wynik: NIE SPEŁNIONY
-[2025-05-27 15:28:43] [DATA] Array
+[2025-05-27 16:29:40] [DEBUG] condition
+[2025-05-27 16:29:40] [DATA] Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => area
+    [area] => 207
+    [location_text] => 
+)
+
+[2025-05-27 16:29:40] [DEBUG] condition
+[2025-05-27 16:29:40] [DATA] Array
 (
     [acf_fc_layout] => condition_location
     [condition] => is
     [location_type] => area
     [area] => 451
     [location_text] => 
-)
-
-[2025-05-27 15:28:43] [DEBUG] Dialog przy-wiezieniu: Końcowy wynik widoczności: UKRYTY
-[2025-05-27 15:28:43] [DEBUG] Rezultat wyszukiwania pierwszego dialogu
-[2025-05-27 15:28:43] [DATA] Array
-(
-    [found] => 1
-    [dialog_id] => jak-sie-w-to-gra
-)
-
-[2025-05-27 15:28:43] [DEBUG] Sprawdzanie warunku zadania
-[2025-05-27 15:28:43] [DATA] Array
-(
-    [condition] => Array
-        (
-            [acf_fc_layout] => condition_task
-            [condition] => is_not
-            [mission_id] => 339
-            [task_id] => jak-poruszac-sie-po-grze_0
-            [status] => completed
-        )
-
-    [user_id] => 1
-)
-
-[2025-05-27 15:28:43] [DEBUG] Pobrane misje użytkownika
-[2025-05-27 15:28:43] [DATA] Array
-(
-    [user_id] => 1
-    [missions] => Array
-        (
-            [] => 
-            [mission_339] => Array
-                (
-                    [status] => not_started
-                    [assigned_date] => 
-                    [completion_date] => 
-                    [tasks] => Array
-                        (
-                            [jak-poruszac-sie-po-grze_0] => completed
-                            [jak-sie-tu-poruszac_1] => completed
-                        )
-
-                )
-
-            [mission_247] => Array
-                (
-                    [status] => not_started
-                    [assigned_date] => 
-                    [completion_date] => 
-                    [tasks] => Array
-                        (
-                            [zidentyfikuj-potencjalnych-klientow_0] => Array
-                                (
-                                    [status] => completed
-                                    [npc_target_449] => completed
-                                    [npc_449] => not_started
-                                )
-
-                            [rozlicz-sie-z-irasem_1] => not_started
-                        )
-
-                )
-
-        )
-
-)
-
-[2025-05-27 15:28:58] [DEBUG] Dialog przy-wiezieniu: Warunek #0 - wynik: NIE SPEŁNIONY
-[2025-05-27 15:28:58] [DATA] Array
-(
-    [acf_fc_layout] => condition_location
-    [condition] => is
-    [location_type] => area
-    [area] => 451
-    [location_text] => 
-)
-
-[2025-05-27 15:28:58] [DEBUG] Dialog przy-wiezieniu: Końcowy wynik widoczności: UKRYTY
-[2025-05-27 15:28:58] [DEBUG] Rezultat wyszukiwania pierwszego dialogu
-[2025-05-27 15:28:58] [DATA] Array
-(
-    [found] => 1
-    [dialog_id] => jak-sie-w-to-gra
-)
-
-[2025-05-27 15:29:18] [DEBUG] Dialog przy-wiezieniu: Warunek #0 - wynik: NIE SPEŁNIONY
-[2025-05-27 15:29:18] [DATA] Array
-(
-    [acf_fc_layout] => condition_location
-    [condition] => is
-    [location_type] => area
-    [area] => 451
-    [location_text] => 
-)
-
-[2025-05-27 15:29:18] [DEBUG] Dialog przy-wiezieniu: Końcowy wynik widoczności: UKRYTY
-[2025-05-27 15:29:18] [DEBUG] Rezultat wyszukiwania pierwszego dialogu
-[2025-05-27 15:29:18] [DATA] Array
-(
-    [found] => 1
-    [dialog_id] => jak-sie-w-to-gra
-)
-
-[2025-05-27 15:29:25] [DEBUG] Otrzymano powiadomienie z akcji
-[2025-05-27 15:29:25] [DATA] Array
-(
-    [message] => Ustawiono klasę: zawijacz
-    [status] => success
-)
-
-[2025-05-27 15:29:27] [DEBUG] Otrzymano powiadomienie z akcji
-[2025-05-27 15:29:27] [DATA] Array
-(
-    [message] => Ustawiono klasę: zawijacz
-    [status] => success
-)
-
-[2025-05-27 15:29:42] [DEBUG] Otrzymano powiadomienie z akcji
-[2025-05-27 15:29:42] [DATA] Array
-(
-    [message] => Ustawiono klasę: zawijacz
-    [status] => success
-)
-
-[2025-05-27 15:30:08] [DEBUG] Dialog przy-wiezieniu: Warunek #0 - wynik: NIE SPEŁNIONY
-[2025-05-27 15:30:08] [DATA] Array
-(
-    [acf_fc_layout] => condition_location
-    [condition] => is
-    [location_type] => area
-    [area] => 451
-    [location_text] => 
-)
-
-[2025-05-27 15:30:08] [DEBUG] Dialog przy-wiezieniu: Końcowy wynik widoczności: UKRYTY
-[2025-05-27 15:30:08] [DEBUG] Rezultat wyszukiwania pierwszego dialogu
-[2025-05-27 15:30:08] [DATA] Array
-(
-    [found] => 1
-    [dialog_id] => jak-sie-w-to-gra
-)
-
-[2025-05-27 15:30:14] [DEBUG] Otrzymano powiadomienie z akcji
-[2025-05-27 15:30:14] [DATA] Array
-(
-    [message] => Ustawiono klasę: zawijacz
-    [status] => success
 )
 

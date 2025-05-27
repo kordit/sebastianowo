@@ -14,7 +14,8 @@ load_theme_files([
     'includes/register-cpt',
     'includes/class',
     'includes/functions',
-    'includes/dynamic-fields'
+    'includes/dynamic-fields',
+    'includes/db-tables'
 ]);
 
 add_action('wp_footer', function () {

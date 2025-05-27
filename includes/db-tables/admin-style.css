@@ -1,0 +1,388 @@
+/* Stylowanie dla panelu administracyjnego gry */
+
+.game-admin-wrap {
+    max-width: 1200px;
+}
+
+/* Statystyki na górze */
+.game-stats-overview {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.stat-box {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    flex: 1;
+}
+
+.stat-box h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #646970;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1d2327;
+}
+
+/* Tabela użytkowników */
+.wp-list-table .has-game-data {
+    background-color: #f0f9ff;
+}
+
+.wp-list-table .no-game-data {
+    background-color: #fef7f0;
+}
+
+.no-data {
+    color: #8c8f94;
+    font-style: italic;
+}
+
+.user-class {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.reputation-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+}
+
+.reputation-excellent {
+    background: #22c55e;
+}
+
+.reputation-good {
+    background: #3b82f6;
+}
+
+.reputation-neutral {
+    background: #6b7280;
+}
+
+.reputation-poor {
+    background: #f59e0b;
+}
+
+.reputation-bad {
+    background: #ef4444;
+}
+
+.status-active {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.status-inactive {
+    color: #8c8f94;
+}
+
+/* Szczegóły użytkownika */
+.user-details-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+}
+
+.user-avatar img {
+    border-radius: 50%;
+}
+
+.user-info h2 {
+    margin: 0;
+}
+
+.user-info p {
+    margin: 5px 0;
+    color: #646970;
+}
+
+/* Sekcje danych gry */
+.game-data-section {
+    margin: 20px 0;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+}
+
+.game-data-section h3 {
+    margin: 0;
+    padding: 15px 20px;
+    border-bottom: 1px solid #c3c4c7;
+    background: #f6f7f7;
+}
+
+.game-data-section .form-table,
+.game-data-section .wp-list-table {
+    margin: 0;
+}
+
+/* Siatka statystyk */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.stat-item label {
+    display: block;
+    font-size: 12px;
+    color: #646970;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1d2327;
+}
+
+/* Paski witalności */
+.vitality-bars {
+    padding: 20px;
+}
+
+.vitality-item {
+    margin-bottom: 15px;
+}
+
+.vitality-item label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.progress-bar {
+    position: relative;
+    width: 100%;
+    height: 25px;
+    background: #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.progress-fill.life {
+    background: linear-gradient(90deg, #ef4444, #22c55e);
+}
+
+.progress-fill.energy {
+    background: linear-gradient(90deg, #3b82f6, #06b6d4);
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: #1d2327;
+}
+
+/* Siatka umiejętności */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.skill-item {
+    padding: 15px;
+    background: #f0f9ff;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.skill-item label {
+    display: block;
+    font-size: 12px;
+    color: #1e40af;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.skill-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #1e40af;
+}
+
+/* Przedmioty */
+.item-equipped {
+    background-color: #ecfdf5 !important;
+}
+
+.equipped {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.not-equipped {
+    color: #8c8f94;
+}
+
+/* Misje */
+.mission-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-completed {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.status-failed {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* Relacje */
+.relation-value {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+
+.relation-excellent {
+    background: #22c55e;
+}
+
+.relation-good {
+    background: #3b82f6;
+}
+
+.relation-neutral {
+    background: #6b7280;
+}
+
+.relation-poor {
+    background: #f59e0b;
+}
+
+.relation-bad {
+    background: #ef4444;
+}
+
+.known {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.unknown {
+    color: #8c8f94;
+}
+
+/* Obszary */
+.areas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.area-item {
+    padding: 15px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+}
+
+.area-item strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.area-item small {
+    color: #6b7280;
+}
+
+/* Ustawienia bazy danych */
+.database-status,
+.database-actions,
+.tables-list {
+    margin: 20px 0;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.status-ok {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.status-error {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+    .game-stats-overview {
+        flex-direction: column;
+    }
+
+    .stats-grid,
+    .skills-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+
+    .user-details-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .areas-grid {
+        grid-template-columns: 1fr;
+    }
+}
