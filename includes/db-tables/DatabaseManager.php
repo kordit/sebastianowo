@@ -177,9 +177,14 @@ class GameDatabaseManager
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             user_id bigint(20) unsigned NOT NULL,
             mission_id bigint(20) unsigned NOT NULL,
-            status varchar(20) DEFAULT 'active',
+            mission_type varchar(50) DEFAULT NULL,
+            status varchar(20) DEFAULT 'not_started',
+            start_date datetime DEFAULT NULL,
+            end_date datetime DEFAULT NULL,
             tasks_data longtext,
-            progress_data longtext,
+            wins int(11) DEFAULT 0,
+            losses int(11) DEFAULT 0,
+            draws int(11) DEFAULT 0,
             
             created_at timestamp DEFAULT CURRENT_TIMESTAMP,
             updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -188,6 +193,7 @@ class GameDatabaseManager
             KEY user_id (user_id),
             KEY mission_id (mission_id),
             KEY status (status),
+            KEY mission_type (mission_type),
             UNIQUE KEY user_mission (user_id, mission_id),
             FOREIGN KEY (user_id) REFERENCES {$wpdb->prefix}users(ID) ON DELETE CASCADE
         ) $charset_collate;";

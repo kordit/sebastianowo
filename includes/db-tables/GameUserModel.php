@@ -85,18 +85,9 @@ class GameUserModel
      */
     public function get_missions_data()
     {
-        global $wpdb;
-
-        $results = $wpdb->get_results($wpdb->prepare(
-            "SELECT um.*, p.post_title as mission_name 
-             FROM {$this->tables['user_missions']} um 
-             LEFT JOIN {$wpdb->posts} p ON um.mission_id = p.ID 
-             WHERE um.user_id = %d 
-             ORDER BY um.created_at DESC",
-            $this->user_id
-        ), ARRAY_A);
-
-        return $results ?: [];
+        require_once(get_template_directory() . '/includes/db-tables/MissionUserModel.php');
+        $mission_model = new GameMissionUserModel($this->user_id);
+        return $mission_model->get_all_missions();
     }
 
     /**

@@ -14,8 +14,9 @@ if (!defined('ABSPATH')) {
 // Ładowanie klas
 require_once __DIR__ . '/DatabaseManager.php';
 require_once __DIR__ . '/GameUserModel.php';
+require_once __DIR__ . '/MissionUserModel.php';
+require_once __DIR__ . '/GameMissionAPI.php';
 require_once __DIR__ . '/GameAdminPanel.php';
-require_once __DIR__ . '/helpers.php';
 
 /**
  * Główna klasa inicjalizująca system bazy danych
@@ -34,6 +35,9 @@ class GameDatabaseInit
         if (is_admin()) {
             GameAdminPanel::get_instance();
         }
+
+        // Inicjalizuj API misji
+        new GameMissionAPI();
     }
 
     public static function get_instance()
