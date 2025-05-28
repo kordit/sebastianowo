@@ -108,6 +108,52 @@ class GameAdminPanel
                 });
             }
         }
+
+        // Edycja gracza
+        if (isset($_POST['update_game_user']) && wp_verify_nonce($_POST['_wpnonce'], 'update_game_user')) {
+            $user_id = intval($_POST['user_id']);
+            $user_repo = new GameUserRepository();
+
+            $update_data = [
+                'nick' => sanitize_text_field($_POST['nick']),
+                'user_class' => sanitize_text_field($_POST['user_class']),
+                'exp' => intval($_POST['exp']),
+                'learning_points' => intval($_POST['learning_points']),
+                'reputation' => intval($_POST['reputation']),
+                'strength' => intval($_POST['strength']),
+                'defense' => intval($_POST['defense']),
+                'dexterity' => intval($_POST['dexterity']),
+                'perception' => intval($_POST['perception']),
+                'technical' => intval($_POST['technical']),
+                'charisma' => intval($_POST['charisma']),
+                'combat' => intval($_POST['combat']),
+                'steal' => intval($_POST['steal']),
+                'craft' => intval($_POST['craft']),
+                'trade' => intval($_POST['trade']),
+                'relations' => intval($_POST['relations']),
+                'street' => intval($_POST['street']),
+                'life' => intval($_POST['life']),
+                'max_life' => intval($_POST['max_life']),
+                'energy' => intval($_POST['energy']),
+                'max_energy' => intval($_POST['max_energy']),
+                'gold' => intval($_POST['gold']),
+                'cigarettes' => intval($_POST['cigarettes']),
+                'current_area_id' => intval($_POST['current_area_id']),
+                'current_scene_id' => sanitize_text_field($_POST['current_scene_id']),
+                'story_text' => sanitize_textarea_field($_POST['story_text'])
+            ];
+
+            try {
+                $user_repo->update($user_id, $update_data);
+                add_action('admin_notices', function () {
+                    echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Dane gracza zostały zaktualizowane!</p></div>';
+                });
+            } catch (Exception $e) {
+                add_action('admin_notices', function () use ($e) {
+                    echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+                });
+            }
+        }
     }
 
     /**

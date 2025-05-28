@@ -353,3 +353,17 @@ details>ul {
     min-height: 100px;
     line-height: 1.6;
 }
+
+/* Submit Section Styles */
+.submit-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    text-align: left;
+}
+
+.submit-section .button-primary {
+    margin-right: 10px;
+}
