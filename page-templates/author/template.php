@@ -1,17 +1,27 @@
-<div class="author-panel-tabs">
-    <ul class="tab-navigation">
-        <li class="tab-item active" data-tab="profil">Profil</li>
-        <li class="tab-item" data-tab="statystyki">Statystyki</li>
-        <li class="tab-item" data-tab="umiejetnosci">Umiejętności</li>
+<div class="tabs-container" x-data="{ activeTab: 'tab1' }">
+    <ul class="tabs-nav">
+        <li class="tab-item" :class="{ 'active': activeTab === 'tab1' }" @click="activeTab = 'tab1'">Profil</li>
+        <li class="tab-item" :class="{ 'active': activeTab === 'tab2' }" @click="activeTab = 'tab2'">Statystyki</li>
+        <li class="tab-item" :class="{ 'active': activeTab === 'tab3' }" @click="activeTab = 'tab3'">Umiejętności</li>
     </ul>
 
-    <div class="tab-content-author">
-        <!-- Tab Profil -->
-        <div id="profil" class="tab-pane active">
+    <div class="tabs-content">
+        <!-- Tab 1: Profil -->
+        <div id="tab1" class="tab-pane" :class="{ 'active': activeTab === 'tab1' }" x-show.transition.opacity="activeTab === 'tab1'">
             <h2>Profil postaci</h2>
             <div class="profile-details">
                 <div class="profile-section">
-                    <h3>Informacje podstawowe</h3>
+                    <div class="person">
+                        <div class="profile-image">
+                            <?php echo wp_get_attachment_image(get_field('avatar_full', 'user_' . $user_id), 'full', false, ['class' => 'main_person_avatar']); ?>
+                        </div>
+                    </div>
+
+                    <!-- Tutaj możesz dodać więcej pól związanych z profilem -->
+                </div>
+
+                <div class="profile-section">
+                    <h3>Dane postaci</h3>
                     <div class="profile-field">
                         <span class="label">Nick:</span>
                         <span class="value"><?php echo esc_html(get_field('nick', 'user_' . $user_id) ?: $current_user->display_name); ?></span>
@@ -20,11 +30,6 @@
                         <span class="label">Klasa postaci:</span>
                         <span class="value"><?php echo $user_class ? esc_html($user_class['label']) : 'Brak klasy'; ?></span>
                     </div>
-                    <!-- Tutaj możesz dodać więcej pól związanych z profilem -->
-                </div>
-
-                <div class="profile-section">
-                    <h3>Historia postaci</h3>
                     <div class="story-content">
                         <?php echo get_field('story', 'user_' . $user_id) ?: 'Brak historii postaci'; ?>
                     </div>
@@ -32,8 +37,8 @@
             </div>
         </div>
 
-        <!-- Tab Statystyki -->
-        <div id="statystyki" class="tab-pane">
+        <!-- Tab 2: Statystyki -->
+        <div id="tab2" class="tab-pane" :class="{ 'active': activeTab === 'tab2' }" x-show.transition.opacity="activeTab === 'tab2'">
             <h2>Statystyki</h2>
 
             <?php
@@ -113,8 +118,8 @@
             </div>
         </div>
 
-        <!-- Tab Umiejętności -->
-        <div id="umiejetnosci" class="tab-pane">
+        <!-- Tab 3: Umiejętności -->
+        <div id="tab3" class="tab-pane" :class="{ 'active': activeTab === 'tab3' }" x-show.transition.opacity="activeTab === 'tab3'">
             <h2>Umiejętności</h2>
             <div class="skills-container">
                 <?php if ($skills && is_array($skills)): ?>

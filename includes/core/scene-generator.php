@@ -1,0 +1,175 @@
+<?php
+function getRelationColor($relation)
+{
+    // Ograniczenie wartości do zakresu -100 do 100
+    $relation = max(-100, min(100, $relation));
+
+    // Przeliczamy wartość na zakres 0-1
+    $normalized = ($relation + 100) / 200;
+
+    // Interpolacja kolorów (czerwony -> żółty -> zielony)
+    $r = (1 - $normalized) * 255; // Od czerwonego do zielonego
+    $g = ($normalized) * 255; // Od żółtego do zielonego
+    $b = 0; // Brak niebieskiego
+
+    return sprintf("#%02X%02X%02X", $r, $g, $b);
+}
+
+/**
+ * Przetwarza ścieżki SVG i zwraca dane potrzebne do renderowania
+ * 
+ * @param string $svg_url URL pliku SVG
+ * @param int $post_id ID aktualnego posta
+ * @param string $post_title Tytuł posta (sanityzowany)
+ * @param int $scene_index Indeks sceny (0 dla pierwszej sceny lub indeks z tablicy dla pozostałych)
+ * @param int $current_user_id ID bieżącego użytkownika
+ * @param string $post_type Typ posta
+ * @param string $post_name Nazwa posta
+ * @param bool $autostart Czy element ma być automatycznie aktywowany
+ * @return array Tablica z danymi ścieżek
+ */
+function process_svg_paths(string $svg_url, int $post_id, string $post_title, int $scene_index, int $current_user_id, string $post_type, string $post_name, bool $autostart = false): array
+{
+    if (!$svg_url) {
+        return [];
+    }
+
+    $path_count = count_svg_paths($svg_url);
+    $selected_paths = [];
+
+    for ($i = 0; $i < $path_count; $i++) {
+        $select = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_select", $post_id);
+        $path_id = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_id", $post_id);
+        $npc     = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_npc", $post_id);
+        $name    = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_name", $post_id);
+        $link    = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_page", $post_id) ?: '';
+        $lootbox     = get_field("field_{$post_title}_scene_{$scene_index}_svg_path_{$i}_lootbox", $post_id);
+
+        // Określenie koloru w zależności od typu elementu
+        $color = '#000'; // Domyślny kolor
+        if ($select === 'scena' || $select === 'page') {
+            $color = '#fff';
+        } elseif ($select === 'lootbox') {
+            $color = '#0000ff'; // Przykładowy kolor dla lootboxa
+        } elseif ($select === 'npc' && $npc) {
+            $relation_value = get_field('npc-relation-' . $npc, 'user_' . $current_user_id);
+            $color = getRelationColor($relation_value);
+        }
+
+        // Obsługa linku jako tablicy (obsługa pola ACF typu link)
+        if (isset($link['url'])) {
+            $link = $link['url'];
+        }
+
+        if (!empty($select) || !empty($path_id) || !empty($npc) || !empty($name) || !empty($lootbox)) {
+            // Inicjalizacja podstawowych danych wspólnych dla wszystkich typów
+            $path_data = [
+                'select' => $select,
+                'title'  => $name ?: 'brak tytułu',
+                'color'  => $color,
+                'autostart' => $autostart,
+            ];
+
+            // Dodawanie odpowiednich atrybutów w zależności od typu elementu
+            switch ($select) {
+                case 'npc':
+                    // Dane dla NPC
+                    if ($npc) {
+                        $path_data['npc-id'] = $npc;
+                        $path_data['npc-name'] = get_the_title($npc);
+                        $path_data['relation'] = $current_user_id;
+                    }
+                    break;
+
+                case 'scena':
+                    // Dane dla sceny - tylko target
+                    $path_data['target'] = get_site_url() . '/' . $post_type . '/' . $post_name . '/' . $path_id;
+                    break;
+
+                case 'lootbox':
+                    // Dane dla sceny - tylko target
+                    $path_data['lootbox'] = $lootbox;
+                    break;
+
+                case 'page':
+                    // Dane dla strony
+                    $path_data['page'] = $link;
+                    break;
+            }
+
+            $selected_paths[] = $path_data;
+        }
+    }
+
+    return $selected_paths;
+}
+
+function scene_generator()
+{
+    $post_id = get_the_ID();
+    $post_type = get_post_type();
+
+    $post_obj = get_post();
+    $post_name = $post_obj ? $post_obj->post_name : '';
+
+    $scene_id = get_query_var('scene_id', $post_id);
+    $get_scenes = get_field('scenes');
+    $current_user_id = get_current_user_id();
+
+    $instance = get_query_var('instance_name');
+    $post_title = sanitize_title(get_the_title($post_id));
+
+    if (isset($_GET['spacer']) && $_GET['spacer'] === 'true') {
+        $spacer_data = handle_spacer_parameter($post_id);
+
+        if ($spacer_data) {
+            $background = $spacer_data['background'];
+            $svg_url = $spacer_data['svg_url'];
+            $selected_paths = $spacer_data['selected_paths'];
+        }
+    } elseif ($scene_id == $post_id) {
+        // Obsługa pierwszej sceny
+        if (isset($get_scenes[0])) {
+            $scene = $get_scenes[0];
+            $background = $scene['tlo'];
+            $svg_url = $scene['maska'];
+            $selected_paths = process_svg_paths($svg_url, $post_id, $post_title, 0, $current_user_id, $post_type, $post_name);
+        }
+    } else {
+        // Obsługa innych scen
+        $found_scene = null;
+        $found_index = null;
+        foreach ($get_scenes as $index => $scene) {
+            if ($scene['id_sceny'] === $scene_id) {
+                $found_scene = $scene;
+                $found_index = $index;
+                break;
+            }
+        }
+
+        if ($found_scene) {
+            $background = $found_scene['tlo'];
+            $svg_url = $found_scene['maska'];
+
+            $selected_paths = process_svg_paths(
+                $svg_url,
+                $post_id,
+                $post_title,
+                $found_index,
+                $current_user_id,
+                $post_type,
+                $post_name,
+            );
+        } else {
+            // Możesz obsłużyć przypadek, gdy scena o danym id_sceny nie zostanie znaleziona.
+        }
+    }
+
+    // Wyświetlanie tła i SVG
+    if (isset($background)) {
+        echo wp_get_attachment_image($background, 'full');
+    }
+    if (isset($svg_url) && isset($selected_paths)) {
+        echo et_svg_with_data($svg_url, $selected_paths);
+    }
+}

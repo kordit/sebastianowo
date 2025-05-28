@@ -1,0 +1,20 @@
+[2025-05-27 16:29:40] [DEBUG] condition
+[2025-05-27 16:29:40] [DATA] Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => area
+    [area] => 207
+    [location_text] => 
+)
+
+[2025-05-27 16:29:40] [DEBUG] condition
+[2025-05-27 16:29:40] [DATA] Array
+(
+    [acf_fc_layout] => condition_location
+    [condition] => is
+    [location_type] => area
+    [area] => 451
+    [location_text] => 
+)
+

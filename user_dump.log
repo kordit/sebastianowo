@@ -1,0 +1,211 @@
+Array
+(
+    [user_class] => Array
+        (
+            [value] => kombinator
+            [label] => Kombinator
+        )
+
+    [avatar] => 81
+    [nick] => Adam
+    [story] => 
+    [stats] => Array
+        (
+            [strength] => 10
+            [defense] => 9
+            [dexterity] => 7
+            [perception] => 9
+            [technical] => 11
+            [charisma] => 6
+        )
+
+    [skills] => Array
+        (
+            [combat] => 200
+            [steal] => 50
+            [craft] => 100
+            [trade] => 0
+            [relations] => 0
+            [street] => 0
+        )
+
+    [backpack] => Array
+        (
+            [gold] => 442
+            [cigarettes] => 48
+        )
+
+    [vitality] => Array
+        (
+            [life] => 80
+            [max_life] => 100
+            [energy] => 183
+            [max_energy] => 100
+        )
+
+    [progress] => Array
+        (
+            [exp] => 1100
+            [learning_points] => 10
+            [reputation] => 0
+        )
+
+    [items] => Array
+        (
+            [0] => Array
+                (
+                    [item] => 121
+                    [quantity] => 5
+                )
+
+            [1] => Array
+                (
+                    [item] => 122
+                    [quantity] => 1
+                )
+
+            [2] => Array
+                (
+                    [item] => 212
+                    [quantity] => 2
+                )
+
+            [3] => Array
+                (
+                    [item] => 125
+                    [quantity] => 1
+                )
+
+            [4] => Array
+                (
+                    [item] => 118
+                    [quantity] => 1
+                )
+
+            [5] => Array
+                (
+                    [item] => 484
+                    [quantity] => 6
+                )
+
+            [6] => Array
+                (
+                    [item] => 483
+                    [quantity] => 10
+                )
+
+            [7] => Array
+                (
+                    [item] => 124
+                    [quantity] => 6
+                )
+
+        )
+
+    [avatar_full] => 86
+    [equipped_items] => Array
+        (
+            [chest_item] => 118
+            [bottom_item] => 121
+            [legs_item] => 
+        )
+
+    [mission_247] => Array
+        (
+            [status] => in_progress
+            [assigned_date] => 2025-04-27 13:05:30
+            [completion_date] => 2025-04-29 16:43:16
+            [tasks] => Array
+                (
+                    [zidentyfikuj-potencjalnych-klientow_0] => Array
+                        (
+                            [status] => completed
+                            [npc_target_449] => completed
+                            [npc_449] => completed
+                        )
+
+                    [rozlicz-sie-z-irasem_1] => in_progress
+                )
+
+        )
+
+    [current_area] => 207
+    [available_areas] => Array
+        (
+            [0] => 451
+            [1] => 207
+        )
+
+    [mission_339] => Array
+        (
+            [status] => not_started
+            [assigned_date] => 2025-04-29 18:04:25
+            [completion_date] => 2025-05-15 18:20:13
+            [tasks] => Array
+                (
+                    [jak-poruszac-sie-po-grze_0] => completed
+                    [jak-sie-tu-poruszac_1] => not_started
+                )
+
+        )
+
+    [relations] => Array
+        (
+            [npc_350] => 20
+        )
+
+    [npc-relation-449] => 77
+    [npc-meet-449] => 
+    [missions] => Array
+        (
+            [] => 
+            [mission_339] => Array
+                (
+                    [status] => not_started
+                    [assigned_date] => 
+                    [completion_date] => 
+                    [tasks] => Array
+                        (
+                            [jak-poruszac-sie-po-grze_0] => not_started
+                            [jak-sie-tu-poruszac_1] => not_started
+                        )
+
+                )
+
+            [mission_247] => Array
+                (
+                    [status] => not_started
+                    [assigned_date] => 
+                    [completion_date] => 
+                    [tasks] => Array
+                        (
+                            [zidentyfikuj-potencjalnych-klientow_0] => Array
+                                (
+                                    [status] => not_started
+                                    [npc_target_449] => completed
+                                    [npc_449] => completed
+                                )
+
+                            [rozlicz-sie-z-irasem_1] => not_started
+                        )
+
+                )
+
+        )
+
+    [npc-relation-464] => 10
+    [npc-meet-464] => 1
+    [npc-relation-473] => -42
+    [npc-meet-473] => 
+    [searched_lootboxes] => Array
+        (
+            [0] => Array
+                (
+                    [lootbox_id] => 480
+                    [search_date] => 19/05/2025 2:57 pm
+                )
+
+        )
+
+    [fight_tokens] => 
+)

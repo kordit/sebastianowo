@@ -1,3 +1,11 @@
+:root {
+    --c1: #421318;
+    --c2: #A5A394;
+    --c3: #745F40;
+    --c4: #0E0300;
+    --c5: #F1F4F1;
+}
+
 @font-face {
     font-display: swap;
     /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
@@ -46,6 +54,7 @@
     font-weight: 700;
     src: url('assets/fonts/work-sans-v19-latin_latin-ext-700.woff2') format('woff2');
 }
+
 
 .walking-effect {
     animation: fadeZoomBlur 1s linear forwards;
@@ -110,15 +119,17 @@
     --ft: 'Bungee Outline';
 }
 
+* {
+    box-sizing: border-box;
+
+    &:before,
+    &:after {
+        box-sizing: border-box;
+    }
+}
+
 pre {
     color: #fff !important;
-    // position: fixed;
-    // top: 0;
-    // left: 0;
-    // width: 100%;
-    // height: 100%;
-    // z-index: 1000000;
-    // background-color: #000;
     overflow: scroll;
 }
 
@@ -130,7 +141,7 @@ html {
     }
 }
 
-body.postid-24 {
+body.postid-454 {
 
     header,
     aside {
@@ -147,7 +158,7 @@ body {
 
     &.author,
     &.template-zadania,
-    &.template-plecak {
+    &.template-backpack {
         .game-content {
             background-image: url(/wp-content/uploads/2025/04/New-Project-2.jpg);
             background-size: cover;
@@ -347,9 +358,10 @@ html {
 
 .game-content {
     width: 100vw;
+    overflow: auto;
 
     &--inner {
-        width: calc(80vw - 40px);
+        width: calc(85vw - 40px);
         margin-left: auto;
         margin-right: 20px;
         margin-top: 130px;
@@ -367,66 +379,6 @@ html {
     display: none;
 }
 
-.npc-dialog-bubble {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid #333;
-    border-radius: 12px;
-    padding: 10px 15px;
-    width: 250px;
-    max-width: 100%;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    transition: opacity 0.3s ease;
-    transform: translate(20%, 0%);
-    display: none;
-
-    .npc-dialog-next {
-        margin: auto;
-        display: block;
-        background: green;
-    }
-}
-
-.npc-dialog-bubble::after {
-    content: "";
-    position: absolute;
-    top: 40px;
-    left: -20px;
-    margin-left: -10px;
-    border-width: 20px 20px 0;
-    border-style: solid;
-    border-color: #fff rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
-    transform: rotate(90deg);
-    opacity: .9;
-}
-
-.npc-dialog-speaker {
-    color: #111;
-    font-size: 12px;
-    font-weight: bold;
-    text-align: left;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 4px;
-    background-color: rgba(0, 0, 0, 0.03);
-    padding: 3px 6px;
-    border-radius: 4px;
-}
-
-.npc-dialog-content {
-    color: #333;
-    font-size: 14px;
-    line-height: 1.4;
-    text-align: center;
-}
-
-.npc-dialog-bubble {
-    animation: dialogFadeIn 0.5s ease forwards;
-}
-
 aside {
     position: absolute;
     z-index: 4;
@@ -435,7 +387,12 @@ aside {
     left: 20px;
     top: 20px;
     border: solid 5px #000;
-    width: calc(20vw - 20px);
+    width: calc(15vw - 20px);
+    min-width: 180px;
+
+    @media only screen and (max-width: 991px) {
+        left: 0px;
+    }
 
     .bar-game {
         width: 100%;
@@ -574,6 +531,8 @@ header {
     opacity: 0;
     filter: blur(10px);
     animation: reverseFadeZoomBlur .5s ease-out forwards;
+    aspect-ratio: 1440 / 800;
+    height: 100%;
 
     &.zooming {
         transform: scale(3);
@@ -581,8 +540,8 @@ header {
     }
 
     img {
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: auto;
         object-fit: cover;
     }
 
@@ -827,9 +786,9 @@ a.btn.back {
         margin: auto;
     }
 
-    &.neutral {}
+    // &.neutral {}
 
-    &.bad {}
+    // &.bad {}
 
     &.success {
         .btn {
@@ -876,4 +835,59 @@ body.template-kreator .game-content {
         margin-top: auto;
     }
 
+}
+
+ul.tabs-nav {
+    display: flex;
+    list-style-type: none;
+    padding: 0px;
+    margin: 0;
+    margin-bottom: 30px;
+    margin-top: -83px;
+    gap: 15px;
+    margin-left: -25px;
+
+
+    .tab-item {
+        font-family: var(--ff);
+        padding: 15px 30px;
+        border: solid 4px #000;
+        background: #fff;
+        cursor: pointer;
+
+        &.active {
+            background-color: #000;
+            color: #fff;
+        }
+    }
+}
+
+
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 15px;
+    grid-row-gap: 15px;
+}
+
+.page-title {
+    margin-bottom: 20px;
+}
+
+.item-card {
+    background-color: #fff;
+    border: solid 5px #000;
+    padding: 15px;
+    border-radius: 5px;
+
+    img {
+        width: 100%;
+
+        height: auto;
+    }
+}
+
+.subtypes-nav {
+    margin-bottom: 30px;
 }

@@ -13,12 +13,12 @@ if ($instance != 'kreator'): ?>
     </div>
     <div class="game-content--inner">
         <?php
-
+        $current_user_id = get_current_user_id();
+        $meta = get_user_meta($current_user_id);
         if (is_single() && get_the_ID() !== 24) {
             $post = get_post();
             echo '<a class="walk btn btn-green" href="' . esc_url(get_permalink($post)) . '?spacer=true">Poszwędaj się</a>';
         }
-
 
         $request_uri = trim($_SERVER['REQUEST_URI'], '/'); // Usuwamy początkowe i końcowe "/"
         $slash_count = substr_count($request_uri, '/');
@@ -30,19 +30,21 @@ if ($instance != 'kreator'): ?>
             $scene = '';
         }
 
-
+        // et_r(get_fields('user_' . $current_user_id));
+        et_r(get_fields('508'));
         if ($instance) {
             include(THEME_SRC . '/page-templates/' . $instance . '/template.php');
         } elseif (is_author()) {
             include(THEME_SRC . '/page-templates/author/config.php');
-        } elseif (is_archive()) {
-            $single_src = get_post()->post_type;
-            include(THEME_SRC . '/page-templates/' . $single_src . '/main/template.php');
-        } elseif (is_single()) {
-            $single_src = get_post()->post_type;
-            include(THEME_SRC . '/page-templates/' . $single_src . '/single/template.php');
-        } else {
         }
+        //  elseif (is_archive()) {
+        //     $single_src = get_post()->post_type;
+        //     include(THEME_SRC . '/page-templates/' . $single_src . '/main/template.php');
+        // } elseif (is_single()) {
+        //     $single_src = get_post()->post_type;
+        //     include(THEME_SRC . '/page-templates/' . $single_src . '/single/template.php');
+        // } else {
+        // }
         ?>
     </div>
 

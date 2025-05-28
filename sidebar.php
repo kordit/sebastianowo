@@ -2,12 +2,26 @@
 $current_user = wp_get_current_user();
 $author_url = get_author_posts_url($current_user->ID);
 $current_user_id = get_current_user_id();
-$avatar_id = get_field('avatar', 'user_' . $current_user_id);
-$avatar = get_field('avatar', 'user_' . $current_user_id);
-$nick = get_field('nick', 'user_' . $current_user_id);
-$stats = get_field('vitality', 'user_' . $current_user_id);
-$current_area = get_field('current_area', 'user_' . get_current_user_id());
 
+// Pobierz dane z nowego systemu bazy danych
+$game_user = get_game_user($current_user_id);
+$user_data = $game_user ? $game_user->get_basic_data() : null;
+
+// Przygotuj dane dla kompatybilności
+$avatar_id = $user_data ? $user_data['avatar_id'] : 0;
+$avatar = $avatar_id ? ['ID' => $avatar_id] : null;
+$nick = $user_data ? $user_data['nick'] : $current_user->display_name;
+
+// Przygotuj dane witalności
+$vitality_data = [
+    'max_life' => $user_data ? $user_data['max_life'] : 100,
+    'life' => $user_data ? $user_data['current_life'] : 100,
+    'max_energy' => $user_data ? $user_data['max_energy'] : 100,
+    'energy' => $user_data ? $user_data['current_energy'] : 100
+];
+$stats = $vitality_data;
+
+$current_area = $user_data ? $user_data['current_area_id'] : null;
 ?>
 <aside>
     <div class="wrapper">
@@ -34,12 +48,13 @@ $current_area = get_field('current_area', 'user_' . get_current_user_id());
                 <div class="bar-game" data-bar-max="<?= $stats['max_energy']; ?>" data-bar-current="<?= $stats['energy']; ?>" data-bar-color="#ff5733" data-bar-type="energy"></div>
             </div>
         </div>
+        <h5 class="navigation-title">Nawigacja</h5>
         <div class="icons">
-            <a href="/<?= get_permalink($current_area->ID); ?>">
+            <a href="<?= get_permalink($current_area); ?>">
                 <img src="<?= esc_url(PNG . '/spacer.png'); ?>" alt="">
                 <span class="icon-label">Rejon</span>
             </a>
-            <a href="/plecak">
+            <a href="/backpack">
                 <img src="<?= esc_url(PNG . '/plecak.png'); ?>" alt="">
                 <span class="icon-label">Plecak</span>
             </a>
