@@ -492,4 +492,3 @@ $level = max(1, floor($game_user['exp'] / 100) + 1);
         </a>
     </div>
 </div>
-</div>

@@ -6,6 +6,10 @@
 /* =============================================================================
    RESET & BASE STYLES
    ============================================================================= */
+* {
+    box-sizing: border-box;
+}
+
 .game-admin * {
     box-sizing: border-box;
 }
@@ -16,10 +20,15 @@
 
 /* Kontener główny */
 .ga-container {
-    max-width: 1200px;
     margin: 0;
+    margin-right: 30px;
     padding: 20px 0;
 }
+
+/* .ga-card-content {
+    padding: 20px;
+    padding-top: 0px;
+} */
 
 /* Siatka główna */
 .ga-grid {

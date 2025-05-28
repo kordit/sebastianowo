@@ -35,11 +35,11 @@ function initConfirmButtons() {
  * Inicjalizuje animowane paski postępu
  */
 function initProgressBars() {
-    const progressBars = document.querySelectorAll('.progress-bar-large');
+    const progressBars = document.querySelectorAll('.ga-progress');
 
     progressBars.forEach(bar => {
-        const fill = bar.querySelector('.progress-fill');
-        const text = bar.querySelector('.progress-text');
+        const fill = bar.querySelector('.ga-progress__fill');
+        const text = bar.querySelector('.ga-progress__text');
 
         if (fill && text) {
             // Animuj pasek przy ładowaniu
@@ -71,8 +71,8 @@ function updateProgressBar(progressBar, inputs) {
     const max = parseInt(inputs[1].value) || 1;
     const percentage = Math.min(Math.max((current / max) * 100, 0), 100);
 
-    const fill = progressBar.querySelector('.progress-fill');
-    const text = progressBar.querySelector('.progress-text');
+    const fill = progressBar.querySelector('.ga-progress__fill');
+    const text = progressBar.querySelector('.ga-progress__text');
 
     if (fill && text) {
         fill.style.width = percentage + '%';
@@ -85,11 +85,11 @@ function updateProgressBar(progressBar, inputs) {
  */
 function showNotification(message, type = 'info', duration = 5000) {
     // Usuń poprzednie powiadomienia
-    const existing = document.querySelectorAll('.game-notification');
+    const existing = document.querySelectorAll('.ga-notice');
     existing.forEach(notif => notif.remove());
 
     const notification = document.createElement('div');
-    notification.className = `game-notification game-notification-${type}`;
+    notification.className = `ga-notice ga-notice--${type}`;
     notification.innerHTML = `
         <span>${message}</span>
         <button onclick="this.parentNode.remove()">&times;</button>
@@ -108,15 +108,15 @@ function showNotification(message, type = 'info', duration = 5000) {
  * Inicjalizacja sliderów relacji NPC
  */
 function initNPCRelationSliders() {
-    const sliders = document.querySelectorAll('.relation-slider');
-    const numberInputs = document.querySelectorAll('.relation-number');
+    const sliders = document.querySelectorAll('.ga-range__slider');
+    const numberInputs = document.querySelectorAll('.ga-range__input');
 
     // Synchronizacja slider -> number input
     sliders.forEach(slider => {
         slider.addEventListener('input', function () {
             const npcId = this.dataset.npc;
-            const numberInput = document.querySelector(`.relation-number[data-npc="${npcId}"]`);
-            const preview = this.closest('.npc-relation-details').querySelector('.relation-bar-preview .relation-fill');
+            const numberInput = document.querySelector(`.ga-range__input[data-npc="${npcId}"]`);
+            const preview = this.closest('.ga-relation__content').querySelector('.relation-bar-preview .relation-fill');
 
             if (numberInput) {
                 numberInput.value = this.value;
@@ -130,8 +130,8 @@ function initNPCRelationSliders() {
     numberInputs.forEach(input => {
         input.addEventListener('input', function () {
             const npcId = this.dataset.npc;
-            const slider = document.querySelector(`.relation-slider[data-npc="${npcId}"]`);
-            const preview = this.closest('.npc-relation-details').querySelector('.relation-bar-preview .relation-fill');
+            const slider = document.querySelector(`.ga-range__slider[data-npc="${npcId}"]`);
+            const preview = this.closest('.ga-relation__content').querySelector('.relation-bar-preview .relation-fill');
 
             // Walidacja zakresu
             let value = parseInt(this.value);
@@ -178,11 +178,11 @@ function updateRelationPreview(preview, value) {
  * Oblicza łączną liczbę walk
  */
 function updateFightsTotal() {
-    const fightInputGroups = document.querySelectorAll('.fights-inputs');
+    const fightInputGroups = document.querySelectorAll('.ga-fight-stats');
 
     fightInputGroups.forEach(group => {
-        const inputs = group.querySelectorAll('.fight-input');
-        const totalElement = group.parentNode.querySelector('.fights-total strong');
+        const inputs = group.querySelectorAll('.ga-form-control--small');
+        const totalElement = group.parentNode.querySelector('.ga-stat-value');
 
         if (totalElement) {
             inputs.forEach(input => {
