@@ -190,6 +190,12 @@ class GameUserSyncService
             ]
         );
 
+        if ($result !== false) {
+            // Inicjalizuj relacje z NPC dla nowego gracza
+            $npc_relation_repo = new GameNPCRelationRepository();
+            $npc_relation_repo->initializeUserRelations($user_id);
+        }
+
         return $result !== false;
     }
 

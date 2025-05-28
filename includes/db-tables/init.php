@@ -18,11 +18,13 @@ spl_autoload_register(function ($class_name) {
         'GameItemRepository' => 'repositories/GameItemRepository.php',
         'GameAreaRepository' => 'repositories/GameAreaRepository.php',
         'GameFightTokenRepository' => 'repositories/GameFightTokenRepository.php',
+        'GameNPCRelationRepository' => 'repositories/GameNPCRelationRepository.php',
         'GameUserSyncService' => 'services/GameUserSyncService.php',
         'DeltaUpdater' => 'services/DeltaUpdater.php',
         'MigrationService' => 'services/MigrationService.php',
         'AreasBuilder' => 'builders/AreasBuilder.php',
         'EventsBuilder' => 'builders/EventsBuilder.php',
+        'NPCBuilder' => 'builders/NPCBuilder.php',
         'GameAdminPanel' => 'admin/GameAdminPanel.php',
     ];
 

@@ -234,13 +234,18 @@ class GameDatabaseManager
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
             user_id bigint(20) unsigned NOT NULL,
             npc_id int NOT NULL,
-            relation_value int DEFAULT 0,
-            is_known boolean DEFAULT 0,
+            relation_value int DEFAULT 0 COMMENT 'Poziom relacji od -100 do 100',
+            is_known boolean DEFAULT 0 COMMENT 'Czy gracz poznał tego NPC',
+            fights_won int DEFAULT 0 COMMENT 'Wygrane walki z tym NPC',
+            fights_lost int DEFAULT 0 COMMENT 'Przegrane walki z tym NPC',
+            fights_draw int DEFAULT 0 COMMENT 'Remisy z tym NPC',
+            last_interaction timestamp NULL COMMENT 'Ostatnia interakcja',
             created_at timestamp DEFAULT CURRENT_TIMESTAMP,
             updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES {$this->wpdb->prefix}game_users(user_id) ON DELETE CASCADE,
             UNIQUE KEY unique_user_npc (user_id, npc_id),
-            INDEX idx_user_relations (user_id, is_known)
+            INDEX idx_user_relations (user_id, is_known),
+            INDEX idx_npc_relations (npc_id, relation_value)
         ) {$this->charset_collate};";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
