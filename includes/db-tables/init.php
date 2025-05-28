@@ -22,7 +22,7 @@ spl_autoload_register(function ($class_name) {
         'GameUserSyncService' => 'services/GameUserSyncService.php',
         'DeltaUpdater' => 'services/DeltaUpdater.php',
         'MigrationService' => 'services/MigrationService.php',
-        'AreasBuilder' => 'builders/AreasBuilder.php',
+        'AreaBuilder' => 'builders/AreaBuilder.php',
         'EventsBuilder' => 'builders/EventsBuilder.php',
         'NPCBuilder' => 'builders/NPCBuilder.php',
         'GameAdminPanel' => 'admin/GameAdminPanel.php',

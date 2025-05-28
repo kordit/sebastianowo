@@ -74,22 +74,36 @@ if (!defined('ABSPATH')) {
         </div>
 
         <!-- Builder obszarów -->
-        <div class="ga-card ga-card--warning">
+        <div class="ga-card ga-card--primary">
             <div class="ga-card__header">
                 <h3 class="ga-card__title">🗺️ Builder obszarów</h3>
                 <div class="ga-card__meta">
                     <span class="ga-stat-compact">
-                        <strong>0</strong> obszarów
+                        <strong><?php echo isset($areas_stats['total_areas']) ? esc_html($areas_stats['total_areas']) : 0; ?></strong> obszarów
                     </span>
                     <span class="ga-stat-compact">
-                        <strong>0</strong> scen
+                        <strong><?php echo isset($areas_stats['users_with_areas']) ? esc_html($areas_stats['users_with_areas']) : 0; ?></strong> użytkowników
                     </span>
-                    <span class="ga-badge ga-badge--neutral">Niedostępne</span>
+                    <span class="ga-stat-compact <?php echo isset($areas_stats['total_areas']) && $areas_stats['areas_in_db'] < $areas_stats['total_areas'] ? 'ga-stat-compact--warning' : 'ga-stat-compact--success'; ?>">
+                        <strong><?php echo isset($areas_stats['total_connections']) ? esc_html($areas_stats['total_connections']) : 0; ?></strong> powiązań
+                    </span>
                 </div>
             </div>
             <div class="ga-card__content">
                 <div class="ga-actions">
-                    <button class="ga-button ga-button--disabled" disabled>🔧 W przygotowaniu</button>
+                    <form method="post">
+                        <?php wp_nonce_field('build_area_connections'); ?>
+                        <button type="submit" name="build_area_connections" class="ga-button ga-button--success">
+                            🚀 Zbuduj powiązania obszarów
+                        </button>
+                    </form>
+
+                    <form method="post" onsubmit="return confirm('Usunąć wszystkie powiązania obszarów?');">
+                        <?php wp_nonce_field('clear_area_connections'); ?>
+                        <button type="submit" name="clear_area_connections" class="ga-button ga-button--danger">
+                            🗑️ Wyczyść
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -127,6 +141,72 @@ if (!defined('ABSPATH')) {
                     <div class="ga-stat__label">Neutralne relacje</div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Szczegółowe statystyki obszarów -->
+    <div class="ga-card ga-card--full ga-card--info ga-mt-3">
+        <div class="ga-card__header">
+            <h3 class="ga-card__title">📊 Szczegółowe statystyki obszarów</h3>
+        </div>
+        <div class="ga-card__content">
+            <div class="ga-stats">
+                <div class="ga-stat">
+                    <div class="ga-stat__number"><?php echo isset($areas_stats['total_areas']) ? esc_html($areas_stats['total_areas']) : 0; ?></div>
+                    <div class="ga-stat__label">Wszystkie obszary</div>
+                </div>
+                <div class="ga-stat">
+                    <div class="ga-stat__number"><?php echo isset($areas_stats['areas_in_db']) ? esc_html($areas_stats['areas_in_db']) : 0; ?></div>
+                    <div class="ga-stat__label">Obszary w bazie</div>
+                </div>
+                <div class="ga-stat">
+                    <div class="ga-stat__number"><?php echo isset($areas_stats['users_with_areas']) ? esc_html($areas_stats['users_with_areas']) : 0; ?></div>
+                    <div class="ga-stat__label">Użytkownicy z obszarami</div>
+                </div>
+                <div class="ga-stat">
+                    <div class="ga-stat__number"><?php echo isset($areas_stats['total_connections']) ? esc_html($areas_stats['total_connections']) : 0; ?></div>
+                    <div class="ga-stat__label">Wszystkie połączenia</div>
+                </div>
+            </div>
+
+            <?php if (isset($areas_list) && !empty($areas_list)) : ?>
+                <div class="ga-table-container ga-mt-3">
+                    <h4>Lista obszarów</h4>
+                    <table class="wp-list-table widefat fixed striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nazwa</th>
+                                <th>Typ</th>
+                                <th>Sceny</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($areas_list as $area) : ?>
+                                <tr>
+                                    <td><?php echo esc_html($area['id']); ?></td>
+                                    <td><?php echo esc_html($area['title']); ?></td>
+                                    <td><?php echo esc_html($area['type']); ?></td>
+                                    <td>
+                                        <?php
+                                        if (!empty($area['scenes'])) {
+                                            echo esc_html(count($area['scenes'])) . ' scen';
+                                            echo '<div class="ga-tag-list">';
+                                            foreach ($area['scenes'] as $scene) {
+                                                echo '<span class="ga-tag">' . esc_html($scene) . '</span>';
+                                            }
+                                            echo '</div>';
+                                        } else {
+                                            echo '<span class="ga-muted">Brak scen</span>';
+                                        }
+                                        ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
