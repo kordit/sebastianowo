@@ -8,8 +8,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Inicjalizacja wszystkich funkcjonalności
     initConfirmButtons();
-    initFormValidation();
     initProgressBars();
+    initNPCRelationSliders();
+    updateFightsTotal();
 });
 
 /**
@@ -101,4 +102,99 @@ function showNotification(message, type = 'info', duration = 5000) {
             notification.remove();
         }, duration);
     }
+}
+
+/**
+ * Inicjalizacja sliderów relacji NPC
+ */
+function initNPCRelationSliders() {
+    const sliders = document.querySelectorAll('.relation-slider');
+    const numberInputs = document.querySelectorAll('.relation-number');
+
+    // Synchronizacja slider -> number input
+    sliders.forEach(slider => {
+        slider.addEventListener('input', function () {
+            const npcId = this.dataset.npc;
+            const numberInput = document.querySelector(`.relation-number[data-npc="${npcId}"]`);
+            const preview = this.closest('.npc-relation-details').querySelector('.relation-bar-preview .relation-fill');
+
+            if (numberInput) {
+                numberInput.value = this.value;
+            }
+
+            updateRelationPreview(preview, this.value);
+        });
+    });
+
+    // Synchronizacja number input -> slider
+    numberInputs.forEach(input => {
+        input.addEventListener('input', function () {
+            const npcId = this.dataset.npc;
+            const slider = document.querySelector(`.relation-slider[data-npc="${npcId}"]`);
+            const preview = this.closest('.npc-relation-details').querySelector('.relation-bar-preview .relation-fill');
+
+            // Walidacja zakresu
+            let value = parseInt(this.value);
+            if (isNaN(value)) value = 0;
+            if (value < -100) value = -100;
+            if (value > 100) value = 100;
+            this.value = value;
+
+            if (slider) {
+                slider.value = value;
+            }
+
+            updateRelationPreview(preview, value);
+        });
+    });
+}
+
+/**
+ * Aktualizuje wizualny podgląd relacji
+ */
+function updateRelationPreview(preview, value) {
+    if (!preview) return;
+
+    const absValue = Math.abs(value);
+    const width = absValue + '%';
+
+    // Usuń wszystkie klasy
+    preview.classList.remove('positive', 'negative', 'neutral');
+
+    // Dodaj odpowiednią klasę
+    if (value > 0) {
+        preview.classList.add('positive');
+    } else if (value < 0) {
+        preview.classList.add('negative');
+    } else {
+        preview.classList.add('neutral');
+    }
+
+    // Ustaw szerokość
+    preview.style.width = value === 0 ? '2px' : width;
+}
+
+/**
+ * Oblicza łączną liczbę walk
+ */
+function updateFightsTotal() {
+    const fightInputGroups = document.querySelectorAll('.fights-inputs');
+
+    fightInputGroups.forEach(group => {
+        const inputs = group.querySelectorAll('.fight-input');
+        const totalElement = group.parentNode.querySelector('.fights-total strong');
+
+        if (totalElement) {
+            inputs.forEach(input => {
+                input.addEventListener('input', function () {
+                    let total = 0;
+                    inputs.forEach(inp => {
+                        const val = parseInt(inp.value) || 0;
+                        total += val;
+                    });
+                    totalElement.textContent = total;
+                });
+            });
+        }
+    });
 }

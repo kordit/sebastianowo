@@ -155,8 +155,45 @@ class GameAdminPanel
 
             try {
                 $user_repo->update($user_id, $update_data);
-                add_action('admin_notices', function () {
-                    echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Dane gracza zostały zaktualizowane!</p></div>';
+
+                // Aktualizuj relacje z NPC jeśli zostały przesłane
+                if (isset($_POST['npc_relations']) && is_array($_POST['npc_relations'])) {
+                    $npc_repo = new GameNPCRelationRepository();
+                    $updated_relations = 0;
+
+                    foreach ($_POST['npc_relations'] as $npc_id => $relation_data) {
+                        $npc_id = intval($npc_id);
+
+                        // Sprawdź czy relacja istnieje
+                        $existing_relation = $npc_repo->getRelation($user_id, $npc_id);
+
+                        if ($existing_relation) {
+                            // Przygotuj dane do aktualizacji
+                            $npc_update_data = [
+                                'is_known' => isset($relation_data['is_known']) ? 1 : 0,
+                                'relation_value' => intval($relation_data['relation_value']),
+                                'fights_won' => intval($relation_data['fights_won']),
+                                'fights_lost' => intval($relation_data['fights_lost']),
+                                'fights_draw' => intval($relation_data['fights_draw']),
+                                'last_interaction' => current_time('mysql')
+                            ];
+
+                            // Waliduj relation_value
+                            if ($npc_update_data['relation_value'] < -100) $npc_update_data['relation_value'] = -100;
+                            if ($npc_update_data['relation_value'] > 100) $npc_update_data['relation_value'] = 100;
+
+                            $npc_repo->updateRelation($user_id, $npc_id, $npc_update_data);
+                            $updated_relations++;
+                        }
+                    }
+                }
+
+                add_action('admin_notices', function () use ($updated_relations) {
+                    $message = 'Dane gracza zostały zaktualizowane!';
+                    if (isset($updated_relations) && $updated_relations > 0) {
+                        $message .= " Zaktualizowano również {$updated_relations} relacji z NPC.";
+                    }
+                    echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> ' . esc_html($message) . '</p></div>';
                 });
             } catch (Exception $e) {
                 add_action('admin_notices', function () use ($e) {
@@ -241,6 +278,18 @@ class GameAdminPanel
 
         // Pobierz dane użytkownika WordPress
         $wp_user = get_user_by('ID', $user_id);
+
+        // Pobierz relacje z NPC
+        $npc_repo = new GameNPCRelationRepository();
+        $user_npc_relations = $npc_repo->getUserRelations($user_id);
+
+        // Pobierz wszystkie NPC dla nazw
+        $npc_builder = new NPCBuilder();
+        $all_npcs = $npc_builder->getAllNPCs();
+        $npcs_by_id = [];
+        foreach ($all_npcs as $npc) {
+            $npcs_by_id[$npc['id']] = $npc['name'];
+        }
 
         include __DIR__ . '/views/user-details.php';
     }

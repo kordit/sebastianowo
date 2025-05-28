@@ -220,6 +220,121 @@ $level = max(1, floor($game_user['exp'] / 100) + 1);
                     </div>
                 </div>
 
+                <!-- Relacje z NPC -->
+                <div class="details-card full-width npc-relations-card">
+                    <div class="card-header npc-header">
+                        <h3>Relacje z NPC</h3>
+                        <?php if (!empty($user_npc_relations)): ?>
+                            <div class="npc-stats">
+                                <span class="npc-stat">
+                                    Poznanych: <strong><?php echo count(array_filter($user_npc_relations, fn($r) => $r['is_known'])); ?></strong>
+                                </span>
+                                <span class="npc-stat">
+                                    Pozytywnych: <strong><?php echo count(array_filter($user_npc_relations, fn($r) => $r['relation_value'] > 0)); ?></strong>
+                                </span>
+                                <span class="npc-stat">
+                                    Negatywnych: <strong><?php echo count(array_filter($user_npc_relations, fn($r) => $r['relation_value'] < 0)); ?></strong>
+                                </span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="card-content">
+                        <?php if (empty($user_npc_relations)): ?>
+                            <p class="no-relations">Brak relacji z NPC. <a href="<?php echo admin_url('admin.php?page=game-buildery'); ?>">Zbuduj relacje w Builderach</a></p>
+                        <?php else: ?>
+                            <div class="npc-relations-grid">
+                                <?php foreach ($user_npc_relations as $relation): ?>
+                                    <div class="npc-relation-item <?php echo $relation['is_known'] ? 'known' : 'unknown'; ?>">
+                                        <div class="npc-relation-header">
+                                            <h4>
+                                                <?php echo esc_html($npcs_by_id[$relation['npc_id']] ?? "NPC #{$relation['npc_id']}"); ?>
+                                            </h4>
+                                        </div>
+
+                                        <div class="npc-relation-details">
+                                            <!-- Czy poznany -->
+                                            <div class="relation-field">
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox"
+                                                        name="npc_relations[<?php echo $relation['npc_id']; ?>][is_known]"
+                                                        value="1"
+                                                        <?php checked($relation['is_known'], 1); ?>>
+                                                    <span class="checkmark"></span>
+                                                    Poznany przez gracza
+                                                </label>
+                                            </div>
+
+                                            <!-- Poziom relacji -->
+                                            <div class="relation-field">
+                                                <label>Poziom relacji (-100 do +100):</label>
+                                                <div class="relation-input-group">
+                                                    <input type="range"
+                                                        name="npc_relations[<?php echo $relation['npc_id']; ?>][relation_value]"
+                                                        value="<?php echo $relation['relation_value']; ?>"
+                                                        min="-100"
+                                                        max="100"
+                                                        class="relation-slider"
+                                                        data-npc="<?php echo $relation['npc_id']; ?>">
+                                                    <input type="number"
+                                                        name="npc_relations[<?php echo $relation['npc_id']; ?>][relation_value]"
+                                                        value="<?php echo $relation['relation_value']; ?>"
+                                                        min="-100"
+                                                        max="100"
+                                                        class="relation-number"
+                                                        data-npc="<?php echo $relation['npc_id']; ?>">
+                                                </div>
+                                            </div>
+
+                                            <!-- Bilans walk -->
+                                            <div class="fights-editor">
+                                                <label>Bilans walk:</label>
+                                                <div class="fights-inputs">
+                                                    <div class="fight-input-group">
+                                                        <label>🏆 Wygrane:</label>
+                                                        <input type="number"
+                                                            name="npc_relations[<?php echo $relation['npc_id']; ?>][fights_won]"
+                                                            value="<?php echo $relation['fights_won']; ?>"
+                                                            min="0"
+                                                            class="fight-input">
+                                                    </div>
+                                                    <div class="fight-input-group">
+                                                        <label>💀 Przegrane:</label>
+                                                        <input type="number"
+                                                            name="npc_relations[<?php echo $relation['npc_id']; ?>][fights_lost]"
+                                                            value="<?php echo $relation['fights_lost']; ?>"
+                                                            min="0"
+                                                            class="fight-input">
+                                                    </div>
+                                                    <div class="fight-input-group">
+                                                        <label>🤝 Remisy:</label>
+                                                        <input type="number"
+                                                            name="npc_relations[<?php echo $relation['npc_id']; ?>][fights_draw]"
+                                                            value="<?php echo $relation['fights_draw']; ?>"
+                                                            min="0"
+                                                            class="fight-input">
+                                                    </div>
+                                                </div>
+                                                <div class="fights-total">
+                                                    Łącznie walk: <strong><?php echo $relation['fights_won'] + $relation['fights_lost'] + $relation['fights_draw']; ?></strong>
+                                                </div>
+                                            </div>
+
+                                            <?php if ($relation['last_interaction']): ?>
+                                                <div class="last-interaction">
+                                                    Ostatnia interakcja: <?php echo date('d.m.Y H:i', strtotime($relation['last_interaction'])); ?>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <!-- Hidden field for NPC ID -->
+                                            <input type="hidden" name="npc_relations[<?php echo $relation['npc_id']; ?>][npc_id]" value="<?php echo $relation['npc_id']; ?>">
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Sekcja submit -->
