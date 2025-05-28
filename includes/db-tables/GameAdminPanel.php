@@ -16,20 +16,17 @@ class GameAdminPanel
     {
         $this->dbManager = GameDatabaseManager::getInstance();
         $this->userRepo = new GameUserRepository();
-        $this->missionManager = new GameMissionManager();
         $this->deltaManager = new GameDeltaManager();
         $this->dataBuilder = new GameDataBuilder();
 
         add_action('admin_menu', [$this, 'addAdminMenus']);
         add_action('admin_post_game_create_tables', [$this, 'handleCreateTables']);
+        add_action('admin_post_game_recreate_tables', [$this, 'handleRecreateTables']);
         add_action('admin_post_game_build_missions', [$this, 'handleBuildMissions']);
         add_action('admin_post_game_build_npc_relations', [$this, 'handleBuildNpcRelations']);
         add_action('admin_post_game_build_areas', [$this, 'handleBuildAreas']);
         add_action('admin_post_game_update_player', [$this, 'handleUpdatePlayer']);
         add_action('admin_post_game_update_player_extended', [$this, 'handleUpdatePlayerExtended']);
-        add_action('admin_post_game_add_mission', [$this, 'handleAddMission']);
-        add_action('admin_post_game_start_mission', [$this, 'handleStartMission']);
-        add_action('admin_post_game_complete_mission', [$this, 'handleCompleteMission']);
     }
 
     /**
@@ -67,15 +64,6 @@ class GameAdminPanel
 
         add_submenu_page(
             'game-management',
-            'Misje',
-            'Misje',
-            'manage_options',
-            'game-missions',
-            [$this, 'renderMissionsPage']
-        );
-
-        add_submenu_page(
-            'game-management',
             'Budowanie danych',
             'Budowanie danych',
             'manage_options',
@@ -89,31 +77,52 @@ class GameAdminPanel
      */
     public function renderMainPage()
     {
-?>
-        <div class="wrap">
-            <h1>Zarządzanie Grą RPG</h1>
+        // Przekaż dane do szablonu
+        $systemStatus = $this->getSystemStatusData(); // Załóżmy, że istnieje taka metoda
+        $quickActions = [
+            [
+                'url' => admin_url('admin.php?page=game-database'),
+                'text' => 'Zarządzaj bazą danych',
+                'class' => 'button-primary'
+            ],
+            [
+                'url' => admin_url('admin.php?page=game-players'),
+                'text' => 'Przeglądaj graczy',
+                'class' => 'button-secondary'
+            ],
+            [
+                'url' => admin_url('admin.php?page=game-builder'),
+                'text' => 'Zbuduj dane z ACF',
+                'class' => 'button-secondary'
+            ]
+        ];
 
-            <div class="card">
-                <h2>Status systemu</h2>
-                <?php $this->renderSystemStatus(); ?>
-            </div>
+        include __DIR__ . '/templates/main-page.php';
+    }
 
-            <div class="card">
-                <h2>Szybkie akcje</h2>
-                <p>
-                    <a href="<?php echo admin_url('admin.php?page=game-database'); ?>" class="button button-primary">
-                        Zarządzaj bazą danych
-                    </a>
-                    <a href="<?php echo admin_url('admin.php?page=game-players'); ?>" class="button button-secondary">
-                        Przeglądaj graczy
-                    </a>
-                    <a href="<?php echo admin_url('admin.php?page=game-builder'); ?>" class="button button-secondary">
-                        Zbuduj dane z ACF
-                    </a>
-                </p>
-            </div>
-        </div>
-    <?php
+    /**
+     * Pobiera dane statusu systemu
+     */
+    private function getSystemStatusData()
+    {
+        $allTablesExist = true;
+        $existingTables = 0;
+        $totalTables = count(GameDatabaseManager::TABLES);
+
+        foreach (GameDatabaseManager::TABLES as $tableName) {
+            if ($this->dbManager->tableExists($tableName)) {
+                $existingTables++;
+            } else {
+                $allTablesExist = false;
+            }
+        }
+
+        return [
+            'allTablesExist' => $allTablesExist,
+            'existingTables' => $existingTables,
+            'totalTables' => $totalTables,
+            'statusColor' => $allTablesExist ? 'green' : 'orange'
+        ];
     }
 
     /**
@@ -121,73 +130,30 @@ class GameAdminPanel
      */
     public function renderDatabasePage()
     {
-        if (isset($_GET['created']) && $_GET['created'] === '1') {
-            echo '<div class="notice notice-success"><p>Tabele zostały utworzone pomyślnie!</p></div>';
+        $tableData = [];
+        $tableDescriptions = [
+            'game_users' => 'Główne dane graczy',
+            'game_user_data' => 'Wszystkie dane gracza (statystyki, umiejętności, postęp, witalność, historia)',
+            'game_user_items' => 'Ekwipunek graczy',
+            'game_user_areas' => 'Dostępne rejony',
+            'game_user_fight_tokens' => 'Tokeny walk',
+            'game_user_relations' => 'Relacje z NPC',
+            'game_user_missions' => 'Misje graczy',
+            'game_user_mission_tasks' => 'Zadania misji'
+        ];
+
+        foreach (GameDatabaseManager::TABLES as $tableName) {
+            $exists = $this->dbManager->tableExists($tableName);
+            $status = $exists ? '<span style="color: green;">✓ Istnieje</span>' : '<span style="color: red;">✗ Brak</span>';
+            $description = $tableDescriptions[$tableName] ?? '';
+            $tableData[] = [
+                'name' => $tableName,
+                'status' => $status,
+                'description' => $description
+            ];
         }
 
-    ?>
-        <div class="wrap">
-            <h1>Zarządzanie bazą danych</h1>
-
-            <div class="card">
-                <h2>Status tabel</h2>
-                <table class="wp-list-table widefat fixed striped">
-                    <thead>
-                        <tr>
-                            <th>Tabela</th>
-                            <th>Status</th>
-                            <th>Opis</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $tableDescriptions = [
-                            'game_users' => 'Główne dane graczy',
-                            'game_user_stats' => 'Statystyki graczy',
-                            'game_user_skills' => 'Umiejętności graczy',
-                            'game_user_progress' => 'Postęp graczy',
-                            'game_user_vitality' => 'Witalność graczy',
-                            'game_user_items' => 'Ekwipunek graczy',
-                            'game_user_areas' => 'Dostępne rejony',
-                            'game_user_fight_tokens' => 'Tokeny walk',
-                            'game_user_relations' => 'Relacje z NPC',
-                            'game_user_story' => 'Historia postaci',
-                            'game_user_missions' => 'Misje graczy',
-                            'game_user_mission_tasks' => 'Zadania misji'
-                        ];
-
-                        foreach (GameDatabaseManager::TABLES as $tableName) {
-                            $exists = $this->dbManager->tableExists($tableName);
-                            $status = $exists ? '<span style="color: green;">✓ Istnieje</span>' : '<span style="color: red;">✗ Brak</span>';
-                            $description = $tableDescriptions[$tableName] ?? '';
-
-                            echo "<tr>";
-                            echo "<td><code>$tableName</code></td>";
-                            echo "<td>$status</td>";
-                            echo "<td>$description</td>";
-                            echo "</tr>";
-                        }
-                        ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="card">
-                <h2>Akcje</h2>
-                <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
-                    <input type="hidden" name="action" value="game_create_tables">
-                    <?php wp_nonce_field('game_create_tables'); ?>
-                    <p>
-                        <input type="submit" class="button button-primary" value="Utwórz wszystkie tabele"
-                            onclick="return confirm('Czy na pewno chcesz utworzyć tabele?');">
-                    </p>
-                    <p class="description">
-                        Utworzy wszystkie tabele gry jeśli nie istnieją. Bezpieczne do ponownego uruchomienia.
-                    </p>
-                </form>
-            </div>
-        </div>
-    <?php
+        include __DIR__ . '/templates/database-page.php';
     }
 
     /**
@@ -197,177 +163,115 @@ class GameAdminPanel
     {
         $selectedUserId = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
 
-    ?>
-        <div class="wrap">
-            <h1>Zarządzanie graczami</h1>
+        // Przekaż dane do szablonu
+        $templateData = [
+            'selectedUserId' => $selectedUserId,
+            'userRepo' => $this->userRepo, // Przekazujemy repozytorium użytkownika
+            'gameAdminPanel' => $this,     // Przekazujemy instancję GameAdminPanel
+            'dataBuilder' => $this->dataBuilder, // Przekazujemy instancję GameDataBuilder
+            // Dodajemy puste wartości, aby uniknąć błędów w szablonach, jeśli nie są jeszcze ustawione
+            'users' => [],
+            'totalUsers' => 0,
+            'totalPages' => 1,
+            'currentPage' => 1,
+            'search' => '',
+            'pageSlug' => 'game-players',
+            'playerExists' => false,
+            'userData' => null,
+            'user' => null,
+            'userId' => 0,
+        ];
 
-            <div class="card">
-                <h2>Wybierz gracza</h2>
-                <form method="get">
-                    <input type="hidden" name="page" value="game-players">
-                    <select name="user_id" onchange="this.form.submit()">
-                        <option value="0">-- Wybierz gracza --</option>
-                        <?php
-                        $users = get_users(['orderby' => 'display_name']);
-                        foreach ($users as $user) {
-                            $selected = $selectedUserId === $user->ID ? 'selected' : '';
-                            $hasGameData = $this->userRepo->playerExists($user->ID) ? ' (ma dane gry)' : '';
-                            echo "<option value='{$user->ID}' $selected>{$user->display_name}{$hasGameData}</option>";
-                        }
-                        ?>
-                    </select>
-                </form>
-            </div>
+        // Jeśli edytujemy konkretnego gracza, pobierz jego dane
+        if ($selectedUserId > 0) {
+            $this->renderPlayerEditor($selectedUserId, $templateData);
+        } else {
+            // Jeśli wyświetlamy listę graczy, pobierz dane dla tabeli
+            $this->renderPlayersTable($templateData);
+        }
 
-            <?php if ($selectedUserId > 0) {
-                $this->renderPlayerEditor($selectedUserId);
-            } ?>
-        </div>
-    <?php
+        extract($templateData);
+
+        // Załaduj główny szablon strony graczy, który zdecyduje, co wyświetlić
+        include __DIR__ . '/templates/players-page.php';
     }
 
     /**
      * Renderuje edytor gracza
      */
-    private function renderPlayerEditor($userId)
+    public function renderPlayerEditor($userId, &$templateData = [])
     {
         $playerExists = $this->userRepo->playerExists($userId);
         $userData = $playerExists ? $this->userRepo->getPlayerData($userId) : null;
         $user = get_userdata($userId);
 
-    ?>
-        <div class="card">
-            <h2>Edycja gracza: <?php echo $user->display_name; ?></h2>
-
-            <?php if (!$playerExists): ?>
-                <div class="notice notice-warning">
-                    <p>Ten użytkownik nie ma jeszcze danych gry. Utworzenie danych nastąpi automatycznie po pierwszym zapisie.</p>
-                </div>
-            <?php endif; ?>
-
-            <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
-                <input type="hidden" name="action" value="game_update_player_extended">
-                <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
-                <?php wp_nonce_field('game_update_player_extended'); ?>
-
-                <table class="form-table">
-                    <!-- Statystyki -->
-                    <tr>
-                        <th scope="row">Statystyki</th>
-                        <td>
-                            <fieldset>
-                                <label>Siła: <input type="number" name="stats[strength]" value="<?php echo $userData['stats']['strength'] ?? 10; ?>" min="1" max="100"></label><br>
-                                <label>Obrona: <input type="number" name="stats[defense]" value="<?php echo $userData['stats']['defense'] ?? 10; ?>" min="1" max="100"></label><br>
-                                <label>Zwinność: <input type="number" name="stats[agility]" value="<?php echo $userData['stats']['agility'] ?? 10; ?>" min="1" max="100"></label><br>
-                                <label>Inteligencja: <input type="number" name="stats[intelligence]" value="<?php echo $userData['stats']['intelligence'] ?? 10; ?>" min="1" max="100"></label><br>
-                                <label>Charyzma: <input type="number" name="stats[charisma]" value="<?php echo $userData['stats']['charisma'] ?? 10; ?>" min="1" max="100"></label>
-                            </fieldset>
-                        </td>
-                    </tr>
-
-                    <!-- Umiejętności -->
-                    <tr>
-                        <th scope="row">Umiejętności</th>
-                        <td>
-                            <fieldset>
-                                <label>Walka: <input type="number" name="skills[combat]" value="<?php echo $userData['skills']['combat'] ?? 1; ?>" min="1" max="100"></label><br>
-                                <label>Kradzież: <input type="number" name="skills[steal]" value="<?php echo $userData['skills']['steal'] ?? 1; ?>" min="1" max="100"></label><br>
-                                <label>Dyplomacja: <input type="number" name="skills[diplomacy]" value="<?php echo $userData['skills']['diplomacy'] ?? 1; ?>" min="1" max="100"></label><br>
-                                <label>Śledztwo: <input type="number" name="skills[investigation]" value="<?php echo $userData['skills']['investigation'] ?? 1; ?>" min="1" max="100"></label><br>
-                                <label>Przetrwanie: <input type="number" name="skills[survival]" value="<?php echo $userData['skills']['survival'] ?? 1; ?>" min="1" max="100"></label>
-                            </fieldset>
-                        </td>
-                    </tr>
-
-                    <!-- Postęp -->
-                    <tr>
-                        <th scope="row">Postęp</th>
-                        <td>
-                            <fieldset>
-                                <label>Doświadczenie: <input type="number" name="progress[experience]" value="<?php echo $userData['progress']['experience'] ?? 0; ?>" min="0"></label><br>
-                                <label>Punkty nauki: <input type="number" name="progress[learning_points]" value="<?php echo $userData['progress']['learning_points'] ?? 5; ?>" min="0"></label><br>
-                                <label>Reputacja: <input type="number" name="progress[reputation]" value="<?php echo $userData['progress']['reputation'] ?? 0; ?>"></label><br>
-                                <label>Poziom: <input type="number" name="progress[level]" value="<?php echo $userData['progress']['level'] ?? 1; ?>" min="1"></label>
-                            </fieldset>
-                        </td>
-                    </tr>
-
-                    <!-- Witalność -->
-                    <tr>
-                        <th scope="row">Witalność</th>
-                        <td>
-                            <fieldset>
-                                <label>Max życie: <input type="number" name="vitality[max_life]" value="<?php echo $userData['vitality']['max_life'] ?? 100; ?>" min="1"></label><br>
-                                <label>Obecne życie: <input type="number" name="vitality[current_life]" value="<?php echo $userData['vitality']['current_life'] ?? 100; ?>" min="0"></label><br>
-                                <label>Max energia: <input type="number" name="vitality[max_energy]" value="<?php echo $userData['vitality']['max_energy'] ?? 100; ?>" min="1"></label><br>
-                                <label>Obecna energia: <input type="number" name="vitality[current_energy]" value="<?php echo $userData['vitality']['current_energy'] ?? 100; ?>" min="0"></label>
-                            </fieldset>
-                        </td>
-                    </tr>
-                </table>
-
-                <h3>Dostępne rejony</h3>
-                <?php $this->dataBuilder->renderAreaCheckboxes($userId); ?>
-
-                <h3>Ekwipunek</h3>
-                <?php $this->dataBuilder->renderItemSelector($userId); ?>
-
-                <h3>Relacje z NPC</h3>
-                <?php $this->dataBuilder->renderNPCRelations($userId); ?>
-
-                <?php submit_button('Zapisz wszystkie zmiany'); ?>
-            </form>
-        </div>
-
-        <?php
-        // Renderuj sekcje przedmiotów, rejonów i relacji
-        $this->renderPlayerItems($userId);
-        $this->renderPlayerAreas($userId);
-        $this->renderPlayerRelations($userId);
-        ?>
-    <?php
+        // Przygotuj dane dla szablonu
+        $templateData['playerExists'] = $playerExists;
+        $templateData['userData'] = $userData;
+        $templateData['user'] = $user;
+        $templateData['userId'] = $userId;
+        $templateData['gameAdminPanel'] = $this; // Upewnij się, że $gameAdminPanel jest dostępne w player-editor.php
     }
+
+    /**
+     * Renderuje tabelę graczy z paginacją
+     */
+    public function renderPlayersTable(&$templateData = [])
+    {
+        $currentPage = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+        $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
+        $perPage = 20; // Liczba użytkowników na stronę
+
+        $args = [
+            'number' => $perPage,
+            'paged' => $currentPage,
+            'orderby' => 'display_name',
+            'order' => 'ASC',
+        ];
+
+        if (!empty($search)) {
+            $args['search'] = '*' . $search . '*';
+            $args['search_columns'] = ['user_login', 'user_email', 'display_name'];
+        }
+
+        $users = get_users($args);
+
+        $total_args = ['orderby' => 'display_name', 'count_total' => true];
+        if (!empty($search)) {
+            $total_args['search'] = '*' . $search . '*';
+            $total_args['search_columns'] = ['user_login', 'user_email', 'display_name'];
+        }
+        // Użyj 'count_total' => true i pobierz wynik z zapytania, zamiast pobierać wszystkich użytkowników
+        $user_query = new WP_User_Query($total_args);
+        $total_users = $user_query->get_total();
+
+        $totalPages = ceil($total_users / $perPage);
+
+        // Przygotuj dane dla szablonu
+        $templateData['users'] = $users;
+        $templateData['totalUsers'] = $total_users;
+        $templateData['totalPages'] = $totalPages > 0 ? $totalPages : 1; // Unikaj dzielenia przez zero i upewnij się, że jest co najmniej 1 strona
+        $templateData['currentPage'] = $currentPage;
+        $templateData['search'] = $search;
+        $templateData['pageSlug'] = 'game-players'; // Slug strony dla paginacji
+        $templateData['userRepo'] = $this->userRepo; // Dodajemy userRepo do danych tabeli
+        $templateData['gameAdminPanel'] = $this; // Upewnij się, że $gameAdminPanel jest dostępne w players-table.php
+    }
+
 
     /**
      * Strona budowania danych
      */
     public function renderBuilderPage()
     {
-    ?>
-        <div class="wrap">
-            <h1>Budowanie danych z ACF</h1>
-
-            <div class="card">
-                <h2>Zbuduj misje</h2>
-                <p>Tworzy strukturę misji na podstawie Custom Post Types i pól ACF.</p>
-                <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
-                    <input type="hidden" name="action" value="game_build_missions">
-                    <?php wp_nonce_field('game_build_missions'); ?>
-                    <input type="submit" class="button button-primary" value="Zbuduj misje">
-                </form>
-            </div>
-
-            <div class="card">
-                <h2>Zbuduj relacje z NPC</h2>
-                <p>Tworzy bazowe relacje z wszystkimi NPC dla wszystkich graczy.</p>
-                <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
-                    <input type="hidden" name="action" value="game_build_npc_relations">
-                    <?php wp_nonce_field('game_build_npc_relations'); ?>
-                    <input type="submit" class="button button-primary" value="Zbuduj relacje NPC">
-                </form>
-            </div>
-
-            <div class="card">
-                <h2>Zbuduj dostępne rejony</h2>
-                <p>Tworzy strukturę rejonów i scen na podstawie CPT terenów.</p>
-                <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
-                    <input type="hidden" name="action" value="game_build_areas">
-                    <?php wp_nonce_field('game_build_areas'); ?>
-                    <input type="submit" class="button button-primary" value="Zbuduj rejony">
-                </form>
-            </div>
-        </div>
-    <?php
+        // Dane do przekazania do szablonu
+        $data = [
+            'admin_post_url' => admin_url('admin-post.php'),
+            'nonce_build_missions' => wp_create_nonce('game_build_missions'),
+            'nonce_build_npc_relations' => wp_create_nonce('game_build_npc_relations'),
+            'nonce_build_areas' => wp_create_nonce('game_build_areas'),
+        ];
+        include __DIR__ . '/templates/builder-page.php';
     }
 
     /**
@@ -411,6 +315,22 @@ class GameAdminPanel
         $results = $this->dbManager->createAllTables();
 
         wp_redirect(admin_url('admin.php?page=game-database&created=1'));
+        exit;
+    }
+
+    public function handleRecreateTables()
+    {
+        if (!wp_verify_nonce($_POST['_wpnonce'], 'game_recreate_tables')) {
+            wp_die('Błąd bezpieczeństwa');
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_die('Brak uprawnień');
+        }
+
+        $results = $this->dbManager->recreateAllTables();
+
+        wp_redirect(admin_url('admin.php?page=game-database&recreated=1'));
         exit;
     }
 
@@ -564,261 +484,65 @@ class GameAdminPanel
     private function renderPlayerItems($userId)
     {
         $items = $this->userRepo->getPlayerItems($userId);
-
-        echo '<div class="card">';
-        echo '<h3>Przedmioty gracza</h3>';
-
-        if (empty($items)) {
-            echo '<p>Gracz nie ma żadnych przedmiotów.</p>';
-        } else {
-            echo '<table class="wp-list-table widefat">';
-            echo '<thead><tr><th>ID przedmiotu</th><th>Ilość</th><th>Założony</th><th>Slot</th></tr></thead>';
-            echo '<tbody>';
-            foreach ($items as $item) {
-                $equipped = $item['is_equipped'] ? 'Tak' : 'Nie';
-                echo "<tr>";
-                echo "<td>{$item['item_id']}</td>";
-                echo "<td>{$item['quantity']}</td>";
-                echo "<td>$equipped</td>";
-                echo "<td>{$item['equipment_slot']}</td>";
-                echo "</tr>";
-            }
-            echo '</tbody></table>';
-        }
-
-        echo '</div>';
+        // Przekaż dane do szablonu player-items.php
+        include __DIR__ . '/templates/player-items.php';
     }
 
     private function renderPlayerAreas($userId)
     {
         $areas = $this->userRepo->getPlayerAreas($userId);
-
-        echo '<div class="card">';
-        echo '<h3>Dostępne rejony</h3>';
-
-        if (empty($areas)) {
-            echo '<p>Gracz nie ma odblokowanych rejonów.</p>';
-        } else {
-            echo '<table class="wp-list-table widefat">';
-            echo '<thead><tr><th>ID rejonu</th><th>Scena</th><th>Odblokowany</th><th>Data odblokowania</th></tr></thead>';
-            echo '<tbody>';
-            foreach ($areas as $area) {
-                $unlocked = $area['is_unlocked'] ? 'Tak' : 'Nie';
-                echo "<tr>";
-                echo "<td>{$area['area_id']}</td>";
-                echo "<td>{$area['scene_id']}</td>";
-                echo "<td>$unlocked</td>";
-                echo "<td>{$area['unlocked_at']}</td>";
-                echo "</tr>";
-            }
-            echo '</tbody></table>';
-        }
-
-        echo '</div>';
+        // Przekaż dane do szablonu player-areas.php
+        include __DIR__ . '/templates/player-areas.php';
     }
 
     private function renderPlayerRelations($userId)
     {
         $relations = $this->userRepo->getPlayerRelations($userId);
-
-        echo '<div class="card">';
-        echo '<h3>Relacje z NPC</h3>';
-
-        if (empty($relations)) {
-            echo '<p>Gracz nie ma relacji z NPC.</p>';
-        } else {
-            echo '<table class="wp-list-table widefat">';
-            echo '<thead><tr><th>ID NPC</th><th>Relacja</th><th>Znany</th><th>W/P/R</th></tr></thead>';
-            echo '<tbody>';
-            foreach ($relations as $relation) {
-                $known = $relation['is_known'] ? 'Tak' : 'Nie';
-                $fights = "{$relation['fights_won']}/{$relation['fights_lost']}/{$relation['fights_draw']}";
-                echo "<tr>";
-                echo "<td>{$relation['npc_id']}</td>";
-                echo "<td>{$relation['relation_value']}</td>";
-                echo "<td>$known</td>";
-                echo "<td>$fights</td>";
-                echo "</tr>";
-            }
-            echo '</tbody></table>';
-        }
-
-        echo '</div>';
+        // Przekaż dane do szablonu player-relations.php
+        include __DIR__ . '/templates/player-relations.php';
     }
 
-    /**
-     * Strona zarządzania misjami
-     */
-    public function renderMissionsPage()
+
+    public function renderPlayerItemsSection($userId)
     {
-        $selectedUserId = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+        // Użyj GameDataBuilder do wygenerowania HTML dla zarządzania przedmiotami
+        // GameDataBuilder powinien mieć metodę, która zwraca HTML lub renderuje szablon
+        // Na przykład:
+        // echo $this->dataBuilder->renderItemManagement($userId, $this->userRepo->getPlayerItems($userId));
+        // Lub, jeśli GameDataBuilder używa własnych szablonów:
+        // $this->dataBuilder->displayItemManagement($userId, $this->userRepo->getPlayerItems($userId));
 
-    ?>
-        <div class="wrap">
-            <h1>Zarządzanie misjami</h1>
-
-            <div class="card">
-                <h2>Wybierz gracza</h2>
-                <?php $this->renderUserSelector($selectedUserId, 'game-missions'); ?>
-            </div>
-
-            <?php if ($selectedUserId): ?>
-                <?php if (!$this->userRepo->playerExists($selectedUserId)): ?>
-                    <div class="notice notice-warning">
-                        <p>Gracz nie ma danych w systemie gry. <a href="<?php echo admin_url('admin.php?page=game-players&user_id=' . $selectedUserId); ?>">Przejdź do panelu gracza</a>, aby utworzyć dane.</p>
-                    </div>
-                <?php else: ?>
-                    <?php $this->renderPlayerMissions($selectedUserId); ?>
-                <?php endif; ?>
-            <?php endif; ?>
-        </div>
-    <?php
+        // Na razie, jako placeholder, ponieważ GameDataBuilder nie jest jeszcze dostosowany do szablonów:
+        echo '<div class="postbox"><div class="inside"><p>Zarządzanie przedmiotami (placeholder - do implementacji w GameDataBuilder lub nowym szablonie)</p></div></div>';
+        // Docelowo, ta metoda powinna przygotować dane i dołączyć szablon, np.:
+        // $items = $this->userRepo->getPlayerItems($userId);
+        // $allItems = $this->dataBuilder->getAllPossibleItems(); // Metoda do pobrania wszystkich możliwych przedmiotów
+        // include __DIR__ . '/templates/player-editor-items.php';
     }
 
-    /**
-     * Renderuje misje gracza
-     */
-    private function renderPlayerMissions($userId)
+    public function renderPlayerAreasSection($userId)
     {
-        $missions = $this->missionManager->getPlayerMissions($userId);
-
-        echo '<div class="card">';
-        echo '<h3>Misje gracza</h3>';
-
-        if (empty($missions)) {
-            echo '<p>Gracz nie ma żadnych misji.</p>';
-        } else {
-            echo '<table class="wp-list-table widefat">';
-            echo '<thead><tr><th>ID Misji</th><th>Status</th><th>Postęp</th><th>Data rozpoczęcia</th><th>Data zakończenia</th><th>Akcje</th></tr></thead>';
-            echo '<tbody>';
-
-            foreach ($missions as $mission) {
-                $status = $this->missionManager->translateStatus($mission['status']);
-                $progress = $mission['completed_tasks'] . '/' . $mission['total_tasks'];
-                $startDate = $mission['started_at'] ? date('d.m.Y H:i', strtotime($mission['started_at'])) : '-';
-                $endDate = $mission['completed_at'] ? date('d.m.Y H:i', strtotime($mission['completed_at'])) : '-';
-
-                echo "<tr>";
-                echo "<td>{$mission['mission_id']}</td>";
-                echo "<td>$status</td>";
-                echo "<td>$progress</td>";
-                echo "<td>$startDate</td>";
-                echo "<td>$endDate</td>";
-                echo "<td>";
-
-                if ($mission['status'] === 'active') {
-                    echo '<a href="#" class="button button-small" onclick="completeMission(' . $mission['mission_id'] . ')">Zakończ</a> ';
-                }
-                if ($mission['status'] === 'available') {
-                    echo '<a href="#" class="button button-small" onclick="startMission(' . $mission['mission_id'] . ')">Rozpocznij</a> ';
-                }
-
-                echo "</td>";
-                echo "</tr>";
-            }
-
-            echo '</tbody></table>';
-        }
-
-        echo '</div>';
-
-        // Formularz do ręcznego dodawania misji
-        echo '<div class="card">';
-        echo '<h3>Dodaj misję</h3>';
-        echo '<form method="post" action="' . admin_url('admin-post.php') . '">';
-        echo '<input type="hidden" name="action" value="game_add_mission">';
-        echo '<input type="hidden" name="user_id" value="' . $userId . '">';
-        wp_nonce_field('game_add_mission');
-
-        echo '<table class="form-table">';
-        echo '<tr><th><label for="mission_id">ID Misji</label></th>';
-        echo '<td><input type="text" id="mission_id" name="mission_id" required></td></tr>';
-        echo '<tr><th><label for="mission_status">Status</label></th>';
-        echo '<td><select id="mission_status" name="status">';
-        echo '<option value="available">Dostępna</option>';
-        echo '<option value="active">Aktywna</option>';
-        echo '<option value="completed">Zakończona</option>';
-        echo '<option value="failed">Nieudana</option>';
-        echo '</select></td></tr>';
-        echo '</table>';
-
-        echo '<p><input type="submit" class="button button-primary" value="Dodaj misję"></p>';
-        echo '</form>';
-        echo '</div>';
-
-    ?>
-        <script>
-            function startMission(missionId) {
-                if (confirm('Czy na pewno chcesz rozpocząć tę misję?')) {
-                    // Implementacja AJAX lub przekierowanie
-                    window.location.href = '<?php echo admin_url('admin-post.php'); ?>?action=game_start_mission&mission_id=' + missionId + '&user_id=<?php echo $userId; ?>&_wpnonce=<?php echo wp_create_nonce('game_start_mission'); ?>';
-                }
-            }
-
-            function completeMission(missionId) {
-                if (confirm('Czy na pewno chcesz zakończyć tę misję?')) {
-                    window.location.href = '<?php echo admin_url('admin-post.php'); ?>?action=game_complete_mission&mission_id=' + missionId + '&user_id=<?php echo $userId; ?>&_wpnonce=<?php echo wp_create_nonce('game_complete_mission'); ?>';
-                }
-            }
-        </script>
-<?php
+        // Podobnie jak dla przedmiotów
+        echo '<div class="postbox"><div class="inside"><p>Zarządzanie rejonami (placeholder)</p></div></div>';
+        // $areas = $this->userRepo->getPlayerAreas($userId);
+        // $allAreas = $this->dataBuilder->getAllPossibleAreas();
+        // include __DIR__ . '/templates/player-editor-areas.php';
     }
 
-    /**
-     * Obsługuje dodawanie misji
-     */
-    public function handleAddMission()
+    public function renderPlayerRelationsSection($userId)
     {
-        if (!wp_verify_nonce($_POST['_wpnonce'], 'game_add_mission')) {
-            wp_die('Błąd bezpieczeństwa');
-        }
-
-        $userId = intval($_POST['user_id']);
-        $missionId = sanitize_text_field($_POST['mission_id']);
-        $status = sanitize_text_field($_POST['status']);
-
-        $result = $this->missionManager->addMissionForPlayer($userId, $missionId, $status);
-
-        $message = $result['success'] ? 'added' : 'error';
-        wp_redirect(admin_url('admin.php?page=game-missions&user_id=' . $userId . '&message=' . $message));
-        exit;
+        // Podobnie jak dla przedmiotów
+        echo '<div class="postbox"><div class="inside"><p>Zarządzanie relacjami NPC (placeholder)</p></div></div>';
+        // $relations = $this->userRepo->getPlayerRelations($userId);
+        // $allNpcs = $this->dataBuilder->getAllNpcs();
+        // include __DIR__ . '/templates/player-editor-relations.php';
     }
 
-    /**
-     * Obsługuje rozpoczynanie misji
-     */
-    public function handleStartMission()
+    public function renderPlayerFightResultsSection($userId)
     {
-        if (!wp_verify_nonce($_GET['_wpnonce'], 'game_start_mission')) {
-            wp_die('Błąd bezpieczeństwa');
-        }
-
-        $userId = intval($_GET['user_id']);
-        $missionId = sanitize_text_field($_GET['mission_id']);
-
-        $result = $this->missionManager->activateMission($userId, $missionId);
-
-        $message = $result['success'] ? 'started' : 'error';
-        wp_redirect(admin_url('admin.php?page=game-missions&user_id=' . $userId . '&message=' . $message));
-        exit;
-    }
-
-    /**
-     * Obsługuje kończenie misji
-     */
-    public function handleCompleteMission()
-    {
-        if (!wp_verify_nonce($_GET['_wpnonce'], 'game_complete_mission')) {
-            wp_die('Błąd bezpieczeństwa');
-        }
-
-        $userId = intval($_GET['user_id']);
-        $missionId = sanitize_text_field($_GET['mission_id']);
-
-        $result = $this->missionManager->completeMission($userId, $missionId);
-
-        $message = $result['success'] ? 'completed' : 'error';
-        wp_redirect(admin_url('admin.php?page=game-missions&user_id=' . $userId . '&message=' . $message));
-        exit;
+        // Podobnie jak dla przedmiotów
+        echo '<div class="postbox"><div class="inside"><p>Zarządzanie wynikami walk (placeholder)</p></div></div>';
+        // $fightData = $this->userRepo->getPlayerFightData($userId); // Załóżmy, że jest taka metoda
+        // include __DIR__ . '/templates/player-editor-fights.php';
     }
 }

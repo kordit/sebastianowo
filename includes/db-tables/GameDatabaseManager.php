@@ -9,15 +9,11 @@ class GameDatabaseManager
     // Nazwy tabel
     const TABLES = [
         'game_users' => 'game_users',
-        'game_user_stats' => 'game_user_stats',
-        'game_user_skills' => 'game_user_skills',
-        'game_user_progress' => 'game_user_progress',
-        'game_user_vitality' => 'game_user_vitality',
+        'game_user_data' => 'game_user_data',
         'game_user_items' => 'game_user_items',
         'game_user_areas' => 'game_user_areas',
         'game_user_fight_tokens' => 'game_user_fight_tokens',
         'game_user_relations' => 'game_user_relations',
-        'game_user_story' => 'game_user_story',
         'game_user_missions' => 'game_user_missions',
         'game_user_mission_tasks' => 'game_user_mission_tasks'
     ];
@@ -36,45 +32,13 @@ class GameDatabaseManager
             'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
         ],
 
-        'game_user_stats' => [
+        'game_user_data' => [
             'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
             'user_id' => 'BIGINT UNSIGNED NOT NULL',
-            'strength' => 'INT DEFAULT 0',
-            'defense' => 'INT DEFAULT 0',
-            'agility' => 'INT DEFAULT 0',
-            'intelligence' => 'INT DEFAULT 0',
-            'charisma' => 'INT DEFAULT 0',
-            'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
-        ],
-
-        'game_user_skills' => [
-            'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
-            'user_id' => 'BIGINT UNSIGNED NOT NULL',
-            'combat' => 'INT DEFAULT 0',
-            'steal' => 'INT DEFAULT 0',
-            'diplomacy' => 'INT DEFAULT 0',
-            'investigation' => 'INT DEFAULT 0',
-            'survival' => 'INT DEFAULT 0',
-            'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
-        ],
-
-        'game_user_progress' => [
-            'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
-            'user_id' => 'BIGINT UNSIGNED NOT NULL',
-            'experience' => 'INT DEFAULT 0',
-            'learning_points' => 'INT DEFAULT 0',
-            'reputation' => 'INT DEFAULT 0',
-            'level' => 'INT DEFAULT 1',
-            'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
-        ],
-
-        'game_user_vitality' => [
-            'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
-            'user_id' => 'BIGINT UNSIGNED NOT NULL',
-            'max_life' => 'INT DEFAULT 100',
-            'current_life' => 'INT DEFAULT 100',
-            'max_energy' => 'INT DEFAULT 100',
-            'current_energy' => 'INT DEFAULT 100',
+            'data_type' => 'ENUM("stat", "skill", "progress", "vitality", "story") NOT NULL',
+            'data_key' => 'VARCHAR(50) NOT NULL',
+            'data_value' => 'TEXT',
+            'numeric_value' => 'INT DEFAULT NULL',
             'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
         ],
 
@@ -119,32 +83,35 @@ class GameDatabaseManager
             'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
         ],
 
-        'game_user_story' => [
-            'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
-            'user_id' => 'BIGINT UNSIGNED NOT NULL',
-            'story_text' => 'LONGTEXT',
-            'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
-        ],
-
         'game_user_missions' => [
-            'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
+            'id' => 'BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY',
             'user_id' => 'BIGINT UNSIGNED NOT NULL',
-            'mission_id' => 'INT NOT NULL',
-            'status' => 'ENUM("available", "active", "completed", "failed") DEFAULT "available"',
-            'started_at' => 'TIMESTAMP NULL',
-            'completed_at' => 'TIMESTAMP NULL',
-            'expires_at' => 'TIMESTAMP NULL',
-            'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
+            'mission_id' => 'BIGINT NOT NULL',
+            'status' => 'VARCHAR(20) DEFAULT "not_started"',
+            'type' => 'VARCHAR(20) DEFAULT "one-time"',
+            'wins' => 'INT DEFAULT 0',
+            'losses' => 'INT DEFAULT 0',
+            'draws' => 'INT DEFAULT 0',
+            'started_at' => 'DATETIME NULL',
+            'completed_at' => 'DATETIME NULL',
+            'expires_at' => 'DATETIME NULL',
+            'created_at' => 'DATETIME DEFAULT CURRENT_TIMESTAMP',
+            'updated_at' => 'DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
         ],
 
         'game_user_mission_tasks' => [
-            'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
-            'user_mission_id' => 'INT NOT NULL',
-            'task_id' => 'VARCHAR(50) NOT NULL',
-            'status' => 'ENUM("pending", "completed", "failed") DEFAULT "pending"',
+            'id' => 'BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY',
+            'user_mission_id' => 'BIGINT NOT NULL',
+            'task_id' => 'BIGINT NOT NULL',
+            'task_type' => 'VARCHAR(20) NOT NULL',
+            'status' => 'VARCHAR(20) DEFAULT "not_started"',
             'attempts' => 'INT DEFAULT 0',
-            'completed_at' => 'TIMESTAMP NULL',
-            'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
+            'location_id' => 'BIGINT NULL',
+            'scene_id' => 'BIGINT NULL',
+            'npc_ids' => 'JSON NULL',
+            'enemy_ids' => 'JSON NULL',
+            'completed_at' => 'DATETIME NULL',
+            'updated_at' => 'DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
         ]
     ];
 
@@ -154,19 +121,10 @@ class GameDatabaseManager
             'user_id' => 'UNIQUE KEY idx_user_id (user_id)',
             'current_area' => 'KEY idx_current_area (current_area_id)'
         ],
-        'game_user_stats' => [
-            'user_id' => 'UNIQUE KEY idx_user_id (user_id)'
-        ],
-        'game_user_skills' => [
-            'user_id' => 'UNIQUE KEY idx_user_id (user_id)'
-        ],
-        'game_user_progress' => [
-            'user_id' => 'UNIQUE KEY idx_user_id (user_id)',
-            'experience' => 'KEY idx_experience (experience)',
-            'level' => 'KEY idx_level (level)'
-        ],
-        'game_user_vitality' => [
-            'user_id' => 'UNIQUE KEY idx_user_id (user_id)'
+        'game_user_data' => [
+            'user_type_key' => 'UNIQUE KEY idx_user_type_key (user_id, data_type, data_key)',
+            'data_type' => 'KEY idx_data_type (data_type)',
+            'numeric_value' => 'KEY idx_numeric_value (numeric_value)'
         ],
         'game_user_items' => [
             'user_item' => 'KEY idx_user_item (user_id, item_id)',
@@ -184,17 +142,19 @@ class GameDatabaseManager
             'user_npc' => 'UNIQUE KEY idx_user_npc (user_id, npc_id)',
             'relation' => 'KEY idx_relation (relation_value)'
         ],
-        'game_user_story' => [
-            'user_id' => 'UNIQUE KEY idx_user_id (user_id)'
-        ],
         'game_user_missions' => [
             'user_mission' => 'KEY idx_user_mission (user_id, mission_id)',
             'status' => 'KEY idx_status (status)',
-            'expires' => 'KEY idx_expires (expires_at)'
+            'type' => 'KEY idx_type (type)',
+            'expires' => 'KEY idx_expires (expires_at)',
+            'created' => 'KEY idx_created (created_at)'
         ],
         'game_user_mission_tasks' => [
-            'mission_task' => 'UNIQUE KEY idx_mission_task (user_mission_id, task_id)',
-            'status' => 'KEY idx_status (status)'
+            'user_mission_task' => 'KEY idx_user_mission_task (user_mission_id, task_id)',
+            'task_type' => 'KEY idx_task_type (task_type)',
+            'status' => 'KEY idx_status (status)',
+            'location' => 'KEY idx_location (location_id)',
+            'scene' => 'KEY idx_scene (scene_id)'
         ]
     ];
 
@@ -219,6 +179,27 @@ class GameDatabaseManager
     {
         $results = [];
 
+        foreach (self::TABLES as $tableName) {
+            $result = $this->createTable($tableName);
+            $results[$tableName] = $result;
+        }
+
+        return $results;
+    }
+
+    /**
+     * Usuwa wszystkie tabele gry i tworzy je od nowa
+     */
+    public function recreateAllTables()
+    {
+        $results = [];
+
+        // Najpierw usuń wszystkie tabele
+        foreach (self::TABLES as $tableName) {
+            $this->dropTable($tableName);
+        }
+
+        // Następnie utwórz je ponownie
         foreach (self::TABLES as $tableName) {
             $result = $this->createTable($tableName);
             $results[$tableName] = $result;
