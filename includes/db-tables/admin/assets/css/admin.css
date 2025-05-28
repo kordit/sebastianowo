@@ -1,0 +1,166 @@
+/* Game Admin Panel Styles */
+
+.game-admin-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+    margin: 20px 0;
+    padding: 20px;
+}
+
+.game-admin-section h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.game-admin-actions {
+    margin: 20px 0;
+}
+
+.game-admin-info {
+    background: #f9f9f9;
+    border-left: 4px solid #0073aa;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.game-admin-info h3 {
+    margin-top: 0;
+}
+
+.game-admin-info ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.game-admin-info li {
+    margin: 5px 0;
+}
+
+.game-admin-info code {
+    background: #f1f1f1;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.game-admin-placeholder {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.game-admin-placeholder h3 {
+    margin-top: 0;
+    color: #856404;
+}
+
+/* Notice styles */
+.notice.inline {
+    margin: 15px 0;
+    padding: 10px 15px;
+}
+
+/* Button spacing */
+.button+.button {
+    margin-left: 10px;
+}
+
+/* Table styles for future user lists */
+.game-users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.game-users-table th,
+.game-users-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+.game-users-table th {
+    background: #f9f9f9;
+    font-weight: 600;
+}
+
+.game-users-table tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+.game-users-table tr:hover {
+    background: #f0f0f0;
+}
+
+/* Table status styles */
+.game-tables-status {
+    margin: 20px 0;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-exists {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-missing {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.record-count {
+    font-weight: 600;
+    color: #0073aa;
+}
+
+.record-count-na {
+    color: #999;
+    font-style: italic;
+}
+
+/* Details/summary styling */
+details {
+    margin: 15px 0;
+}
+
+details summary {
+    cursor: pointer;
+    padding: 10px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+}
+
+details summary:hover {
+    background: #e8e8e8;
+}
+
+details[open] summary {
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+}
+
+details[open] {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+}
+
+details>ul {
+    margin: 15px;
+    padding-left: 20px;
+}
