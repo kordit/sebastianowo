@@ -117,13 +117,6 @@ if (!defined('ABSPATH')) {
                         </button>
                     </form>
 
-                    <form method="post">
-                        <?php wp_nonce_field('remove_duplicate_area_connections'); ?>
-                        <button type="submit" name="remove_duplicate_area_connections" class="ga-button ga-button--info">
-                            🧹 Usuń duplikaty
-                        </button>
-                    </form>
-
                     <form method="post" onsubmit="return confirm('Usunąć wszystkie powiązania obszarów?');">
                         <?php wp_nonce_field('clear_area_connections'); ?>
                         <button type="submit" name="clear_area_connections" class="ga-button ga-button--danger">
