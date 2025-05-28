@@ -1299,193 +1299,85 @@
 }
 
 /* =============================================================================
-   STAT COMPACT VARIANTS
+   AREAS MANAGEMENT STYLES
    ============================================================================= */
 
-.ga-stat-compact--success {
-    background: #d4f6db;
-    color: #155724;
+/* Sekcja obszaru */
+.ga-area-section {
+    margin-bottom: 30px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.ga-stat-compact--warning {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.ga-stat-compact--danger {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-/* =============================================================================
-   ADDITIONAL FORM COMPONENTS
-   ============================================================================= */
-
-/* Inline form styling */
-.ga-inline-form {
-    display: inline-block;
+.ga-area-title {
     margin: 0;
-}
-
-.ga-form-inline {
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 16px;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-wrap: wrap;
 }
 
-.ga-form-inline .ga-form-control,
-.ga-form-inline .ga-form-select {
-    margin: 0;
-}
-
-.ga-form-inline .ga-form-group {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.ga-form-inline .ga-form-group label {
-    margin: 0;
+.ga-area-title small {
+    color: #666;
+    font-weight: normal;
     font-size: 12px;
-    white-space: nowrap;
 }
 
-/* Icon styling */
-.ga-icon {
-    display: inline-block;
-    font-size: 18px;
-    line-height: 1;
-    text-align: center;
-    width: 24px;
-    height: 24px;
+/* Tabela obszarów */
+.ga-areas-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
 }
 
-/* Meta information */
-.ga-meta-info {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #e5e5e5;
+.ga-areas-table th,
+.ga-areas-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
 }
 
-.ga-meta-info small {
+.ga-areas-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #666;
+    letter-spacing: 0.5px;
+}
+
+.ga-areas-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.ga-areas-table input[type="checkbox"] {
+    transform: scale(1.2);
+    margin: 0;
+}
+
+.ga-areas-table small {
     color: #666;
     font-size: 11px;
 }
 
-/* Form sections */
-.ga-form-section {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e5e5e5;
-}
-
-.ga-form-section h4 {
-    margin: 0 0 15px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #23282d;
-}
-
-/* Section Header */
-.ga-section-header {
-    margin: 20px 0 10px 0;
-    padding-bottom: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    color: #23282d;
-    border-bottom: 1px solid #eee;
-}
-
-.ga-section-header:first-child {
-    margin-top: 0;
-}
-
-/* Form row */
-.ga-form-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    flex-direction: column;
-}
-
-.ga-form-row label {
-    min-width: 80px;
-    font-size: 12px;
-    margin: 0;
-}
-
-/* Small button improvements */
-.ga-button--small {
-    min-height: 24px;
-    padding: 2px 8px;
-    font-size: 11px;
-    line-height: 1.2;
-}
-
-/* Badge secondary variant */
-.ga-badge--secondary {
-    background: #6c757d;
-    color: white;
-}
-
-/* Button state improvements */
-.ga-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.ga-button:disabled:hover {
-    background-color: inherit;
-    border-color: inherit;
-    transform: none;
-}
-
-/* Responsive improvements */
+/* Responsywność dla tabeli obszarów */
 @media (max-width: 768px) {
-    .ga-form-inline {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .ga-form-inline .ga-form-group {
-        justify-content: space-between;
-    }
-
-    .ga-table {
+    .ga-areas-table {
         font-size: 12px;
     }
 
-    .ga-table th,
-    .ga-table td {
-        padding: 6px 4px;
-    }
-}
-
-/* =============================================================================
-   ACCESSIBILITY IMPROVEMENTS
-   ============================================================================= */
-
-.ga-button:focus,
-.ga-form-control:focus,
-.ga-form-select:focus,
-.ga-form-textarea:focus {
-    outline: 2px solid #005ccc;
-    outline-offset: 1px;
-}
-
-/* High contrast support */
-@media (prefers-contrast: high) {
-    .ga-card {
-        border-width: 2px;
+    .ga-areas-table th,
+    .ga-areas-table td {
+        padding: 8px 10px;
     }
 
-    .ga-button {
-        border-width: 2px;
-    }
-
-    .ga-badge {
-        border: 1px solid currentColor;
+    .ga-area-title {
+        padding: 12px 15px;
+        font-size: 14px;
     }
 }

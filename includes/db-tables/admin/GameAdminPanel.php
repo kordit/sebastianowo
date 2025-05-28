@@ -150,8 +150,6 @@ class GameAdminPanel
                 'max_energy' => intval($_POST['max_energy']),
                 'gold' => intval($_POST['gold']),
                 'cigarettes' => intval($_POST['cigarettes']),
-                'current_area_id' => intval($_POST['current_area_id']),
-                'current_scene_id' => sanitize_text_field($_POST['current_scene_id']),
                 'story_text' => sanitize_textarea_field($_POST['story_text'])
             ];
 
@@ -408,6 +406,84 @@ class GameAdminPanel
                 });
             }
         }
+
+        // Aktualizacja statusów obszarów gracza
+        if (isset($_POST['update_user_areas']) && wp_verify_nonce($_POST['_wpnonce'], 'update_user_areas')) {
+            $user_id = intval($_POST['user_id']);
+            $area_repo = new GameAreaRepository();
+            $updated_scenes = 0;
+            $errors = 0;
+
+            if (isset($_POST['area_scenes']) && is_array($_POST['area_scenes'])) {
+                foreach ($_POST['area_scenes'] as $scene_key => $scene_data) {
+                    // Parsuj klucz sceny (format: area_id-scene_id)
+                    $parts = explode('-', $scene_key);
+                    if (count($parts) !== 2) continue;
+
+                    $area_id = intval($parts[0]);
+                    $scene_id = sanitize_text_field($parts[1]);
+
+                    // Pobierz aktualną scenę
+                    $current_scene = $area_repo->getUserScene($user_id, $area_id, $scene_id);
+
+                    if ($current_scene) {
+                        // Przygotuj dane do aktualizacji
+                        $update_data = [
+                            'unlocked' => isset($scene_data['unlocked']) ? 1 : 0,
+                            'viewed' => isset($scene_data['viewed']) ? 1 : 0,
+                            'is_current' => isset($scene_data['is_current']) ? 1 : 0,
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ];
+
+                        // Jeśli ustawiamy is_current=1, to najpierw wyczyść wszystkie inne is_current dla tego użytkownika
+                        if ($update_data['is_current'] == 1) {
+                            global $wpdb;
+                            $wpdb->update(
+                                $wpdb->prefix . 'game_user_areas',
+                                ['is_current' => 0],
+                                ['user_id' => $user_id]
+                            );
+                        }
+
+                        // Aktualizuj scenę
+                        global $wpdb;
+                        $result = $wpdb->update(
+                            $wpdb->prefix . 'game_user_areas',
+                            $update_data,
+                            [
+                                'user_id' => $user_id,
+                                'area_id' => $area_id,
+                                'scene_id' => $scene_id
+                            ]
+                        );
+
+                        if ($result !== false) {
+                            $updated_scenes++;
+                        } else {
+                            $errors++;
+                        }
+                    }
+                }
+            }
+
+            if ($updated_scenes > 0) {
+                add_action('admin_notices', function () use ($updated_scenes) {
+                    echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Zaktualizowano ' . $updated_scenes . ' scen obszarów.</p></div>';
+                });
+            }
+
+            if ($errors > 0) {
+                add_action('admin_notices', function () use ($errors) {
+                    echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> ' . $errors . ' scen nie zostało zaktualizowanych.</p></div>';
+                });
+            }
+
+            if ($updated_scenes == 0 && $errors == 0) {
+                add_action('admin_notices', function () {
+                    echo '<div class="notice notice-info is-dismissible"><p><strong>Info!</strong> Nie wprowadzono żadnych zmian w obszarach.</p></div>';
+                });
+            }
+        }
     }
 
     /**
@@ -473,6 +549,26 @@ class GameAdminPanel
         $user_items = $item_repo->getUserItems($user_id);
         $all_items = $item_repo->getAllAvailableItems();
         $items_stats = $item_repo->getUserItemStats($user_id);
+
+        // Pobierz aktualną lokalizację gracza
+        $area_repo = new GameAreaRepository();
+        $current_location = $area_repo->getCurrentLocation($user_id);
+        $user_areas_stats = $area_repo->getUserAreasStats($user_id);
+
+        // Pobierz wszystkie obszary gracza z detalami
+        $user_areas = $area_repo->getUserAreas($user_id);
+        $area_builder = new AreaBuilder();
+        $all_areas = $area_builder->getAllAreas();
+
+        // Połącz dane WordPress z danymi gracza
+        $areas_with_details = [];
+        foreach ($all_areas as $wp_area) {
+            $user_area_scenes = $area_repo->getUserArea($user_id, $wp_area['id']);
+            $areas_with_details[] = [
+                'wp_data' => $wp_area,
+                'user_scenes' => $user_area_scenes ?: []
+            ];
+        }
 
         include __DIR__ . '/views/user-details.php';
     }

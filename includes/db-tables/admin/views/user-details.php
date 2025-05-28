@@ -198,15 +198,159 @@ $level = max(1, floor($game_user['exp'] / 100) + 1);
                 </div>
                 <div class="ga-card__content">
                     <table class="ga-form-table">
-                        <tr>
-                            <th>Obecny teren:</th>
-                            <td><input type="number" name="current_area_id" value="<?php echo $game_user['current_area_id']; ?>" min="0" class="ga-form-control ga-form-control--small"></td>
-                        </tr>
-                        <tr>
-                            <th>Obecna scena:</th>
-                            <td><input type="text" name="current_scene_id" value="<?php echo esc_attr($game_user['current_scene_id']); ?>" class="ga-form-control"></td>
-                        </tr>
+                        <?php if ($current_location): ?>
+                            <tr>
+                                <th>Obecny teren:</th>
+                                <td>
+                                    <strong><?php echo esc_html($current_location->area_id); ?></strong>
+                                    <?php
+                                    // Pobierz nazwę terenu z WordPress
+                                    $area_post = get_post($current_location->area_id);
+                                    if ($area_post) {
+                                        echo ' - ' . esc_html($area_post->post_title);
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Obecna scena:</th>
+                                <td><strong><?php echo esc_html($current_location->scene_id); ?></strong></td>
+                            </tr>
+                            <tr>
+                                <th>Status sceny:</th>
+                                <td>
+                                    <span class="ga-badge <?php echo $current_location->unlocked ? 'ga-badge--success' : 'ga-badge--danger'; ?>">
+                                        <?php echo $current_location->unlocked ? '🔓 Odblokowana' : '🔒 Zablokowana'; ?>
+                                    </span>
+                                    <?php if ($current_location->viewed): ?>
+                                        <span class="ga-badge ga-badge--info">👁️ Oglądana</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Ostatnia aktualizacja:</th>
+                                <td><?php echo $current_location->updated_at ? date('d.m.Y H:i', strtotime($current_location->updated_at)) : 'Nigdy'; ?></td>
+                            </tr>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="2">
+                                    <div class="ga-notice ga-notice--warning">
+                                        <p>🚨 Gracz nie ma ustawionej lokalizacji. <a href="<?php echo admin_url('admin.php?page=game-buildery'); ?>">Zbuduj powiązania obszarów</a></p>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
                     </table>
+                </div>
+            </div>
+
+            <!-- Statystyki i edycja obszarów -->
+            <div class="ga-card ga-card--success ga-card--full">
+                <div class="ga-card__header">
+                    <h3 class="ga-card__title">🗺️ Obszary gracza</h3>
+                    <div class="ga-stats">
+                        <div class="ga-stat">
+                            <span class="ga-stat-label">Wszystkie obszary:</span>
+                            <span class="ga-stat-value"><?php echo $user_areas_stats['total_areas']; ?></span>
+                        </div>
+                        <div class="ga-stat">
+                            <span class="ga-stat-label">Odblokowane:</span>
+                            <span class="ga-stat-value"><?php echo $user_areas_stats['unlocked_areas']; ?></span>
+                        </div>
+                        <div class="ga-stat">
+                            <span class="ga-stat-label">Oglądane:</span>
+                            <span class="ga-stat-value"><?php echo $user_areas_stats['viewed_areas']; ?></span>
+                        </div>
+                        <div class="ga-stat">
+                            <span class="ga-stat-label">Sceny:</span>
+                            <span class="ga-stat-value"><?php echo $user_areas_stats['unlocked_scenes']; ?>/<?php echo $user_areas_stats['total_scenes']; ?></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ga-card__content">
+                    <?php if (!empty($areas_with_details)): ?>
+                        <form method="post" action="">
+                            <?php wp_nonce_field('update_user_areas', '_wpnonce'); ?>
+                            <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+
+                            <?php foreach ($areas_with_details as $area_detail): ?>
+                                <?php
+                                $wp_area = $area_detail['wp_data'];
+                                $user_scenes = $area_detail['user_scenes'];
+                                ?>
+                                <div class="ga-area-section">
+                                    <h4 class="ga-area-title">
+                                        <?php echo esc_html($wp_area['title']); ?>
+                                        <span class="ga-badge ga-badge--<?php echo $wp_area['type'] === 'teren' ? 'info' : 'warning'; ?>">
+                                            <?php echo $wp_area['type']; ?>
+                                        </span>
+                                        <small>(ID: <?php echo $wp_area['id']; ?>)</small>
+                                    </h4>
+
+                                    <?php if (!empty($user_scenes)): ?>
+                                        <table class="ga-areas-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Scena</th>
+                                                    <th>Odblokowana</th>
+                                                    <th>Oglądana</th>
+                                                    <th>Aktualna</th>
+                                                    <th>Utworzono</th>
+                                                    <th>Ostatnia aktualizacja</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($user_scenes as $scene): ?>
+                                                    <?php $scene_key = $scene['area_id'] . '-' . $scene['scene_id']; ?>
+                                                    <tr>
+                                                        <td><strong><?php echo esc_html($scene['scene_id']); ?></strong></td>
+                                                        <td>
+                                                            <input type="checkbox"
+                                                                name="area_scenes[<?php echo $scene_key; ?>][unlocked]"
+                                                                value="1"
+                                                                <?php checked($scene['unlocked'], 1); ?>>
+                                                        </td>
+                                                        <td>
+                                                            <input type="checkbox"
+                                                                name="area_scenes[<?php echo $scene_key; ?>][viewed]"
+                                                                value="1"
+                                                                <?php checked($scene['viewed'], 1); ?>>
+                                                        </td>
+                                                        <td>
+                                                            <input type="checkbox"
+                                                                name="area_scenes[<?php echo $scene_key; ?>][is_current]"
+                                                                value="1"
+                                                                <?php checked($scene['is_current'], 1); ?>>
+                                                        </td>
+                                                        <td>
+                                                            <small><?php echo date('d.m.Y H:i', strtotime($scene['created_at'])); ?></small>
+                                                        </td>
+                                                        <td>
+                                                            <small><?php echo $scene['updated_at'] ? date('d.m.Y H:i', strtotime($scene['updated_at'])) : 'Nigdy'; ?></small>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    <?php else: ?>
+                                        <div class="ga-notice ga-notice--info">
+                                            <p>Brak scen dla tego obszaru lub nie zostały jeszcze utworzone powiązania.</p>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+
+                            <div class="ga-form-actions">
+                                <button type="submit" name="update_user_areas" class="ga-btn ga-btn--primary">
+                                    💾 Zapisz zmiany w obszarach
+                                </button>
+                            </div>
+                        </form>
+                    <?php else: ?>
+                        <div class="ga-notice ga-notice--warning">
+                            <p>🚨 Gracz nie ma żadnych obszarów. <a href="<?php echo admin_url('admin.php?page=game-buildery'); ?>">Zbuduj powiązania obszarów</a></p>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 

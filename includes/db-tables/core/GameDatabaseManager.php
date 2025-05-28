@@ -142,8 +142,6 @@ class GameDatabaseManager
             avatar int DEFAULT 0,
             avatar_full int DEFAULT 0,
             story_text text,
-            current_area_id int DEFAULT 0,
-            current_scene_id varchar(32) DEFAULT '',
             strength int DEFAULT 1,
             defense int DEFAULT 1,
             dexterity int DEFAULT 1,

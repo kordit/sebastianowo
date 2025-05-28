@@ -133,8 +133,6 @@ class GameUserSyncService
                 'avatar' => 0,
                 'avatar_full' => 0,
                 'story_text' => '',
-                'current_area_id' => 0,
-                'current_scene_id' => '',
                 'strength' => 1,
                 'defense' => 1,
                 'dexterity' => 1,
