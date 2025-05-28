@@ -100,10 +100,18 @@ class AreaBuilder
     {
         $areas = $this->getAllAreas();
         $user_repo = new GameUserRepository();
-        $users = $user_repo->getAll();
+        $users = $user_repo->getAll(999999, 0); // Pobierz wszystkich użytkowników
 
         $total_created = 0;
         $total_updated = 0;
+
+        // Debug: sprawdź co mamy
+        error_log("DEBUG buildAllAreaConnections: Found " . count($areas) . " areas");
+        error_log("DEBUG buildAllAreaConnections: Found " . count($users) . " users");
+
+        foreach ($areas as $area) {
+            error_log("DEBUG Area: " . $area['title'] . " (ID: " . $area['id'] . ") has " . count($area['scenes']) . " scenes");
+        }
 
         foreach ($users as $user) {
             foreach ($areas as $area) {
@@ -122,21 +130,9 @@ class AreaBuilder
                         );
 
                         if (!$scene_exists) {
-                            // Domyślnie, tylko scena 'main' jest odblokowana dla terenów
-                            $is_scene_unlocked = ($area['type'] === 'teren' && $scene_id === 'main') ? 1 : 0;
-
-                            // Ustawienie is_current tylko dla głównej sceny w głównym terenie dla nowych graczy
+                            // Wszystkie wartości domyślnie ustawione na 0
+                            $is_scene_unlocked = 0;
                             $is_current = 0;
-                            if ($area['type'] === 'teren' && $scene_id === 'main' && $area['id'] == 207) {  // Zakładam, że obszar 207 to główny obszar
-                                $is_current = 1;
-
-                                // Upewnij się, że tylko jedno miejsce jest oznaczone jako aktualne
-                                $this->wpdb->update(
-                                    $this->wpdb->prefix . 'game_user_areas',
-                                    ['is_current' => 0],
-                                    ['user_id' => $user['user_id']]
-                                );
-                            }
 
                             // Dodaj nowy wpis dla sceny
                             $result = $this->wpdb->insert(

@@ -569,6 +569,10 @@
     margin-bottom: 24px;
 }
 
+.ga-header .notice {
+    color: #000;
+}
+
 .ga-header__title {
     margin: 0 0 8px 0;
     font-size: 28px;
