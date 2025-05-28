@@ -378,93 +378,122 @@ $level = max(1, floor($game_user['exp'] / 100) + 1);
                     <p>Gracz nie posiada żadnych przedmiotów.</p>
                 </div>
             <?php else: ?>
-                <table class="ga-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;">Ikona</th>
-                            <th>Nazwa przedmiotu</th>
-                            <th style="width: 120px;">Ilość</th>
-                            <th style="width: 100px;">Status</th>
-                            <th style="width: 120px;">Akcje</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($user_items as $item): ?>
+                <?php
+                // Grupowanie przedmiotów wg taksonomii item_type
+                $items_by_type = [];
+                foreach ($user_items as $item) {
+                    $type_id = !empty($item['item_type']) ? $item['item_type']->term_id : 0;
+                    $type_name = !empty($item['item_type']) ? $item['item_type']->name : 'Inne przedmioty';
+
+                    if (!isset($items_by_type[$type_id])) {
+                        $items_by_type[$type_id] = [
+                            'name' => $type_name,
+                            'items' => []
+                        ];
+                    }
+
+                    $items_by_type[$type_id]['items'][] = $item;
+                }
+
+                // Sortuj typy według nazwy
+                uasort($items_by_type, function ($a, $b) {
+                    return $a['name'] <=> $b['name'];
+                });
+                ?>
+
+                <?php foreach ($items_by_type as $type_id => $type_data): ?>
+                    <h4 class="ga-section-header"><?php echo esc_html($type_data['name']); ?></h4>
+                    <table class="ga-table">
+                        <thead>
                             <tr>
-                                <td>
-                                    <span class="ga-icon">
-                                        <?php
-                                        $icon = get_post_meta($item['item_id'], 'item_icon', true);
-                                        echo $icon ?: '📦';
-                                        ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <strong><?php echo esc_html($item['item_name']); ?></strong>
-                                </td>
-                                <td>
-                                    <form method="post" action="" class="ga-inline-form">
-                                        <?php wp_nonce_field('update_item_amount', '_wpnonce_update_item'); ?>
-                                        <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
-                                        <input type="hidden" name="item_id" value="<?php echo $item['item_id']; ?>">
-                                        <div class="ga-form-inline">
-                                            <input type="number"
-                                                name="item_new_amount"
-                                                value="<?php echo $item['amount']; ?>"
-                                                min="0"
-                                                class="ga-form-control ga-form-control--small">
-                                            <button type="submit"
-                                                name="update_item_amount"
-                                                class="ga-button ga-button--small ga-button--primary"
-                                                title="Zapisz nową ilość">
-                                                💾
-                                            </button>
-                                        </div>
-                                    </form>
-                                </td>
-                                <td>
-                                    <form method="post" action="" class="ga-inline-form">
-                                        <?php wp_nonce_field('update_item_equipped', '_wpnonce_update_equipped'); ?>
-                                        <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
-                                        <input type="hidden" name="item_id" value="<?php echo $item['item_id']; ?>">
-                                        <input type="hidden" name="update_item_equipped" value="1">
-                                        <div class="ga-form-inline">
-                                            <select name="item_equipped_status"
-                                                class="ga-form-select ga-form-select--small"
-                                                onchange="this.form.submit()">
-                                                <option value="0" <?php selected($item['is_equipped'], 0); ?>>Nie wyposażony</option>
-                                                <option value="1" <?php selected($item['is_equipped'], 1); ?>>Wyposażony</option>
-                                            </select>
-                                            <button type="submit"
-                                                class="ga-button ga-button--small ga-button--primary"
-                                                title="Zapisz status wyposażenia"
-                                                style="display: none;">
-                                                💾
-                                            </button>
-                                        </div>
-                                    </form>
-                                </td>
-                                <td>
-                                    <form method="post"
-                                        action=""
-                                        class="ga-inline-form"
-                                        onsubmit="return confirm('Czy na pewno usunąć cały przedmiot?')">
-                                        <?php wp_nonce_field('remove_item', '_wpnonce_remove_item'); ?>
-                                        <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
-                                        <input type="hidden" name="item_id_remove" value="<?php echo $item['item_id']; ?>">
-                                        <input type="hidden" name="item_amount_remove" value="<?php echo $item['amount']; ?>">
-                                        <button type="submit"
-                                            name="remove_item"
-                                            class="ga-button ga-button--small ga-button--danger"
-                                            title="Usuń całkowicie przedmiot">
-                                            🗑️
-                                        </button>
-                                    </form>
-                                </td>
+                                <th style="width: 50px;">Ikona</th>
+                                <th>Nazwa przedmiotu</th>
+                                <th style="width: 120px;">Ilość</th>
+                                <th style="width: 100px;">Status</th>
+                                <th style="width: 120px;">Akcje</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($type_data['items'] as $item): ?>
+                                <tr>
+                                    <td>
+                                        <span class="ga-icon">
+                                            <?php
+                                            $icon = get_post_meta($item['item_id'], 'item_icon', true);
+                                            echo $icon ?: '📦';
+                                            ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong><?php echo esc_html($item['item_name']); ?></strong>
+                                    </td>
+                                    <td>
+                                        <form method="post" action="" class="ga-inline-form">
+                                            <?php wp_nonce_field('update_item_amount', '_wpnonce_update_item'); ?>
+                                            <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                                            <input type="hidden" name="item_id" value="<?php echo $item['item_id']; ?>">
+                                            <div class="ga-form-inline">
+                                                <input type="number"
+                                                    name="item_new_amount"
+                                                    value="<?php echo $item['amount']; ?>"
+                                                    min="0"
+                                                    class="ga-form-control ga-form-control--small">
+                                                <button type="submit"
+                                                    name="update_item_amount"
+                                                    class="ga-button ga-button--small ga-button--primary"
+                                                    title="Zapisz nową ilość">
+                                                    💾
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <form method="post" action="" class="ga-inline-form">
+                                            <?php wp_nonce_field('update_item_equipped', '_wpnonce_update_equipped'); ?>
+                                            <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                                            <input type="hidden" name="item_id" value="<?php echo $item['item_id']; ?>">
+                                            <input type="hidden" name="update_item_equipped" value="1">
+                                            <div class="ga-form-inline">
+                                                <select name="item_equipped_status"
+                                                    class="ga-form-select ga-form-select--small"
+                                                    onchange="this.form.submit()"
+                                                    <?php echo !$item['can_be_equipped'] ? 'disabled title="Ten przedmiot nie może być wyposażony"' : ''; ?>>
+                                                    <option value="0" <?php selected($item['is_equipped'], 0); ?>>Nie wyposażony</option>
+                                                    <?php if ($item['can_be_equipped']): ?>
+                                                        <option value="1" <?php selected($item['is_equipped'], 1); ?>>Wyposażony</option>
+                                                    <?php endif; ?>
+                                                </select>
+                                                <button type="submit"
+                                                    class="ga-button ga-button--small ga-button--primary"
+                                                    title="Zapisz status wyposażenia"
+                                                    style="display: none;">
+                                                    💾
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <form method="post"
+                                            action=""
+                                            class="ga-inline-form"
+                                            onsubmit="return confirm('Czy na pewno usunąć cały przedmiot?')">
+                                            <?php wp_nonce_field('remove_item', '_wpnonce_remove_item'); ?>
+                                            <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                                            <input type="hidden" name="item_id_remove" value="<?php echo $item['item_id']; ?>">
+                                            <input type="hidden" name="item_amount_remove" value="<?php echo $item['amount']; ?>">
+                                            <button type="submit"
+                                                name="remove_item"
+                                                class="ga-button ga-button--small ga-button--danger"
+                                                title="Usuń całkowicie przedmiot">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endforeach; ?>
             <?php endif; ?>
 
             <!-- Dodawanie przedmiotu -->

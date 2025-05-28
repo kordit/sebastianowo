@@ -1383,6 +1383,20 @@
     color: #23282d;
 }
 
+/* Section Header */
+.ga-section-header {
+    margin: 20px 0 10px 0;
+    padding-bottom: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #23282d;
+    border-bottom: 1px solid #eee;
+}
+
+.ga-section-header:first-child {
+    margin-top: 0;
+}
+
 /* Form row */
 .ga-form-row {
     display: flex;

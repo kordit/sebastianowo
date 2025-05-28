@@ -317,6 +317,28 @@ class GameAdminPanel
                             echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Przedmiot został oznaczony jako ' . $status_text . '.</p></div>';
                         });
                     } else {
+                        // Sprawdź czy próbujemy wyposażyć przedmiot, który nie można wyposażyć
+                        if ($is_equipped) {
+                            $item_types = wp_get_post_terms($item_id, 'item_type');
+                            $can_be_equipped = false;
+
+                            if (!empty($item_types)) {
+                                foreach ($item_types as $term) {
+                                    if ($term->term_id == 2) {
+                                        $can_be_equipped = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!$can_be_equipped) {
+                                add_action('admin_notices', function () {
+                                    echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Ten przedmiot nie może być wyposażony. Tylko przedmioty z kategorii wyposażenia (ID=2) mogą być wyposażone.</p></div>';
+                                });
+                                return;
+                            }
+                        }
+
                         add_action('admin_notices', function () {
                             echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Nie udało się zaktualizować statusu wyposażenia.</p></div>';
                         });

@@ -21,7 +21,7 @@ class GameUserItemRepository
      */
     public function getUserItems($user_id)
     {
-        return $this->wpdb->get_results($this->wpdb->prepare(
+        $items = $this->wpdb->get_results($this->wpdb->prepare(
             "SELECT gui.*, p.post_title as item_name 
              FROM {$this->table_name} gui 
              LEFT JOIN {$this->wpdb->posts} p ON gui.item_id = p.ID 
@@ -29,6 +29,25 @@ class GameUserItemRepository
              ORDER BY p.post_title",
             $user_id
         ), ARRAY_A);
+
+        // Dodaj informację o taksonomii do każdego przedmiotu
+        foreach ($items as $key => $item) {
+            $item_types = wp_get_post_terms($item['item_id'], 'item_type');
+            $items[$key]['item_type'] = !empty($item_types) ? $item_types[0] : null;
+            $items[$key]['can_be_equipped'] = false;
+
+            // Sprawdź czy przedmiot można wyposażyć (item_type o ID=2)
+            if (!empty($item_types)) {
+                foreach ($item_types as $term) {
+                    if ($term->term_id == 2) {
+                        $items[$key]['can_be_equipped'] = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $items;
     }
 
     /**
@@ -131,9 +150,30 @@ class GameUserItemRepository
 
     /**
      * Zmienia status wyposażenia przedmiotu
+     * Tylko przedmioty z taksonomią item_type o ID=2 mogą być wyposażone
      */
     public function setEquipped($user_id, $item_id, $is_equipped, $slot = '')
     {
+        // Jeśli próbujemy wyposażyć przedmiot, najpierw sprawdźmy czy ma odpowiednią taksonomię
+        if ($is_equipped) {
+            $can_be_equipped = false;
+            $item_types = wp_get_post_terms($item_id, 'item_type');
+
+            if (!empty($item_types)) {
+                foreach ($item_types as $term) {
+                    if ($term->term_id == 2) {
+                        $can_be_equipped = true;
+                        break;
+                    }
+                }
+            }
+
+            // Jeśli przedmiot nie może być wyposażony, zwróć false
+            if (!$can_be_equipped) {
+                return false;
+            }
+        }
+
         return $this->wpdb->update(
             $this->table_name,
             [
