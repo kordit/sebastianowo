@@ -334,14 +334,122 @@ $level = max(1, floor($game_user['exp'] / 100) + 1);
                         <?php endif; ?>
                     </div>
                 </div>
-
-            </div>
-
-            <!-- Sekcja submit -->
-            <div class="submit-section">
                 <input type="submit" name="update_game_user" class="button-primary" value="💾 Zapisz zmiany">
-                <a href="<?php echo admin_url('admin.php?page=game-users'); ?>" class="button-secondary">← Powrót do listy</a>
+                <!-- Ekwipunek gracza - wydzielony z głównego formularza -->
             </div>
         </form>
+
+        <div class="details-card full-width items-card">
+            <div class="card-header items-header">
+                <h3>Ekwipunek gracza</h3>
+                <?php if (!empty($user_items)): ?>
+                    <div class="items-stats">
+                        <span class="item-stat">
+                            Rodzaje przedmiotów: <strong><?php echo $items_stats['unique_items']; ?></strong>
+                        </span>
+                        <span class="item-stat">
+                            Łącznie przedmiotów: <strong><?php echo $items_stats['total_amount']; ?></strong>
+                        </span>
+                        <span class="item-stat">
+                            Wyposażonych: <strong><?php echo $items_stats['equipped_items']; ?></strong>
+                        </span>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="card-content">
+                <?php if (empty($user_items)): ?>
+                    <p class="no-items">Gracz nie posiada żadnych przedmiotów.</p>
+                <?php else: ?>
+                    <h4>Przedmioty w ekwipunku</h4>
+                    <table class="wp-list-table widefat fixed striped item-list">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="width: 50px;">Ikona</th>
+                                <th scope="col">Nazwa przedmiotu</th>
+                                <th scope="col" style="width: 120px;">Ilość</th>
+                                <th scope="col" style="width: 100px;">Status</th>
+                                <th scope="col" style="width: 120px;">Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($user_items as $item): ?>
+                                <tr>
+                                    <td>
+                                        <?php
+                                        $icon = get_post_meta($item['item_id'], 'item_icon', true);
+                                        echo $icon ?: '📦';
+                                        ?>
+                                    </td>
+                                    <td>
+                                        <strong><?php echo esc_html($item['item_name']); ?></strong>
+                                    </td>
+                                    <td>
+                                        <form method="post" action="" class="item-edit-form">
+                                            <?php wp_nonce_field('update_item_amount', '_wpnonce_update_item'); ?>
+                                            <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                                            <input type="hidden" name="item_id" value="<?php echo $item['item_id']; ?>">
+                                            <input type="number" name="item_new_amount" value="<?php echo $item['amount']; ?>" min="0" class="form-control small" style="width: 60px; display: inline-block;">
+                                            <button type="submit" name="update_item_amount" class="button button-small" title="Zapisz nową ilość">
+                                                <span class="dashicons dashicons-saved"></span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <?php if ($item['is_equipped']): ?>
+                                            <span class="equipped-badge">Wyposażony</span>
+                                        <?php else: ?>
+                                            <span class="not-equipped-badge">Nie wyposażony</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <form method="post" action="" class="item-remove-form" onsubmit="return confirm('Czy na pewno usunąć cały przedmiot?')">
+                                            <?php wp_nonce_field('remove_item', '_wpnonce_remove_item'); ?>
+                                            <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                                            <input type="hidden" name="item_id_remove" value="<?php echo $item['item_id']; ?>">
+                                            <input type="hidden" name="item_amount_remove" value="<?php echo $item['amount']; ?>">
+                                            <button type="submit" name="remove_item" class="button button-small button-caution" title="Usuń całkowicie przedmiot">
+                                                <span class="dashicons dashicons-trash"></span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+
+                <!-- Dodawanie przedmiotu - przeniesione pod tabelę -->
+                <div class="items-management">
+                    <div class="item-action-box add-item-box">
+                        <h4>Dodaj przedmiot do ekwipunku</h4>
+                        <form method="post" action="">
+                            <?php wp_nonce_field('add_item', '_wpnonce_add_item'); ?>
+                            <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                            <div class="item-form">
+                                <select name="item_id" class="form-select">
+                                    <option value="">-- Wybierz przedmiot --</option>
+                                    <?php foreach ($all_items as $item): ?>
+                                        <option value="<?php echo $item->ID; ?>"><?php echo $item->post_title; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="item-amount-input">
+                                    <label>Ilość:</label>
+                                    <input type="number" name="item_amount" value="1" min="1" class="form-control small">
+                                </div>
+                                <button type="submit" name="add_item" class="button button-primary">
+                                    <span class="dashicons dashicons-plus"></span> Dodaj do ekwipunku
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sekcja submit dla głównego formularza -->
+        <div class="submit-section">
+            <a href="<?php echo admin_url('admin.php?page=game-users'); ?>" class="button-secondary">← Powrót do listy</a>
+        </div>
+        </form> <!-- Zamknięcie głównego formularza -->
     </div>
 </div>

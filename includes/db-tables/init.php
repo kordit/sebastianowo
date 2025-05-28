@@ -15,7 +15,7 @@ spl_autoload_register(function ($class_name) {
     $class_map = [
         'GameDatabaseManager' => 'core/GameDatabaseManager.php',
         'GameUserRepository' => 'repositories/GameUserRepository.php',
-        'GameItemRepository' => 'repositories/GameItemRepository.php',
+        'GameUserItemRepository' => 'repositories/GameUserItemRepository.php',
         'GameAreaRepository' => 'repositories/GameAreaRepository.php',
         'GameFightTokenRepository' => 'repositories/GameFightTokenRepository.php',
         'GameNPCRelationRepository' => 'repositories/GameNPCRelationRepository.php',

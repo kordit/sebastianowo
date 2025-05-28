@@ -202,6 +202,103 @@ class GameAdminPanel
             }
         }
 
+        // Obsługa operacji na przedmiotach (niezależna od głównego formularza)
+        if (isset($_POST['user_id'])) {
+            $user_id = intval($_POST['user_id']);
+
+            // Dodawanie przedmiotu
+            if (
+                isset($_POST['add_item']) && isset($_POST['item_id']) && isset($_POST['item_amount']) &&
+                isset($_POST['_wpnonce_add_item']) && wp_verify_nonce($_POST['_wpnonce_add_item'], 'add_item')
+            ) {
+
+                $item_id = intval($_POST['item_id']);
+                $amount = intval($_POST['item_amount']);
+
+                if ($item_id > 0 && $amount > 0) {
+                    $item_repo = new GameUserItemRepository();
+                    $result = $item_repo->addItem($user_id, $item_id, $amount);
+
+                    if ($result !== false) {
+                        add_action('admin_notices', function () use ($amount) {
+                            echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Dodano ' . $amount . ' szt. przedmiotu do ekwipunku gracza.</p></div>';
+                        });
+                    } else {
+                        add_action('admin_notices', function () {
+                            echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Nie udało się dodać przedmiotu.</p></div>';
+                        });
+                    }
+                }
+            }
+
+            // Usuwanie przedmiotu
+            if (
+                isset($_POST['remove_item']) && isset($_POST['item_id_remove']) && isset($_POST['item_amount_remove']) &&
+                isset($_POST['_wpnonce_remove_item']) && wp_verify_nonce($_POST['_wpnonce_remove_item'], 'remove_item')
+            ) {
+
+                $item_id = intval($_POST['item_id_remove']);
+                $amount = intval($_POST['item_amount_remove']);
+
+                if ($item_id > 0 && $amount > 0) {
+                    $item_repo = new GameUserItemRepository();
+                    $result = $item_repo->removeItem($user_id, $item_id, $amount);
+
+                    if ($result !== false) {
+                        add_action('admin_notices', function () use ($amount) {
+                            echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Usunięto ' . $amount . ' szt. przedmiotu z ekwipunku gracza.</p></div>';
+                        });
+                    } else {
+                        add_action('admin_notices', function () {
+                            echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Nie udało się usunąć przedmiotu.</p></div>';
+                        });
+                    }
+                }
+            }
+
+            // Aktualizacja ilości przedmiotu
+            if (
+                isset($_POST['update_item_amount']) && isset($_POST['item_id']) && isset($_POST['item_new_amount']) &&
+                isset($_POST['_wpnonce_update_item']) && wp_verify_nonce($_POST['_wpnonce_update_item'], 'update_item_amount')
+            ) {
+
+                $item_id = intval($_POST['item_id']);
+                $amount = intval($_POST['item_new_amount']);
+
+                if ($item_id > 0) {
+                    $item_repo = new GameUserItemRepository();
+
+                    if ($amount <= 0) {
+                        // Usuń przedmiot całkowicie
+                        $result = $item_repo->removeItem($user_id, $item_id, 999999); // Duża liczba, aby usunąć wszystko
+
+                        if ($result !== false) {
+                            add_action('admin_notices', function () {
+                                echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Przedmiot został całkowicie usunięty z ekwipunku gracza.</p></div>';
+                            });
+                        } else {
+                            add_action('admin_notices', function () {
+                                echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Nie udało się usunąć przedmiotu.</p></div>';
+                            });
+                        }
+                    } else {
+                        // Ustaw nową ilość
+                        $result = $item_repo->setItemAmount($user_id, $item_id, $amount);
+
+                        if ($result !== false) {
+                            add_action('admin_notices', function () use ($amount) {
+                                echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Zmieniono ilość przedmiotu na ' . $amount . ' szt.</p></div>';
+                            });
+                        } else {
+                            add_action('admin_notices', function () {
+                                echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Nie udało się zaktualizować ilości przedmiotu.</p></div>';
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
         // Budowanie relacji NPC
         if (isset($_POST['build_npc_relations']) && wp_verify_nonce($_POST['_wpnonce'], 'build_npc_relations')) {
             $result = $npc_builder->buildAllRelations();
@@ -290,6 +387,12 @@ class GameAdminPanel
         foreach ($all_npcs as $npc) {
             $npcs_by_id[$npc['id']] = $npc['name'];
         }
+
+        // Pobierz przedmioty gracza
+        $item_repo = new GameUserItemRepository();
+        $user_items = $item_repo->getUserItems($user_id);
+        $all_items = $item_repo->getAllAvailableItems();
+        $items_stats = $item_repo->getUserItemStats($user_id);
 
         include __DIR__ . '/views/user-details.php';
     }
