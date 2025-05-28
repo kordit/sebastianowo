@@ -115,7 +115,48 @@ class GameAdminPanel
      */
     public function displayUsersPage()
     {
-        include __DIR__ . '/views/users-page.php';
+        // Sprawdź czy pokazać szczegóły gracza
+        $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+        $action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'list';
+
+        if ($action === 'view' && $user_id > 0) {
+            $this->displayUserDetails($user_id);
+        } else {
+            $this->displayUsersList();
+        }
+    }
+
+    /**
+     * Lista wszystkich graczy
+     */
+    private function displayUsersList()
+    {
+        $user_repo = new GameUserRepository();
+        $users = $user_repo->getAll();
+
+        // Pobierz statystyki
+        $user_sync = new GameUserSyncService();
+        $stats = $user_sync->getUsersStats();
+
+        include __DIR__ . '/views/users-list.php';
+    }
+
+    /**
+     * Szczegóły pojedynczego gracza
+     */
+    private function displayUserDetails($user_id)
+    {
+        $user_repo = new GameUserRepository();
+        $game_user = $user_repo->getByUserId($user_id);
+
+        if (!$game_user) {
+            wp_die('Gracz nie został znaleziony.');
+        }
+
+        // Pobierz dane użytkownika WordPress
+        $wp_user = get_user_by('ID', $user_id);
+
+        include __DIR__ . '/views/user-details.php';
     }
 
     /**
