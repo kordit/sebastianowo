@@ -164,3 +164,55 @@ details>ul {
     margin: 15px;
     padding-left: 20px;
 }
+
+/* User sync styles */
+.game-users-sync-status {
+    margin: 20px 0;
+}
+
+.sync-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.sync-stat-item {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+}
+
+.sync-stat-number {
+    display: block;
+    font-size: 32px;
+    font-weight: 700;
+    color: #0073aa;
+    margin-bottom: 8px;
+}
+
+.sync-stat-number.sync-stat-missing {
+    color: #d63638;
+}
+
+.sync-stat-label {
+    display: block;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.sync-stat-item:hover {
+    background: #f0f0f0;
+    border-color: #0073aa;
+}
+
+.sync-stat-item:hover .sync-stat-number.sync-stat-missing {
+    color: #d63638;
+}
+
+.sync-stat-item:hover .sync-stat-number:not(.sync-stat-missing) {
+    color: #005a87;
+}

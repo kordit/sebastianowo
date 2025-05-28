@@ -76,6 +76,7 @@ class GameAdminPanel
         }
 
         $db_manager = new GameDatabaseManager();
+        $user_sync = new GameUserSyncService();
 
         // Tworzenie tabel
         if (isset($_POST['create_tables']) && wp_verify_nonce($_POST['_wpnonce'], 'create_tables')) {
@@ -91,6 +92,21 @@ class GameAdminPanel
             add_action('admin_notices', function () {
                 echo '<div class="notice notice-warning is-dismissible"><p><strong>Uwaga!</strong> Wszystkie tabele zostały usunięte!</p></div>';
             });
+        }
+
+        // Import użytkowników
+        if (isset($_POST['import_users']) && wp_verify_nonce($_POST['_wpnonce'], 'import_users')) {
+            $result = $user_sync->importAllUsers();
+
+            if ($result['success']) {
+                add_action('admin_notices', function () use ($result) {
+                    echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> ' . esc_html($result['message']) . ' Zaimportowano: ' . $result['imported'] . '</p></div>';
+                });
+            } else {
+                add_action('admin_notices', function () use ($result) {
+                    echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> ' . esc_html($result['message']) . '</p></div>';
+                });
+            }
         }
     }
 
@@ -108,8 +124,12 @@ class GameAdminPanel
     public function displayDatabasePage()
     {
         $db_manager = new GameDatabaseManager();
+        $user_sync = new GameUserSyncService();
+
         $tables_exist = $db_manager->allTablesExist();
         $tables_status = $db_manager->getTablesStatus();
+        $users_stats = $user_sync->getUsersStats();
+
         include __DIR__ . '/views/database-page.php';
     }
 }
