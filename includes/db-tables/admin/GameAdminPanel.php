@@ -48,7 +48,7 @@ class GameAdminPanel
             return;
         }
 
-        $assets_url = plugin_dir_url(__FILE__) . 'assets/';
+        $assets_url = get_template_directory_uri() . '/includes/db-tables/admin/assets/';
 
         wp_enqueue_style(
             'game-admin-css',
