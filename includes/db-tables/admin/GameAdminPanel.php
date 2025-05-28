@@ -36,6 +36,15 @@ class GameAdminPanel
             'game-database',
             [$this, 'displayDatabasePage']
         );
+
+        add_submenu_page(
+            'game-users',
+            'Buildery',
+            'Buildery',
+            'manage_options',
+            'game-builders',
+            [$this, 'displayBuildersPage']
+        );
     }
 
     /**
@@ -77,6 +86,7 @@ class GameAdminPanel
 
         $db_manager = new GameDatabaseManager();
         $user_sync = new GameUserSyncService();
+        $npc_builder = new NPCBuilder();
 
         // Tworzenie tabel
         if (isset($_POST['create_tables']) && wp_verify_nonce($_POST['_wpnonce'], 'create_tables')) {
@@ -154,6 +164,36 @@ class GameAdminPanel
                 });
             }
         }
+
+        // Budowanie relacji NPC
+        if (isset($_POST['build_npc_relations']) && wp_verify_nonce($_POST['_wpnonce'], 'build_npc_relations')) {
+            $result = $npc_builder->buildAllRelations();
+
+            if ($result['success']) {
+                add_action('admin_notices', function () use ($result) {
+                    echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> ' . esc_html($result['message']) . '</p></div>';
+                });
+            } else {
+                add_action('admin_notices', function () {
+                    echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Nie udało się zbudować relacji.</p></div>';
+                });
+            }
+        }
+
+        // Czyszczenie relacji NPC
+        if (isset($_POST['clear_npc_relations']) && wp_verify_nonce($_POST['_wpnonce'], 'clear_npc_relations')) {
+            $result = $npc_builder->clearAllRelations();
+
+            if ($result['success']) {
+                add_action('admin_notices', function () use ($result) {
+                    echo '<div class="notice notice-warning is-dismissible"><p><strong>Uwaga!</strong> ' . esc_html($result['message']) . '</p></div>';
+                });
+            } else {
+                add_action('admin_notices', function () {
+                    echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Nie udało się wyczyścić relacji.</p></div>';
+                });
+            }
+        }
     }
 
     /**
@@ -218,5 +258,17 @@ class GameAdminPanel
         $users_stats = $user_sync->getUsersStats();
 
         include __DIR__ . '/views/database-page.php';
+    }
+
+    /**
+     * Wyświetla stronę builderów
+     */
+    public function displayBuildersPage()
+    {
+        $npc_builder = new NPCBuilder();
+        $relations_stats = $npc_builder->getRelationsStats();
+        $npcs_list = $npc_builder->getAllNPCs();
+
+        include __DIR__ . '/views/builders-page.php';
     }
 }

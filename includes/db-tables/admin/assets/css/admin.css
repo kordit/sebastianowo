@@ -849,3 +849,100 @@ details>ul {
         opacity: 1;
     }
 }
+
+/* Kompaktowe style dla builderów */
+.builder-card {
+    background: #fff;
+    margin-bottom: 30px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.builder-card h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.builder-stats-compact {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.stat-compact {
+    font-size: 12px;
+    color: #666;
+}
+
+.stat-compact strong {
+    display: block;
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+}
+
+.stat-compact.stat-warning strong {
+    color: #d63384;
+}
+
+.stat-compact.stat-success strong {
+    color: #198754;
+}
+
+.stat-compact.stat-disabled strong {
+    color: #999;
+}
+
+.builder-actions-compact .button {
+    font-size: 12px;
+    padding: 4px 8px;
+    height: auto;
+}
+
+.builder-details {
+    margin-top: 30px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0;
+}
+
+.builder-details summary {
+    padding: 15px;
+    cursor: pointer;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    user-select: none;
+}
+
+.builder-details summary:hover {
+    background: #e9ecef;
+}
+
+.builder-details[open] summary {
+    border-bottom: 1px solid #ddd;
+}
+
+.builder-details .game-admin-card {
+    margin: 0;
+    border: none;
+    box-shadow: none;
+}
+
+@media (max-width: 768px) {
+    .builder-stats-compact {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .builder-actions-compact form {
+        display: block !important;
+        margin-bottom: 10px !important;
+    }
+
+    .builder-actions-compact .button {
+        width: 100%;
+    }
+}
