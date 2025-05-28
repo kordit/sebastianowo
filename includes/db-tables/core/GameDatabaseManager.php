@@ -335,4 +335,46 @@ class GameDatabaseManager
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
     }
+
+    /**
+     * Migruje strukturę tabel - usuwa przestarzałe kolumny
+     */
+    public function migrateTables()
+    {
+        $this->removeOldLocationFields();
+    }
+
+    /**
+     * Usuwa stare pola lokalizacji z tabeli game_users jeśli istnieją
+     */
+    private function removeOldLocationFields()
+    {
+        $table_name = $this->wpdb->prefix . 'game_users';
+
+        // Sprawdź czy tabela istnieje
+        $table_exists = $this->wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+        if (!$table_exists) {
+            return false;
+        }
+
+        // Sprawdź jakie kolumny istnieją
+        $columns = $this->wpdb->get_results("SHOW COLUMNS FROM $table_name", ARRAY_A);
+        $column_names = array_column($columns, 'Field');
+
+        $removed_columns = [];
+
+        // Usuń current_area_id jeśli istnieje
+        if (in_array('current_area_id', $column_names)) {
+            $this->wpdb->query("ALTER TABLE $table_name DROP COLUMN current_area_id");
+            $removed_columns[] = 'current_area_id';
+        }
+
+        // Usuń current_scene_id jeśli istnieje
+        if (in_array('current_scene_id', $column_names)) {
+            $this->wpdb->query("ALTER TABLE $table_name DROP COLUMN current_scene_id");
+            $removed_columns[] = 'current_scene_id';
+        }
+
+        return $removed_columns;
+    }
 }

@@ -98,6 +98,20 @@ class GameAdminPanel
             });
         }
 
+        // Migracja struktury tabel
+        if (isset($_POST['migrate_tables']) && wp_verify_nonce($_POST['_wpnonce'], 'migrate_tables')) {
+            $removed_columns = $db_manager->migrateTables();
+            if (!empty($removed_columns)) {
+                add_action('admin_notices', function () use ($removed_columns) {
+                    echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Usunięto przestarzałe kolumny: ' . implode(', ', $removed_columns) . '</p></div>';
+                });
+            } else {
+                add_action('admin_notices', function () {
+                    echo '<div class="notice notice-info is-dismissible"><p><strong>Info!</strong> Struktura tabel jest aktualna - nie wykryto przestarzałych pól.</p></div>';
+                });
+            }
+        }
+
         // Usuwanie tabel
         if (isset($_POST['drop_tables']) && wp_verify_nonce($_POST['_wpnonce'], 'drop_tables')) {
             $db_manager->dropTables();
