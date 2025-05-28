@@ -297,6 +297,32 @@ class GameAdminPanel
                     }
                 }
             }
+
+            // Zmiana statusu wyposażenia przedmiotu
+            if (
+                isset($_POST['update_item_equipped']) && isset($_POST['item_id']) && isset($_POST['item_equipped_status']) &&
+                isset($_POST['_wpnonce_update_equipped']) && wp_verify_nonce($_POST['_wpnonce_update_equipped'], 'update_item_equipped')
+            ) {
+
+                $item_id = intval($_POST['item_id']);
+                $is_equipped = intval($_POST['item_equipped_status']);
+
+                if ($item_id > 0) {
+                    $item_repo = new GameUserItemRepository();
+                    $result = $item_repo->setEquipped($user_id, $item_id, $is_equipped);
+
+                    if ($result !== false) {
+                        $status_text = $is_equipped ? 'wyposażony' : 'nie wyposażony';
+                        add_action('admin_notices', function () use ($status_text) {
+                            echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Przedmiot został oznaczony jako ' . $status_text . '.</p></div>';
+                        });
+                    } else {
+                        add_action('admin_notices', function () {
+                            echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Nie udało się zaktualizować statusu wyposażenia.</p></div>';
+                        });
+                    }
+                }
+            }
         }
 
         // Budowanie relacji NPC

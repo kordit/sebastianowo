@@ -163,12 +163,10 @@
     padding: 6px 8px;
 }
 
-.ga-form-control--medium {
+.ga-form-select--small {
     width: 120px;
-}
-
-.ga-form-control--large {
-    width: 200px;
+    padding: 6px 8px;
+    font-size: 12px;
 }
 
 /* Select */

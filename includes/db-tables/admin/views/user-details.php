@@ -423,11 +423,26 @@ $level = max(1, floor($game_user['exp'] / 100) + 1);
                                     </form>
                                 </td>
                                 <td>
-                                    <?php if ($item['is_equipped']): ?>
-                                        <span class="ga-badge ga-badge--success">Wyposażony</span>
-                                    <?php else: ?>
-                                        <span class="ga-badge ga-badge--secondary">Nie wyposażony</span>
-                                    <?php endif; ?>
+                                    <form method="post" action="" class="ga-inline-form">
+                                        <?php wp_nonce_field('update_item_equipped', '_wpnonce_update_equipped'); ?>
+                                        <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                                        <input type="hidden" name="item_id" value="<?php echo $item['item_id']; ?>">
+                                        <input type="hidden" name="update_item_equipped" value="1">
+                                        <div class="ga-form-inline">
+                                            <select name="item_equipped_status"
+                                                class="ga-form-select ga-form-select--small"
+                                                onchange="this.form.submit()">
+                                                <option value="0" <?php selected($item['is_equipped'], 0); ?>>Nie wyposażony</option>
+                                                <option value="1" <?php selected($item['is_equipped'], 1); ?>>Wyposażony</option>
+                                            </select>
+                                            <button type="submit"
+                                                class="ga-button ga-button--small ga-button--primary"
+                                                title="Zapisz status wyposażenia"
+                                                style="display: none;">
+                                                💾
+                                            </button>
+                                        </div>
+                                    </form>
                                 </td>
                                 <td>
                                     <form method="post"

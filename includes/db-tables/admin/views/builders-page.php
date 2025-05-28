@@ -73,27 +73,6 @@ if (!defined('ABSPATH')) {
             </div>
         </div>
 
-        <!-- Builder przedmiotów -->
-        <div class="ga-card ga-card--warning">
-            <div class="ga-card__header">
-                <h3 class="ga-card__title">🎒 Builder przedmiotów</h3>
-                <div class="ga-card__meta">
-                    <span class="ga-stat-compact">
-                        <strong>0</strong> przedmiotów
-                    </span>
-                    <span class="ga-stat-compact">
-                        <strong>0</strong> kategorii
-                    </span>
-                    <span class="ga-badge ga-badge--neutral">Niedostępne</span>
-                </div>
-            </div>
-            <div class="ga-card__content">
-                <div class="ga-actions">
-                    <button class="ga-button ga-button--disabled" disabled>🔧 W przygotowaniu</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Builder obszarów -->
         <div class="ga-card ga-card--warning">
             <div class="ga-card__header">
