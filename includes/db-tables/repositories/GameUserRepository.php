@@ -94,7 +94,7 @@ class GameUserRepository
      */
     public function update($user_id, $data)
     {
-        $data['updated_at'] = current_time('mysql');
+        $data['updated_at'] = date('Y-m-d H:i:s');
 
         $result = $this->wpdb->update(
             $this->table_name,

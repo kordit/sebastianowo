@@ -93,7 +93,7 @@ class AreaBuilder
     }
 
     /**
-     * Tworzy powiązania między graczami a terenami
+     * Tworzy powiązania między graczami a terenami i scenami
      * Inicjuje podstawowe wpisy w tabeli game_user_areas
      */
     public function buildAllAreaConnections()
@@ -102,60 +102,63 @@ class AreaBuilder
         $user_repo = new GameUserRepository();
         $users = $user_repo->getAll();
 
-        $created = 0;
-        $updated = 0;
+        $total_created = 0;
+        $total_updated = 0;
 
         foreach ($users as $user) {
             foreach ($areas as $area) {
-                // Sprawdź czy relacja już istnieje
-                $exists = $this->getAreaConnection($user['user_id'], $area['id']);
+                // Dla każdej sceny w obszarze, dodaj wpis
+                if (!empty($area['scenes'])) {
+                    foreach ($area['scenes'] as $scene_id) {
+                        // Sprawdź czy taka kombinacja użytkownik-obszar-scena już istnieje
+                        $scene_exists = $this->wpdb->get_var(
+                            $this->wpdb->prepare(
+                                "SELECT id FROM {$this->wpdb->prefix}game_user_areas 
+                                WHERE user_id = %d AND area_id = %d AND scene_id = %s",
+                                $user['user_id'],
+                                $area['id'],
+                                $scene_id
+                            )
+                        );
 
-                if (!$exists) {
-                    // Domyślnie tylko główne tereny są odblokowane
-                    $is_unlocked = ($area['type'] === 'teren') ? 1 : 0;
+                        if (!$scene_exists) {
+                            // Domyślnie, tylko scena 'main' jest odblokowana dla terenów
+                            $is_scene_unlocked = ($area['type'] === 'teren' && $scene_id === 'main') ? 1 : 0;
 
-                    // Przygotuj dane scen jako JSON
-                    $scenes_json = !empty($area['scenes']) ? json_encode($area['scenes']) : null;
+                            // Ustawienie is_current tylko dla głównej sceny w głównym terenie dla nowych graczy
+                            $is_current = 0;
+                            if ($area['type'] === 'teren' && $scene_id === 'main' && $area['id'] == 207) {  // Zakładam, że obszar 207 to główny obszar
+                                $is_current = 1;
 
-                    // Domyślnie brak odblokowanych scen
-                    $unlocked_scenes_json = null;
+                                // Upewnij się, że tylko jedno miejsce jest oznaczone jako aktualne
+                                $this->wpdb->update(
+                                    $this->wpdb->prefix . 'game_user_areas',
+                                    ['is_current' => 0],
+                                    ['user_id' => $user['user_id']]
+                                );
+                            }
 
-                    // Utwórz nowy wpis w tabeli
-                    $result = $this->wpdb->insert(
-                        $this->wpdb->prefix . 'game_user_areas',
-                        [
-                            'user_id' => $user['user_id'],
-                            'area_id' => $area['id'],
-                            'unlocked' => $is_unlocked,
-                            'scenes' => $scenes_json,
-                            'unlocked_scenes' => $unlocked_scenes_json,
-                            'viewed_scenes' => null,
-                            'viewed_area' => 0,
-                            'created_at' => current_time('mysql')
-                        ]
-                    );
+                            // Dodaj nowy wpis dla sceny
+                            $result = $this->wpdb->insert(
+                                $this->wpdb->prefix . 'game_user_areas',
+                                [
+                                    'user_id' => $user['user_id'],
+                                    'area_id' => $area['id'],
+                                    'scene_id' => $scene_id,
+                                    'unlocked' => $is_scene_unlocked,
+                                    'viewed' => 0,
+                                    'is_current' => $is_current,
+                                    'created_at' => date('Y-m-d H:i:s')
+                                ]
+                            );
 
-                    if ($result) {
-                        $created++;
-                    }
-                } else {
-                    // Aktualizujemy tylko listę scen, nie zmieniając stanu odblokowania
-                    $scenes_json = !empty($area['scenes']) ? json_encode($area['scenes']) : null;
-
-                    $result = $this->wpdb->update(
-                        $this->wpdb->prefix . 'game_user_areas',
-                        [
-                            'scenes' => $scenes_json,
-                            'updated_at' => current_time('mysql')
-                        ],
-                        [
-                            'user_id' => $user['user_id'],
-                            'area_id' => $area['id']
-                        ]
-                    );
-
-                    if ($result) {
-                        $updated++;
+                            if ($result) {
+                                $total_created++;
+                            }
+                        } else {
+                            // Możemy zaktualizować status lub inne pole w razie potrzeby
+                            $total_updated++;
+                        }
                     }
                 }
             }
@@ -163,172 +166,7 @@ class AreaBuilder
 
         return [
             'success' => true,
-            'message' => "Zbudowano powiązania obszarów dla graczy. Utworzono: $created, Zaktualizowano: $updated."
-        ];
-    }
-
-    /**
-     * Sprawdza czy istnieje połączenie między graczem a obszarem
-     */
-    public function getAreaConnection($user_id, $area_id)
-    {
-        $result = $this->wpdb->get_row(
-            $this->wpdb->prepare(
-                "SELECT * FROM {$this->wpdb->prefix}game_user_areas WHERE user_id = %d AND area_id = %d",
-                $user_id,
-                $area_id
-            )
-        );
-
-        return $result ? $result : false;
-    }
-
-    /**
-     * Aktualizuje status odblokowania obszaru dla użytkownika
-     */
-    public function unlockArea($user_id, $area_id, $unlock = true)
-    {
-        $connection = $this->getAreaConnection($user_id, $area_id);
-
-        if ($connection) {
-            $result = $this->wpdb->update(
-                $this->wpdb->prefix . 'game_user_areas',
-                [
-                    'unlocked' => $unlock ? 1 : 0,
-                    'updated_at' => current_time('mysql')
-                ],
-                [
-                    'user_id' => $user_id,
-                    'area_id' => $area_id
-                ]
-            );
-
-            return $result !== false;
-        }
-
-        return false;
-    }
-
-    /**
-     * Aktualizuje status odblokowania sceny dla użytkownika
-     */
-    public function unlockSceneForUser($user_id, $area_id, $scene_id)
-    {
-        $connection = $this->getAreaConnection($user_id, $area_id);
-
-        if ($connection) {
-            $unlocked_scenes = json_decode($connection->unlocked_scenes ?? '[]', true) ?: [];
-
-            // Dodaj scenę do odblokowanych jeśli jeszcze jej nie ma
-            if (!in_array($scene_id, $unlocked_scenes)) {
-                $unlocked_scenes[] = $scene_id;
-
-                $result = $this->wpdb->update(
-                    $this->wpdb->prefix . 'game_user_areas',
-                    [
-                        'unlocked_scenes' => json_encode($unlocked_scenes),
-                        'updated_at' => current_time('mysql')
-                    ],
-                    [
-                        'user_id' => $user_id,
-                        'area_id' => $area_id
-                    ]
-                );
-
-                return $result !== false;
-            }
-
-            return true; // Scena już była odblokowana
-        }
-
-        return false; // Brak połączenia użytkownika z obszarem
-    }
-
-    /**
-     * Oznacza scenę jako oglądaną przez użytkownika
-     */
-    public function markSceneAsViewed($user_id, $area_id, $scene_id)
-    {
-        $connection = $this->getAreaConnection($user_id, $area_id);
-
-        if ($connection) {
-            $viewed_scenes = json_decode($connection->viewed_scenes ?? '[]', true) ?: [];
-
-            // Dodaj scenę do oglądanych jeśli jeszcze jej nie ma
-            if (!in_array($scene_id, $viewed_scenes)) {
-                $viewed_scenes[] = $scene_id;
-
-                $result = $this->wpdb->update(
-                    $this->wpdb->prefix . 'game_user_areas',
-                    [
-                        'viewed_scenes' => json_encode($viewed_scenes),
-                        'updated_at' => current_time('mysql')
-                    ],
-                    [
-                        'user_id' => $user_id,
-                        'area_id' => $area_id
-                    ]
-                );
-
-                return $result !== false;
-            }
-
-            return true; // Scena już była oznaczona jako oglądana
-        }
-
-        return false; // Brak połączenia użytkownika z obszarem
-    }
-
-    /**
-     * Oznacza obszar jako oglądany przez użytkownika
-     */
-    public function markAreaAsViewed($user_id, $area_id)
-    {
-        $connection = $this->getAreaConnection($user_id, $area_id);
-
-        if ($connection) {
-            $result = $this->wpdb->update(
-                $this->wpdb->prefix . 'game_user_areas',
-                [
-                    'viewed_area' => 1,
-                    'updated_at' => current_time('mysql')
-                ],
-                [
-                    'user_id' => $user_id,
-                    'area_id' => $area_id
-                ]
-            );
-
-            return $result !== false;
-        }
-
-        return false;
-    }
-
-    /**
-     * Pobiera statystyki obszarów i scen
-     */
-    public function getAreasStats()
-    {
-        $total_areas = count($this->getAllAreas());
-
-        $areas_count = $this->wpdb->get_var(
-            "SELECT COUNT(DISTINCT area_id) FROM {$this->wpdb->prefix}game_user_areas"
-        );
-
-        $users_count = $this->wpdb->get_var(
-            "SELECT COUNT(DISTINCT user_id) FROM {$this->wpdb->prefix}game_user_areas"
-        );
-
-        $total_connections = $this->wpdb->get_var(
-            "SELECT COUNT(*) FROM {$this->wpdb->prefix}game_user_areas"
-        );
-
-        return [
-            'total_areas' => $total_areas,
-            'areas_in_db' => (int) $areas_count,
-            'users_with_areas' => (int) $users_count,
-            'total_connections' => (int) $total_connections
+            'message' => "Zbudowano powiązania obszarów dla graczy. Utworzono: $total_created, Zaktualizowano: $total_updated."
         ];
     }
 
@@ -344,6 +182,34 @@ class AreaBuilder
         return [
             'success' => true,
             'message' => "Wszystkie powiązania z obszarami zostały usunięte."
+        ];
+    }
+
+    /**
+     * Pobiera statystyki struktury obszarów (dla buildera)
+     */
+    public function getAreasStructureStats()
+    {
+        $areas = $this->getAllAreas();
+        $total_areas = count($areas);
+        $total_tereny = 0;
+        $total_events = 0;
+        $total_scenes = 0;
+
+        foreach ($areas as $area) {
+            if ($area['type'] === 'teren') {
+                $total_tereny++;
+            } elseif ($area['type'] === 'event') {
+                $total_events++;
+            }
+            $total_scenes += count($area['scenes']);
+        }
+
+        return [
+            'total_areas' => $total_areas,
+            'total_tereny' => $total_tereny,
+            'total_events' => $total_events,
+            'total_scenes' => $total_scenes
         ];
     }
 }

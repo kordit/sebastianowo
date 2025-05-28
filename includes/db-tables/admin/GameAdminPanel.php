@@ -88,6 +88,7 @@ class GameAdminPanel
         $user_sync = new GameUserSyncService();
         $npc_builder = new NPCBuilder();
         $area_builder = new AreaBuilder();
+        $area_repository = new GameAreaRepository();
 
         // Tworzenie tabel
         if (isset($_POST['create_tables']) && wp_verify_nonce($_POST['_wpnonce'], 'create_tables')) {
@@ -176,7 +177,7 @@ class GameAdminPanel
                                 'fights_won' => intval($relation_data['fights_won']),
                                 'fights_lost' => intval($relation_data['fights_lost']),
                                 'fights_draw' => intval($relation_data['fights_draw']),
-                                'last_interaction' => current_time('mysql')
+                                'last_interaction' => date('Y-m-d H:i:s')
                             ];
 
                             // Waliduj relation_value
@@ -498,11 +499,14 @@ class GameAdminPanel
     {
         $npc_builder = new NPCBuilder();
         $area_builder = new AreaBuilder();
+        $area_repository = new GameAreaRepository();
 
         $relations_stats = $npc_builder->getRelationsStats();
         $npcs_list = $npc_builder->getAllNPCs();
 
-        $areas_stats = $area_builder->getAreasStats();
+        // Pobierz statystyki struktury z buildera i bazodanowe z repozytorium
+        $areas_structure_stats = $area_builder->getAreasStructureStats();
+        $areas_database_stats = $area_repository->getAreasStats();
         $areas_list = $area_builder->getAllAreas();
 
         include __DIR__ . '/views/builders-page.php';

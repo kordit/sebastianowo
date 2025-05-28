@@ -79,13 +79,13 @@ if (!defined('ABSPATH')) {
                 <h3 class="ga-card__title">🗺️ Builder obszarów</h3>
                 <div class="ga-card__meta">
                     <span class="ga-stat-compact">
-                        <strong><?php echo isset($areas_stats['total_areas']) ? esc_html($areas_stats['total_areas']) : 0; ?></strong> obszarów
+                        <strong><?php echo isset($areas_structure_stats['total_areas']) ? esc_html($areas_structure_stats['total_areas']) : 0; ?></strong> obszarów
                     </span>
                     <span class="ga-stat-compact">
-                        <strong><?php echo isset($areas_stats['users_with_areas']) ? esc_html($areas_stats['users_with_areas']) : 0; ?></strong> użytkowników
+                        <strong><?php echo isset($areas_database_stats['users_with_areas']) ? esc_html($areas_database_stats['users_with_areas']) : 0; ?></strong> użytkowników
                     </span>
-                    <span class="ga-stat-compact <?php echo isset($areas_stats['total_areas']) && $areas_stats['areas_in_db'] < $areas_stats['total_areas'] ? 'ga-stat-compact--warning' : 'ga-stat-compact--success'; ?>">
-                        <strong><?php echo isset($areas_stats['total_connections']) ? esc_html($areas_stats['total_connections']) : 0; ?></strong> powiązań
+                    <span class="ga-stat-compact <?php echo isset($areas_structure_stats['total_areas']) && $areas_database_stats['areas_in_db'] < $areas_structure_stats['total_areas'] ? 'ga-stat-compact--warning' : 'ga-stat-compact--success'; ?>">
+                        <strong><?php echo isset($areas_database_stats['total_connections']) ? esc_html($areas_database_stats['total_connections']) : 0; ?></strong> powiązań
                     </span>
                 </div>
             </div>
@@ -152,20 +152,28 @@ if (!defined('ABSPATH')) {
         <div class="ga-card__content">
             <div class="ga-stats">
                 <div class="ga-stat">
-                    <div class="ga-stat__number"><?php echo isset($areas_stats['total_areas']) ? esc_html($areas_stats['total_areas']) : 0; ?></div>
+                    <div class="ga-stat__number"><?php echo isset($areas_structure_stats['total_areas']) ? esc_html($areas_structure_stats['total_areas']) : 0; ?></div>
                     <div class="ga-stat__label">Wszystkie obszary</div>
                 </div>
                 <div class="ga-stat">
-                    <div class="ga-stat__number"><?php echo isset($areas_stats['areas_in_db']) ? esc_html($areas_stats['areas_in_db']) : 0; ?></div>
+                    <div class="ga-stat__number"><?php echo isset($areas_database_stats['areas_in_db']) ? esc_html($areas_database_stats['areas_in_db']) : 0; ?></div>
                     <div class="ga-stat__label">Obszary w bazie</div>
                 </div>
                 <div class="ga-stat">
-                    <div class="ga-stat__number"><?php echo isset($areas_stats['users_with_areas']) ? esc_html($areas_stats['users_with_areas']) : 0; ?></div>
+                    <div class="ga-stat__number"><?php echo isset($areas_database_stats['users_with_areas']) ? esc_html($areas_database_stats['users_with_areas']) : 0; ?></div>
                     <div class="ga-stat__label">Użytkownicy z obszarami</div>
                 </div>
                 <div class="ga-stat">
-                    <div class="ga-stat__number"><?php echo isset($areas_stats['total_connections']) ? esc_html($areas_stats['total_connections']) : 0; ?></div>
+                    <div class="ga-stat__number"><?php echo isset($areas_database_stats['total_connections']) ? esc_html($areas_database_stats['total_connections']) : 0; ?></div>
                     <div class="ga-stat__label">Wszystkie połączenia</div>
+                </div>
+                <div class="ga-stat">
+                    <div class="ga-stat__number"><?php echo isset($areas_database_stats['unlocked_connections']) ? esc_html($areas_database_stats['unlocked_connections']) : 0; ?></div>
+                    <div class="ga-stat__label">Odblokowane</div>
+                </div>
+                <div class="ga-stat">
+                    <div class="ga-stat__number"><?php echo isset($areas_database_stats['viewed_connections']) ? esc_html($areas_database_stats['viewed_connections']) : 0; ?></div>
+                    <div class="ga-stat__label">Oglądane</div>
                 </div>
             </div>
 

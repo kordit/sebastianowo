@@ -47,7 +47,7 @@ class GameDatabaseManager
         return [
             'game_users' => 'Dane graczy',
             'game_user_items' => 'Ekwipunek graczy',
-            'game_user_areas' => 'Dostępne rejony',
+            'game_user_areas' => 'Dostępne rejony i sceny',
             'game_user_relations' => 'Relacje z NPC',
             'game_user_fight_tokens' => 'Tokeny walk',
             'game_user_missions' => 'Misje graczy',
@@ -200,7 +200,7 @@ class GameDatabaseManager
     }
 
     /**
-     * Tworzy tabelę dostępnych rejonów
+     * Tworzy tabelę dostępnych rejonów i scen
      */
     private function createGameUserAreasTable()
     {
@@ -210,17 +210,18 @@ class GameDatabaseManager
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
             user_id bigint(20) unsigned NOT NULL,
             area_id int NOT NULL,
+            scene_id varchar(64) NOT NULL,
             unlocked_area_id int DEFAULT 0,
             unlocked boolean DEFAULT 1,
-            scenes text,
-            unlocked_scenes text,
-            viewed_scenes text,
-            viewed_area boolean DEFAULT 0,
+            viewed boolean DEFAULT 0,
+            is_current boolean DEFAULT 0,
             created_at timestamp DEFAULT CURRENT_TIMESTAMP,
             updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES {$this->wpdb->prefix}game_users(user_id) ON DELETE CASCADE,
-            UNIQUE KEY unique_user_area (user_id, area_id),
-            INDEX idx_user_areas (user_id, unlocked)
+            UNIQUE KEY unique_user_area_scene (user_id, area_id, scene_id),
+            INDEX idx_user_areas (user_id, area_id, unlocked),
+            INDEX idx_scene_status (scene_id, unlocked, viewed),
+            INDEX idx_current_location (user_id, is_current)
         ) {$this->charset_collate};";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
