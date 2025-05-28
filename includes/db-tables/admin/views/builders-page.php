@@ -53,22 +53,41 @@ if (!defined('ABSPATH')) {
         </div>
 
         <!-- Builder misji -->
-        <div class="ga-card ga-card--warning">
+        <div class="ga-card ga-card--primary">
             <div class="ga-card__header">
                 <h3 class="ga-card__title">📜 Builder misji</h3>
                 <div class="ga-card__meta">
                     <span class="ga-stat-compact">
-                        <strong>0</strong> misji
+                        <strong><?php echo isset($mission_stats['wordpress_missions']) ? esc_html($mission_stats['wordpress_missions']) : 0; ?></strong> misji WP
                     </span>
                     <span class="ga-stat-compact">
-                        <strong>0</strong> zadań
+                        <strong><?php echo isset($mission_stats['assigned_missions']) ? esc_html($mission_stats['assigned_missions']) : 0; ?></strong> przypisanych
                     </span>
-                    <span class="ga-badge ga-badge--neutral">Niedostępne</span>
+                    <span class="ga-stat-compact">
+                        <strong><?php echo isset($mission_stats['total_tasks']) ? esc_html($mission_stats['total_tasks']) : 0; ?></strong> zadań
+                    </span>
+                    <?php if (isset($mission_stats['assigned_missions']) && $mission_stats['assigned_missions'] > 0): ?>
+                        <span class="ga-badge ga-badge--success">Aktywne</span>
+                    <?php else: ?>
+                        <span class="ga-badge ga-badge--warning">Gotowe do uruchomienia</span>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="ga-card__content">
                 <div class="ga-actions">
-                    <button class="ga-button ga-button--disabled" disabled>🔧 W przygotowaniu</button>
+                    <form method="post">
+                        <?php wp_nonce_field('build_missions'); ?>
+                        <button type="submit" name="build_missions" class="ga-button ga-button--success">
+                            🚀 Zbuduj misje
+                        </button>
+                    </form>
+
+                    <form method="post" onsubmit="return confirm('Usunąć wszystkie misje graczy? Operacja jest nieodwracalna!');">
+                        <?php wp_nonce_field('clear_missions'); ?>
+                        <button type="submit" name="clear_missions" class="ga-button ga-button--danger">
+                            🗑️ Wyczyść
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -215,6 +234,41 @@ if (!defined('ABSPATH')) {
                     </table>
                 </div>
             <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Szczegółowe statystyki misji -->
+    <div class="ga-card ga-card--full ga-card--info ga-mt-3">
+        <div class="ga-card__header">
+            <h3 class="ga-card__title">📊 Szczegółowe statystyki misji</h3>
+        </div>
+        <div class="ga-card__content">
+            <div class="ga-stats">
+                <div class="ga-stat">
+                    <div class="ga-stat__number"><?php echo isset($mission_stats['wordpress_missions']) ? esc_html($mission_stats['wordpress_missions']) : 0; ?></div>
+                    <div class="ga-stat__label">Misje w WordPress</div>
+                </div>
+                <div class="ga-stat ga-stat--success">
+                    <div class="ga-stat__number"><?php echo isset($mission_stats['assigned_missions']) ? esc_html($mission_stats['assigned_missions']) : 0; ?></div>
+                    <div class="ga-stat__label">Przypisane misje</div>
+                </div>
+                <div class="ga-stat">
+                    <div class="ga-stat__number"><?php echo isset($mission_stats['total_tasks']) ? esc_html($mission_stats['total_tasks']) : 0; ?></div>
+                    <div class="ga-stat__label">Wszystkie zadania</div>
+                </div>
+                <div class="ga-stat">
+                    <div class="ga-stat__number"><?php echo isset($mission_stats['users_with_missions']) ? esc_html($mission_stats['users_with_missions']) : 0; ?></div>
+                    <div class="ga-stat__label">Użytkownicy z misjami</div>
+                </div>
+                <div class="ga-stat ga-stat--warning">
+                    <div class="ga-stat__number"><?php echo isset($mission_stats['not_started_tasks']) ? esc_html($mission_stats['not_started_tasks']) : 0; ?></div>
+                    <div class="ga-stat__label">Zadania nierozpoczęte</div>
+                </div>
+                <div class="ga-stat ga-stat--info">
+                    <div class="ga-stat__number"><?php echo isset($mission_stats['completed_tasks']) ? esc_html($mission_stats['completed_tasks']) : 0; ?></div>
+                    <div class="ga-stat__label">Zadania ukończone</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

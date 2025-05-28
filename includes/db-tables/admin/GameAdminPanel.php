@@ -11,6 +11,7 @@ class GameAdminPanel
         add_action('admin_menu', [$this, 'addAdminMenu']);
         add_action('admin_init', [$this, 'handleFormSubmissions']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAssets']);
+        add_action('wp_ajax_test_mission_validation', [$this, 'handleTestMissionValidation']);
     }
 
     /**
@@ -89,6 +90,7 @@ class GameAdminPanel
         $npc_builder = new NPCBuilder();
         $area_builder = new AreaBuilder();
         $area_repository = new GameAreaRepository();
+        $mission_builder = new MissionBuilder();
 
         // Tworzenie tabel
         if (isset($_POST['create_tables']) && wp_verify_nonce($_POST['_wpnonce'], 'create_tables')) {
@@ -291,9 +293,7 @@ class GameAdminPanel
                                 echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Przedmiot został całkowicie usunięty z ekwipunku gracza.</p></div>';
                             });
                         } else {
-                            add_action('admin_notices', function () {
-                                echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Nie udało się usunąć przedmiotu.</p></div>';
-                            });
+                            add_action('admin_notices', function () {});
                         }
                     } else {
                         // Ustaw nową ilość
@@ -417,6 +417,36 @@ class GameAdminPanel
             } else {
                 add_action('admin_notices', function () {
                     echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Nie udało się wyczyścić połączeń obszarów.</p></div>';
+                });
+            }
+        }
+
+        // Budowanie misji
+        if (isset($_POST['build_missions']) && wp_verify_nonce($_POST['_wpnonce'], 'build_missions')) {
+            $result = $mission_builder->buildAllMissions();
+
+            if ($result['success']) {
+                add_action('admin_notices', function () use ($result) {
+                    echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> ' . esc_html($result['message']) . '</p></div>';
+                });
+            } else {
+                add_action('admin_notices', function () use ($result) {
+                    echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> ' . esc_html($result['message']) . '</p></div>';
+                });
+            }
+        }
+
+        // Czyszczenie misji
+        if (isset($_POST['clear_missions']) && wp_verify_nonce($_POST['_wpnonce'], 'clear_missions')) {
+            $result = $mission_builder->clearAllMissions();
+
+            if ($result['success']) {
+                add_action('admin_notices', function () use ($result) {
+                    echo '<div class="notice notice-warning is-dismissible"><p><strong>Uwaga!</strong> ' . esc_html($result['message']) . '</p></div>';
+                });
+            } else {
+                add_action('admin_notices', function () {
+                    echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> Nie udało się wyczyścić misji.</p></div>';
                 });
             }
         }
@@ -610,6 +640,7 @@ class GameAdminPanel
         $npc_builder = new NPCBuilder();
         $area_builder = new AreaBuilder();
         $area_repository = new GameAreaRepository();
+        $mission_builder = new MissionBuilder();
 
         $relations_stats = $npc_builder->getRelationsStats();
         $npcs_list = $npc_builder->getAllNPCs();
@@ -618,6 +649,9 @@ class GameAdminPanel
         $areas_structure_stats = $area_builder->getAreasStructureStats();
         $areas_database_stats = $area_repository->getAreasStats();
         $areas_list = $area_builder->getAllAreas();
+
+        // Pobierz statystyki misji
+        $mission_stats = $mission_builder->getBuilderStats();
 
         include __DIR__ . '/views/builders-page.php';
     }

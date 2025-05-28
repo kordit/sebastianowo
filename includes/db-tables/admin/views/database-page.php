@@ -66,6 +66,14 @@
                 </form>
 
                 <form method="post">
+                    <?php wp_nonce_field('migrate_tables'); ?>
+                    <button type="submit" name="migrate_tables" class="ga-button ga-button--info"
+                        onclick="return confirm('Czy chcesz zmigrować strukturę tabel do najnowszej wersji?')">
+                        🚀 Migruj strukturę tabel
+                    </button>
+                </form>
+
+                <form method="post">
                     <?php wp_nonce_field('drop_tables'); ?>
                     <button type="submit" name="drop_tables" class="ga-button ga-button--danger"
                         onclick="return confirm('UWAGA: To usunie wszystkie dane graczy! Czy na pewno?')">
