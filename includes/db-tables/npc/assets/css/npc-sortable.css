@@ -1,0 +1,52 @@
+/* Styles for sortable functionality */
+
+.dialog-item {
+    cursor: move;
+}
+
+.dialog-header {
+    cursor: grab;
+}
+
+.dialog-item-placeholder {
+    border: 2px dashed #ccc;
+    background-color: #f7f7f7;
+    height: 100px;
+    margin-bottom: 20px;
+}
+
+.dialog-answers ul li {
+    cursor: move;
+}
+
+.answer-item-placeholder {
+    border: 2px dashed #eee;
+    background-color: #f9f9f9;
+    height: 40px;
+    margin-bottom: 10px;
+}
+
+/* Style for the dragging state */
+.ui-sortable-helper {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0.9;
+}
+
+/* Give visual feedback that elements are sortable */
+.dialog-header:hover {
+    background-color: #f7f7f7;
+}
+
+.dialog-answers ul li:hover {
+    background-color: #f9f9f9;
+}
+
+/* Add drag icon */
+.dialog-header::before,
+.dialog-answers ul li::before {
+    content: "\f545"; /* WordPress dashicons move icon */
+    font-family: dashicons;
+    margin-right: 5px;
+    color: #999;
+    vertical-align: middle;
+}
