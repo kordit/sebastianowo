@@ -144,6 +144,8 @@ class GameAdminPanel
             $update_data = [
                 'nick' => sanitize_text_field($_POST['nick']),
                 'user_class' => sanitize_text_field($_POST['user_class']),
+                'avatar' => intval($_POST['avatar']),
+                'avatar_full' => intval($_POST['avatar_full']),
                 'exp' => intval($_POST['exp']),
                 'learning_points' => intval($_POST['learning_points']),
                 'reputation' => intval($_POST['reputation']),

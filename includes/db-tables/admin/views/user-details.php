@@ -56,6 +56,14 @@ $level = max(1, floor($game_user['exp'] / 100) + 1);
                             </td>
                         </tr>
                         <tr>
+                            <th>Avatar ID:</th>
+                            <td><input type="number" name="avatar" value="<?php echo $game_user['avatar']; ?>" min="0" class="ga-form-control ga-form-control--small"></td>
+                        </tr>
+                        <tr>
+                            <th>Avatar Full ID:</th>
+                            <td><input type="number" name="avatar_full" value="<?php echo $game_user['avatar_full']; ?>" min="0" class="ga-form-control ga-form-control--small"></td>
+                        </tr>
+                        <tr>
                             <th>Poziom:</th>
                             <td><strong><?php echo $level; ?></strong> <small>(obliczany z exp)</small></td>
                         </tr>
