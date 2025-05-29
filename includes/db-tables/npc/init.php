@@ -114,12 +114,12 @@ class NPCDialogSystem
         if (strpos($hook, 'npc-manager') === false) {
             return;
         }
-        
+
         // Dodaj jQuery UI dla funkcji przeciągania i sortowania
         wp_enqueue_script('jquery-ui-core');
         wp_enqueue_script('jquery-ui-sortable');
         wp_enqueue_script('jquery-ui-draggable');
-        
+
         wp_enqueue_script(
             'npc-admin-js',
             NPC_PLUGIN_URL . 'assets/js/npc-admin.js',
@@ -136,13 +136,21 @@ class NPCDialogSystem
             true
         );
 
+        wp_enqueue_script(
+            'npc-sortable-extras',
+            NPC_PLUGIN_URL . 'assets/js/npc-sortable-extras.js',
+            ['jquery', 'npc-admin-js', 'jquery-ui-sortable'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
+
         wp_enqueue_style(
             'npc-admin-css',
             NPC_PLUGIN_URL . 'assets/css/npc-admin.css',
             [],
             NPC_PLUGIN_VERSION
         );
-        
+
         // Dodaj nowy arkusz CSS dla funkcji sortowania
         wp_enqueue_style(
             'npc-sortable-css',

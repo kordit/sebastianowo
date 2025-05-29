@@ -2,10 +2,18 @@
 
 .dialog-item {
     cursor: move;
+    position: relative;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.dialog-item:hover {
+    border-left-color: #007cba;
 }
 
 .dialog-header {
     cursor: grab;
+    position: relative;
 }
 
 .dialog-item-placeholder {
@@ -13,10 +21,26 @@
     background-color: #f7f7f7;
     height: 100px;
     margin-bottom: 20px;
+    border-radius: 3px;
+}
+
+.dialog-answers ul {
+    padding-left: 0;
+    margin-left: 0;
+    list-style: none;
 }
 
 .dialog-answers ul li {
     cursor: move;
+    transition: background-color 0.2s ease;
+    padding: 8px 10px;
+    border-radius: 3px;
+    position: relative;
+    border-left: 3px solid transparent;
+}
+
+.dialog-answers ul li:hover {
+    border-left-color: #007cba;
 }
 
 .answer-item-placeholder {
@@ -24,12 +48,15 @@
     background-color: #f9f9f9;
     height: 40px;
     margin-bottom: 10px;
+    border-radius: 3px;
 }
 
 /* Style for the dragging state */
 .ui-sortable-helper {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     opacity: 0.9;
+    background-color: #f8f8f8;
+    border-radius: 3px;
 }
 
 /* Give visual feedback that elements are sortable */
@@ -41,12 +68,57 @@
     background-color: #f9f9f9;
 }
 
-/* Add drag icon */
+/* Sort indicator */
+.sort-indicator {
+    position: absolute;
+    left: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 18px;
+    display: none;
+}
+
+.dialog-header:hover .sort-indicator,
+.dialog-answers ul li:hover .sort-indicator {
+    display: block;
+}
+
+/* Add drag icon with animation */
 .dialog-header::before,
 .dialog-answers ul li::before {
-    content: "\f545"; /* WordPress dashicons move icon */
+    content: "\f545";
+    /* WordPress dashicons move icon */
     font-family: dashicons;
     margin-right: 5px;
     color: #999;
     vertical-align: middle;
+    transition: color 0.2s ease;
+}
+
+.dialog-header:hover::before,
+.dialog-answers ul li:hover::before {
+    color: #007cba;
+}
+
+/* Add sorting instructions */
+.dialogs-container:before {
+    content: "Przeciągnij aby zmienić kolejność dialogów. Pierwszy dialog będzie dialogiem początkowym.";
+    display: block;
+    padding: 10px;
+    background-color: #f0f6fc;
+    border-left: 4px solid #007cba;
+    margin-bottom: 15px;
+    font-style: italic;
+    color: #555;
+}
+
+.dialog-answers ul:before {
+    content: "Przeciągnij aby zmienić kolejność odpowiedzi.";
+    display: block;
+    padding: 5px 0;
+    margin-bottom: 10px;
+    font-style: italic;
+    color: #666;
+    font-size: 13px;
 }

@@ -52,12 +52,16 @@ class NPC_DialogRepository
 
     /**
      * Pobiera dialog początkowy dla NPC
+     * 
+     * Zwraca pierwszy dialog według kolejności ustalonej przez drag and drop
+     * Teraz system nie używa flagi is_starting_dialog - zamiast tego
+     * pierwszy dialog to ten, który ma najniższą wartość dialog_order
      */
     public function get_starting_dialog($npc_id)
     {
         $sql = $this->wpdb->prepare(
             "SELECT * FROM {$this->table_name} 
-             WHERE npc_id = %d AND is_starting_dialog = 1 AND status = 'active'
+             WHERE npc_id = %d AND status = 'active'
              ORDER BY dialog_order ASC
              LIMIT 1",
             $npc_id

@@ -372,12 +372,27 @@
             });
         }
 
+        // Funkcja pokazująca subtelne powiadomienie o aktualizacji kolejności
+        showOrderUpdateNotice(message) {
+            let $notice = $('.order-update-notice');
+
+            if ($notice.length === 0) {
+                $notice = $('<div class="order-update-notice" style="position: fixed; bottom: 20px; right: 20px; background-color: rgba(0,124,186,0.8); color: white; padding: 10px 15px; border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 9999; opacity: 0;"></div>');
+                $('body').append($notice);
+            }
+
+            $notice.text(message);
+            $notice.animate({ opacity: 1 }, 300).delay(2000).animate({ opacity: 0 }, 300, function () {
+                $(this).remove();
+            });
+        }
+
         // Funkcja inicjalizująca sortowanie
         initSortable() {
             // Jeśli jQuery UI jest dostępne
             if ($.fn.sortable) {
                 console.log('Initializing sortable functionality...');
-                
+
                 // Inicjalizuj sortowanie dla dialogów
                 $('.dialogs-container').sortable({
                     items: '.dialog-item',
@@ -402,18 +417,22 @@
                 console.warn('jQuery UI sortable is not available. Drag and drop functionality will not work.');
             }
         }
-        
+
         // Aktualizuje kolejność dialogów po przeciągnięciu
         updateDialogOrder(event, ui) {
             const dialogIds = [];
-            
-            $('.dialog-item').each(function(index) {
+
+            $('.dialog-item').each(function (index) {
                 const dialogId = $(this).data('dialog-id');
                 dialogIds.push({
                     id: dialogId,
                     order: index
                 });
             });
+
+            // Oznacz pierwszy dialog jako początkowy (wizualnie)
+            $('.dialog-item').removeClass('first-dialog');
+            $('.dialog-item:first').addClass('first-dialog');
 
             // Wysyłamy dane AJAX do zapisania kolejności
             $.ajax({
@@ -424,21 +443,28 @@
                     dialog_order: JSON.stringify(dialogIds),
                     nonce: npcAdmin.nonce
                 },
-                success: function(response) {
+                success: (response) => {
                     if (response.success) {
-                        console.log('Dialog order updated successfully');
+                        // Pokaż subtelne powiadomienie o sukcesie
+                        this.showOrderUpdateNotice('Kolejność dialogów zaktualizowana');
+
+                        // Aktualizuje informację w interfejsie, że pierwszy dialog jest początkowym
+                        if ($('.dialog-item').length > 0) {
+                            $('.dialog-item:first').find('.starting-badge').remove();
+                            $('.dialog-item:first .dialog-title').append('<span class="starting-badge">Początkowy</span>');
+                        }
                     }
                 }
             });
         }
-        
+
         // Aktualizuje kolejność odpowiedzi po przeciągnięciu
         updateAnswerOrder(event, ui) {
             const $list = $(event.target);
             const dialogId = $list.closest('.dialog-answers').find('.add-answer-btn').data('dialog-id');
             const answerIds = [];
-            
-            $list.find('li').each(function(index) {
+
+            $list.find('li').each(function (index) {
                 const answerId = $(this).find('.edit-answer-btn').data('answer-id');
                 answerIds.push({
                     id: answerId,
@@ -456,7 +482,7 @@
                     answer_order: JSON.stringify(answerIds),
                     nonce: npcAdmin.nonce
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         console.log('Answer order updated successfully');
                     }

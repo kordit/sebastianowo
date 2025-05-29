@@ -154,6 +154,16 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                     </button>
                 </div>
 
+                <div class="dialog-instruction" style="margin: 15px 0; background-color: #f0f6fc; border-left: 4px solid #007cba; padding: 10px;">
+                    <strong>Jak działa system dialogów:</strong>
+                    <ol style="margin-left: 20px; margin-top: 5px;">
+                        <li>Dialogi pokazują się w kolejności ustalonej przez przeciągnięcie (drag & drop).</li>
+                        <li>Pierwszy dialog jest automatycznie dialogiem początkowym.</li>
+                        <li>System wybierze pierwszy dialog, który spełnia wszystkie warunki.</li>
+                        <li>Odpowiedzi również można sortować przez przeciągnięcie.</li>
+                    </ol>
+                </div>
+
                 <div class="dialogs-container">
                     <?php if (empty($dialogs)): ?>
                         <div class="no-dialogs">
