@@ -236,39 +236,4 @@ if (!defined('ABSPATH')) {
             <?php endif; ?>
         </div>
     </div>
-
-    <!-- Szczegółowe statystyki misji -->
-    <div class="ga-card ga-card--full ga-card--info ga-mt-3">
-        <div class="ga-card__header">
-            <h3 class="ga-card__title">📊 Szczegółowe statystyki misji</h3>
-        </div>
-        <div class="ga-card__content">
-            <div class="ga-stats">
-                <div class="ga-stat">
-                    <div class="ga-stat__number"><?php echo isset($mission_stats['wordpress_missions']) ? esc_html($mission_stats['wordpress_missions']) : 0; ?></div>
-                    <div class="ga-stat__label">Misje w WordPress</div>
-                </div>
-                <div class="ga-stat ga-stat--success">
-                    <div class="ga-stat__number"><?php echo isset($mission_stats['assigned_missions']) ? esc_html($mission_stats['assigned_missions']) : 0; ?></div>
-                    <div class="ga-stat__label">Przypisane misje</div>
-                </div>
-                <div class="ga-stat">
-                    <div class="ga-stat__number"><?php echo isset($mission_stats['total_tasks']) ? esc_html($mission_stats['total_tasks']) : 0; ?></div>
-                    <div class="ga-stat__label">Wszystkie zadania</div>
-                </div>
-                <div class="ga-stat">
-                    <div class="ga-stat__number"><?php echo isset($mission_stats['users_with_missions']) ? esc_html($mission_stats['users_with_missions']) : 0; ?></div>
-                    <div class="ga-stat__label">Użytkownicy z misjami</div>
-                </div>
-                <div class="ga-stat ga-stat--warning">
-                    <div class="ga-stat__number"><?php echo isset($mission_stats['not_started_tasks']) ? esc_html($mission_stats['not_started_tasks']) : 0; ?></div>
-                    <div class="ga-stat__label">Zadania nierozpoczęte</div>
-                </div>
-                <div class="ga-stat ga-stat--info">
-                    <div class="ga-stat__number"><?php echo isset($mission_stats['completed_tasks']) ? esc_html($mission_stats['completed_tasks']) : 0; ?></div>
-                    <div class="ga-stat__label">Zadania ukończone</div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>

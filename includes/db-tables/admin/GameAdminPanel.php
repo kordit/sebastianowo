@@ -650,9 +650,6 @@ class GameAdminPanel
         $areas_database_stats = $area_repository->getAreasStats();
         $areas_list = $area_builder->getAllAreas();
 
-        // Pobierz statystyki misji
-        $mission_stats = $mission_builder->getBuilderStats();
-
         include __DIR__ . '/views/builders-page.php';
     }
 }
