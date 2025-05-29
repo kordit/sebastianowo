@@ -430,45 +430,6 @@ class GameAdminPanel
                     });
                 }
             }
-
-            // Szybkie akcje misji
-            if (
-                isset($_POST['quick_mission_action']) && isset($_POST['mission_id']) && isset($_POST['action']) &&
-                isset($_POST['_wpnonce_quick']) && wp_verify_nonce($_POST['_wpnonce_quick'], 'quick_mission')
-            ) {
-                $mission_id = intval($_POST['mission_id']);
-                $action = sanitize_text_field($_POST['action']);
-
-                try {
-                    switch ($action) {
-                        case 'start':
-                            $mission_repo->startMission($user_id, $mission_id);
-                            $message = 'Misja została rozpoczęta.';
-                            break;
-                        case 'complete':
-                            $mission_repo->completeMission($user_id, $mission_id);
-                            $message = 'Misja została ukończona.';
-                            break;
-                        case 'reset':
-                            $mission_repo->updateMissionStatus($user_id, $mission_id, 'not_started', [
-                                'mission_started_at' => null,
-                                'mission_completed_at' => null
-                            ]);
-                            $message = 'Misja została zresetowana.';
-                            break;
-                        default:
-                            throw new Exception('Nieznana akcja.');
-                    }
-
-                    add_action('admin_notices', function () use ($message) {
-                        echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> ' . esc_html($message) . '</p></div>';
-                    });
-                } catch (Exception $e) {
-                    add_action('admin_notices', function () use ($e) {
-                        echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> ' . esc_html($e->getMessage()) . '</p></div>';
-                    });
-                }
-            }
         }
 
         // Budowanie relacji NPC

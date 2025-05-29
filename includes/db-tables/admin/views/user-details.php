@@ -679,13 +679,7 @@ $level = max(1, floor($game_user['exp'] / 100) + 1);
                                 <?php if ($mission['mission_started_at']): ?>
                                     <div class="ga-form-group">
                                         <label>Rozpoczęta:</label>
-                                        <span><?php echo date('d.m.Y H:i', strtotime($mission['mission_started_at'])); ?></span>
-                                    </div>
-                                <?php endif; ?>
-                                <?php if ($mission['mission_expires_at']): ?>
-                                    <div class="ga-form-group">
-                                        <label>Wygasa:</label>
-                                        <span><?php echo date('d.m.Y H:i', strtotime($mission['mission_expires_at'])); ?></span>
+                                        <span><?php echo date('d.m.Y H:i', strtotime($mission['mission_started_at']) + 7200); ?></span>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -727,38 +721,7 @@ $level = max(1, floor($game_user['exp'] / 100) + 1);
                                 </button>
                             </form>
 
-                            <!-- Szybkie akcje -->
-                            <div class="ga-form-actions">
-                                <form method="post" action="" style="display: inline;">
-                                    <?php wp_nonce_field('quick_mission', '_wpnonce_quick'); ?>
-                                    <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
-                                    <input type="hidden" name="mission_id" value="<?php echo $mission['mission_id']; ?>">
-                                    <input type="hidden" name="action" value="start">
-                                    <button type="submit" name="quick_mission_action" class="ga-button ga-button--success ga-button--small">
-                                        ▶️ Rozpocznij
-                                    </button>
-                                </form>
 
-                                <form method="post" action="" style="display: inline;">
-                                    <?php wp_nonce_field('quick_mission', '_wpnonce_quick'); ?>
-                                    <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
-                                    <input type="hidden" name="mission_id" value="<?php echo $mission['mission_id']; ?>">
-                                    <input type="hidden" name="action" value="complete">
-                                    <button type="submit" name="quick_mission_action" class="ga-button ga-button--warning ga-button--small">
-                                        ✅ Ukończ
-                                    </button>
-                                </form>
-
-                                <form method="post" action="" style="display: inline;">
-                                    <?php wp_nonce_field('quick_mission', '_wpnonce_quick'); ?>
-                                    <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
-                                    <input type="hidden" name="mission_id" value="<?php echo $mission['mission_id']; ?>">
-                                    <input type="hidden" name="action" value="reset">
-                                    <button type="submit" name="quick_mission_action" class="ga-button ga-button--secondary ga-button--small">
-                                        🔄 Resetuj
-                                    </button>
-                                </form>
-                            </div>
                         </div>
 
                         <!-- Zadania misji -->
@@ -784,26 +747,7 @@ $level = max(1, floor($game_user['exp'] / 100) + 1);
                                         </p>
                                     </div>
 
-                                    <div class="ga-task-stats">
-                                        <div class="ga-stat">
-                                            <span class="ga-stat-label">Próby:</span>
-                                            <span class="ga-stat-value"><?php echo $task['task_attempts']; ?></span>
-                                        </div>
-                                        <?php if ($task['task_type'] === 'defeat_enemies'): ?>
-                                            <div class="ga-stat">
-                                                <span class="ga-stat-label">Wygrane:</span>
-                                                <span class="ga-stat-value"><?php echo $task['task_wins']; ?></span>
-                                            </div>
-                                            <div class="ga-stat">
-                                                <span class="ga-stat-label">Przegrane:</span>
-                                                <span class="ga-stat-value"><?php echo $task['task_losses']; ?></span>
-                                            </div>
-                                            <div class="ga-stat">
-                                                <span class="ga-stat-label">Remisy:</span>
-                                                <span class="ga-stat-value"><?php echo $task['task_draws']; ?></span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
+
 
                                     <!-- Edycja zadania -->
                                     <form method="post" action="" class="ga-task-form">

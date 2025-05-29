@@ -227,30 +227,6 @@ class GameMissionRepository
     }
 
     /**
-     * Rozpoczyna misję
-     */
-    public function startMission($user_id, $mission_id)
-    {
-        $started_at = date('Y-m-d H:i:s');
-
-        return $this->updateMissionStatus($user_id, $mission_id, 'in_progress', [
-            'mission_started_at' => $started_at
-        ]);
-    }
-
-    /**
-     * Kończy misję
-     */
-    public function completeMission($user_id, $mission_id)
-    {
-        $completed_at = date('Y-m-d H:i:s');
-
-        return $this->updateMissionStatus($user_id, $mission_id, 'completed', [
-            'mission_completed_at' => $completed_at
-        ]);
-    }
-
-    /**
      * Kończy zadanie
      */
     public function completeTask($user_id, $mission_id, $task_id)
