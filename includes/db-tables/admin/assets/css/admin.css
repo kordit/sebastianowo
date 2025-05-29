@@ -1381,3 +1381,11 @@
         font-size: 14px;
     }
 }
+
+.ga-form-inline {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 20px;
+    margin-left: 10px;
+}

@@ -26,7 +26,6 @@ class GameDatabaseManager
         $this->createGameUserAreasTable();
         $this->createGameUserRelationsTable();
         $this->createGameUserFightTokensTable();
-        $this->createGameUserMissionsTable();
         $this->createGameUserMissionTasksTable();
     }
 
@@ -50,7 +49,6 @@ class GameDatabaseManager
             'game_user_areas' => 'Dostępne rejony i sceny',
             'game_user_relations' => 'Relacje z NPC',
             'game_user_fight_tokens' => 'Tokeny walk',
-            'game_user_missions' => 'Misje graczy',
             'game_user_mission_tasks' => 'Zadania misji'
         ];
     }
@@ -112,7 +110,6 @@ class GameDatabaseManager
         // Usuwanie tabel w odwrotnej kolejności niż tworzenie foreign keys
         $tables = [
             $this->wpdb->prefix . 'game_user_mission_tasks',
-            $this->wpdb->prefix . 'game_user_missions',
             $this->wpdb->prefix . 'game_user_fight_tokens',
             $this->wpdb->prefix . 'game_user_relations',
             $this->wpdb->prefix . 'game_user_areas',
@@ -275,41 +272,7 @@ class GameDatabaseManager
     }
 
     /**
-     * Tworzy tabelę misji użytkowników
-     */
-    private function createGameUserMissionsTable()
-    {
-        $table_name = $this->wpdb->prefix . 'game_user_missions';
-
-        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
-            id bigint(20) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            user_id bigint(20) unsigned NOT NULL,
-            mission_id int NOT NULL COMMENT 'ID misji z WordPress',
-            mission_description text COMMENT 'Opis misji',
-            mission_time_limit int DEFAULT 0 COMMENT 'Limit czasowy w godzinach (0 = bez limitu)',
-            mission_type varchar(32) DEFAULT 'one-time' COMMENT 'Typ: one-time, repeatable, daily, weekly',
-            status varchar(32) DEFAULT 'not_started' COMMENT 'Status: not_started, in_progress, completed, failed, expired',
-            wins int DEFAULT 0 COMMENT 'Wygrane (dla misji walki)',
-            losses int DEFAULT 0 COMMENT 'Przegrane (dla misji walki)',
-            draws int DEFAULT 0 COMMENT 'Remisy (dla misji walki)',
-            started_at datetime NULL,
-            completed_at datetime NULL,
-            expires_at datetime NULL COMMENT 'Kiedy misja wygasa (na podstawie time_limit)',
-            created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-            updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES {$this->wpdb->prefix}game_users(user_id) ON DELETE CASCADE,
-            UNIQUE KEY unique_user_mission (user_id, mission_id),
-            INDEX idx_user_missions (user_id, status),
-            INDEX idx_mission_status (mission_id, status),
-            INDEX idx_expires (expires_at)
-        ) {$this->charset_collate};";
-
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
-    }
-
-    /**
-     * Tworzy tabelę zadań misji użytkowników
+     * Tworzy tabelę zadań misji użytkowników (główna tabela misji)
      */
     private function createGameUserMissionTasksTable()
     {
@@ -317,7 +280,13 @@ class GameDatabaseManager
 
         $sql = "CREATE TABLE IF NOT EXISTS $table_name (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            user_mission_id bigint(20) unsigned NOT NULL,
+            user_id bigint(20) unsigned NOT NULL,
+            mission_id int NOT NULL COMMENT 'ID misji z WordPress',
+            mission_title varchar(255) DEFAULT '' COMMENT 'Tytuł misji',
+            mission_description text COMMENT 'Opis misji',
+            mission_time_limit int DEFAULT 0 COMMENT 'Limit czasowy w godzinach (0 = bez limitu)',
+            mission_type varchar(32) DEFAULT 'one-time' COMMENT 'Typ: one-time, repeatable, daily, weekly',
+            mission_status varchar(32) DEFAULT 'not_started' COMMENT 'Status misji: not_started, in_progress, completed, failed, expired',
             task_id varchar(64) NOT NULL COMMENT 'ID zadania np. pierwszy-trop',
             task_title varchar(255) DEFAULT '' COMMENT 'Tytuł zadania',
             task_description text COMMENT 'Opis zadania',
@@ -328,139 +297,29 @@ class GameDatabaseManager
             task_location_scene varchar(64) DEFAULT '' COMMENT 'Nazwa sceny (dla checkpoint)',
             task_checkpoint_npc json NULL COMMENT 'Array NPC dla checkpoint_npc',
             task_defeat_enemies json NULL COMMENT 'Array wrogów do pokonania',
-            status varchar(32) DEFAULT 'not_started' COMMENT 'Status: not_started, in_progress, completed, failed',
-            attempts int DEFAULT 0 COMMENT 'Liczba prób',
-            completed_at datetime NULL,
+            task_status varchar(32) DEFAULT 'not_started' COMMENT 'Status zadania: not_started, in_progress, completed, failed',
+            task_attempts int DEFAULT 0 COMMENT 'Liczba prób zadania',
+            task_wins int DEFAULT 0 COMMENT 'Wygrane (dla zadań walki)',
+            task_losses int DEFAULT 0 COMMENT 'Przegrane (dla zadań walki)',
+            task_draws int DEFAULT 0 COMMENT 'Remisy (dla zadań walki)',
+            mission_started_at datetime NULL,
+            mission_completed_at datetime NULL,
+            mission_expires_at datetime NULL COMMENT 'Kiedy misja wygasa (na podstawie time_limit)',
+            task_completed_at datetime NULL,
             created_at timestamp DEFAULT CURRENT_TIMESTAMP,
             updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_mission_id) REFERENCES {$this->wpdb->prefix}game_user_missions(id) ON DELETE CASCADE,
-            UNIQUE KEY unique_user_mission_task (user_mission_id, task_id),
-            INDEX idx_user_mission_tasks (user_mission_id, status),
-            INDEX idx_task_type (task_type, status),
-            INDEX idx_location_scene (task_location, task_location_scene)
+            FOREIGN KEY (user_id) REFERENCES {$this->wpdb->prefix}game_users(user_id) ON DELETE CASCADE,
+            UNIQUE KEY unique_user_mission_task (user_id, mission_id, task_id),
+            INDEX idx_user_missions (user_id, mission_id, mission_status),
+            INDEX idx_user_tasks (user_id, mission_id, task_status),
+            INDEX idx_task_type (task_type, task_status),
+            INDEX idx_location_scene (task_location, task_location_scene),
+            INDEX idx_mission_expires (mission_expires_at)
         ) {$this->charset_collate};";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
     }
 
-    /**
-     * Migruje strukturę tabel - usuwa przestarzałe kolumny
-     */
-    public function migrateTables()
-    {
-        $this->removeOldLocationFields();
-        $this->migrateMissionsTables();
-    }
 
-    /**
-     * Migruje tabele misji do nowej struktury
-     */
-    private function migrateMissionsTables()
-    {
-        $missions_table = $this->wpdb->prefix . 'game_user_missions';
-        $tasks_table = $this->wpdb->prefix . 'game_user_mission_tasks';
-
-        // Sprawdź czy tabele istnieją
-        $missions_exists = $this->wpdb->get_var("SHOW TABLES LIKE '$missions_table'") === $missions_table;
-        $tasks_exists = $this->wpdb->get_var("SHOW TABLES LIKE '$tasks_table'") === $tasks_table;
-
-        if (!$missions_exists || !$tasks_exists) {
-            return false;
-        }
-
-        // Sprawdź strukturę tabeli misji
-        $missions_columns = $this->wpdb->get_results("SHOW COLUMNS FROM $missions_table");
-        $missions_column_names = array_column($missions_columns, 'Field');
-
-        // Dodaj nowe kolumny do tabeli misji jeśli nie istnieją
-        if (!in_array('mission_description', $missions_column_names)) {
-            $this->wpdb->query("ALTER TABLE $missions_table ADD COLUMN mission_description text COMMENT 'Opis misji'");
-        }
-        if (!in_array('mission_time_limit', $missions_column_names)) {
-            $this->wpdb->query("ALTER TABLE $missions_table ADD COLUMN mission_time_limit int DEFAULT 0 COMMENT 'Limit czasowy w godzinach (0 = bez limitu)'");
-        }
-        if (!in_array('mission_type', $missions_column_names)) {
-            $this->wpdb->query("ALTER TABLE $missions_table ADD COLUMN mission_type varchar(32) DEFAULT 'one-time' COMMENT 'Typ: one-time, repeatable, daily, weekly'");
-        }
-
-        // Usuń starą kolumnę 'type' jeśli istnieje
-        if (in_array('type', $missions_column_names)) {
-            $this->wpdb->query("ALTER TABLE $missions_table DROP COLUMN type");
-        }
-
-        // Sprawdź strukturę tabeli zadań
-        $tasks_columns = $this->wpdb->get_results("SHOW COLUMNS FROM $tasks_table");
-        $tasks_column_names = array_column($tasks_columns, 'Field');
-
-        // Modyfikuj task_id z bigint na varchar jeśli trzeba
-        foreach ($tasks_columns as $column) {
-            if ($column['Field'] === 'task_id' && strpos($column['Type'], 'bigint') !== false) {
-                $this->wpdb->query("ALTER TABLE $tasks_table MODIFY task_id varchar(64) NOT NULL COMMENT 'ID zadania np. pierwszy-trop'");
-                break;
-            }
-        }
-
-        // Dodaj nowe kolumny do tabeli zadań jeśli nie istnieją
-        $new_task_columns = [
-            'task_title' => "varchar(255) DEFAULT '' COMMENT 'Tytuł zadania'",
-            'task_description' => "text COMMENT 'Opis zadania'",
-            'task_optional' => "boolean DEFAULT 0 COMMENT 'Czy zadanie jest opcjonalne'",
-            'task_attempt_limit' => "int DEFAULT 0 COMMENT 'Limit prób (0 = bez limitu)'",
-            'task_location' => "int DEFAULT 0 COMMENT 'ID lokacji (dla checkpoint)'",
-            'task_location_scene' => "varchar(64) DEFAULT '' COMMENT 'Nazwa sceny (dla checkpoint)'",
-            'task_checkpoint_npc' => "json NULL COMMENT 'Array NPC dla checkpoint_npc'",
-            'task_defeat_enemies' => "json NULL COMMENT 'Array wrogów do pokonania'"
-        ];
-
-        foreach ($new_task_columns as $column_name => $column_definition) {
-            if (!in_array($column_name, $tasks_column_names)) {
-                $this->wpdb->query("ALTER TABLE $tasks_table ADD COLUMN $column_name $column_definition");
-            }
-        }
-
-        // Usuń stare kolumny jeśli istnieją
-        $old_task_columns = ['location_id', 'scene_id', 'npc_ids', 'enemy_ids'];
-        foreach ($old_task_columns as $old_column) {
-            if (in_array($old_column, $tasks_column_names)) {
-                $this->wpdb->query("ALTER TABLE $tasks_table DROP COLUMN $old_column");
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Usuwa stare pola lokalizacji z tabeli game_users jeśli istnieją
-     */
-    private function removeOldLocationFields()
-    {
-        $table_name = $this->wpdb->prefix . 'game_users';
-
-        // Sprawdź czy tabela istnieje
-        $table_exists = $this->wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
-        if (!$table_exists) {
-            return false;
-        }
-
-        // Sprawdź jakie kolumny istnieją
-        $columns = $this->wpdb->get_results("SHOW COLUMNS FROM $table_name");
-        $column_names = array_column($columns, 'Field');
-
-        $removed_columns = [];
-
-        // Usuń current_area_id jeśli istnieje
-        if (in_array('current_area_id', $column_names)) {
-            $this->wpdb->query("ALTER TABLE $table_name DROP COLUMN current_area_id");
-            $removed_columns[] = 'current_area_id';
-        }
-
-        // Usuń current_scene_id jeśli istnieje
-        if (in_array('current_scene_id', $column_names)) {
-            $this->wpdb->query("ALTER TABLE $table_name DROP COLUMN current_scene_id");
-            $removed_columns[] = 'current_scene_id';
-        }
-
-        return $removed_columns;
-    }
 }
