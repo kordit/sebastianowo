@@ -11,12 +11,12 @@
             this.conditionIndex = 0;
             this.conditionDescriptions = {
                 'user_level': 'Sprawdza poziom gracza. Użyj liczby całkowitej.',
-                'user_gold': 'Sprawdza ilość złota gracza. Użyj liczby całkowitej.',
+                'user_skill': 'Sprawdza poziom umiejętności gracza (walka, kradzież, handel, itp.). Użyj liczby całkowitej.',
+                'user_class': 'Sprawdza klasę gracza. Wybierz z dostępnych opcji.',
                 'user_item': 'Sprawdza czy gracz posiada określony przedmiot. Użyj ID przedmiotu.',
-                'quest_completed': 'Sprawdza czy zadanie zostało ukończone. Użyj ID zadania.',
-                'user_stat': 'Sprawdza statystykę gracza (np. siła, zręczność). Podaj nazwę statystyki.',
-                'time_of_day': 'Sprawdza porę dnia (0-23). Użyj godziny w formacie 24h.',
-                'custom': 'Warunek niestandardowy dla zaawansowanych zastosowań.'
+                'user_mission': 'Sprawdza status misji gracza. Użyj ID misji.',
+                'quest_completed': '[LEGACY] Sprawdza czy zadanie zostało ukończone. Użyj ID zadania.',
+                'user_stat': 'Sprawdza statystykę gracza (np. siła, zręczność). Podaj nazwę statystyki.'
             };
 
             this.operatorsByType = {
@@ -28,23 +28,19 @@
                     '<': 'mniejsze niż',
                     '<=': 'mniejsze lub równe'
                 },
-                'user_gold': {
+                'user_skill': {
                     '==': 'równe',
                     '!=': 'różne od',
                     '>': 'większe niż',
                     '>=': 'większe lub równe',
                     '<': 'mniejsze niż',
                     '<=': 'mniejsze lub równe'
+                },
+                'user_class': {
+                    '==': 'jest klasą',
+                    '!=': 'nie jest klasą'
                 },
                 'user_stat': {
-                    '==': 'równe',
-                    '!=': 'różne od',
-                    '>': 'większe niż',
-                    '>=': 'większe lub równe',
-                    '<': 'mniejsze niż',
-                    '<=': 'mniejsze lub równe'
-                },
-                'time_of_day': {
                     '==': 'równe',
                     '!=': 'różne od',
                     '>': 'większe niż',
@@ -56,13 +52,16 @@
                     'has': 'posiada',
                     'not_has': 'nie posiada'
                 },
+                'user_mission': {
+                    'not_started': 'nie rozpoczęta',
+                    'in_progress': 'w trakcie',
+                    'completed': 'ukończona',
+                    'failed': 'nieudana',
+                    'expired': 'wygasła'
+                },
                 'quest_completed': {
                     'completed': 'ukończone',
                     'not_completed': 'nie ukończone'
-                },
-                'custom': {
-                    '==': 'równe',
-                    '!=': 'różne od'
                 }
             };
 
@@ -83,6 +82,9 @@
 
             // Zmiana typu warunku
             $(document).on('change', '.condition-type', this.handleTypeChange.bind(this));
+
+            // Zmiana logiki warunków (OR/AND)
+            $(document).on('change', '.conditions-logic-operator', this.updateConditionsData.bind(this));
 
             // Aktualizacja danych przy zmianie pól
             $(document).on('change input', '.condition-item input, .condition-item select', this.updateConditionsData.bind(this));
@@ -168,9 +170,20 @@
                 // Aktualizuj pole wartości
                 this.updateValueField($fields.find('.condition-value'), type);
 
-                // Pokaż pole dodatkowe dla user_stat
-                if (type === 'user_stat') {
+                // Pokaż pole dodatkowe dla user_stat i user_skill
+                if (type === 'user_stat' || type === 'user_skill') {
                     $extraGroup.show();
+
+                    // Pokaż odpowiednie pole - select dla user_skill, input dla user_stat
+                    if (type === 'user_skill') {
+                        $extraGroup.find('.skill-select').show();
+                        $extraGroup.find('.text-input').hide();
+                        $extraGroup.find('label').text('Nazwa umiejętności:');
+                    } else {
+                        $extraGroup.find('.skill-select').hide();
+                        $extraGroup.find('.text-input').show();
+                        $extraGroup.find('label').text('Nazwa statystyki:');
+                    }
                 } else {
                     $extraGroup.hide();
                 }
@@ -207,22 +220,31 @@
 
             switch (type) {
                 case 'user_level':
-                case 'user_gold':
                 case 'user_stat':
-                case 'time_of_day':
+                case 'user_skill':
                     newField = '<input type="number" class="condition-value" min="0" placeholder="Wprowadź liczbę">';
+                    break;
+
+                case 'user_class':
+                    newField = '<select class="condition-value">' +
+                        '<option value="">Wybierz klasę...</option>' +
+                        '<option value="wojownik">Wojownik</option>' +
+                        '<option value="handlarz">Handlarz</option>' +
+                        '<option value="zlodziej">Złodziej</option>' +
+                        '<option value="dyplomata">Dyplomata</option>' +
+                        '</select>';
                     break;
 
                 case 'user_item':
                     newField = '<input type="text" class="condition-value" placeholder="ID przedmiotu">';
                     break;
 
-                case 'quest_completed':
-                    newField = '<input type="text" class="condition-value" placeholder="ID zadania">';
+                case 'user_mission':
+                    newField = '<input type="number" class="condition-value" placeholder="ID misji" min="1">';
                     break;
 
-                case 'custom':
-                    newField = '<input type="text" class="condition-value" placeholder="Wartość niestandardowa">';
+                case 'quest_completed':
+                    newField = '<input type="text" class="condition-value" placeholder="ID zadania">';
                     break;
 
                 default:
@@ -243,6 +265,7 @@
             $('.conditions-manager').each((index, manager) => {
                 const $manager = $(manager);
                 const $dataField = $manager.find('.conditions-data');
+                const $logicSelect = $manager.find('.conditions-logic-operator');
                 const conditions = [];
 
                 $manager.find('.condition-item').each((condIndex, condition) => {
@@ -257,15 +280,23 @@
                         value: $condition.find('.condition-value').val() || ''
                     };
 
-                    // Dodaj pole field dla user_stat
+                    // Dodaj pole field dla user_stat i user_skill
                     if (type === 'user_stat') {
-                        conditionData.field = $condition.find('.condition-field').val() || '';
+                        conditionData.field = $condition.find('.condition-field.text-input').val() || '';
+                    } else if (type === 'user_skill') {
+                        conditionData.field = $condition.find('.condition-field.skill-select').val() || '';
                     }
 
                     conditions.push(conditionData);
                 });
 
-                $dataField.val(JSON.stringify(conditions));
+                // Utwórz nową strukturę z logiką OR/AND
+                const data = {
+                    logic: $logicSelect.val() || 'AND',
+                    conditions: conditions
+                };
+
+                $dataField.val(JSON.stringify(data));
             });
         }
 
@@ -275,7 +306,19 @@
                 const $dataField = $manager.find('.conditions-data');
 
                 try {
-                    const conditions = JSON.parse($dataField.val() || '[]');
+                    const data = JSON.parse($dataField.val() || '[]');
+                    let conditions = [];
+
+                    // Sprawdź czy to nowa struktura z logiką OR/AND
+                    if (data.logic && data.conditions) {
+                        conditions = data.conditions;
+                        // Ustaw logikę w selekcie
+                        $manager.find('.conditions-logic-operator').val(data.logic);
+                    } else if (Array.isArray(data)) {
+                        // Stara struktura - tablica warunków
+                        conditions = data;
+                        $manager.find('.conditions-logic-operator').val('AND');
+                    }
 
                     if (conditions.length > 0) {
                         // Usuń komunikat "brak warunków"
@@ -319,29 +362,43 @@
                     return;
                 }
 
-                if (!value && type !== 'custom') {
+                if (!value && !['user_mission'].includes(type)) {
                     errors.push(`Warunek ${index + 1}: Wprowadź wartość`);
                     return;
                 }
 
                 // Dodatkowa walidacja dla specific types
-                if (['user_level', 'user_gold', 'user_stat', 'time_of_day'].includes(type)) {
+                if (['user_level', 'user_stat', 'user_skill'].includes(type)) {
                     if (isNaN(value) || parseInt(value) < 0) {
                         errors.push(`Warunek ${index + 1}: Wartość musi być liczbą nieujemną`);
                     }
                 }
 
-                if (type === 'time_of_day') {
-                    const hour = parseInt(value);
-                    if (hour < 0 || hour > 23) {
-                        errors.push(`Warunek ${index + 1}: Godzina musi być między 0 a 23`);
+                if (type === 'user_mission') {
+                    const missionId = parseInt(value);
+                    if (isNaN(missionId) || missionId < 1) {
+                        errors.push(`Warunek ${index + 1}: ID misji musi być liczbą większą od 0`);
+                    }
+                }
+
+                if (type === 'user_class') {
+                    const validClasses = ['wojownik', 'handlarz', 'zlodziej', 'dyplomata'];
+                    if (!validClasses.includes(value)) {
+                        errors.push(`Warunek ${index + 1}: Wybierz prawidłową klasę`);
                     }
                 }
 
                 if (type === 'user_stat') {
-                    const field = $condition.find('.condition-field').val();
+                    const field = $condition.find('.condition-field.text-input').val();
                     if (!field) {
                         errors.push(`Warunek ${index + 1}: Podaj nazwę statystyki`);
+                    }
+                }
+
+                if (type === 'user_skill') {
+                    const field = $condition.find('.condition-field.skill-select').val();
+                    if (!field) {
+                        errors.push(`Warunek ${index + 1}: Wybierz umiejętność`);
                     }
                 }
             });

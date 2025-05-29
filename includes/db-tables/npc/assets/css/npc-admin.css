@@ -357,6 +357,8 @@
     padding: 15px 20px;
     border-bottom: 1px solid #c3c4c7;
     background: #f6f7f7;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .conditions-header h4 {
@@ -364,6 +366,24 @@
     font-size: 14px;
     font-weight: 600;
     color: #1d2327;
+}
+
+.conditions-logic {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.conditions-logic label {
+    margin: 0;
+    font-weight: 500;
+    color: #1d2327;
+}
+
+.conditions-logic-operator {
+    min-width: 200px;
+    font-size: 13px;
 }
 
 .add-condition-btn {

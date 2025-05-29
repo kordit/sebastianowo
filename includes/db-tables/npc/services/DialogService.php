@@ -21,6 +21,9 @@ class NPC_DialogService
         $this->dialog_repository = new NPC_DialogRepository();
         $this->answer_repository = new NPC_AnswerRepository();
 
+        // Załaduj ConditionManager
+        require_once dirname(__FILE__) . '/../admin/components/ConditionManager.php';
+
         add_action('wp_ajax_npc_start_dialog', [$this, 'ajax_start_dialog']);
         add_action('wp_ajax_npc_continue_dialog', [$this, 'ajax_continue_dialog']);
         add_action('wp_ajax_nopriv_npc_start_dialog', [$this, 'ajax_start_dialog']);
@@ -176,16 +179,8 @@ class NPC_DialogService
      */
     private function check_dialog_conditions($dialog, $user_id = null)
     {
-        if (!$dialog->conditions) {
-            return true;
-        }
-
-        $conditions = json_decode($dialog->conditions, true);
-        if (!$conditions) {
-            return true;
-        }
-
-        return $this->evaluate_conditions($conditions, $user_id);
+        // Używa nowego systemu warunków z ConditionManager
+        return NPC_ConditionManager::check_conditions($dialog->conditions, $user_id);
     }
 
     /**
@@ -193,16 +188,8 @@ class NPC_DialogService
      */
     private function check_answer_conditions($answer, $user_id = null)
     {
-        if (!$answer->conditions) {
-            return true;
-        }
-
-        $conditions = json_decode($answer->conditions, true);
-        if (!$conditions) {
-            return true;
-        }
-
-        return $this->evaluate_conditions($conditions, $user_id);
+        // Używa nowego systemu warunków z ConditionManager
+        return NPC_ConditionManager::check_conditions($answer->conditions, $user_id);
     }
 
     /**
@@ -220,90 +207,6 @@ class NPC_DialogService
         }
 
         return $available_answers;
-    }
-
-    /**
-     * Ocenia warunki (conditions)
-     */
-    private function evaluate_conditions($conditions, $user_id = null)
-    {
-        if (!is_array($conditions)) {
-            return true;
-        }
-
-        foreach ($conditions as $condition) {
-            if (!$this->evaluate_single_condition($condition, $user_id)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Ocenia pojedynczy warunek
-     */
-    private function evaluate_single_condition($condition, $user_id = null)
-    {
-        $type = $condition['type'] ?? '';
-        $operator = $condition['operator'] ?? '==';
-        $value = $condition['value'] ?? '';
-        $field = $condition['field'] ?? '';
-
-        switch ($type) {
-            case 'user_level':
-                $user_level = $this->get_user_level($user_id);
-                return $this->compare_values($user_level, $operator, intval($value));
-
-            case 'user_gold':
-                $user_gold = $this->get_user_gold($user_id);
-                return $this->compare_values($user_gold, $operator, intval($value));
-
-            case 'user_item':
-                $has_item = $this->user_has_item($user_id, $value);
-                return $operator === 'has' ? $has_item : !$has_item;
-
-            case 'quest_completed':
-                $quest_completed = $this->is_quest_completed($user_id, $value);
-                return $operator === 'completed' ? $quest_completed : !$quest_completed;
-
-            case 'user_stat':
-                $stat_value = $this->get_user_stat($user_id, $field);
-                return $this->compare_values($stat_value, $operator, intval($value));
-
-            case 'time_of_day':
-                $current_hour = intval(date('H'));
-                return $this->compare_values($current_hour, $operator, intval($value));
-
-            case 'custom':
-                return apply_filters('npc_dialog_custom_condition', true, $condition, $user_id);
-
-            default:
-                return true;
-        }
-    }
-
-    /**
-     * Porównuje wartości według operatora
-     */
-    private function compare_values($actual, $operator, $expected)
-    {
-        switch ($operator) {
-            case '==':
-                return $actual == $expected;
-            case '!=':
-                return $actual != $expected;
-            case '>':
-                return $actual > $expected;
-            case '>=':
-                return $actual >= $expected;
-            case '<':
-                return $actual < $expected;
-            case '<=':
-                return $actual <= $expected;
-            default:
-                return true;
-        }
     }
 
     /**
