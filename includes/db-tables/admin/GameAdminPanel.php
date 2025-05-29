@@ -11,7 +11,6 @@ class GameAdminPanel
         add_action('admin_menu', [$this, 'addAdminMenu']);
         add_action('admin_init', [$this, 'handleFormSubmissions']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAssets']);
-        add_action('wp_ajax_test_mission_validation', [$this, 'handleTestMissionValidation']);
     }
 
     /**
@@ -361,6 +360,117 @@ class GameAdminPanel
             }
         }
 
+        // Obsługa zarządzania misjami
+        if (isset($_POST['user_id'])) {
+            $user_id = intval($_POST['user_id']);
+            $mission_repo = new GameMissionRepository();
+
+            // Aktualizacja statusu misji
+            if (
+                isset($_POST['update_mission_status']) && isset($_POST['mission_id']) && isset($_POST['mission_status']) &&
+                isset($_POST['_wpnonce_mission']) && wp_verify_nonce($_POST['_wpnonce_mission'], 'update_mission')
+            ) {
+                $mission_id = intval($_POST['mission_id']);
+                $status = sanitize_text_field($_POST['mission_status']);
+
+                try {
+                    $data = [];
+                    if (isset($_POST['mission_time_limit'])) {
+                        $mission_repo->updateMissionTimeLimit($user_id, $mission_id, intval($_POST['mission_time_limit']));
+                    }
+
+                    if (isset($_POST['mission_expires_at']) && !empty($_POST['mission_expires_at'])) {
+                        $data['mission_expires_at'] = sanitize_text_field($_POST['mission_expires_at']);
+                    }
+
+                    $mission_repo->updateMissionStatus($user_id, $mission_id, $status, $data);
+
+                    add_action('admin_notices', function () {
+                        echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Status misji został zaktualizowany.</p></div>';
+                    });
+                } catch (Exception $e) {
+                    add_action('admin_notices', function () use ($e) {
+                        echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+                    });
+                }
+            }
+
+            // Aktualizacja statusu zadania
+            if (
+                isset($_POST['update_task_status']) && isset($_POST['mission_id']) && isset($_POST['task_id']) && isset($_POST['task_status']) &&
+                isset($_POST['_wpnonce_task']) && wp_verify_nonce($_POST['_wpnonce_task'], 'update_task')
+            ) {
+                $mission_id = intval($_POST['mission_id']);
+                $task_id = sanitize_text_field($_POST['task_id']);
+                $status = sanitize_text_field($_POST['task_status']);
+
+                try {
+                    $data = [];
+                    if (isset($_POST['task_attempts'])) {
+                        $data['task_attempts'] = intval($_POST['task_attempts']);
+                    }
+                    if (isset($_POST['task_wins'])) {
+                        $data['task_wins'] = intval($_POST['task_wins']);
+                    }
+                    if (isset($_POST['task_losses'])) {
+                        $data['task_losses'] = intval($_POST['task_losses']);
+                    }
+                    if (isset($_POST['task_draws'])) {
+                        $data['task_draws'] = intval($_POST['task_draws']);
+                    }
+
+                    $mission_repo->updateTaskStatus($user_id, $mission_id, $task_id, $status, $data);
+
+                    add_action('admin_notices', function () {
+                        echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Status zadania został zaktualizowany.</p></div>';
+                    });
+                } catch (Exception $e) {
+                    add_action('admin_notices', function () use ($e) {
+                        echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+                    });
+                }
+            }
+
+            // Szybkie akcje misji
+            if (
+                isset($_POST['quick_mission_action']) && isset($_POST['mission_id']) && isset($_POST['action']) &&
+                isset($_POST['_wpnonce_quick']) && wp_verify_nonce($_POST['_wpnonce_quick'], 'quick_mission')
+            ) {
+                $mission_id = intval($_POST['mission_id']);
+                $action = sanitize_text_field($_POST['action']);
+
+                try {
+                    switch ($action) {
+                        case 'start':
+                            $mission_repo->startMission($user_id, $mission_id);
+                            $message = 'Misja została rozpoczęta.';
+                            break;
+                        case 'complete':
+                            $mission_repo->completeMission($user_id, $mission_id);
+                            $message = 'Misja została ukończona.';
+                            break;
+                        case 'reset':
+                            $mission_repo->updateMissionStatus($user_id, $mission_id, 'not_started', [
+                                'mission_started_at' => null,
+                                'mission_completed_at' => null
+                            ]);
+                            $message = 'Misja została zresetowana.';
+                            break;
+                        default:
+                            throw new Exception('Nieznana akcja.');
+                    }
+
+                    add_action('admin_notices', function () use ($message) {
+                        echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> ' . esc_html($message) . '</p></div>';
+                    });
+                } catch (Exception $e) {
+                    add_action('admin_notices', function () use ($e) {
+                        echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+                    });
+                }
+            }
+        }
+
         // Budowanie relacji NPC
         if (isset($_POST['build_npc_relations']) && wp_verify_nonce($_POST['_wpnonce'], 'build_npc_relations')) {
             $result = $npc_builder->buildAllRelations();
@@ -528,6 +638,117 @@ class GameAdminPanel
                 });
             }
         }
+
+        // Obsługa zarządzania misjami
+        if (isset($_POST['user_id'])) {
+            $user_id = intval($_POST['user_id']);
+            $mission_repo = new GameMissionRepository();
+
+            // Aktualizacja statusu misji
+            if (
+                isset($_POST['update_mission_status']) && isset($_POST['mission_id']) && isset($_POST['mission_status']) &&
+                isset($_POST['_wpnonce_mission']) && wp_verify_nonce($_POST['_wpnonce_mission'], 'update_mission')
+            ) {
+                $mission_id = intval($_POST['mission_id']);
+                $status = sanitize_text_field($_POST['mission_status']);
+
+                try {
+                    $data = [];
+                    if (isset($_POST['mission_time_limit'])) {
+                        $mission_repo->updateMissionTimeLimit($user_id, $mission_id, intval($_POST['mission_time_limit']));
+                    }
+
+                    if (isset($_POST['mission_expires_at']) && !empty($_POST['mission_expires_at'])) {
+                        $data['mission_expires_at'] = sanitize_text_field($_POST['mission_expires_at']);
+                    }
+
+                    $mission_repo->updateMissionStatus($user_id, $mission_id, $status, $data);
+
+                    add_action('admin_notices', function () {
+                        echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Status misji został zaktualizowany.</p></div>';
+                    });
+                } catch (Exception $e) {
+                    add_action('admin_notices', function () use ($e) {
+                        echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+                    });
+                }
+            }
+
+            // Aktualizacja statusu zadania
+            if (
+                isset($_POST['update_task_status']) && isset($_POST['mission_id']) && isset($_POST['task_id']) && isset($_POST['task_status']) &&
+                isset($_POST['_wpnonce_task']) && wp_verify_nonce($_POST['_wpnonce_task'], 'update_task')
+            ) {
+                $mission_id = intval($_POST['mission_id']);
+                $task_id = sanitize_text_field($_POST['task_id']);
+                $status = sanitize_text_field($_POST['task_status']);
+
+                try {
+                    $data = [];
+                    if (isset($_POST['task_attempts'])) {
+                        $data['task_attempts'] = intval($_POST['task_attempts']);
+                    }
+                    if (isset($_POST['task_wins'])) {
+                        $data['task_wins'] = intval($_POST['task_wins']);
+                    }
+                    if (isset($_POST['task_losses'])) {
+                        $data['task_losses'] = intval($_POST['task_losses']);
+                    }
+                    if (isset($_POST['task_draws'])) {
+                        $data['task_draws'] = intval($_POST['task_draws']);
+                    }
+
+                    $mission_repo->updateTaskStatus($user_id, $mission_id, $task_id, $status, $data);
+
+                    add_action('admin_notices', function () {
+                        echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> Status zadania został zaktualizowany.</p></div>';
+                    });
+                } catch (Exception $e) {
+                    add_action('admin_notices', function () use ($e) {
+                        echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+                    });
+                }
+            }
+
+            // Szybkie akcje misji
+            if (
+                isset($_POST['quick_mission_action']) && isset($_POST['mission_id']) && isset($_POST['action']) &&
+                isset($_POST['_wpnonce_quick']) && wp_verify_nonce($_POST['_wpnonce_quick'], 'quick_mission')
+            ) {
+                $mission_id = intval($_POST['mission_id']);
+                $action = sanitize_text_field($_POST['action']);
+
+                try {
+                    switch ($action) {
+                        case 'start':
+                            $mission_repo->startMission($user_id, $mission_id);
+                            $message = 'Misja została rozpoczęta.';
+                            break;
+                        case 'complete':
+                            $mission_repo->completeMission($user_id, $mission_id);
+                            $message = 'Misja została ukończona.';
+                            break;
+                        case 'reset':
+                            $mission_repo->updateMissionStatus($user_id, $mission_id, 'not_started', [
+                                'mission_started_at' => null,
+                                'mission_completed_at' => null
+                            ]);
+                            $message = 'Misja została zresetowana.';
+                            break;
+                        default:
+                            throw new Exception('Nieznana akcja.');
+                    }
+
+                    add_action('admin_notices', function () use ($message) {
+                        echo '<div class="notice notice-success is-dismissible"><p><strong>Sukces!</strong> ' . esc_html($message) . '</p></div>';
+                    });
+                } catch (Exception $e) {
+                    add_action('admin_notices', function () use ($e) {
+                        echo '<div class="notice notice-error is-dismissible"><p><strong>Błąd!</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+                    });
+                }
+            }
+        }
     }
 
     /**
@@ -612,6 +833,29 @@ class GameAdminPanel
                 'wp_data' => $wp_area,
                 'user_scenes' => $user_area_scenes ?: []
             ];
+        }
+
+        // Pobierz misje gracza
+        $mission_repo = new GameMissionRepository();
+        $user_missions = $mission_repo->getUserMissions($user_id);
+        $missions_stats = [
+            'total' => $mission_repo->countUserMissionsByStatus($user_id),
+            'active' => $mission_repo->countUserMissionsByStatus($user_id, 'in_progress'),
+            'completed' => $mission_repo->countUserMissionsByStatus($user_id, 'completed'),
+            'not_started' => $mission_repo->countUserMissionsByStatus($user_id, 'not_started')
+        ];
+
+        // Grupuj misje według mission_id
+        $missions_grouped = [];
+        foreach ($user_missions as $mission_task) {
+            $mission_id = $mission_task['mission_id'];
+            if (!isset($missions_grouped[$mission_id])) {
+                $missions_grouped[$mission_id] = [
+                    'mission_data' => $mission_task,
+                    'tasks' => []
+                ];
+            }
+            $missions_grouped[$mission_id]['tasks'][] = $mission_task;
         }
 
         include __DIR__ . '/views/user-details.php';

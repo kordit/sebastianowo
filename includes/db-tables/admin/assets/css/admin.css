@@ -1299,93 +1299,215 @@
 }
 
 /* =============================================================================
-   AREAS MANAGEMENT STYLES
+   MISSION MANAGEMENT STYLES
    ============================================================================= */
 
-/* Sekcja obszaru */
-.ga-area-section {
-    margin-bottom: 30px;
+/* Sekcja misji */
+.ga-mission-section {
     border: 1px solid #e0e0e0;
     border-radius: 8px;
+    margin-bottom: 25px;
+    background: #fff;
     overflow: hidden;
 }
 
-.ga-area-title {
-    margin: 0;
-    padding: 15px 20px;
+.ga-mission-header {
     background: #f8f9fa;
+    padding: 20px;
     border-bottom: 1px solid #e0e0e0;
-    font-size: 16px;
-    font-weight: 600;
+}
+
+.ga-mission-title {
+    margin: 0 0 10px 0;
     display: flex;
     align-items: center;
     gap: 10px;
-}
-
-.ga-area-title small {
-    color: #666;
-    font-weight: normal;
-    font-size: 12px;
-}
-
-/* Tabela obszarów */
-.ga-areas-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-}
-
-.ga-areas-table th,
-.ga-areas-table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-}
-
-.ga-areas-table th {
-    background: #f8f9fa;
+    font-size: 18px;
     font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
+}
+
+.ga-mission-description {
+    margin: 0;
     color: #666;
-    letter-spacing: 0.5px;
+    line-height: 1.5;
 }
 
-.ga-areas-table tbody tr:hover {
+.ga-mission-info {
+    padding: 15px 20px;
+    background: #f9f9f9;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Zadania misji */
+.ga-tasks-section {
+    padding: 20px;
+}
+
+.ga-tasks-section h5 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.ga-task-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    background: #fafafa;
+}
+
+.ga-task-header {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #fff;
+}
+
+.ga-task-title {
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ga-task-description {
+    margin: 0;
+    color: #666;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.ga-task-stats {
+    padding: 10px 15px;
+    display: flex;
+    gap: 20px;
     background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-.ga-areas-table input[type="checkbox"] {
-    transform: scale(1.2);
+.ga-task-form {
+    padding: 15px;
+    background: #fff;
+}
+
+.ga-task-form .ga-form-inline {
+    margin-bottom: 0;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.ga-task-form .ga-form-group {
+    min-width: auto;
+}
+
+/* Sekcja formularza misji */
+.ga-form-section {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    background: #f9f9f9;
+}
+
+.ga-form-section h5 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.ga-form-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.ga-form-actions form {
     margin: 0;
 }
 
-.ga-areas-table small {
-    color: #666;
+/* Przyciski małe */
+.ga-button--small {
+    padding: 6px 12px;
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+/* Status badges dla misji/zadań */
+.ga-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
     font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* Responsywność dla tabeli obszarów */
+.ga-badge--success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.ga-badge--warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.ga-badge--info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.ga-badge--secondary {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+/* No data message */
+.ga-no-data {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Responsywność dla misji */
 @media (max-width: 768px) {
-    .ga-areas-table {
-        font-size: 12px;
+    .ga-mission-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
     }
 
-    .ga-areas-table th,
-    .ga-areas-table td {
-        padding: 8px 10px;
+    .ga-task-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
     }
 
-    .ga-area-title {
-        padding: 12px 15px;
-        font-size: 14px;
+    .ga-task-stats {
+        flex-direction: column;
+        gap: 10px;
     }
-}
 
-.ga-form-inline {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    margin-bottom: 20px;
-    margin-left: 10px;
+    .ga-form-inline {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .ga-form-actions {
+        flex-direction: column;
+    }
+
+    .ga-form-actions form {
+        width: 100%;
+    }
+
+    .ga-button--small {
+        width: 100%;
+        text-align: center;
+    }
 }

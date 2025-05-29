@@ -620,6 +620,247 @@ $level = max(1, floor($game_user['exp'] / 100) + 1);
         </div>
     </div>
 
+    <!-- Sekcja zarządzania misjami -->
+    <div class="ga-card ga-card--warning ga-card--full">
+        <div class="ga-card__header">
+            <h3 class="ga-card__title">🎯 Zarządzanie misjami gracza</h3>
+            <div class="ga-stats">
+                <div class="ga-stat">
+                    <span class="ga-stat-label">Wszystkie misje:</span>
+                    <span class="ga-stat-value"><?php echo $missions_stats['total']; ?></span>
+                </div>
+                <div class="ga-stat">
+                    <span class="ga-stat-label">Aktywne:</span>
+                    <span class="ga-stat-value"><?php echo $missions_stats['active']; ?></span>
+                </div>
+                <div class="ga-stat">
+                    <span class="ga-stat-label">Ukończone:</span>
+                    <span class="ga-stat-value"><?php echo $missions_stats['completed']; ?></span>
+                </div>
+                <div class="ga-stat">
+                    <span class="ga-stat-label">Nie rozpoczęte:</span>
+                    <span class="ga-stat-value"><?php echo $missions_stats['not_started']; ?></span>
+                </div>
+            </div>
+        </div>
+        <div class="ga-card__content">
+            <?php if (!empty($missions_grouped)): ?>
+                <?php foreach ($missions_grouped as $mission_id => $mission_group): ?>
+                    <?php
+                    $mission = $mission_group['mission_data'];
+                    $tasks = $mission_group['tasks'];
+                    $status_class = $mission['mission_status'] === 'completed' ? 'success' : ($mission['mission_status'] === 'in_progress' ? 'warning' : 'info');
+                    ?>
+                    <div class="ga-mission-section">
+                        <div class="ga-mission-header">
+                            <h4 class="ga-mission-title">
+                                <?php echo esc_html($mission['mission_title']); ?>
+                                <span class="ga-badge ga-badge--<?php echo $status_class; ?>">
+                                    <?php echo esc_html($mission['mission_status']); ?>
+                                </span>
+                                <small>(ID: <?php echo $mission['mission_id']; ?>)</small>
+                            </h4>
+                            <p class="ga-mission-description">
+                                <?php echo esc_html(wp_trim_words($mission['mission_description'], 20)); ?>
+                            </p>
+                        </div>
+
+                        <!-- Informacje o misji -->
+                        <div class="ga-mission-info">
+                            <div class="ga-form-inline">
+                                <div class="ga-form-group">
+                                    <label>Typ misji:</label>
+                                    <span class="ga-badge ga-badge--info"><?php echo esc_html($mission['mission_type']); ?></span>
+                                </div>
+                                <div class="ga-form-group">
+                                    <label>Limit czasu (godziny):</label>
+                                    <span><?php echo $mission['mission_time_limit'] ?: 'Brak'; ?></span>
+                                </div>
+                                <?php if ($mission['mission_started_at']): ?>
+                                    <div class="ga-form-group">
+                                        <label>Rozpoczęta:</label>
+                                        <span><?php echo date('d.m.Y H:i', strtotime($mission['mission_started_at'])); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if ($mission['mission_expires_at']): ?>
+                                    <div class="ga-form-group">
+                                        <label>Wygasa:</label>
+                                        <span><?php echo date('d.m.Y H:i', strtotime($mission['mission_expires_at'])); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <!-- Edycja misji -->
+                        <div class="ga-form-section">
+                            <h5>Edycja misji</h5>
+                            <form method="post" action="" class="ga-form-inline">
+                                <?php wp_nonce_field('update_mission', '_wpnonce_mission'); ?>
+                                <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                                <input type="hidden" name="mission_id" value="<?php echo $mission['mission_id']; ?>">
+
+                                <div class="ga-form-group">
+                                    <label>Status misji:</label>
+                                    <select name="mission_status" class="ga-form-select">
+                                        <option value="not_started" <?php selected($mission['mission_status'], 'not_started'); ?>>Nie rozpoczęta</option>
+                                        <option value="in_progress" <?php selected($mission['mission_status'], 'in_progress'); ?>>W trakcie</option>
+                                        <option value="completed" <?php selected($mission['mission_status'], 'completed'); ?>>Ukończona</option>
+                                        <option value="failed" <?php selected($mission['mission_status'], 'failed'); ?>>Nieudana</option>
+                                        <option value="expired" <?php selected($mission['mission_status'], 'expired'); ?>>Wygasła</option>
+                                    </select>
+                                </div>
+
+                                <div class="ga-form-group">
+                                    <label>Limit czasu (godz):</label>
+                                    <input type="number" name="mission_time_limit" value="<?php echo esc_attr($mission['mission_time_limit']); ?>" min="0" class="ga-form-control ga-form-control--small">
+                                </div>
+
+                                <div class="ga-form-group">
+                                    <label>Data wygaśnięcia:</label>
+                                    <input type="datetime-local" name="mission_expires_at"
+                                        value="<?php echo $mission['mission_expires_at'] ? date('Y-m-d\TH:i', strtotime($mission['mission_expires_at'])) : ''; ?>"
+                                        class="ga-form-control">
+                                </div>
+
+                                <button type="submit" name="update_mission_status" class="ga-button ga-button--primary">
+                                    💾 Zapisz misję
+                                </button>
+                            </form>
+
+                            <!-- Szybkie akcje -->
+                            <div class="ga-form-actions">
+                                <form method="post" action="" style="display: inline;">
+                                    <?php wp_nonce_field('quick_mission', '_wpnonce_quick'); ?>
+                                    <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                                    <input type="hidden" name="mission_id" value="<?php echo $mission['mission_id']; ?>">
+                                    <input type="hidden" name="action" value="start">
+                                    <button type="submit" name="quick_mission_action" class="ga-button ga-button--success ga-button--small">
+                                        ▶️ Rozpocznij
+                                    </button>
+                                </form>
+
+                                <form method="post" action="" style="display: inline;">
+                                    <?php wp_nonce_field('quick_mission', '_wpnonce_quick'); ?>
+                                    <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                                    <input type="hidden" name="mission_id" value="<?php echo $mission['mission_id']; ?>">
+                                    <input type="hidden" name="action" value="complete">
+                                    <button type="submit" name="quick_mission_action" class="ga-button ga-button--warning ga-button--small">
+                                        ✅ Ukończ
+                                    </button>
+                                </form>
+
+                                <form method="post" action="" style="display: inline;">
+                                    <?php wp_nonce_field('quick_mission', '_wpnonce_quick'); ?>
+                                    <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                                    <input type="hidden" name="mission_id" value="<?php echo $mission['mission_id']; ?>">
+                                    <input type="hidden" name="action" value="reset">
+                                    <button type="submit" name="quick_mission_action" class="ga-button ga-button--secondary ga-button--small">
+                                        🔄 Resetuj
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Zadania misji -->
+                        <div class="ga-tasks-section">
+                            <h5>Zadania misji (<?php echo count($tasks); ?>)</h5>
+                            <?php foreach ($tasks as $task): ?>
+                                <?php
+                                $task_status_class = $task['task_status'] === 'completed' ? 'success' : ($task['task_status'] === 'in_progress' ? 'warning' : 'info');
+                                ?>
+                                <div class="ga-task-item">
+                                    <div class="ga-task-header">
+                                        <h6 class="ga-task-title">
+                                            <?php echo esc_html($task['task_title']); ?>
+                                            <span class="ga-badge ga-badge--<?php echo $task_status_class; ?>">
+                                                <?php echo esc_html($task['task_status']); ?>
+                                            </span>
+                                            <?php if ($task['task_optional']): ?>
+                                                <span class="ga-badge ga-badge--secondary">Opcjonalne</span>
+                                            <?php endif; ?>
+                                        </h6>
+                                        <p class="ga-task-description">
+                                            <?php echo esc_html($task['task_description']); ?>
+                                        </p>
+                                    </div>
+
+                                    <div class="ga-task-stats">
+                                        <div class="ga-stat">
+                                            <span class="ga-stat-label">Próby:</span>
+                                            <span class="ga-stat-value"><?php echo $task['task_attempts']; ?></span>
+                                        </div>
+                                        <?php if ($task['task_type'] === 'defeat_enemies'): ?>
+                                            <div class="ga-stat">
+                                                <span class="ga-stat-label">Wygrane:</span>
+                                                <span class="ga-stat-value"><?php echo $task['task_wins']; ?></span>
+                                            </div>
+                                            <div class="ga-stat">
+                                                <span class="ga-stat-label">Przegrane:</span>
+                                                <span class="ga-stat-value"><?php echo $task['task_losses']; ?></span>
+                                            </div>
+                                            <div class="ga-stat">
+                                                <span class="ga-stat-label">Remisy:</span>
+                                                <span class="ga-stat-value"><?php echo $task['task_draws']; ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- Edycja zadania -->
+                                    <form method="post" action="" class="ga-task-form">
+                                        <?php wp_nonce_field('update_task', '_wpnonce_task'); ?>
+                                        <input type="hidden" name="user_id" value="<?php echo $game_user['user_id']; ?>">
+                                        <input type="hidden" name="mission_id" value="<?php echo $task['mission_id']; ?>">
+                                        <input type="hidden" name="task_id" value="<?php echo esc_attr($task['task_id']); ?>">
+
+                                        <div class="ga-form-inline">
+                                            <div class="ga-form-group">
+                                                <label>Status:</label>
+                                                <select name="task_status" class="ga-form-select">
+                                                    <option value="not_started" <?php selected($task['task_status'], 'not_started'); ?>>Nie rozpoczęte</option>
+                                                    <option value="in_progress" <?php selected($task['task_status'], 'in_progress'); ?>>W trakcie</option>
+                                                    <option value="completed" <?php selected($task['task_status'], 'completed'); ?>>Ukończone</option>
+                                                    <option value="failed" <?php selected($task['task_status'], 'failed'); ?>>Nieudane</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="ga-form-group">
+                                                <label>Próby:</label>
+                                                <input type="number" name="task_attempts" value="<?php echo esc_attr($task['task_attempts']); ?>" min="0" class="ga-form-control ga-form-control--small">
+                                            </div>
+
+                                            <?php if ($task['task_type'] === 'defeat_enemies'): ?>
+                                                <div class="ga-form-group">
+                                                    <label>Wygrane:</label>
+                                                    <input type="number" name="task_wins" value="<?php echo esc_attr($task['task_wins']); ?>" min="0" class="ga-form-control ga-form-control--small">
+                                                </div>
+
+                                                <div class="ga-form-group">
+                                                    <label>Przegrane:</label>
+                                                    <input type="number" name="task_losses" value="<?php echo esc_attr($task['task_losses']); ?>" min="0" class="ga-form-control ga-form-control--small">
+                                                </div>
+
+                                                <div class="ga-form-group">
+                                                    <label>Remisy:</label>
+                                                    <input type="number" name="task_draws" value="<?php echo esc_attr($task['task_draws']); ?>" min="0" class="ga-form-control ga-form-control--small">
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <button type="submit" name="update_task_status" class="ga-button ga-button--primary ga-button--small">
+                                                💾 Zapisz zadanie
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="ga-no-data">Ten gracz nie ma jeszcze przypisanych misji.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <!-- Sekcja nawigacji -->
     <div class="ga-card-actions">
         <a href="<?php echo admin_url('admin.php?page=game-users'); ?>"

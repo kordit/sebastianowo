@@ -19,6 +19,7 @@ spl_autoload_register(function ($class_name) {
         'GameAreaRepository' => 'repositories/GameAreaRepository.php',
         'GameFightTokenRepository' => 'repositories/GameFightTokenRepository.php',
         'GameNPCRelationRepository' => 'repositories/GameNPCRelationRepository.php',
+        'GameMissionRepository' => 'repositories/GameMissionRepository.php',
         'GameUserSyncService' => 'services/GameUserSyncService.php',
         'DeltaUpdater' => 'services/DeltaUpdater.php',
         'MigrationService' => 'services/MigrationService.php',
