@@ -17,13 +17,9 @@ spl_autoload_register(function ($class_name) {
         'GameUserRepository' => 'repositories/GameUserRepository.php',
         'GameUserItemRepository' => 'repositories/GameUserItemRepository.php',
         'GameAreaRepository' => 'repositories/GameAreaRepository.php',
-        'GameFightTokenRepository' => 'repositories/GameFightTokenRepository.php',
         'GameNPCRelationRepository' => 'repositories/GameNPCRelationRepository.php',
         'GameMissionRepository' => 'repositories/GameMissionRepository.php',
         'GameUserSyncService' => 'services/GameUserSyncService.php',
-        'DeltaUpdater' => 'services/DeltaUpdater.php',
-        'MigrationService' => 'services/MigrationService.php',
-        'MissionManager' => 'services/MissionManager.php',
         'AreaBuilder' => 'builders/AreaBuilder.php',
         'EventsBuilder' => 'builders/EventsBuilder.php',
         'MissionBuilder' => 'builders/MissionBuilder.php',
@@ -35,6 +31,8 @@ spl_autoload_register(function ($class_name) {
         $file = $base_dir . $class_map[$class_name];
         if (file_exists($file)) {
             require_once $file;
+        } else {
+            echo "Class file for $class_name not found: $file";
         }
     }
 });
