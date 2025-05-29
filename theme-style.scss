@@ -159,6 +159,14 @@ body {
     &.author,
     &.template-zadania,
     &.template-backpack {
+        .container-world {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: -1;
+        }
+
         .game-content {
             background-image: url(/wp-content/uploads/2025/04/New-Project-2.jpg);
             background-size: cover;
@@ -361,7 +369,7 @@ html {
     overflow: auto;
 
     &--inner {
-        width: calc(85vw - 40px);
+        width: calc(100vw - 300px);
         margin-left: auto;
         margin-right: 20px;
         margin-top: 130px;
@@ -377,111 +385,6 @@ html {
 
 .game-content--inner:empty {
     display: none;
-}
-
-aside {
-    position: absolute;
-    z-index: 4;
-    background-image: url(/wp-content/themes/game/assets/images/png/sidebar.png);
-    padding: 20px 10px 10px;
-    left: 20px;
-    top: 20px;
-    border: solid 5px #000;
-    width: calc(15vw - 20px);
-    min-width: 180px;
-
-    @media only screen and (max-width: 991px) {
-        left: 0px;
-    }
-
-    .bar-game {
-        width: 100%;
-        max-width: 300px;
-        height: 15px;
-        background: #444;
-        position: relative;
-        overflow: hidden;
-        text-align: center;
-        font-size: 14px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        padding: 7px;
-        justify-content: center;
-        border: solid 2px #333;
-    }
-
-    .bar {
-        height: 100%;
-        width: 0%;
-        transition: width 0.3s ease-in-out;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 1;
-    }
-
-    .bar-value {
-        font-size: 11px;
-        position: relative;
-        z-index: 2;
-    }
-
-    .icons {
-        margin-top: 20px;
-        display: flex;
-        gap: 5px 20px;
-        flex-wrap: wrap;
-        justify-content: center;
-
-        a {
-            display: flex;
-            flex-direction: column;
-            font-size: 10px;
-            font-weight: bold;
-            color: #000;
-            text-decoration: none;
-            opacity: .5;
-            transition: opacity .5s;
-            align-items: center;
-
-            &:hover {
-                opacity: 1;
-            }
-        }
-
-        img {
-            width: 30px;
-            height: 30px;
-            margin-bottom: 5px;
-        }
-    }
-
-    #get-user-id {
-        text-align: center;
-    }
-
-
-    &:before {
-        content: " ";
-        background-image: url(/wp-content/themes/game/assets/images/png/pin.png);
-        position: absolute;
-        top: 0px;
-        left: 50%;
-        width: 90px;
-        height: 40px;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: bottom;
-        transform: translate(-50%, -70%);
-        filter: invert(1);
-    }
-
-    .content-sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
 }
 
 header {
@@ -890,4 +793,194 @@ ul.tabs-nav {
 
 .subtypes-nav {
     margin-bottom: 30px;
+}
+
+/* ==========================================
+   MINIMALISTYCZNY SIDEBAR GAMY
+   ========================================== */
+
+.game-sidebar {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 240px;
+    background: var(--c4);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    z-index: 1000;
+    padding: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    font-family: var(--fs);
+}
+
+/* Avatar i dane użytkownika */
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 0 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 15px;
+}
+
+.user-avatar {
+    position: relative;
+}
+
+.avatar-img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    object-fit: cover;
+    object-position: top;
+}
+
+.user-info {
+    flex: 1;
+    color: #fff;
+}
+
+.user-nick {
+    font-family: var(--ff);
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 3px;
+    letter-spacing: 0.5px;
+}
+
+.user-respect {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 400;
+}
+
+/* Paski zdrowia i energii */
+.sidebar-vitals {
+    margin-bottom: 15px;
+}
+
+.vital-bar {
+    margin-bottom: 10px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.vital-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.vital-values {
+    font-family: var(--fs);
+    font-size: 9px;
+    opacity: 0.7;
+}
+
+.vital-progress {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vital-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: 3px;
+}
+
+.health-fill {
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.energy-fill {
+    background: linear-gradient(90deg, #f39c12, #e67e22);
+}
+
+/* Nawigacja */
+.sidebar-navigation {
+    justify-content: space-around;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 400;
+    font-size: 12px;
+    flex-direction: column;
+    text-transform: uppercase;
+    font-weight: 700;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+    }
+}
+
+.nav-icon {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    filter: brightness(0.7);
+}
+
+.nav-item:hover .nav-icon {
+    filter: brightness(1);
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+    .game-sidebar {
+        position: static;
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+        padding: 10px;
+
+        .sidebar-user {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-vitals {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-navigation {
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 8px;
+
+            .nav-item {
+                padding: 6px 10px;
+                font-size: 11px;
+
+                span {
+                    display: none;
+                }
+            }
+        }
+    }
 }

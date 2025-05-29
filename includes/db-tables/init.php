@@ -14,6 +14,7 @@ spl_autoload_register(function ($class_name) {
     $base_dir = __DIR__ . '/';
     $class_map = [
         'GameDatabaseManager' => 'core/GameDatabaseManager.php',
+        'GameResourceManager' => 'core/GameResourceManager.php',
         'GameUserRepository' => 'repositories/GameUserRepository.php',
         'GameUserItemRepository' => 'repositories/GameUserItemRepository.php',
         'GameAreaRepository' => 'repositories/GameAreaRepository.php',
