@@ -115,7 +115,6 @@ class NPC_ConditionManager
             'user_class' => 'Klasa gracza',
             'user_item' => 'Przedmiot gracza',
             'user_mission' => 'Misja gracza',
-            'quest_completed' => 'Ukończone zadanie (Legacy)',
             'user_stat' => 'Statystyka gracza'
         ];
 
@@ -150,16 +149,21 @@ class NPC_ConditionManager
                 <?php self::render_value_field($type, $value); ?>
             </div>
 
-            <!-- Pole dodatkowe (dla umiejętności) -->
-            <div class="field-group field-group-extra" style="<?php echo in_array($type, ['user_stat', 'user_skill']) ? '' : 'display: none;'; ?>">
-                <label><?php echo $type === 'user_skill' ? 'Nazwa umiejętności:' : 'Nazwa statystyki:'; ?></label>
+            <!-- Pole dodatkowe -->
+            <div class="field-group field-group-extra" style="<?php echo in_array($type, ['user_stat', 'user_skill', 'user_item']) ? '' : 'display: none;'; ?>">
                 <?php if ($type === 'user_skill'): ?>
-                    <select class="condition-field">
+                    <label>Nazwa umiejętności:</label>
+                    <select class="condition-field skill-select">
                         <?php self::render_skill_options($field); ?>
                     </select>
-                <?php else: ?>
-                    <input type="text" class="condition-field" value="<?php echo esc_attr($field); ?>"
-                        placeholder="np. strength, agility">
+                <?php elseif ($type === 'user_stat'): ?>
+                    <label>Nazwa statystyki:</label>
+                    <select class="condition-field stat-select">
+                        <?php self::render_stat_options($field); ?>
+                    </select>
+                <?php elseif ($type === 'user_item'): ?>
+                    <label>Liczba sztuk:</label>
+                    <input type="number" class="condition-field item-amount" value="<?php echo esc_attr($field); ?>" min="0" placeholder="Liczba sztuk">
                 <?php endif; ?>
             </div>
 
@@ -194,11 +198,14 @@ class NPC_ConditionManager
 
             <!-- Pole dodatkowe -->
             <div class="field-group field-group-extra" style="display: none;">
-                <label>Nazwa umiejętności/statystyki:</label>
+                <label>Dodatkowe pole:</label>
                 <select class="condition-field skill-select" style="display: none;">
                     <?php self::render_skill_options(); ?>
                 </select>
-                <input type="text" class="condition-field text-input" placeholder="np. strength, agility">
+                <select class="condition-field stat-select" style="display: none;">
+                    <?php self::render_stat_options(); ?>
+                </select>
+                <input type="number" class="condition-field item-amount" style="display: none;" min="0" placeholder="Liczba sztuk">
             </div>
 
             <!-- Opis warunku -->
@@ -240,7 +247,13 @@ class NPC_ConditionManager
             case 'user_item':
                 $operators = [
                     'has' => 'posiada',
-                    'not_has' => 'nie posiada'
+                    'not_has' => 'nie posiada',
+                    '==' => 'ma dokładnie',
+                    '!=' => 'nie ma dokładnie',
+                    '>' => 'ma więcej niż',
+                    '>=' => 'ma co najmniej',
+                    '<' => 'ma mniej niż',
+                    '<=' => 'ma co najwyżej'
                 ];
                 break;
 
@@ -251,13 +264,6 @@ class NPC_ConditionManager
                     'completed' => 'ukończona',
                     'failed' => 'nieudana',
                     'expired' => 'wygasła'
-                ];
-                break;
-
-            case 'quest_completed':
-                $operators = [
-                    'completed' => 'ukończone',
-                    'not_completed' => 'nie ukończone'
                 ];
                 break;
 
@@ -281,9 +287,15 @@ class NPC_ConditionManager
     {
         switch ($type) {
             case 'user_level':
+                echo "<input type=\"number\" class=\"condition-value\" value=\"" . esc_attr($value) . "\" min=\"0\" placeholder=\"Poziom gracza\">";
+                break;
+
             case 'user_stat':
+                echo "<input type=\"number\" class=\"condition-value\" value=\"" . esc_attr($value) . "\" min=\"0\" placeholder=\"Wartość statystyki\">";
+                break;
+
             case 'user_skill':
-                echo "<input type=\"number\" class=\"condition-value\" value=\"" . esc_attr($value) . "\" min=\"0\">";
+                echo "<input type=\"number\" class=\"condition-value\" value=\"" . esc_attr($value) . "\" min=\"0\" placeholder=\"Poziom umiejętności\">";
                 break;
 
             case 'user_class':
@@ -293,15 +305,15 @@ class NPC_ConditionManager
                 break;
 
             case 'user_item':
-                echo "<input type=\"text\" class=\"condition-value\" value=\"" . esc_attr($value) . "\" placeholder=\"ID przedmiotu\">";
+                echo "<select class=\"condition-value\">";
+                self::render_item_options($value);
+                echo "</select>";
                 break;
 
             case 'user_mission':
-                echo "<input type=\"number\" class=\"condition-value\" value=\"" . esc_attr($value) . "\" placeholder=\"ID misji\" min=\"1\">";
-                break;
-
-            case 'quest_completed':
-                echo "<input type=\"text\" class=\"condition-value\" value=\"" . esc_attr($value) . "\" placeholder=\"ID zadania\">";
+                echo "<select class=\"condition-value\">";
+                self::render_mission_options($value);
+                echo "</select>";
                 break;
 
             default:
@@ -337,10 +349,9 @@ class NPC_ConditionManager
     {
         $classes = [
             '' => 'Wybierz klasę...',
-            'wojownik' => 'Wojownik',
-            'handlarz' => 'Handlarz',
-            'zlodziej' => 'Złodziej',
-            'dyplomata' => 'Dyplomata'
+            'zadymiarz' => '🔥 Zadymiarz',
+            'zawijacz' => '💨 Zawijacz',
+            'kombinator' => '⚡ Kombinator'
         ];
 
         foreach ($classes as $value => $label) {
@@ -350,18 +361,84 @@ class NPC_ConditionManager
     }
 
     /**
+     * Renderuje opcje statystyk gracza
+     */
+    private static function render_stat_options($selected = '')
+    {
+        $stats = [
+            '' => 'Wybierz statystykę...',
+            'strength' => 'Siła',
+            'defense' => 'Obrona',
+            'dexterity' => 'Zręczność',
+            'perception' => 'Percepcja',
+            'technical' => 'Technika',
+            'charisma' => 'Charyzma'
+        ];
+
+        foreach ($stats as $value => $label) {
+            $selected_attr = selected($selected, $value, false);
+            echo "<option value=\"{$value}\" {$selected_attr}>{$label}</option>";
+        }
+    }
+
+    /**
+     * Renderuje opcje przedmiotów z CPT items
+     */
+    private static function render_item_options($selected = '')
+    {
+        // Spróbujmy alternatywną metodę pobierania postów
+        global $wpdb;
+
+        $items = $wpdb->get_results(
+            "SELECT ID, post_title FROM {$wpdb->posts} 
+             WHERE post_type = 'item' AND post_status = 'publish'
+             ORDER BY post_title ASC"
+        );
+
+        // Dodajmy debugowanie
+        echo '<option value="">Wybierz przedmiot... (' . count($items) . ' znaleziono)</option>';
+
+        foreach ($items as $item) {
+            $selected_attr = selected($selected, $item->ID, false);
+            echo "<option value=\"{$item->ID}\" {$selected_attr}>{$item->post_title}</option>";
+        }
+    }
+
+    /**
+     * Renderuje opcje misji z tabeli game_user_mission_tasks
+     */
+    private static function render_mission_options($selected = '')
+    {
+        global $wpdb;
+
+        $missions = $wpdb->get_results(
+            "SELECT DISTINCT mission_id, mission_title 
+             FROM {$wpdb->prefix}game_user_mission_tasks 
+             WHERE mission_title != '' 
+             ORDER BY mission_title ASC"
+        );
+
+        echo '<option value="">Wybierz misję...</option>';
+
+        foreach ($missions as $mission) {
+            $selected_attr = selected($selected, $mission->mission_id, false);
+            $title = esc_html($mission->mission_title);
+            echo "<option value=\"{$mission->mission_id}\" {$selected_attr}>{$title}</option>";
+        }
+    }
+
+    /**
      * Zwraca opis dla typu warunku
      */
     public static function get_condition_descriptions()
     {
         return [
-            'user_level' => 'Sprawdza poziom gracza. Użyj liczby całkowitej.',
-            'user_skill' => 'Sprawdza poziom umiejętności gracza (walka, kradzież, handel, itp.). Użyj liczby całkowitej.',
-            'user_class' => 'Sprawdza klasę gracza. Wybierz z dostępnych opcji.',
-            'user_item' => 'Sprawdza czy gracz posiada określony przedmiot. Użyj ID przedmiotu.',
-            'user_mission' => 'Sprawdza status misji gracza. Użyj ID misji.',
-            'quest_completed' => '[LEGACY] Sprawdza czy zadanie zostało ukończone. Użyj ID zadania.',
-            'user_stat' => 'Sprawdza statystykę gracza (np. siła, zręczność). Podaj nazwę statystyki.'
+            'user_level' => 'Sprawdza poziom gracza. Podaj wymaganą wartość.',
+            'user_skill' => 'Sprawdza poziom wybranej umiejętności gracza. Wybierz umiejętność i podaj wymaganą wartość.',
+            'user_class' => 'Sprawdza klasę gracza. Wybierz klasę z listy.',
+            'user_item' => 'Sprawdza czy gracz posiada przedmiot. Wybierz przedmiot i określ liczbę sztuk.',
+            'user_mission' => 'Sprawdza status misji gracza. Wybierz misję i wymagany status.',
+            'user_stat' => 'Sprawdza wybraną statystykę gracza. Wybierz statystykę i podaj wymaganą wartość.'
         ];
     }
 
@@ -405,9 +482,18 @@ class NPC_ConditionManager
                 'value' => sanitize_text_field($condition['value'] ?? ''),
             ];
 
-            // Dodaj pole field dla user_stat i user_skill
+            // Dodaj pole field dla różnych typów warunków
             if (in_array($condition['type'], ['user_stat', 'user_skill']) && !empty($condition['field'])) {
                 $sanitized_condition['field'] = sanitize_text_field($condition['field']);
+            }
+
+            // Dla przedmiotów dodaj liczbę sztuk jako field
+            if (
+                $condition['type'] === 'user_item' &&
+                !in_array($condition['operator'], ['has', 'not_has']) &&
+                isset($condition['field'])
+            ) {
+                $sanitized_condition['field'] = absint($condition['field']);
             }
 
             $sanitized_conditions[] = $sanitized_condition;
@@ -512,13 +598,22 @@ class NPC_ConditionManager
                 return self::compare_values($user_value, $operator, (int) $value);
 
             case 'user_item':
-                $has_item = $wpdb->get_var($wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$wpdb->prefix}game_user_items 
-                     WHERE user_id = %d AND item_id = %d AND amount > 0",
+                $item_amount = $wpdb->get_var($wpdb->prepare(
+                    "SELECT amount FROM {$wpdb->prefix}game_user_items 
+                     WHERE user_id = %d AND item_id = %d",
                     $user_id,
                     (int) $value
-                )) > 0;
-                return ($operator === 'has') ? $has_item : !$has_item;
+                )) ?: 0;
+
+                // Sprawdź czy operator to has/not_has czy numeryczny
+                if (in_array($operator, ['has', 'not_has'])) {
+                    $has_item = $item_amount > 0;
+                    return ($operator === 'has') ? $has_item : !$has_item;
+                } else {
+                    // Dla numerycznych operatorów użyj field jako liczby sztuk
+                    $required_amount = (int) $field;
+                    return self::compare_values($item_amount, $operator, $required_amount);
+                }
 
             case 'user_mission':
                 $mission_status = $wpdb->get_var($wpdb->prepare(
@@ -534,19 +629,6 @@ class NPC_ConditionManager
                 }
 
                 return $mission_status === $operator;
-
-            case 'quest_completed':
-                // Legacy support - mapuj na user_mission
-                $mission_status = $wpdb->get_var($wpdb->prepare(
-                    "SELECT mission_status FROM {$wpdb->prefix}game_user_mission_tasks 
-                     WHERE user_id = %d AND mission_id = %d 
-                     ORDER BY created_at DESC LIMIT 1",
-                    $user_id,
-                    (int) $value
-                ));
-
-                $is_completed = ($mission_status === 'completed');
-                return ($operator === 'completed') ? $is_completed : !$is_completed;
 
             default:
                 return true;

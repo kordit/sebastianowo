@@ -27,6 +27,8 @@ class NPC_AdminPanel
         add_action('wp_ajax_npc_get_answer', [$this, 'ajax_get_answer']);
         add_action('wp_ajax_npc_update_dialog_order', [$this, 'ajax_update_dialog_order']);
         add_action('wp_ajax_npc_update_answer_order', [$this, 'ajax_update_answer_order']);
+        add_action('wp_ajax_npc_get_items', [$this, 'ajax_get_items']);
+        add_action('wp_ajax_npc_get_missions', [$this, 'ajax_get_missions']);
     }
 
     /**
@@ -493,5 +495,70 @@ class NPC_AdminPanel
         } else {
             wp_send_json_error('Wystąpił błąd podczas aktualizacji kolejności odpowiedzi');
         }
+    }
+
+    /**
+     * AJAX endpoint dla pobierania przedmiotów z CPT items
+     */
+    public function ajax_get_items()
+    {
+        if (!wp_verify_nonce($_POST['nonce'], 'npc_admin_nonce')) {
+            wp_send_json_error('Nieprawidłowy nonce');
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Brak uprawnień');
+        }
+
+        global $wpdb;
+
+        $items = $wpdb->get_results(
+            "SELECT ID, post_title FROM {$wpdb->posts} 
+             WHERE post_type = 'item' AND post_status = 'publish'
+             ORDER BY post_title ASC"
+        );
+
+        $items_data = [];
+        foreach ($items as $item) {
+            $items_data[] = [
+                'id' => $item->ID,
+                'title' => $item->post_title
+            ];
+        }
+
+        wp_send_json_success($items_data);
+    }
+
+    /**
+     * AJAX endpoint dla pobierania misji z tabeli game_user_mission_tasks
+     */
+    public function ajax_get_missions()
+    {
+        if (!wp_verify_nonce($_POST['nonce'], 'npc_admin_nonce')) {
+            wp_send_json_error('Nieprawidłowy nonce');
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Brak uprawnień');
+        }
+
+        global $wpdb;
+
+        $missions = $wpdb->get_results(
+            "SELECT DISTINCT mission_id, mission_title 
+             FROM {$wpdb->prefix}game_user_mission_tasks 
+             WHERE mission_title != '' 
+             ORDER BY mission_title ASC"
+        );
+
+        $missions_data = [];
+        foreach ($missions as $mission) {
+            $missions_data[] = [
+                'id' => $mission->mission_id,
+                'title' => $mission->mission_title
+            ];
+        }
+
+        wp_send_json_success($missions_data);
     }
 }

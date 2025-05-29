@@ -10,13 +10,12 @@
         constructor() {
             this.conditionIndex = 0;
             this.conditionDescriptions = {
-                'user_level': 'Sprawdza poziom gracza. Użyj liczby całkowitej.',
-                'user_skill': 'Sprawdza poziom umiejętności gracza (walka, kradzież, handel, itp.). Użyj liczby całkowitej.',
-                'user_class': 'Sprawdza klasę gracza. Wybierz z dostępnych opcji.',
-                'user_item': 'Sprawdza czy gracz posiada określony przedmiot. Użyj ID przedmiotu.',
-                'user_mission': 'Sprawdza status misji gracza. Użyj ID misji.',
-                'quest_completed': '[LEGACY] Sprawdza czy zadanie zostało ukończone. Użyj ID zadania.',
-                'user_stat': 'Sprawdza statystykę gracza (np. siła, zręczność). Podaj nazwę statystyki.'
+                'user_level': 'Sprawdza poziom gracza. Podaj wymaganą wartość.',
+                'user_skill': 'Sprawdza poziom wybranej umiejętności gracza. Wybierz umiejętność i podaj wymaganą wartość.',
+                'user_class': 'Sprawdza klasę gracza. Wybierz klasę z listy.',
+                'user_item': 'Sprawdza czy gracz posiada przedmiot. Wybierz przedmiot i określ liczbę sztuk.',
+                'user_mission': 'Sprawdza status misji gracza. Wybierz misję i wymagany status.',
+                'user_stat': 'Sprawdza wybraną statystykę gracza. Wybierz statystykę i podaj wymaganą wartość.'
             };
 
             this.operatorsByType = {
@@ -50,7 +49,13 @@
                 },
                 'user_item': {
                     'has': 'posiada',
-                    'not_has': 'nie posiada'
+                    'not_has': 'nie posiada',
+                    '==': 'ma dokładnie',
+                    '!=': 'nie ma dokładnie',
+                    '>': 'ma więcej niż',
+                    '>=': 'ma co najmniej',
+                    '<': 'ma mniej niż',
+                    '<=': 'ma co najwyżej'
                 },
                 'user_mission': {
                     'not_started': 'nie rozpoczęta',
@@ -58,10 +63,6 @@
                     'completed': 'ukończona',
                     'failed': 'nieudana',
                     'expired': 'wygasła'
-                },
-                'quest_completed': {
-                    'completed': 'ukończone',
-                    'not_completed': 'nie ukończone'
                 }
             };
 
@@ -170,22 +171,39 @@
                 // Aktualizuj pole wartości
                 this.updateValueField($fields.find('.condition-value'), type);
 
-                // Pokaż pole dodatkowe dla user_stat i user_skill
-                if (type === 'user_stat' || type === 'user_skill') {
-                    $extraGroup.show();
+                // Pokaż odpowiednie pole dodatkowe w zależności od typu
+                $extraGroup.hide();
+                $extraGroup.find('.skill-select, .stat-select, .item-amount').hide();
 
-                    // Pokaż odpowiednie pole - select dla user_skill, input dla user_stat
-                    if (type === 'user_skill') {
-                        $extraGroup.find('.skill-select').show();
-                        $extraGroup.find('.text-input').hide();
-                        $extraGroup.find('label').text('Nazwa umiejętności:');
-                    } else {
-                        $extraGroup.find('.skill-select').hide();
-                        $extraGroup.find('.text-input').show();
-                        $extraGroup.find('label').text('Nazwa statystyki:');
+                if (type === 'user_skill') {
+                    $extraGroup.show();
+                    $extraGroup.find('.skill-select').show();
+                    $extraGroup.find('label').text('Nazwa umiejętności:');
+                }
+                else if (type === 'user_stat') {
+                    $extraGroup.show();
+                    $extraGroup.find('.stat-select').show();
+                    $extraGroup.find('label').text('Nazwa statystyki:');
+                }
+                else if (type === 'user_item') {
+                    const operator = $fields.find('.condition-operator').val();
+                    if (operator && !['has', 'not_has'].includes(operator)) {
+                        $extraGroup.show();
+                        $extraGroup.find('.item-amount').show();
+                        $extraGroup.find('label').text('Liczba sztuk:');
                     }
-                } else {
-                    $extraGroup.hide();
+
+                    // Aktualizuj widoczność pola liczby sztuk przy zmianie operatora
+                    $fields.find('.condition-operator').off('change.item-amount').on('change.item-amount', function () {
+                        const op = $(this).val();
+                        if (!['has', 'not_has'].includes(op)) {
+                            $extraGroup.show();
+                            $extraGroup.find('.item-amount').show();
+                            $extraGroup.find('label').text('Liczba sztuk:');
+                        } else {
+                            $extraGroup.hide();
+                        }
+                    });
                 }
 
                 // Aktualizuj opis
@@ -228,23 +246,92 @@
                 case 'user_class':
                     newField = '<select class="condition-value">' +
                         '<option value="">Wybierz klasę...</option>' +
-                        '<option value="wojownik">Wojownik</option>' +
-                        '<option value="handlarz">Handlarz</option>' +
-                        '<option value="zlodziej">Złodziej</option>' +
-                        '<option value="dyplomata">Dyplomata</option>' +
+                        '<option value="zadymiarz">🔥 Zadymiarz</option>' +
+                        '<option value="zawijacz">💨 Zawijacz</option>' +
+                        '<option value="kombinator">⚡ Kombinator</option>' +
                         '</select>';
                     break;
 
                 case 'user_item':
-                    newField = '<input type="text" class="condition-value" placeholder="ID przedmiotu">';
+                    // Pobierz dostępne przedmioty przez AJAX jeśli nie mamy ich jeszcze w cache
+                    if (!this.itemOptions) {
+                        newField = '<select class="condition-value"><option value="">Ładowanie przedmiotów...</option></select>';
+
+                        // W prawdziwej implementacji, tutaj powinno być wywołanie AJAX
+                        // Na potrzeby tego przykładu używamy setTimeout
+                        const $select = $(newField);
+                        $parent.append($select);
+
+                        setTimeout(() => {
+                            $.post(npcAdmin.ajax_url, {
+                                action: 'npc_get_items',
+                                nonce: npcAdmin.nonce
+                            }).done((response) => {
+                                if (response.success && response.data) {
+                                    this.itemOptions = response.data;
+                                    $select.empty().append('<option value="">Wybierz przedmiot...</option>');
+
+                                    response.data.forEach(item => {
+                                        $select.append(`<option value="${item.id}">${item.title}</option>`);
+                                    });
+                                } else {
+                                    $select.html('<option value="">Błąd ładowania przedmiotów</option>');
+                                }
+                            }).fail(() => {
+                                $select.html('<option value="">Błąd ładowania przedmiotów</option>');
+                            });
+                        }, 0);
+
+                        return;
+                    } else {
+                        newField = '<select class="condition-value"><option value="">Wybierz przedmiot...</option>';
+
+                        this.itemOptions.forEach(item => {
+                            newField += `<option value="${item.id}">${item.title}</option>`;
+                        });
+
+                        newField += '</select>';
+                    }
                     break;
 
                 case 'user_mission':
-                    newField = '<input type="number" class="condition-value" placeholder="ID misji" min="1">';
-                    break;
+                    // Podobnie jak dla przedmiotów, pobierz misje przez AJAX
+                    if (!this.missionOptions) {
+                        newField = '<select class="condition-value"><option value="">Ładowanie misji...</option></select>';
 
-                case 'quest_completed':
-                    newField = '<input type="text" class="condition-value" placeholder="ID zadania">';
+                        const $select = $(newField);
+                        $parent.append($select);
+
+                        setTimeout(() => {
+                            $.post(npcAdmin.ajax_url, {
+                                action: 'npc_get_missions',
+                                nonce: npcAdmin.nonce
+                            }).done((response) => {
+                                if (response.success && response.data) {
+                                    this.missionOptions = response.data;
+                                    $select.empty().append('<option value="">Wybierz misję...</option>');
+
+                                    response.data.forEach(mission => {
+                                        $select.append(`<option value="${mission.id}">${mission.title}</option>`);
+                                    });
+                                } else {
+                                    $select.html('<option value="">Błąd ładowania misji</option>');
+                                }
+                            }).fail(() => {
+                                $select.html('<option value="">Błąd ładowania misji</option>');
+                            });
+                        }, 0);
+
+                        return;
+                    } else {
+                        newField = '<select class="condition-value"><option value="">Wybierz misję...</option>';
+
+                        this.missionOptions.forEach(mission => {
+                            newField += `<option value="${mission.id}">${mission.title}</option>`;
+                        });
+
+                        newField += '</select>';
+                    }
                     break;
 
                 default:
@@ -280,11 +367,14 @@
                         value: $condition.find('.condition-value').val() || ''
                     };
 
-                    // Dodaj pole field dla user_stat i user_skill
+                    // Dodaj pole field dla różnych typów warunków
                     if (type === 'user_stat') {
-                        conditionData.field = $condition.find('.condition-field.text-input').val() || '';
+                        conditionData.field = $condition.find('.condition-field.stat-select').val() || '';
                     } else if (type === 'user_skill') {
                         conditionData.field = $condition.find('.condition-field.skill-select').val() || '';
+                    } else if (type === 'user_item' && !['has', 'not_has'].includes(conditionData.operator)) {
+                        // Dla przedmiotów z operatorami numerycznymi zapisujemy liczbę sztuk w polu field
+                        conditionData.field = $condition.find('.condition-field.item-amount').val() || '1';
                     }
 
                     conditions.push(conditionData);
@@ -377,21 +467,41 @@
                 if (type === 'user_mission') {
                     const missionId = parseInt(value);
                     if (isNaN(missionId) || missionId < 1) {
-                        errors.push(`Warunek ${index + 1}: ID misji musi być liczbą większą od 0`);
+                        errors.push(`Warunek ${index + 1}: Wybierz misję z listy`);
+                    }
+
+                    const operator = $condition.find('.condition-operator').val();
+                    if (!['not_started', 'in_progress', 'completed', 'failed', 'expired'].includes(operator)) {
+                        errors.push(`Warunek ${index + 1}: Wybierz poprawny status misji`);
                     }
                 }
 
                 if (type === 'user_class') {
-                    const validClasses = ['wojownik', 'handlarz', 'zlodziej', 'dyplomata'];
+                    const validClasses = ['zadymiarz', 'zawijacz', 'kombinator'];
                     if (!validClasses.includes(value)) {
                         errors.push(`Warunek ${index + 1}: Wybierz prawidłową klasę`);
                     }
                 }
 
+                if (type === 'user_item') {
+                    const itemId = parseInt(value);
+                    if (isNaN(itemId) || itemId < 1) {
+                        errors.push(`Warunek ${index + 1}: Wybierz przedmiot z listy`);
+                    }
+
+                    const operator = $condition.find('.condition-operator').val();
+                    if (!['has', 'not_has'].includes(operator)) {
+                        const amountField = $condition.find('.condition-field.item-amount').val();
+                        if (!amountField || isNaN(amountField) || parseInt(amountField) < 0) {
+                            errors.push(`Warunek ${index + 1}: Wprowadź liczbę sztuk przedmiotu`);
+                        }
+                    }
+                }
+
                 if (type === 'user_stat') {
-                    const field = $condition.find('.condition-field.text-input').val();
+                    const field = $condition.find('.condition-field.stat-select').val();
                     if (!field) {
-                        errors.push(`Warunek ${index + 1}: Podaj nazwę statystyki`);
+                        errors.push(`Warunek ${index + 1}: Wybierz statystykę`);
                     }
                 }
 
