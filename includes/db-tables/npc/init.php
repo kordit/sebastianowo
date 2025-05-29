@@ -127,19 +127,10 @@ class NPCDialogSystem
             NPC_PLUGIN_VERSION,
             true
         );
-
         wp_enqueue_script(
             'npc-conditions-js',
             NPC_PLUGIN_URL . 'assets/js/npc-conditions.js',
             ['jquery', 'npc-admin-js'],
-            NPC_PLUGIN_VERSION,
-            true
-        );
-
-        wp_enqueue_script(
-            'npc-sortable-extras',
-            NPC_PLUGIN_URL . 'assets/js/npc-sortable-extras.js',
-            ['jquery', 'npc-admin-js', 'jquery-ui-sortable'],
             NPC_PLUGIN_VERSION,
             true
         );

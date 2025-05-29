@@ -413,9 +413,22 @@
                         this.updateAnswerOrder(event, ui);
                     }
                 });
+
+                // Dodaj wskaźniki wizualne dla elementów sortowanych
+                this.enhanceSortableElements();
             } else {
                 console.warn('jQuery UI sortable is not available. Drag and drop functionality will not work.');
             }
+        }
+
+        // Dodaje wizualne wskaźniki dla elementów sortowanych
+        enhanceSortableElements() {
+            // Oznacz pierwszy dialog jako początkowy
+            $('.dialog-item:first').addClass('first-dialog');
+
+            // Dodaj wskazówki dotyczące przeciągania
+            $('.dialog-header').append('<span class="sort-hint" style="font-size: 12px; color: #999; margin-left: 10px; opacity: 0.7;">(przeciągnij aby zmienić kolejność)</span>');
+            $('.dialog-answers ul li').append('<span class="sort-hint" style="font-size: 11px; color: #999; margin-left: 5px; opacity: 0.7;">(przeciągnij)</span>');
         }
 
         // Aktualizuje kolejność dialogów po przeciągnięciu
@@ -450,7 +463,9 @@
 
                         // Aktualizuje informację w interfejsie, że pierwszy dialog jest początkowym
                         if ($('.dialog-item').length > 0) {
-                            $('.dialog-item:first').find('.starting-badge').remove();
+                            // Usuń badge "Początkowy" ze wszystkich dialogów
+                            $('.dialog-item .starting-badge').remove();
+                            // Dodaj badge tylko do pierwszego dialogu
                             $('.dialog-item:first .dialog-title').append('<span class="starting-badge">Początkowy</span>');
                         }
                     }
@@ -482,9 +497,9 @@
                     answer_order: JSON.stringify(answerIds),
                     nonce: npcAdmin.nonce
                 },
-                success: function (response) {
+                success: (response) => {
                     if (response.success) {
-                        console.log('Answer order updated successfully');
+                        this.showOrderUpdateNotice('Kolejność odpowiedzi zaktualizowana');
                     }
                 }
             });
