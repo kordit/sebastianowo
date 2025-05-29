@@ -1,0 +1,1545 @@
+/**
+ * Game Admin Panel - Minimalistic & Modern CSS
+ * Ustandaryzowane klasy z prefiksem 'ga-' (Game Admin)
+ */
+
+/* =============================================================================
+   RESET & BASE STYLES
+   ============================================================================= */
+* {
+    box-sizing: border-box;
+}
+
+.game-admin * {
+    box-sizing: border-box;
+}
+
+/* =============================================================================
+   LAYOUT COMPONENTS
+   ============================================================================= */
+
+/* Kontener główny */
+.ga-container {
+    margin: 0;
+    margin-right: 30px;
+    padding: 20px 0;
+}
+
+/* .ga-card-content {
+    padding: 20px;
+    padding-top: 0px;
+} */
+
+/* Siatka główna */
+.ga-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.ga-grid--2col {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.ga-grid--3col {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+/* Siatka szczegółów (user-details) */
+.ga-details-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+/* =============================================================================
+   CARDS & SECTIONS
+   ============================================================================= */
+
+/* Podstawowa karta */
+.ga-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease;
+}
+
+.ga-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Pełna szerokość */
+.ga-card--full {
+    grid-column: 1 / -1;
+}
+
+/* Warianty kolorystyczne kart */
+.ga-card--primary {
+    border-left: 4px solid #0073aa;
+}
+
+.ga-card--success {
+    border-left: 4px solid #46b450;
+}
+
+.ga-card--warning {
+    border-left: 4px solid #ffb900;
+}
+
+.ga-card--danger {
+    border-left: 4px solid #dc3232;
+}
+
+.ga-card--info {
+    border-left: 4px solid #00a0d2;
+}
+
+/* Nagłówek karty */
+.ga-card__header {
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ga-card__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #23282d;
+}
+
+.ga-card__subtitle {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    color: #666;
+    font-weight: normal;
+}
+
+.ga-card__meta {
+    font-size: 12px;
+    color: #999;
+    display: flex;
+    gap: 12px;
+}
+
+/* Zawartość karty */
+.ga-card__content {
+    padding: 20px;
+}
+
+.ga-card__content--compact {
+    padding: 16px;
+}
+
+/* =============================================================================
+   FORMS & INPUTS
+   ============================================================================= */
+
+/* Podstawowe pola formularza */
+.ga-form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ga-form-control:focus {
+    outline: none;
+    border-color: #0073aa;
+    box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.1);
+}
+
+/* Rozmiary pól */
+.ga-form-control--small {
+    width: 80px;
+    padding: 6px 8px;
+}
+
+.ga-form-select--small {
+    width: 120px;
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+/* Select */
+.ga-form-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>') no-repeat right 12px center;
+    background-size: 12px;
+    padding-right: 32px;
+    appearance: none;
+}
+
+/* Textarea */
+.ga-form-textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    min-height: 100px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* Checkbox */
+.ga-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.ga-checkbox__input {
+    margin: 0;
+}
+
+.ga-checkbox__label {
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Field group (dla pól obok siebie) */
+.ga-field-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* =============================================================================
+   BUTTONS
+   ============================================================================= */
+
+/* Podstawowy przycisk */
+.ga-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+}
+
+/* Warianty przycisków */
+.ga-button--primary {
+    background: #0073aa;
+    color: #fff;
+    border-color: #0073aa;
+}
+
+.ga-button--primary:hover {
+    background: #005a87;
+    border-color: #005a87;
+    color: #fff;
+}
+
+.ga-button--secondary {
+    background: #f1f1f1;
+    color: #23282d;
+    border-color: #ddd;
+}
+
+.ga-button--secondary:hover {
+    background: #e8e8e8;
+    border-color: #ccc;
+    color: #23282d;
+}
+
+.ga-button--success {
+    background: #46b450;
+    color: #fff;
+    border-color: #46b450;
+}
+
+.ga-button--success:hover {
+    background: #399e42;
+    border-color: #399e42;
+    color: #fff;
+}
+
+.ga-button--warning {
+    background: #ffb900;
+    color: #fff;
+    border-color: #ffb900;
+}
+
+.ga-button--warning:hover {
+    background: #e6a600;
+    border-color: #e6a600;
+    color: #fff;
+}
+
+.ga-button--danger {
+    background: #dc3232;
+    color: #fff;
+    border-color: #dc3232;
+}
+
+.ga-button--danger:hover {
+    background: #c32e2e;
+    border-color: #c32e2e;
+    color: #fff;
+}
+
+/* Rozmiary przycisków */
+.ga-button--small {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.ga-button--large {
+    padding: 12px 24px;
+    font-size: 16px;
+}
+
+/* Przycisk wyłączony */
+.ga-button:disabled,
+.ga-button--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* =============================================================================
+   TABLES
+   ============================================================================= */
+
+.ga-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    background: #fff;
+}
+
+.ga-table th,
+.ga-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+}
+
+.ga-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #23282d;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.ga-table tr:hover {
+    background: #f9f9f9;
+}
+
+/* Kompaktowa tabela */
+.ga-table--compact th,
+.ga-table--compact td {
+    padding: 8px 12px;
+}
+
+/* =============================================================================
+   STATISTICS & BADGES
+   ============================================================================= */
+
+/* Kontener statystyk */
+.ga-stats {
+    color: #000;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+/* Pojedyncza statystyka */
+.ga-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    min-width: 80px;
+    text-align: center;
+}
+
+.ga-stat__number {
+    font-size: 20px;
+    font-weight: bold;
+    color: #23282d;
+    margin-bottom: 4px;
+}
+
+.ga-stat__label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Warianty statystyk */
+.ga-stat--success .ga-stat__number {
+    color: #46b450;
+}
+
+.ga-stat--warning .ga-stat__number {
+    color: #ffb900;
+}
+
+.ga-stat--danger .ga-stat__number {
+    color: #dc3232;
+}
+
+.ga-stat--info .ga-stat__number {
+    color: #00a0d2;
+}
+
+/* Kompaktowe statystyki */
+.ga-stats-compact {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 13px;
+}
+
+.ga-stat-compact {
+    padding: 4px 8px;
+    background: #f1f1f1;
+    border-radius: 4px;
+    color: #555;
+}
+
+.ga-stat-compact strong {
+    color: #23282d;
+}
+
+/* Badges */
+.ga-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.ga-badge--success {
+    background: #d4f6db;
+    color: #155724;
+}
+
+.ga-badge--warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.ga-badge--danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.ga-badge--info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.ga-badge--neutral {
+    background: #e9ecef;
+    color: #495057;
+}
+
+/* =============================================================================
+   PROGRESS BARS
+   ============================================================================= */
+
+.ga-progress {
+    width: 100%;
+    height: 20px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    margin: 4px 0;
+}
+
+.ga-progress__fill {
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: inherit;
+}
+
+.ga-progress__fill--health {
+    background: linear-gradient(90deg, #dc3545 0%, #28a745 100%);
+}
+
+.ga-progress__fill--energy {
+    background: linear-gradient(90deg, #ffc107 0%, #007bff 100%);
+}
+
+.ga-progress__fill--exp {
+    background: linear-gradient(90deg, #6f42c1 0%, #e83e8c 100%);
+}
+
+.ga-progress__text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+/* =============================================================================
+   NOTICES & ALERTS
+   ============================================================================= */
+
+.ga-notice {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 16px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.ga-notice__icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.ga-notice--success {
+    background: #d4f6db;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.ga-notice--warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+
+.ga-notice--danger {
+    background: #f8d7da;
+    border: 1px solid #f1aeb5;
+    color: #721c24;
+}
+
+.ga-notice--info {
+    background: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+/* =============================================================================
+   HEADERS
+   ============================================================================= */
+
+.ga-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.ga-header .notice {
+    color: #000;
+}
+
+.ga-header__title {
+    margin: 0 0 8px 0;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.ga-header__subtitle {
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.9;
+    font-weight: normal;
+}
+
+.ga-header__meta {
+    margin: 8px 0 0 0;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* =============================================================================
+   NAVIGATION & ACTIONS
+   ============================================================================= */
+
+.ga-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 16px 0;
+}
+
+.ga-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+}
+
+.ga-nav__item {
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #666;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.ga-nav__item:hover {
+    background: #f1f1f1;
+    color: #23282d;
+}
+
+.ga-nav__item--active {
+    background: #0073aa;
+    color: #fff;
+}
+
+/* =============================================================================
+   SPECIALIZED COMPONENTS
+   ============================================================================= */
+
+/* Lista items */
+.ga-item-list {
+    display: grid;
+    gap: 12px;
+}
+
+.ga-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+}
+
+.ga-item__icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.ga-item__content {
+    flex: 1;
+}
+
+.ga-item__name {
+    font-weight: 600;
+    margin: 0 0 4px 0;
+}
+
+.ga-item__meta {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+}
+
+.ga-item__actions {
+    display: flex;
+    gap: 4px;
+}
+
+/* NPC Relations */
+.ga-relations {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.ga-relation {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.ga-relation__header {
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.ga-relation__title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ga-relation__content {
+    padding: 16px;
+}
+
+.ga-relation__field {
+    margin-bottom: 12px;
+}
+
+.ga-relation__field:last-child {
+    margin-bottom: 0;
+}
+
+.ga-relation__label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #555;
+}
+
+/* Relation states */
+.ga-relation--known {
+    border-color: #28a745;
+}
+
+.ga-relation--unknown {
+    border-color: #dc3545;
+}
+
+/* Checkbox styling */
+.ga-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.ga-checkbox-label input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.ga-checkbox-mark {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ddd;
+    border-radius: 3px;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+
+.ga-checkbox-label input[type="checkbox"]:checked+.ga-checkbox-mark {
+    background: #0073aa;
+    border-color: #0073aa;
+}
+
+.ga-checkbox-label input[type="checkbox"]:checked+.ga-checkbox-mark::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* Fight stats grid */
+.ga-fight-stats {
+    text-align: center;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 8px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .ga-fight-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ga-form-inline {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.ga-areas-table {
+    width: 100%;
+    border: solid 1px #333;
+    border-spacing: 0px;
+
+    thead {
+        background: #333;
+        color: #fff;
+    }
+
+    tr {
+        display: flex;
+        border-bottom: solid 1px #ccc;
+
+        td,
+        th {
+            padding: 10px 15px;
+            flex: 1;
+            text-align: left;
+        }
+
+    }
+}
+
+/* =============================================================================
+   FORM ENHANCEMENTS
+   ============================================================================= */
+
+/* Card actions */
+.ga-card-actions {
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* Field groups */
+.ga-field-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ga-field-group span {
+    font-weight: 500;
+    color: #666;
+}
+
+/* Form sections spacing */
+.ga-form-section+.ga-form-section {
+    margin-top: 24px;
+}
+
+/* Enhanced button hover states */
+.ga-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.ga-button--small:hover {
+    transform: translateY(-0.5px);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading states */
+.ga-button--loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.ga-button--loading::after {
+    content: "⏳";
+    margin-left: 6px;
+}
+
+/* Improved focus states */
+.ga-relation__field input:focus,
+.ga-checkbox-label input:focus+.ga-checkbox-mark {
+    outline: 2px solid #005ccc;
+    outline-offset: 2px;
+}
+
+/* =============================================================================
+   FINAL LEGACY SUPPORT
+   ============================================================================= */
+
+/* Ensure old classes still work by duplicating styles */
+.details-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.npc-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.npc-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    min-width: 80px;
+}
+
+.npc-relations-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.npc-relation-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.npc-relation-header {
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.npc-relation-details {
+    padding: 16px;
+}
+
+.relation-field {
+    margin-bottom: 12px;
+}
+
+.fight-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.fight-input {
+    width: 80px;
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* =============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================= */
+
+@media (max-width: 782px) {
+    .ga-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ga-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ga-stats {
+        justify-content: center;
+    }
+
+    .ga-actions {
+        justify-content: center;
+    }
+
+    .ga-header {
+        text-align: center;
+    }
+
+    .ga-card__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+/* =============================================================================
+   UTILITIES
+   ============================================================================= */
+
+.ga-text-center {
+    text-align: center;
+}
+
+.ga-text-right {
+    text-align: right;
+}
+
+.ga-text-left {
+    text-align: left;
+}
+
+.ga-mb-0 {
+    margin-bottom: 0;
+}
+
+.ga-mb-1 {
+    margin-bottom: 8px;
+}
+
+.ga-mb-2 {
+    margin-bottom: 16px;
+}
+
+.ga-mb-3 {
+    margin-bottom: 24px;
+}
+
+.ga-mt-0 {
+    margin-top: 0;
+}
+
+.ga-mt-1 {
+    margin-top: 8px;
+}
+
+.ga-mt-2 {
+    margin-top: 16px;
+}
+
+.ga-mt-3 {
+    margin-top: 24px;
+}
+
+.ga-hidden {
+    display: none;
+}
+
+.ga-visible {
+    display: block;
+}
+
+.ga-flex {
+    display: flex;
+}
+
+.ga-flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ga-flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ga-flex-wrap {
+    flex-wrap: wrap;
+}
+
+.ga-flex-gap {
+    gap: 12px;
+}
+
+/* =============================================================================
+   LEGACY COMPATIBILITY (dla istniejących klas)
+   ============================================================================= */
+
+/* Mapowanie starych klas na nowe */
+.game-admin-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.game-admin-card,
+.game-admin-section {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease;
+}
+
+.details-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+.details-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    resize: vertical;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.button-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+    background: #0073aa;
+    color: #fff;
+    border-color: #0073aa;
+}
+
+.button-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+    background: #f1f1f1;
+    color: #23282d;
+    border-color: #ddd;
+}
+
+/* =============================================================================
+   FORM TABLES & ADDITIONAL STYLES
+   ============================================================================= */
+
+/* Tabela formularza */
+.ga-form-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ga-form-table th,
+.ga-form-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.ga-form-table th {
+    width: 30%;
+    text-align: right;
+    font-weight: 600;
+    color: #555;
+    background: none;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.ga-form-table tr:last-child th,
+.ga-form-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Text muted */
+.ga-text-muted {
+    color: #999;
+    font-style: italic;
+}
+
+/* CSS @extend replacement for legacy classes */
+.game-admin-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.game-admin-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease;
+}
+
+.game-admin-section {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease;
+}
+
+.details-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+.details-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>') no-repeat right 12px center;
+    background-size: 12px;
+    padding-right: 32px;
+    appearance: none;
+}
+
+.form-textarea {
+    width: 100%;
+    min-height: 100px;
+    resize: vertical;
+    font-family: inherit;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.button-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+    background: #0073aa;
+    color: #fff;
+    border-color: #0073aa;
+}
+
+.button-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+    background: #f1f1f1;
+    color: #23282d;
+    border-color: #ddd;
+}
+
+/* =============================================================================
+   MISSION MANAGEMENT STYLES
+   ============================================================================= */
+
+/* Sekcja misji */
+.ga-mission-section {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.ga-mission-header {
+    background: #f8f9fa;
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.ga-mission-title {
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.ga-mission-description {
+    margin: 0;
+    color: #666;
+    line-height: 1.5;
+}
+
+.ga-mission-info {
+    padding: 15px 20px;
+    background: #f9f9f9;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Zadania misji */
+.ga-tasks-section {
+    padding: 20px;
+}
+
+.ga-tasks-section h5 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.ga-task-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    background: #fafafa;
+}
+
+.ga-task-header {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #fff;
+}
+
+.ga-task-title {
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ga-task-description {
+    margin: 0;
+    color: #666;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.ga-task-stats {
+    padding: 10px 15px;
+    display: flex;
+    gap: 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.ga-task-form {
+    padding: 15px;
+    background: #fff;
+}
+
+.ga-task-form .ga-form-inline {
+    margin-bottom: 0;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.ga-task-form .ga-form-group {
+    min-width: auto;
+}
+
+/* Sekcja formularza misji */
+.ga-form-section {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    background: #f9f9f9;
+}
+
+.ga-form-section h5 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.ga-form-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.ga-form-actions form {
+    margin: 0;
+}
+
+/* Przyciski małe */
+.ga-button--small {
+    padding: 6px 12px;
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+/* Status badges dla misji/zadań */
+.ga-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ga-badge--success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.ga-badge--warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.ga-badge--info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.ga-badge--secondary {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+/* No data message */
+.ga-no-data {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Responsywność dla misji */
+@media (max-width: 768px) {
+    .ga-mission-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .ga-task-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .ga-task-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .ga-form-inline {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .ga-form-actions {
+        flex-direction: column;
+    }
+
+    .ga-form-actions form {
+        width: 100%;
+    }
+
+    .ga-button--small {
+        width: 100%;
+        text-align: center;
+    }
+}
