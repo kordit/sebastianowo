@@ -220,6 +220,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-right: auto;
 }
 
 .starting-badge {
@@ -373,7 +374,14 @@
     align-items: center;
     gap: 8px;
     font-size: 13px;
+    flex-direction: column;
+    align-items: start;
 }
+
+select.conditions-logic-operator {
+    max-width: 150px;
+}
+
 
 .conditions-logic label {
     margin: 0;
@@ -491,6 +499,13 @@
     border: 1px solid #8c8f94;
     border-radius: 3px;
     background: #fff;
+}
+
+/* Style dla pola parametru misji */
+.mission-parameter {
+    width: 100%;
+    color: #2271b1;
+    font-family: monospace;
 }
 
 .field-group input:focus,

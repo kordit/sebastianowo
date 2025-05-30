@@ -15,6 +15,7 @@
                 'user_class': 'Sprawdza klasę gracza. Wybierz klasę z listy.',
                 'user_item': 'Sprawdza czy gracz posiada przedmiot. Wybierz przedmiot i określ liczbę sztuk.',
                 'user_mission': 'Sprawdza status misji gracza. Wybierz misję i wymagany status.',
+                'user_quest': 'Sprawdza status zadania gracza. Wybierz misję, zadanie i wymagany status.',
                 'user_stat': 'Sprawdza wybraną statystykę gracza. Wybierz statystykę i podaj wymaganą wartość.'
             };
 
@@ -63,6 +64,13 @@
                     'completed': 'ukończona',
                     'failed': 'nieudana',
                     'expired': 'wygasła'
+                },
+                'user_quest': {
+                    'not_started': 'nie rozpoczęte',
+                    'in_progress': 'w trakcie',
+                    'completed': 'ukończone',
+                    'failed': 'nieudane',
+                    'skipped': 'pominięte'
                 }
             };
 
@@ -165,55 +173,56 @@
                 $operatorGroup.show();
                 $valueGroup.show();
 
-                // Aktualizuj operatory
                 this.updateOperators($fields.find('.condition-operator'), type);
-
-                // Aktualizuj pole wartości
                 this.updateValueField($fields.find('.condition-value'), type);
 
-                // Pokaż odpowiednie pole dodatkowe w zależności od typu
                 $extraGroup.hide();
-                $extraGroup.find('.skill-select, .stat-select, .item-amount').hide();
+                $extraGroup.find('.skill-select, .stat-select, .item-amount, .quest-select').hide();
 
                 if (type === 'user_skill') {
                     $extraGroup.show();
                     $extraGroup.find('.skill-select').show();
                     $extraGroup.find('label').text('Nazwa umiejętności:');
-                }
-                else if (type === 'user_stat') {
+                } else if (type === 'user_stat') {
                     $extraGroup.show();
                     $extraGroup.find('.stat-select').show();
                     $extraGroup.find('label').text('Nazwa statystyki:');
-                }
-                else if (type === 'user_item') {
+                } else if (type === 'user_item') {
                     const operator = $fields.find('.condition-operator').val();
                     if (operator && !['has', 'not_has'].includes(operator)) {
                         $extraGroup.show();
                         $extraGroup.find('.item-amount').show();
                         $extraGroup.find('label').text('Liczba sztuk:');
+                        
+                        // Listener tylko dla user_item
+                        $fields.find('.condition-operator').off('change.item-amount').on('change.item-amount', function () {
+                            const op = $(this).val();
+                            if (!['has', 'not_has'].includes(op)) {
+                                $extraGroup.show();
+                                $extraGroup.find('.item-amount').show();
+                                $extraGroup.find('label').text('Liczba sztuk:');
+                            } else {
+                                $extraGroup.hide();
+                            }
+                        });
                     }
-
-                    // Aktualizuj widoczność pola liczby sztuk przy zmianie operatora
-                    $fields.find('.condition-operator').off('change.item-amount').on('change.item-amount', function () {
-                        const op = $(this).val();
-                        if (!['has', 'not_has'].includes(op)) {
-                            $extraGroup.show();
-                            $extraGroup.find('.item-amount').show();
-                            $extraGroup.find('label').text('Liczba sztuk:');
-                        } else {
-                            $extraGroup.hide();
-                        }
-                    });
+                } else if (type === 'user_quest') {
+                    $extraGroup.show();
+                    $extraGroup.find('.quest-select').show();
+                    $extraGroup.find('label').text('Zadanie w misji:');
                 }
 
-                // Aktualizuj opis
                 $description.text(this.conditionDescriptions[type] || '');
+
             } else {
                 $operatorGroup.hide();
                 $valueGroup.hide();
                 $extraGroup.hide();
                 $description.text('');
             }
+
+            this.updateConditionsData();
+
 
             this.updateConditionsData();
         }
@@ -334,11 +343,97 @@
                     }
                     break;
 
+                case 'user_quest':
+                    // Dla zadań także ładujemy misje, ale w polu extra będziemy ładować zadania
+                    if (!this.missionOptions) {
+                        newField = '<select class="condition-value"><option value="">Ładowanie misji...</option></select>';
+
+                        const $select = $(newField);
+                        $parent.append($select);
+
+                        setTimeout(() => {
+                            $.post(npcAdmin.ajax_url, {
+                                action: 'npc_get_missions',
+                                nonce: npcAdmin.nonce
+                            }).done((response) => {
+                                if (response.success && response.data) {
+                                    this.missionOptions = response.data;
+                                    $select.empty().append('<option value="">Wybierz misję...</option>');
+
+                                    response.data.forEach(mission => {
+                                        $select.append(`<option value="${mission.id}">${mission.title}</option>`);
+                                    });
+
+                                    // Po załadowaniu misji, ustaw listener na zmianę misji
+                                    this.setupQuestListener($select);
+                                } else {
+                                    $select.html('<option value="">Błąd ładowania misji</option>');
+                                }
+                            }).fail(() => {
+                                $select.html('<option value="">Błąd ładowania misji</option>');
+                            });
+                        }, 0);
+
+                        return;
+                    } else {
+                        newField = '<select class="condition-value"><option value="">Wybierz misję...</option>';
+
+                        this.missionOptions.forEach(mission => {
+                            newField += `<option value="${mission.id}">${mission.title}</option>`;
+                        });
+
+                        newField += '</select>';
+
+                        // Dodaj listener po dodaniu do DOM
+                        const $newSelect = $(newField);
+                        $parent.append($newSelect);
+                        this.setupQuestListener($newSelect);
+                        return;
+                    }
+                    break;
+
                 default:
                     newField = '<input type="text" class="condition-value" placeholder="Wprowadź wartość">';
             }
 
             $parent.append(newField);
+        }
+
+        setupQuestListener($missionSelect) {
+            const self = this;
+
+            $missionSelect.off('change.quest-listener').on('change.quest-listener', function () {
+                const missionId = $(this).val();
+                const $condition = $(this).closest('.condition-item');
+                const $questSelect = $condition.find('.condition-field.quest-select');
+
+                if (!missionId) {
+                    $questSelect.empty().append('<option value="">Wybierz zadanie...</option>');
+                    return;
+                }
+
+                // Pokaż loading
+                $questSelect.empty().append('<option value="">Ładowanie zadań...</option>');
+
+                // Pobierz zadania dla wybranej misji
+                $.post(npcAdmin.ajax_url, {
+                    action: 'npc_get_quests_for_mission',
+                    nonce: npcAdmin.nonce,
+                    mission_id: missionId
+                }).done((response) => {
+                    if (response.success && response.data) {
+                        $questSelect.empty().append('<option value="">Wybierz zadanie...</option>');
+
+                        response.data.forEach(quest => {
+                            $questSelect.append(`<option value="${quest.id}">${quest.title}</option>`);
+                        });
+                    } else {
+                        $questSelect.empty().append('<option value="">Błąd ładowania zadań</option>');
+                    }
+                }).fail(() => {
+                    $questSelect.empty().append('<option value="">Błąd ładowania zadań</option>');
+                });
+            });
         }
 
         updateConditionNumbers() {
@@ -375,6 +470,9 @@
                     } else if (type === 'user_item' && !['has', 'not_has'].includes(conditionData.operator)) {
                         // Dla przedmiotów z operatorami numerycznymi zapisujemy liczbę sztuk w polu field
                         conditionData.field = $condition.find('.condition-field.item-amount').val() || '1';
+                    } else if (type === 'user_quest') {
+                        // Dla zadań zapisujemy ID zadania w polu field
+                        conditionData.field = $condition.find('.condition-field.quest-select').val() || '';
                     }
 
                     conditions.push(conditionData);
@@ -509,6 +607,23 @@
                     const field = $condition.find('.condition-field.skill-select').val();
                     if (!field) {
                         errors.push(`Warunek ${index + 1}: Wybierz umiejętność`);
+                    }
+                }
+
+                if (type === 'user_quest') {
+                    const missionId = parseInt(value);
+                    if (isNaN(missionId) || missionId < 1) {
+                        errors.push(`Warunek ${index + 1}: Wybierz misję z listy`);
+                    }
+
+                    const questId = $condition.find('.condition-field.quest-select').val();
+                    if (!questId) {
+                        errors.push(`Warunek ${index + 1}: Wybierz zadanie z listy`);
+                    }
+
+                    const operator = $condition.find('.condition-operator').val();
+                    if (!['not_started', 'in_progress', 'completed', 'failed', 'skipped'].includes(operator)) {
+                        errors.push(`Warunek ${index + 1}: Wybierz poprawny status zadania`);
                     }
                 }
             });

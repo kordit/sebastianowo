@@ -14,6 +14,7 @@
 .dialog-header {
     cursor: grab;
     position: relative;
+    margin-right: auto;
 }
 
 .dialog-item-placeholder {
@@ -28,15 +29,21 @@
     padding-left: 0;
     margin-left: 0;
     list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .dialog-answers ul li {
     cursor: move;
     transition: background-color 0.2s ease;
-    padding: 8px 10px;
+    padding: 15px;
     border-radius: 3px;
     position: relative;
     border-left: 3px solid transparent;
+    background: #fff;
+    border-radius: 5px;
 }
 
 .dialog-answers ul li:hover {
@@ -99,26 +106,4 @@
 .dialog-header:hover::before,
 .dialog-answers ul li:hover::before {
     color: #007cba;
-}
-
-/* Add sorting instructions */
-.dialogs-container:before {
-    content: "Przeciągnij aby zmienić kolejność dialogów. Pierwszy dialog będzie dialogiem początkowym.";
-    display: block;
-    padding: 10px;
-    background-color: #f0f6fc;
-    border-left: 4px solid #007cba;
-    margin-bottom: 15px;
-    font-style: italic;
-    color: #555;
-}
-
-.dialog-answers ul:before {
-    content: "Przeciągnij aby zmienić kolejność odpowiedzi.";
-    display: block;
-    padding: 5px 0;
-    margin-bottom: 10px;
-    font-style: italic;
-    color: #666;
-    font-size: 13px;
 }

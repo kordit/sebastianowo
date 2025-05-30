@@ -135,6 +135,15 @@ class NPCDialogSystem
             true
         );
 
+        // Dodaj rozszerzenie dla warunków misji
+        wp_enqueue_script(
+            'npc-mission-conditions-js',
+            NPC_PLUGIN_URL . 'assets/js/npc-mission-conditions.js',
+            ['jquery', 'npc-conditions-js'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
+
         wp_enqueue_style(
             'npc-admin-css',
             NPC_PLUGIN_URL . 'assets/css/npc-admin.css',

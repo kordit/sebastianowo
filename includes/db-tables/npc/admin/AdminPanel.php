@@ -29,6 +29,7 @@ class NPC_AdminPanel
         add_action('wp_ajax_npc_update_answer_order', [$this, 'ajax_update_answer_order']);
         add_action('wp_ajax_npc_get_items', [$this, 'ajax_get_items']);
         add_action('wp_ajax_npc_get_missions', [$this, 'ajax_get_missions']);
+        add_action('wp_ajax_npc_get_quests_for_mission', [$this, 'ajax_get_quests_for_mission']);
     }
 
     /**
@@ -560,5 +561,44 @@ class NPC_AdminPanel
         }
 
         wp_send_json_success($missions_data);
+    }
+
+    /**
+     * AJAX endpoint dla pobierania zadań z wybranej misji
+     */
+    public function ajax_get_quests_for_mission()
+    {
+        if (!wp_verify_nonce($_POST['nonce'], 'npc_admin_nonce')) {
+            wp_send_json_error('Nieprawidłowy nonce');
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Brak uprawnień');
+        }
+
+        $mission_id = intval($_POST['mission_id'] ?? 0);
+        if (!$mission_id) {
+            wp_send_json_error('Nieprawidłowe ID misji');
+        }
+
+        global $wpdb;
+
+        $quests = $wpdb->get_results($wpdb->prepare(
+            "SELECT DISTINCT task_id, task_title 
+             FROM {$wpdb->prefix}game_user_mission_tasks 
+             WHERE mission_id = %d AND task_title != '' 
+             ORDER BY task_title ASC",
+            $mission_id
+        ));
+
+        $quests_data = [];
+        foreach ($quests as $quest) {
+            $quests_data[] = [
+                'id' => $quest->task_id,
+                'title' => $quest->task_title
+            ];
+        }
+
+        wp_send_json_success($quests_data);
     }
 }

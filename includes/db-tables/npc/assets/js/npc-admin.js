@@ -427,8 +427,6 @@
             $('.dialog-item:first').addClass('first-dialog');
 
             // Dodaj wskazówki dotyczące przeciągania
-            $('.dialog-header').append('<span class="sort-hint" style="font-size: 12px; color: #999; margin-left: 10px; opacity: 0.7;">(przeciągnij aby zmienić kolejność)</span>');
-            $('.dialog-answers ul li').append('<span class="sort-hint" style="font-size: 11px; color: #999; margin-left: 5px; opacity: 0.7;">(przeciągnij)</span>');
         }
 
         // Aktualizuje kolejność dialogów po przeciągnięciu
