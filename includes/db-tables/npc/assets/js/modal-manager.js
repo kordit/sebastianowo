@@ -55,39 +55,50 @@
 
         openAnswerModal(mode, event) {
             event.preventDefault();
+            console.log('ModalManager: Opening answer modal in mode:', mode);
 
             const $modal = $('#answer-modal');
             const $form = $('#answer-form');
 
             // Reset form
             $form[0].reset();
+            console.log('Form reset');
 
             // Reset actions manager if available
             if (window.answerActionsManager) {
+                console.log('Resetting answer actions manager');
                 window.answerActionsManager.loadActions([]);
+            } else {
+                console.warn('answerActionsManager not available');
             }
 
             if (mode === 'edit') {
                 const $button = $(event.target);
                 const answerId = $button.data('answer-id');
+                console.log('Edit mode, answer ID:', answerId);
 
                 if (answerId) {
                     this.loadAnswerData(answerId);
                     $('#answer_id').val(answerId);
+                    $('#answer-action').val('update_answer');
                 }
             } else {
+                console.log('Create mode');
                 $('#answer_id').val('');
+                $('#answer-action').val('create_answer');
 
                 // Set dialog ID for new answers
                 const dialogId = $(event.target).closest('.dialog-item').data('dialog-id');
+                console.log('Dialog ID for new answer:', dialogId);
                 if (dialogId) {
-                    $('#answer_dialog_id').val(dialogId);
+                    $('#answer-dialog-id').val(dialogId);
                 }
             }
 
             // Show modal
             $modal.show();
             $('body').addClass('modal-open');
+            console.log('Answer modal shown');
         }
 
         closeModal() {

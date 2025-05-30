@@ -15,7 +15,7 @@
         init() {
             // Zainicjalizuj wszystkie komponenty jeśli są dostępne
             this.initializeComponents();
-            
+
             // Bind global events
             this.bindGlobalEvents();
 
@@ -65,7 +65,7 @@
 
             // Answer Actions Manager
             if (window.AnswerActionsManager) {
-                this.components.answerActions = window.answerActionsManager || null;
+                this.components.answerActions = window.answerActionsManager || new window.AnswerActionsManager();
             }
         }
 

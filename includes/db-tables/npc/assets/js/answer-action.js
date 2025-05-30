@@ -14,23 +14,34 @@
         }
 
         init() {
+            console.log('AnswerActionsManager: Initializing...');
             this.loadActionTypes();
             this.bindEvents();
             this.loadExistingActions();
+            console.log('AnswerActionsManager: Initialization complete');
         }
 
         loadActionTypes() {
+            console.log('AnswerActionsManager: Loading action types');
+
             const configScript = document.getElementById('action-types-config');
+            console.log('Config script element:', configScript);
+
             if (configScript) {
                 try {
                     this.actionTypes = JSON.parse(configScript.textContent);
+                    console.log('Action types loaded:', this.actionTypes);
                 } catch (e) {
                     console.error('Error parsing action types config:', e);
                 }
+            } else {
+                console.warn('No action-types-config script found');
             }
         }
 
         bindEvents() {
+            console.log('AnswerActionsManager: Binding events');
+
             // Dodawanie nowej akcji
             $(document).on('click', '.add-action-btn', this.addAction.bind(this));
 
@@ -42,28 +53,45 @@
         }
 
         loadExistingActions() {
+            console.log('AnswerActionsManager: Loading existing actions');
+
             const dataInput = document.getElementById('answer-actions-data');
+            console.log('Data input element:', dataInput);
+            console.log('Data input value:', dataInput ? dataInput.value : 'none');
+
             if (dataInput && dataInput.value) {
                 try {
                     this.actionsData = JSON.parse(dataInput.value) || [];
+                    console.log('Existing actions loaded:', this.actionsData);
                 } catch (e) {
                     console.error('Error parsing existing actions data:', e);
                     this.actionsData = [];
                 }
+            } else {
+                this.actionsData = [];
+                console.log('No existing actions data found, initialized empty array');
             }
         }
 
         addAction() {
+            console.log('AnswerActionsManager: addAction called');
+
             const typeSelect = document.getElementById('new-action-type');
-            const selectedType = typeSelect.value;
+            console.log('Type select element:', typeSelect);
+
+            const selectedType = typeSelect ? typeSelect.value : '';
+            console.log('Selected type:', selectedType);
 
             if (!selectedType || !this.actionTypes[selectedType]) {
+                console.log('No type selected or invalid type');
                 alert('Wybierz typ akcji.');
                 return;
             }
 
             const actionConfig = this.actionTypes[selectedType];
             const actionIndex = this.actionsData.length;
+
+            console.log('Adding action:', selectedType, 'at index:', actionIndex);
 
             // Dodaj do danych
             const newAction = {
@@ -87,11 +115,18 @@
 
             // Zaktualizuj hidden input
             this.updateHiddenInput();
+
+            console.log('Action added successfully');
         }
 
         removeAction(event) {
+            console.log('AnswerActionsManager: removeAction called');
+
             const actionItem = $(event.target).closest('.action-item');
+            console.log('Action item:', actionItem);
+
             const actionIndex = parseInt(actionItem.data('index'));
+            console.log('Action index:', actionIndex);
 
             if (isNaN(actionIndex)) {
                 console.error('Invalid action index');
@@ -100,15 +135,19 @@
 
             // Usuń z danych
             this.actionsData.splice(actionIndex, 1);
+            console.log('Action removed from data. New length:', this.actionsData.length);
 
             // Usuń z interfejsu
             actionItem.remove();
+            console.log('Action item removed from UI');
 
             // Ponownie indeksuj pozostałe akcje
             this.reindexActions();
 
             // Zaktualizuj hidden input
             this.updateHiddenInput();
+
+            console.log('Remove action completed');
         }
 
         renderAction(action, index) {
@@ -252,9 +291,8 @@
 
     // Inicjalizacja po załadowaniu DOM
     $(document).ready(function () {
-        if ($('.answer-actions-manager').length > 0) {
-            window.answerActionsManager = new AnswerActionsManager();
-        }
+        // Zawsze utwórz instancję globalną, niezależnie od tego czy element istnieje
+        window.answerActionsManager = new AnswerActionsManager();
     });
 
 })(jQuery);

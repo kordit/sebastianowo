@@ -339,25 +339,61 @@ class NPC_APIManager
      */
     public function ajax_auto_save()
     {
+        // Logowanie dla debugowania
+        error_log('NPC Auto-save: Rozpoczynam auto-save');
+        error_log('NPC Auto-save: REQUEST_METHOD = ' . $_SERVER['REQUEST_METHOD']);
+        error_log('NPC Auto-save: POST data = ' . print_r($_POST, true));
+
+        // Sprawdź czy żądanie jest typu POST
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            error_log('NPC Auto-save: Błąd - nieprawidłowa metoda żądania');
+            wp_send_json_error('Nieprawidłowa metoda żądania');
+            return;
+        }
+
+        // Sprawdź czy nonce istnieje
+        if (!isset($_POST['nonce'])) {
+            error_log('NPC Auto-save: Błąd - brak nonce');
+            wp_send_json_error('Brak nonce');
+            return;
+        }
+
         if (!wp_verify_nonce($_POST['nonce'], 'npc_admin_nonce')) {
-            wp_die('Nieprawidłowy nonce');
+            error_log('NPC Auto-save: Błąd - nieprawidłowy nonce');
+            wp_send_json_error('Nieprawidłowy nonce');
+            return;
+        }
+
+        // Sprawdź czy npc_id istnieje i jest prawidłowe
+        if (!isset($_POST['npc_id']) || empty($_POST['npc_id'])) {
+            error_log('NPC Auto-save: Błąd - brak ID NPC');
+            wp_send_json_error('Brak ID NPC');
+            return;
         }
 
         $npc_id = intval($_POST['npc_id']);
 
         if (!$npc_id) {
+            error_log('NPC Auto-save: Błąd - nieprawidłowe ID NPC: ' . $_POST['npc_id']);
             wp_send_json_error('Nieprawidłowe ID NPC');
+            return;
         }
 
+        error_log('NPC Auto-save: NPC ID = ' . $npc_id);
+
         $data = [
-            'name' => sanitize_text_field($_POST['name']),
-            'description' => sanitize_textarea_field($_POST['description']),
-            'image_url' => esc_url_raw($_POST['image_url']),
-            'location' => sanitize_text_field($_POST['location']),
-            'status' => sanitize_text_field($_POST['status'])
+            'name' => sanitize_text_field(isset($_POST['name']) ? $_POST['name'] : ''),
+            'description' => sanitize_textarea_field(isset($_POST['description']) ? $_POST['description'] : ''),
+            'image_url' => esc_url_raw(isset($_POST['image_url']) ? $_POST['image_url'] : ''),
+            'location' => sanitize_text_field(isset($_POST['location']) ? $_POST['location'] : ''),
+            'status' => sanitize_text_field(isset($_POST['status']) ? $_POST['status'] : 'active')
         ];
 
+        error_log('NPC Auto-save: Dane do zapisu = ' . print_r($data, true));
+
         $result = $this->npc_repository->update($npc_id, $data);
+
+        error_log('NPC Auto-save: Wynik zapisu = ' . ($result !== false ? 'success' : 'failed'));
 
         if ($result !== false) {
             wp_send_json_success('Auto-save completed');
