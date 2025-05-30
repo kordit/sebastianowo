@@ -42,10 +42,14 @@
 
                 if (dialogId) {
                     this.loadDialogData(dialogId);
-                    $('#dialog_id').val(dialogId);
+                    $('#dialog-id').val(dialogId);
+                    $('#dialog-action').val('update_dialog');
+                    $('#modal-title').text('Edytuj dialog');
                 }
             } else {
-                $('#dialog_id').val('');
+                $('#dialog-id').val('');
+                $('#dialog-action').val('create_dialog');
+                $('#modal-title').text('Dodaj nowy dialog');
             }
 
             // Show modal
@@ -121,7 +125,9 @@
                 .done((response) => {
                     if (response.success) {
                         const dialog = response.data;
-                        $('#dialog_text').val(dialog.text);
+                        $('#dialog_title').val(dialog.title);
+                        $('#dialog_content').val(dialog.content);
+                        $('#dialog_location').val(dialog.location || '');
                         $('#dialog_order').val(dialog.dialog_order);
                     } else {
                         window.notificationManager?.showNotice('Błąd podczas ładowania danych dialogu.', 'error');

@@ -225,14 +225,12 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                             <div class="stat-item">
                                 <label for="life">Obecne życie</label>
                                 <input type="number" id="life" name="life"
-                                    value="<?php echo esc_attr($npc->life ?? 0); ?>"
-                                    min="0">
+                                    value="<?php echo esc_attr($npc->life ?? 0); ?>">
                             </div>
                             <div class="stat-item">
                                 <label for="max_life">Maksymalne życie</label>
                                 <input type="number" id="max_life" name="max_life"
-                                    value="<?php echo esc_attr($npc->max_life ?? 0); ?>"
-                                    min="0">
+                                    value="<?php echo esc_attr($npc->max_life ?? 0); ?>">
                             </div>
                         </div>
                     </div>
@@ -311,7 +309,7 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                                                         <?php endif; ?>
                                                     </h3>
                                                     <div class="dialog-actions">
-                                                        <button type="button" class="button-link edit-dialog-btn">Edytuj</button>
+                                                        <button type="button" class="button-link edit-dialog-btn" data-dialog-id="<?php echo $dialog->id; ?>">Edytuj</button>
                                                         <a href="<?php echo wp_nonce_url(
                                                                         admin_url('admin.php?page=npc-add&action=delete_dialog&dialog_id=' . $dialog->id . '&npc_id=' . $npc->id),
                                                                         'npc_admin_action',
