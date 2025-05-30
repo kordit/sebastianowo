@@ -106,13 +106,6 @@ class NPCDialogSystem
 
     public function enqueue_scripts()
     {
-        wp_enqueue_script(
-            'npc-dialog-frontend',
-            NPC_PLUGIN_URL . 'assets/js/npc-frontend.js',
-            ['jquery'],
-            NPC_PLUGIN_VERSION,
-            true
-        );
 
         wp_localize_script('npc-dialog-frontend', 'npcAjax', [
             'ajax_url' => admin_url('admin-ajax.php'),
@@ -125,17 +118,79 @@ class NPCDialogSystem
     {
         if (strpos($hook, 'npc-manager') === false) {
             return;
-        }
-
-        // Dodaj jQuery UI dla funkcji przeciągania i sortowania
+        }        // Dodaj jQuery UI dla funkcji przeciągania i sortowania
         wp_enqueue_script('jquery-ui-core');
         wp_enqueue_script('jquery-ui-sortable');
         wp_enqueue_script('jquery-ui-draggable');
 
+        // Notification Manager - zawsze pierwszy
         wp_enqueue_script(
-            'npc-admin-js',
-            NPC_PLUGIN_URL . 'assets/js/npc-admin.js',
-            ['jquery', 'wp-api', 'jquery-ui-sortable'],
+            'npc-notification-manager',
+            NPC_PLUGIN_URL . 'assets/js/notification-manager.js',
+            ['jquery'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
+
+        // Modal Manager
+        wp_enqueue_script(
+            'npc-modal-manager',
+            NPC_PLUGIN_URL . 'assets/js/modal-manager.js',
+            ['jquery', 'npc-notification-manager'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
+
+        // Form Validator
+        wp_enqueue_script(
+            'npc-form-validator',
+            NPC_PLUGIN_URL . 'assets/js/form-validator.js',
+            ['jquery', 'npc-notification-manager'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
+
+        // Tab Manager
+        wp_enqueue_script(
+            'npc-tab-manager',
+            NPC_PLUGIN_URL . 'assets/js/tab-manager.js',
+            ['jquery'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
+
+        // Sortable Manager
+        wp_enqueue_script(
+            'npc-sortable-manager',
+            NPC_PLUGIN_URL . 'assets/js/sortable-manager.js',
+            ['jquery', 'jquery-ui-sortable', 'npc-notification-manager'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
+
+        // Image Uploader
+        wp_enqueue_script(
+            'npc-image-uploader',
+            NPC_PLUGIN_URL . 'assets/js/image-uploader.js',
+            ['jquery', 'npc-notification-manager'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
+
+        // Auto Save Manager
+        wp_enqueue_script(
+            'npc-auto-save-manager',
+            NPC_PLUGIN_URL . 'assets/js/auto-save-manager.js',
+            ['jquery', 'npc-notification-manager'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
+
+        // Table Enhancements
+        wp_enqueue_script(
+            'npc-table-enhancements',
+            NPC_PLUGIN_URL . 'assets/js/table-enhancements.js',
+            ['jquery', 'npc-notification-manager'],
             NPC_PLUGIN_VERSION,
             true
         );
@@ -145,6 +200,15 @@ class NPCDialogSystem
             'npc-answer-actions',
             NPC_PLUGIN_URL . 'assets/js/answer-action.js',
             ['jquery'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
+
+        // Główny orchestrator - zawsze ostatni
+        wp_enqueue_script(
+            'npc-admin-js',
+            NPC_PLUGIN_URL . 'assets/js/npc-admin.js',
+            ['jquery', 'wp-api', 'npc-notification-manager', 'npc-modal-manager', 'npc-form-validator', 'npc-tab-manager', 'npc-sortable-manager', 'npc-image-uploader', 'npc-auto-save-manager', 'npc-table-enhancements', 'npc-answer-actions'],
             NPC_PLUGIN_VERSION,
             true
         );
