@@ -18,7 +18,6 @@
         initSortable() {
             // Jeśli jQuery UI jest dostępne
             if ($.fn.sortable) {
-                console.log('Initializing sortable functionality...');
 
                 // Inicjalizuj sortowanie dla dialogów
                 $('.dialogs-container').sortable({

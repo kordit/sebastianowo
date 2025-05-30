@@ -19,7 +19,6 @@
             // Bind global events
             this.bindGlobalEvents();
 
-            console.log('NPC Admin initialized with components:', Object.keys(this.components));
         }
 
         initializeComponents() {
@@ -93,7 +92,6 @@
 
         handleBeforeUnload() {
             // Cleanup przed opuszczeniem strony
-            console.log('NPC Admin cleanup...');
         }
 
         // Publiczne API dla dostępu do komponentów
@@ -104,16 +102,6 @@
         // Legacy methods dla kompatybilności z starym kodem
         showNotice(message, type) {
             this.components.notifications?.showNotice(message, type);
-        }
-
-        // Metoda pomocnicza do debugowania
-        debugInfo() {
-            console.log('NPC Admin Debug Info:', {
-                components: Object.keys(this.components),
-                jQuery: !!window.jQuery,
-                npcAdmin: !!window.npcAdmin,
-                wp: !!window.wp
-            });
         }
     }
 
@@ -126,7 +114,6 @@
         // Dla kompatybilności wstecznej
         window.npcAdmin = window.npcAdmin || {};
 
-        console.log('NPC Admin system ready!');
     });
 
 })(jQuery);

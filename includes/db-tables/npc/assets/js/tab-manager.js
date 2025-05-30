@@ -42,8 +42,6 @@
             const $clickedTab = $(event.currentTarget);
             const targetLocation = $clickedTab.data('location');
 
-            console.log('Switching to tab:', targetLocation);
-
             // Usuń aktywną klasę ze wszystkich tabów
             $('.location-tabs .nav-tab').removeClass('nav-tab-active');
 

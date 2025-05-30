@@ -127,20 +127,6 @@ class NPC_APIManager
                 'permission_callback' => [$this, 'check_admin_permissions']
             ]
         ]);
-
-        // Special endpoints
-        register_rest_route($this->namespace, '/npcs/(?P<npc_id>\d+)/dialog/starting', [
-            'methods' => 'GET',
-            'callback' => [$this, 'get_starting_dialog'],
-            'permission_callback' => '__return_true'
-        ]);
-
-        // Kompatybilność z istniejącym frontendem
-        register_rest_route('game/v1', '/dialog', [
-            'methods' => 'POST',
-            'callback' => [$this, 'get_frontend_dialog'],
-            'permission_callback' => '__return_true'
-        ]);
     }
 
     /**
@@ -228,46 +214,6 @@ class NPC_APIManager
             return new WP_REST_Response($npc, 200);
         } catch (Exception $e) {
             return new WP_Error('npc_error', 'Błąd podczas pobierania NPC: ' . $e->getMessage(), ['status' => 500]);
-        }
-    }
-
-    /**
-     * Pobiera dialog początkowy dla NPC
-     */
-    public function get_starting_dialog($request)
-    {
-        try {
-            $npc_id = intval($request->get_param('npc_id'));
-            $dialog = $this->dialog_repository->get_starting_dialog($npc_id);
-
-            if (!$dialog) {
-                return new WP_Error('dialog_not_found', 'Dialog początkowy nie został znaleziony', ['status' => 404]);
-            }
-
-            // Dodaj odpowiedzi
-            $dialog->answers = $this->answer_repository->get_by_dialog_id($dialog->id);
-
-            // Decode JSON fields
-            if ($dialog->conditions) {
-                $dialog->conditions = json_decode($dialog->conditions, true);
-            }
-            if ($dialog->actions) {
-                $dialog->actions = json_decode($dialog->actions, true);
-            }
-
-            foreach ($dialog->answers as &$answer) {
-                if ($answer->conditions) {
-                    $answer->conditions = json_decode($answer->conditions, true);
-                }
-                if ($answer->actions) {
-                    $answer->actions = json_decode($answer->actions, true);
-                }
-            }
-            unset($answer); // Usuń referencję
-
-            return new WP_REST_Response($dialog, 200);
-        } catch (Exception $e) {
-            return new WP_Error('dialog_error', 'Błąd podczas pobierania dialogu: ' . $e->getMessage(), ['status' => 500]);
         }
     }
 
@@ -401,8 +347,4 @@ class NPC_APIManager
             wp_send_json_error('Auto-save failed');
         }
     }
-
-    // Dodatkowe metody dla pozostałych endpoints...
-    // (create_npc, update_npc, delete_npc, create_dialog, etc.)
-    // Te metody będą implementowane w podobny sposób
 }
