@@ -135,6 +135,10 @@ class NPC_AdminPanel
         if ($npc_id) {
             $npc = $this->npc_repository->get_by_id($npc_id);
             if ($npc) {
+                // Inicjalizuj lub napraw wartości dialog_order przed pobraniem dialogów
+                $this->dialog_repository->initialize_dialog_order($npc_id);
+
+                // Pobierz dialogi z zaktualizowaną kolejnością
                 $dialogs = $this->dialog_repository->get_by_npc_id($npc_id);
 
                 // Usuwamy duplikaty dialogów na podstawie ID
@@ -154,6 +158,7 @@ class NPC_AdminPanel
                 foreach ($dialogs as &$dialog) {
                     $dialog->answers = $this->answer_repository->get_by_dialog_id($dialog->id);
                 }
+                unset($dialog); // Usuń referencję!
             }
         }
 
@@ -230,15 +235,15 @@ class NPC_AdminPanel
      */
     private function handle_create_dialog()
     {
-        require_once dirname(__FILE__) . '/components/ConditionManager.php';
+        // Sprawdź czy jest to pierwszy dialog dla tego NPC
+        $npc_id = intval($_POST['npc_id']);
+        $existing_dialogs_count = $this->dialog_repository->count_by_npc($npc_id);
 
         $data = [
-            'npc_id' => intval($_POST['npc_id']),
+            'npc_id' => $npc_id,
             'title' => sanitize_text_field($_POST['dialog_title']),
             'content' => sanitize_textarea_field($_POST['dialog_content']),
-            'dialog_order' => intval($_POST['dialog_order']),
-            'is_starting_dialog' => isset($_POST['is_starting_dialog']) ? 1 : 0,
-            'conditions' => NPC_ConditionManager::sanitize_conditions($_POST['dialog_conditions'] ?? ''),
+            'dialog_order' => ($existing_dialogs_count === 0) ? 0 : intval($_POST['dialog_order']),
             'status' => 'active'
         ];
 
@@ -259,17 +264,17 @@ class NPC_AdminPanel
      */
     private function handle_update_dialog()
     {
-        require_once dirname(__FILE__) . '/components/ConditionManager.php';
-
         $dialog_id = intval($_POST['dialog_id']);
         $npc_id = intval($_POST['npc_id']);
+
+        // Pobierz aktualny dialog
+        $current_dialog = $this->dialog_repository->get_by_id($dialog_id);
 
         $data = [
             'title' => sanitize_text_field($_POST['dialog_title']),
             'content' => sanitize_textarea_field($_POST['dialog_content']),
             'dialog_order' => intval($_POST['dialog_order']),
-            'is_starting_dialog' => isset($_POST['is_starting_dialog']) ? 1 : 0,
-            'conditions' => NPC_ConditionManager::sanitize_conditions($_POST['dialog_conditions'] ?? '')
+            // Nie używamy już flagi is_starting_dialog
         ];
 
         $result = $this->dialog_repository->update($dialog_id, $data);
@@ -383,7 +388,6 @@ class NPC_AdminPanel
      */
     private function handle_update_answer()
     {
-        require_once dirname(__FILE__) . '/components/ConditionManager.php';
 
         $answer_id = intval($_POST['answer_id']);
         $npc_id = intval($_POST['npc_id']);
@@ -392,7 +396,6 @@ class NPC_AdminPanel
             'text' => sanitize_textarea_field($_POST['answer_text']),
             'next_dialog_id' => empty($_POST['answer_next_dialog_id']) ? null : intval($_POST['answer_next_dialog_id']),
             'answer_order' => intval($_POST['answer_order']),
-            'conditions' => NPC_ConditionManager::sanitize_conditions($_POST['answer_conditions'] ?? '')
         ];
 
         $result = $this->answer_repository->update($answer_id, $data);
@@ -444,10 +447,29 @@ class NPC_AdminPanel
         }
 
         $success = true;
+
+        // Pobierz pierwszy dialog z nowej kolejności, aby ustawić go jako początkowy
+        $first_dialog_id = 0;
+        $npc_id = 0;
+
+        if (!empty($dialog_order) && isset($dialog_order[0]['id'])) {
+            $first_dialog_id = intval($dialog_order[0]['id']);
+
+            // Pobierz NPC ID dla pierwszego dialogu
+            $first_dialog = $this->dialog_repository->get_by_id($first_dialog_id);
+            if ($first_dialog) {
+                $npc_id = $first_dialog->npc_id;
+            }
+        }
+
+        // Dialog początkowy jest ustalany tylko na podstawie kolejności (dialog_order)
+        // Nie używamy już flagi is_starting_dialog
+
         foreach ($dialog_order as $item) {
             $dialog_id = intval($item['id']);
             $order = intval($item['order']);
 
+            // Aktualizuj tylko kolejność, flag is_starting_dialog jest ustawiana oddzielnie
             $result = $this->dialog_repository->update($dialog_id, ['dialog_order' => $order]);
             if ($result === false) {
                 $success = false;

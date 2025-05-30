@@ -173,6 +173,7 @@ class NPC_APIManager
                     $npc->metadata = json_decode($npc->metadata, true);
                 }
             }
+            unset($npc); // Usuń referencję
 
             return new WP_REST_Response($npcs, 200);
         } catch (Exception $e) {
@@ -216,7 +217,9 @@ class NPC_APIManager
                         $answer->actions = json_decode($answer->actions, true);
                     }
                 }
+                unset($answer); // Usuń referencję na odpowiedzi
             }
+            unset($dialog); // Usuń referencję na dialog
 
             if ($npc->metadata) {
                 $npc->metadata = json_decode($npc->metadata, true);
@@ -260,6 +263,7 @@ class NPC_APIManager
                     $answer->actions = json_decode($answer->actions, true);
                 }
             }
+            unset($answer); // Usuń referencję
 
             return new WP_REST_Response($dialog, 200);
         } catch (Exception $e) {
@@ -294,7 +298,9 @@ class NPC_APIManager
                         $answer->actions = json_decode($answer->actions, true);
                     }
                 }
+                unset($answer); // Usuń referencję na odpowiedzi
             }
+            unset($dialog); // Usuń referencję na dialog
 
             return new WP_REST_Response($dialogs, 200);
         } catch (Exception $e) {

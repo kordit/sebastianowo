@@ -171,22 +171,12 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                         </div>
                     <?php else: ?>
                         <?php
-                        // Tworzymy tablicę do śledzenia unikalnych ID dialogów
-                        $unique_dialog_ids = array();
                         foreach ($dialogs as $dialog):
-                            // Pomijamy dialogi z ID, które już były przetwarzane (unikamy duplikatów)
-                            if (in_array($dialog->id, $unique_dialog_ids)) {
-                                continue;
-                            }
-                            $unique_dialog_ids[] = $dialog->id;
                         ?>
                             <div class="dialog-item" data-dialog-id="<?php echo $dialog->id; ?>">
                                 <div class="dialog-header">
                                     <h3 class="dialog-title">
                                         <?php echo esc_html($dialog->title); ?>
-                                        <?php if ($dialog->is_starting_dialog): ?>
-                                            <span class="starting-badge">Początkowy</span>
-                                        <?php endif; ?>
                                     </h3>
                                     <div class="dialog-actions">
                                         <button type="button" class="button-link edit-dialog-btn">Edytuj</button>
@@ -253,132 +243,109 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
     </div>
 </div>
 
-<?php if ($is_edit): ?>
-    <!-- Modal dla dodawania/edycji dialogu -->
-    <div id="dialog-modal" class="npc-modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Dodaj nowy dialog</h3>
-                <button type="button" class="modal-close">&times;</button>
-            </div>
-            <form id="dialog-form" method="post" action="<?php echo admin_url('admin.php?page=npc-add'); ?>">
-                <?php wp_nonce_field('npc_admin_action', 'npc_nonce'); ?>
-                <input type="hidden" name="action" id="dialog-action" value="create_dialog">
-                <input type="hidden" name="npc_id" value="<?php echo $npc->id; ?>">
-                <input type="hidden" name="dialog_id" id="dialog-id" value="">
-
-                <div class="modal-body">
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">
-                                <label for="dialog_title">Tytuł dialogu <span class="required">*</span></label>
-                            </th>
-                            <td>
-                                <input type="text" id="dialog_title" name="dialog_title"
-                                    class="regular-text" required>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="dialog_content">Treść dialogu <span class="required">*</span></label>
-                            </th>
-                            <td>
-                                <textarea id="dialog_content" name="dialog_content"
-                                    rows="6" class="large-text" required></textarea>
-                            </td>
-                        </tr>
-                        <!-- Usunięto pola Kolejność i Dialog początkowy. Kolejność będzie ustalana przez przeciąganie -->
-                        <input type="hidden" id="dialog_order" name="dialog_order" value="0">
-                        <input type="hidden" id="is_starting_dialog" name="is_starting_dialog" value="0">
-                    </table>
-
-                    <!-- Warunki wyświetlania dialogu -->
-                    <div class="dialog-conditions-section">
-                        <?php
-                        require_once dirname(__FILE__) . '/../components/ConditionManager.php';
-                        if (!function_exists('NPC_ConditionManager::render_conditions_ui')) {
-                            NPC_ConditionManager::render_conditions_ui(null, 'dialog');
-                        }
-                        ?>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="button button-primary">Zapisz dialog</button>
-                    <button type="button" class="button modal-cancel">Anuluj</button>
-                </div>
-            </form>
+<!-- Modal dla dodawania/edycji dialogu -->
+<div id="dialog-modal" class="npc-modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Dodaj nowy dialog</h3>
+            <button type="button" class="modal-close">&times;</button>
         </div>
-    </div>
+        <form id="dialog-form" method="post" action="<?php echo admin_url('admin.php?page=npc-add'); ?>">
+            <?php wp_nonce_field('npc_admin_action', 'npc_nonce'); ?>
+            <input type="hidden" name="action" id="dialog-action" value="create_dialog">
+            <input type="hidden" name="npc_id" value="<?php echo $npc->id; ?>">
+            <input type="hidden" name="dialog_id" id="dialog-id" value="">
 
-    <!-- Modal dla dodawania/edycji odpowiedzi -->
-    <div id="answer-modal" class="npc-modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="answer-modal-title">Dodaj nową odpowiedź</h3>
-                <button type="button" class="modal-close">&times;</button>
+            <div class="modal-body">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="dialog_title">Tytuł dialogu <span class="required">*</span></label>
+                        </th>
+                        <td>
+                            <input type="text" id="dialog_title" name="dialog_title"
+                                class="regular-text" required>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="dialog_content">Treść dialogu <span class="required">*</span></label>
+                        </th>
+                        <td>
+                            <textarea id="dialog_content" name="dialog_content"
+                                rows="6" class="large-text" required></textarea>
+                        </td>
+                    </tr>
+                    <!-- Usunięto pola Kolejność i Dialog początkowy. Kolejność będzie ustalana przez przeciąganie -->
+                    <input type="hidden" id="dialog_order" name="dialog_order" value="0">
+                    <!-- Wartość is_starting_dialog jest ustawiana automatycznie w AdminPanel.php -->
+                </table>
             </div>
-            <form id="answer-form" method="post" action="<?php echo admin_url('admin.php?page=npc-add'); ?>">
-                <?php wp_nonce_field('npc_admin_action', 'npc_nonce'); ?>
-                <input type="hidden" name="action" id="answer-action" value="create_answer">
-                <input type="hidden" name="npc_id" value="<?php echo $npc->id; ?>">
-                <input type="hidden" name="dialog_id" id="answer-dialog-id" value="">
-                <input type="hidden" name="answer_id" id="answer-id" value="">
 
-                <div class="modal-body">
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">
-                                <label for="answer_text">Tekst odpowiedzi <span class="required">*</span></label>
-                            </th>
-                            <td>
-                                <textarea id="answer_text" name="answer_text"
-                                    rows="3" class="large-text" required></textarea>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="answer_next_dialog_id">Następny dialog</label>
-                            </th>
-                            <td>
-                                <select id="answer_next_dialog_id" name="answer_next_dialog_id">
-                                    <option value="">-- Brak następnego dialogu --</option>
-                                    <?php
-                                    $unique_dialog_ids_select = array();
-                                    foreach ($dialogs as $d):
-                                        // Pomijamy dialogi z ID, które już były dodane do listy (unikamy duplikatów)
-                                        if (in_array($d->id, $unique_dialog_ids_select)) {
-                                            continue;
-                                        }
-                                        $unique_dialog_ids_select[] = $d->id;
-                                    ?>
-                                        <option value="<?php echo $d->id; ?>"><?php echo esc_html($d->title); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <p class="description">Wybierz dialog, który zostanie wyświetlony po wybraniu tej odpowiedzi.</p>
-                            </td>
-                        </tr>
-                        <!-- Usunięto pole Kolejność. Kolejność będzie ustalana przez przeciąganie -->
-                        <input type="hidden" id="answer_order" name="answer_order" value="0">
-                    </table>
-
-                    <!-- Warunki wyświetlania odpowiedzi -->
-                    <div class="answer-conditions-section">
-                        <h4>Warunki wyświetlania odpowiedzi</h4>
-                        <?php
-                        if (!function_exists('NPC_ConditionManager::render_conditions_ui')) {
-                            require_once dirname(__FILE__) . '/../components/ConditionManager.php';
-                        }
-                        NPC_ConditionManager::render_conditions_ui(null, 'answer');
-                        ?>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="button button-primary">Zapisz odpowiedź</button>
-                    <button type="button" class="button modal-cancel">Anuluj</button>
-                </div>
-            </form>
-        </div>
+            <div class="modal-footer">
+                <button type="submit" class="button button-primary">Zapisz dialog</button>
+                <button type="button" class="button modal-cancel">Anuluj</button>
+            </div>
+        </form>
     </div>
-<?php endif; ?>
+</div>
+
+<!-- Modal dla dodawania/edycji odpowiedzi -->
+<div id="answer-modal" class="npc-modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="answer-modal-title">Dodaj nową odpowiedź</h3>
+            <button type="button" class="modal-close">&times;</button>
+        </div>
+        <form id="answer-form" method="post" action="<?php echo admin_url('admin.php?page=npc-add'); ?>">
+            <?php wp_nonce_field('npc_admin_action', 'npc_nonce'); ?>
+            <input type="hidden" name="action" id="answer-action" value="create_answer">
+            <input type="hidden" name="npc_id" value="<?php echo $npc->id; ?>">
+            <input type="hidden" name="dialog_id" id="answer-dialog-id" value="">
+            <input type="hidden" name="answer_id" id="answer-id" value="">
+
+            <div class="modal-body">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="answer_text">Tekst odpowiedzi <span class="required">*</span></label>
+                        </th>
+                        <td>
+                            <textarea id="answer_text" name="answer_text"
+                                rows="3" class="large-text" required></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="answer_next_dialog_id">Następny dialog</label>
+                        </th>
+                        <td>
+                            <select id="answer_next_dialog_id" name="answer_next_dialog_id">
+                                <option value="">-- Brak następnego dialogu --</option>
+                                <?php
+                                $unique_dialog_ids_select = array();
+                                foreach ($dialogs as $d):
+                                    // Pomijamy dialogi z ID, które już były dodane do listy (unikamy duplikatów)
+                                    if (in_array($d->id, $unique_dialog_ids_select)) {
+                                        continue;
+                                    }
+                                    $unique_dialog_ids_select[] = $d->id;
+                                ?>
+                                    <option value="<?php echo $d->id; ?>"><?php echo esc_html($d->title); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <p class="description">Wybierz dialog, który zostanie wyświetlony po wybraniu tej odpowiedzi.</p>
+                        </td>
+                    </tr>
+                    <!-- Usunięto pole Kolejność. Kolejność będzie ustalana przez przeciąganie -->
+                    <input type="hidden" id="answer_order" name="answer_order" value="0">
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="button button-primary">Zapisz odpowiedź</button>
+                <button type="button" class="button modal-cancel">Anuluj</button>
+            </div>
+        </form>
+    </div>
+</div>

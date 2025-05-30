@@ -125,18 +125,9 @@
                         $('#dialog_title').val(dialog.title);
                         $('#dialog_content').val(dialog.content);
                         $('#dialog_order').val(dialog.dialog_order);
-                        $('#is_starting_dialog').prop('checked', dialog.is_starting_dialog == 1);
 
-                        // Załaduj warunki dialogu
-                        if (dialog.conditions) {
-                            $('.conditions-manager[data-context="dialog"] .conditions-data').val(dialog.conditions);
-
-                            // Przeładuj interfejs warunków
-                            if (window.NPCConditionsManager) {
-                                const conditionsManager = new window.NPCConditionsManager();
-                                conditionsManager.loadExistingConditions();
-                            }
-                        }
+                        // Nie używamy już pola is_starting_dialog
+                        // Dialog początkowy to ten, który ma najmniejszy dialog_order
                     } else {
                         this.showNotice('Błąd podczas ładowania danych dialogu.', 'error');
                     }
@@ -161,16 +152,7 @@
                         $('#answer_order').val(answer.answer_order);
                         $('#answer_next_dialog_id').val(answer.next_dialog_id || '');
 
-                        // Załaduj warunki odpowiedzi
-                        if (answer.conditions) {
-                            $('.conditions-manager[data-context="answer"] .conditions-data').val(answer.conditions);
-
-                            // Przeładuj interfejs warunków
-                            if (window.NPCConditionsManager) {
-                                const conditionsManager = new window.NPCConditionsManager();
-                                conditionsManager.loadExistingConditions();
-                            }
-                        }
+                        // Usunięto ładowanie warunków odpowiedzi
                     } else {
                         this.showNotice('Błąd podczas ładowania danych odpowiedzi.', 'error');
                     }
@@ -238,15 +220,7 @@
                 return false;
             }
 
-            // Waliduj warunki
-            if (window.NPCConditionsManager) {
-                const errors = window.NPCConditionsManager.validateAllConditions();
-                if (errors.length > 0) {
-                    event.preventDefault();
-                    this.showNotice('Błędy w warunkach: ' + errors.join(', '), 'error');
-                    return false;
-                }
-            }
+            // Usunięto walidację warunków
 
             return true;
         }
@@ -459,13 +433,10 @@
                         // Pokaż subtelne powiadomienie o sukcesie
                         this.showOrderUpdateNotice('Kolejność dialogów zaktualizowana');
 
-                        // Aktualizuje informację w interfejsie, że pierwszy dialog jest początkowym
-                        if ($('.dialog-item').length > 0) {
-                            // Usuń badge "Początkowy" ze wszystkich dialogów
-                            $('.dialog-item .starting-badge').remove();
-                            // Dodaj badge tylko do pierwszego dialogu
-                            $('.dialog-item:first .dialog-title').append('<span class="starting-badge">Początkowy</span>');
-                        }
+                        // Odśwież stronę, aby upewnić się, że wszystkie dialogi są widoczne
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
                     }
                 }
             });
@@ -501,48 +472,6 @@
                     }
                 }
             });
-        }
-    }
-
-    // Dialog tree visualization (for complex dialog flows)
-    class DialogTreeViewer {
-        constructor() {
-            this.initTreeView();
-        }
-
-        initTreeView() {
-            // Add tree view toggle button
-            if ($('.dialogs-container .dialog-item').length > 2) {
-                $('.dialog-actions').append(
-                    '<button type="button" class="button" id="toggle-tree-view">Widok drzewa</button>'
-                );
-
-                $(document).on('click', '#toggle-tree-view', this.toggleTreeView.bind(this));
-            }
-        }
-
-        toggleTreeView() {
-            const $container = $('.dialogs-container');
-            $container.toggleClass('tree-view');
-
-            if ($container.hasClass('tree-view')) {
-                this.renderTreeView();
-                $('#toggle-tree-view').text('Widok listy');
-            } else {
-                this.renderListView();
-                $('#toggle-tree-view').text('Widok drzewa');
-            }
-        }
-
-        renderTreeView() {
-            // Implementation for tree visualization would go here
-            // This could use a library like D3.js or vis.js for advanced visualization
-            console.log('Tree view rendering...');
-        }
-
-        renderListView() {
-            // Return to default list view
-            $('.dialogs-container').removeClass('tree-view');
         }
     }
 
@@ -599,7 +528,6 @@
 
             $('.npc-list-table tbody tr').each(function () {
                 const $row = $(this);
-                const status = $row.find('.status-badge').hasClass('status-active') ? 'active' : 'inactive';
                 const location = $row.find('.column-location').text().toLowerCase();
 
                 let showRow = true;
@@ -626,7 +554,6 @@
     // Initialize when document is ready
     $(document).ready(function () {
         new NPCAdmin();
-        new DialogTreeViewer();
         new NPCTableEnhancements();
     });
 

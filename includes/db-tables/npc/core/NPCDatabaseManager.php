@@ -74,7 +74,6 @@ class NPC_DatabaseManager
             dialog_order int(11) DEFAULT 0,
             conditions json,
             actions json,
-            is_starting_dialog tinyint(1) DEFAULT 0,
             status enum('active', 'inactive') DEFAULT 'active',
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -82,7 +81,7 @@ class NPC_DatabaseManager
             FOREIGN KEY (npc_id) REFERENCES {$this->npc_table}(id) ON DELETE CASCADE,
             INDEX idx_npc_id (npc_id),
             INDEX idx_status (status),
-            INDEX idx_starting (is_starting_dialog)
+            INDEX idx_dialog_order (dialog_order)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

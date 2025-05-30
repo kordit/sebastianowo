@@ -127,22 +127,7 @@ class NPCDialogSystem
             NPC_PLUGIN_VERSION,
             true
         );
-        wp_enqueue_script(
-            'npc-conditions-js',
-            NPC_PLUGIN_URL . 'assets/js/npc-conditions.js',
-            ['jquery', 'npc-admin-js'],
-            NPC_PLUGIN_VERSION,
-            true
-        );
-
-        // Dodaj rozszerzenie dla warunków misji
-        wp_enqueue_script(
-            'npc-mission-conditions-js',
-            NPC_PLUGIN_URL . 'assets/js/npc-mission-conditions.js',
-            ['jquery', 'npc-conditions-js'],
-            NPC_PLUGIN_VERSION,
-            true
-        );
+        // Usunięto ładowanie skryptów związanych z warunkami
 
         wp_enqueue_style(
             'npc-admin-css',
@@ -162,7 +147,6 @@ class NPCDialogSystem
         wp_localize_script('npc-admin-js', 'npcAdmin', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('npc_admin_nonce'),
-            'rest_url' => rest_url('npc/v1/')
         ]);
     }
 

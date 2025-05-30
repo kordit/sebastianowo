@@ -2,7 +2,7 @@
 
 /**
  * NPC Dialog Service
- * Serwis obsługujący logikę dialogów i warunków
+ * Serwis obsługujący logikę dialogów
  */
 
 if (!defined('ABSPATH')) {
@@ -20,9 +20,6 @@ class NPC_DialogService
         $this->npc_repository = new NPC_NPCRepository();
         $this->dialog_repository = new NPC_DialogRepository();
         $this->answer_repository = new NPC_AnswerRepository();
-
-        // Załaduj ConditionManager
-        require_once dirname(__FILE__) . '/../admin/components/ConditionManager.php';
 
         add_action('wp_ajax_npc_start_dialog', [$this, 'ajax_start_dialog']);
         add_action('wp_ajax_npc_continue_dialog', [$this, 'ajax_continue_dialog']);
@@ -90,16 +87,8 @@ class NPC_DialogService
                 return false;
             }
 
-            // Sprawdź warunki dialogu
-            if (!$this->check_dialog_conditions($dialog, $user_id)) {
-                return false;
-            }
-
             // Pobierz dostępne odpowiedzi
-            $answers = $this->get_available_answers($dialog->id, $user_id);
-
-            // Wykonaj akcje dialogu
-            $this->execute_dialog_actions($dialog, $user_id);
+            $answers = $this->get_answers($dialog->id);
 
             return [
                 'npc' => $npc,
@@ -124,14 +113,6 @@ class NPC_DialogService
                 return false;
             }
 
-            // Sprawdź warunki odpowiedzi
-            if (!$this->check_answer_conditions($answer, $user_id)) {
-                return false;
-            }
-
-            // Wykonaj akcje odpowiedzi
-            $this->execute_answer_actions($answer, $user_id);
-
             // Sprawdź czy jest następny dialog
             if (!$answer->next_dialog_id) {
                 return [
@@ -149,19 +130,8 @@ class NPC_DialogService
                 ];
             }
 
-            // Sprawdź warunki następnego dialogu
-            if (!$this->check_dialog_conditions($next_dialog, $user_id)) {
-                return [
-                    'dialog_ended' => true,
-                    'answer' => $answer
-                ];
-            }
-
             // Pobierz dostępne odpowiedzi dla następnego dialogu
-            $next_answers = $this->get_available_answers($next_dialog->id, $user_id);
-
-            // Wykonaj akcje następnego dialogu
-            $this->execute_dialog_actions($next_dialog, $user_id);
+            $next_answers = $this->get_answers($next_dialog->id);
 
             return [
                 'dialog' => $next_dialog,
@@ -175,218 +145,10 @@ class NPC_DialogService
     }
 
     /**
-     * Sprawdza warunki dialogu
+     * Pobiera wszystkie odpowiedzi dla dialogu
      */
-    private function check_dialog_conditions($dialog, $user_id = null)
+    private function get_answers($dialog_id)
     {
-        // Używa nowego systemu warunków z ConditionManager
-        return NPC_ConditionManager::check_conditions($dialog->conditions, $user_id);
-    }
-
-    /**
-     * Sprawdza warunki odpowiedzi
-     */
-    private function check_answer_conditions($answer, $user_id = null)
-    {
-        // Używa nowego systemu warunków z ConditionManager
-        return NPC_ConditionManager::check_conditions($answer->conditions, $user_id);
-    }
-
-    /**
-     * Pobiera dostępne odpowiedzi dla dialogu
-     */
-    private function get_available_answers($dialog_id, $user_id = null)
-    {
-        $all_answers = $this->answer_repository->get_by_dialog_id($dialog_id);
-        $available_answers = [];
-
-        foreach ($all_answers as $answer) {
-            if ($this->check_answer_conditions($answer, $user_id)) {
-                $available_answers[] = $answer;
-            }
-        }
-
-        return $available_answers;
-    }
-
-    /**
-     * Wykonuje akcje dialogu
-     */
-    private function execute_dialog_actions($dialog, $user_id = null)
-    {
-        if (!$dialog->actions) {
-            return;
-        }
-
-        $actions = json_decode($dialog->actions, true);
-        if (!$actions) {
-            return;
-        }
-
-        foreach ($actions as $action) {
-            $this->execute_single_action($action, $user_id);
-        }
-    }
-
-    /**
-     * Wykonuje akcje odpowiedzi
-     */
-    private function execute_answer_actions($answer, $user_id = null)
-    {
-        if (!$answer->actions) {
-            return;
-        }
-
-        $actions = json_decode($answer->actions, true);
-        if (!$actions) {
-            return;
-        }
-
-        foreach ($actions as $action) {
-            $this->execute_single_action($action, $user_id);
-        }
-    }
-
-    /**
-     * Wykonuje pojedynczą akcję
-     */
-    private function execute_single_action($action, $user_id = null)
-    {
-        $type = $action['type'] ?? '';
-        $value = $action['value'] ?? '';
-        $amount = intval($action['amount'] ?? 0);
-
-        switch ($type) {
-            case 'give_gold':
-                $this->give_user_gold($user_id, $amount);
-                break;
-
-            case 'take_gold':
-                $this->take_user_gold($user_id, $amount);
-                break;
-
-            case 'give_item':
-                $this->give_user_item($user_id, $value, $amount);
-                break;
-
-            case 'take_item':
-                $this->take_user_item($user_id, $value, $amount);
-                break;
-
-            case 'give_exp':
-                $this->give_user_exp($user_id, $amount);
-                break;
-
-            case 'complete_quest':
-                $this->complete_quest($user_id, $value);
-                break;
-
-            case 'start_quest':
-                $this->start_quest($user_id, $value);
-                break;
-
-            case 'teleport':
-                $this->teleport_user($user_id, $value);
-                break;
-
-            case 'custom':
-                do_action('npc_dialog_custom_action', $action, $user_id);
-                break;
-        }
-    }
-
-    // Metody pomocnicze dla interakcji z systemem gry
-    // Te metody będą integrować się z istniejącym systemem gry
-
-    private function get_user_level($user_id)
-    {
-        // Integracja z systemem poziomów
-        return get_user_meta($user_id, 'user_level', true) ?: 1;
-    }
-
-    private function get_user_gold($user_id)
-    {
-        // Integracja z systemem waluty
-        return get_user_meta($user_id, 'user_gold', true) ?: 0;
-    }
-
-    private function user_has_item($user_id, $item_id)
-    {
-        // Integracja z systemem przedmiotów
-        $backpack = get_user_meta($user_id, 'user_backpack', true) ?: [];
-        return isset($backpack[$item_id]) && $backpack[$item_id] > 0;
-    }
-
-    private function is_quest_completed($user_id, $quest_id)
-    {
-        // Integracja z systemem zadań
-        $completed_quests = get_user_meta($user_id, 'completed_quests', true) ?: [];
-        return in_array($quest_id, $completed_quests);
-    }
-
-    private function get_user_stat($user_id, $stat_name)
-    {
-        // Integracja z systemem statystyk
-        return get_user_meta($user_id, 'user_stat_' . $stat_name, true) ?: 0;
-    }
-
-    private function give_user_gold($user_id, $amount)
-    {
-        $current_gold = $this->get_user_gold($user_id);
-        update_user_meta($user_id, 'user_gold', $current_gold + $amount);
-    }
-
-    private function take_user_gold($user_id, $amount)
-    {
-        $current_gold = $this->get_user_gold($user_id);
-        update_user_meta($user_id, 'user_gold', max(0, $current_gold - $amount));
-    }
-
-    private function give_user_item($user_id, $item_id, $amount)
-    {
-        $backpack = get_user_meta($user_id, 'user_backpack', true) ?: [];
-        $backpack[$item_id] = ($backpack[$item_id] ?? 0) + $amount;
-        update_user_meta($user_id, 'user_backpack', $backpack);
-    }
-
-    private function take_user_item($user_id, $item_id, $amount)
-    {
-        $backpack = get_user_meta($user_id, 'user_backpack', true) ?: [];
-        if (isset($backpack[$item_id])) {
-            $backpack[$item_id] = max(0, $backpack[$item_id] - $amount);
-            if ($backpack[$item_id] === 0) {
-                unset($backpack[$item_id]);
-            }
-        }
-        update_user_meta($user_id, 'user_backpack', $backpack);
-    }
-
-    private function give_user_exp($user_id, $amount)
-    {
-        $current_exp = get_user_meta($user_id, 'user_exp', true) ?: 0;
-        update_user_meta($user_id, 'user_exp', $current_exp + $amount);
-    }
-
-    private function complete_quest($user_id, $quest_id)
-    {
-        $completed_quests = get_user_meta($user_id, 'completed_quests', true) ?: [];
-        if (!in_array($quest_id, $completed_quests)) {
-            $completed_quests[] = $quest_id;
-            update_user_meta($user_id, 'completed_quests', $completed_quests);
-        }
-    }
-
-    private function start_quest($user_id, $quest_id)
-    {
-        $active_quests = get_user_meta($user_id, 'active_quests', true) ?: [];
-        if (!in_array($quest_id, $active_quests)) {
-            $active_quests[] = $quest_id;
-            update_user_meta($user_id, 'active_quests', $active_quests);
-        }
-    }
-
-    private function teleport_user($user_id, $location)
-    {
-        update_user_meta($user_id, 'user_location', $location);
+        return $this->answer_repository->get_by_dialog_id($dialog_id);
     }
 }

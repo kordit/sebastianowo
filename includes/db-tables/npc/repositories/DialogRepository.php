@@ -84,7 +84,6 @@ class NPC_DialogRepository
                 'dialog_order' => $data['dialog_order'] ?? 0,
                 'conditions' => isset($data['conditions']) ? json_encode($data['conditions']) : null,
                 'actions' => isset($data['actions']) ? json_encode($data['actions']) : null,
-                'is_starting_dialog' => $data['is_starting_dialog'] ?? 0,
                 'status' => $data['status'] ?? 'active'
             ],
             [
@@ -182,28 +181,11 @@ class NPC_DialogRepository
     }
 
     /**
-     * Ustawia dialog jako początkowy (usuwa flagę z innych)
+     * Ta metoda została usunięta, ponieważ nie korzystamy już z flagi is_starting_dialog
+     * Zamiast tego ustalamy dialog początkowy na podstawie kolejności (dialog_order)
+     * 
+     * @deprecated
      */
-    public function set_as_starting($id, $npc_id)
-    {
-        // Najpierw usuń flagę z wszystkich dialogów tego NPC
-        $this->wpdb->update(
-            $this->table_name,
-            ['is_starting_dialog' => 0],
-            ['npc_id' => $npc_id],
-            ['%d'],
-            ['%d']
-        );
-
-        // Ustaw flagę dla wybranego dialogu
-        return $this->wpdb->update(
-            $this->table_name,
-            ['is_starting_dialog' => 1],
-            ['id' => $id],
-            ['%d'],
-            ['%d']
-        );
-    }
 
     /**
      * Pobiera liczbę dialogów dla NPC
@@ -216,5 +198,55 @@ class NPC_DialogRepository
         );
 
         return $this->wpdb->get_var($sql);
+    }
+
+    /**
+     * Inicjalizuje lub naprawia wartości dialog_order dla wszystkich dialogów NPC
+     * 
+     * Ta funkcja zapewnia, że każdy dialog ma poprawną wartość dialog_order,
+     * co zapobiega resetowaniu kolejności po odświeżeniu strony.
+     * 
+     * @param int $npc_id ID postaci NPC
+     * @return bool Czy operacja się powiodła
+     */
+    public function initialize_dialog_order($npc_id)
+    {
+        // Pobierz wszystkie dialogi dla NPC posortowane według aktualnej wartości dialog_order
+        $sql = $this->wpdb->prepare(
+            "SELECT id, dialog_order FROM {$this->table_name} 
+             WHERE npc_id = %d AND status = 'active' 
+             ORDER BY dialog_order ASC, id ASC",
+            $npc_id
+        );
+
+        $dialogs = $this->wpdb->get_results($sql);
+        if (empty($dialogs)) {
+            return true; // Brak dialogów do zaktualizowania
+        }
+
+        $success = true;
+
+        // Aktualizuj kolejność dialogów, przypisując im kolejne numery od 0
+        foreach ($dialogs as $index => $dialog) {
+            $new_order = $index; // Zaczynamy od 0
+
+            if ($dialog->dialog_order !== $new_order) {
+                $result = $this->wpdb->update(
+                    $this->table_name,
+                    ['dialog_order' => $new_order],
+                    ['id' => $dialog->id],
+                    ['%d'],
+                    ['%d']
+                );
+
+                if ($result === false) {
+                    $success = false;
+                }
+            }
+        }
+
+        // Pierwszy dialog jest automatycznie dialogiem początkowym dzięki kolejności dialog_order
+
+        return $success;
     }
 }
