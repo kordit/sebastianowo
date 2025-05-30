@@ -62,9 +62,14 @@
             // Reset form
             $form[0].reset();
 
-            // Reset actions manager if available
+            // Reset actions manager tylko dla nowych odpowiedzi
             if (window.answerActionsManager) {
-                window.answerActionsManager.loadActions([]);
+                if (mode === 'create') {
+                    console.log('Creating new answer - resetting actions');
+                    window.answerActionsManager.loadActions([]);
+                } else {
+                    console.log('Editing existing answer - keeping current actions until data loads');
+                }
             } else {
                 console.warn('answerActionsManager not available');
             }

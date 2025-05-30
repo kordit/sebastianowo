@@ -293,7 +293,8 @@
             this.eventsBound = false;
             this.isProcessing = false; // Flaga zapobiegająca podwójnemu kliknięciu
 
-            this.init();
+            // Nie wywołujemy automatycznie init() - pozwalamy na kontrolę z zewnątrz
+            console.log('AnswerActionsManager instance created');
         }
 
         /**
@@ -350,29 +351,51 @@
                 return;
             }
 
-            // Usuń wszystkie poprzednie eventy
-            $(document).off('.answerActions');
+            // Sprawdź czy kontener akcji istnieje - używaj poprawnego selektora
+            const $actionsContainer = $('.answer-actions-manager');
+            if (!$actionsContainer.length) {
+                console.warn('Actions container (.answer-actions-manager) not found for event binding');
+                return;
+            }
 
-            // Binduj eventy z namespace
-            $(document).on('click.answerActions', '.add-action-btn', (e) => {
+            // Usuń wszystkie poprzednie eventy z kontenera akcji
+            $actionsContainer.off('.answerActions');
+
+            // Binduj eventy tylko w kontenerze akcji z namespace
+            $actionsContainer.on('click.answerActions', '.add-action-btn', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                
+                // Dodatkowe sprawdzenie czy to faktycznie przycisk dodawania akcji
+                const $target = $(e.target);
+                if (!$target.hasClass('add-action-btn') && !$target.closest('.add-action-btn').length) {
+                    console.log('Event caught but not from add-action-btn, ignoring');
+                    return;
+                }
+                
+                console.log('Add action button clicked');
                 this.addAction();
             });
 
-            $(document).on('click.answerActions', '.remove-action-btn', (e) => {
+            $actionsContainer.on('click.answerActions', '.remove-action-btn', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                console.log('Remove action button clicked');
                 this.removeAction(e);
             });
 
-            $(document).on('change.answerActions input.answerActions', '.action-field-input', (e) => {
+            $actionsContainer.on('change.answerActions', '.action-field-input', (e) => {
+                e.stopPropagation();
+                this.updateActionData(e);
+            });
+
+            $actionsContainer.on('input.answerActions', '.action-field-input', (e) => {
                 e.stopPropagation();
                 this.updateActionData(e);
             });
 
             this.eventsBound = true;
-            console.log('Events bound successfully');
+            console.log('Events bound successfully to actions container');
         }
 
         /**
@@ -413,6 +436,12 @@
 
                 if (!selectedType) {
                     console.warn('No action type selected');
+                    return;
+                }
+
+                // Sprawdź czy select faktycznie ma wartość i nie jest to przypadkowe wywołanie
+                if (!typeSelect.options[typeSelect.selectedIndex]) {
+                    console.warn('Invalid action type selected');
                     return;
                 }
 
@@ -648,14 +677,24 @@
          * Ładuje akcje (używane przy edycji)
          */
         async loadActions(actions) {
+            console.log('Loading actions:', actions);
             this.actions = actions || [];
             $('.actions-list').empty();
 
+            // Jeśli nie ma akcji, po prostu zaktualizuj hidden input i zakończ
+            if (!this.actions.length) {
+                console.log('No actions to load');
+                this.updateHiddenInput();
+                return;
+            }
+
+            // Renderuj akcje
             for (let i = 0; i < this.actions.length; i++) {
                 await this.renderAction(this.actions[i], i);
             }
 
             this.updateHiddenInput();
+            console.log('Actions loaded successfully, total:', this.actions.length);
         }
 
         /**
@@ -764,6 +803,9 @@
     window.get_items = API.getItems;
     window.get_locations = API.getLocations;
     window.get_locations_with_scenes = API.getLocationsWithScenes;
+    window.get_items = API.getItems;
+    window.get_locations = API.getLocations;
+    window.get_locations_with_scenes = API.getLocationsWithScenes;
 
     // Globalna instancja
     window.AnswerActionsManager = AnswerActionsManager;
@@ -771,14 +813,29 @@
     // Inicjalizacja po załadowaniu DOM
     $(document).ready(function () {
         // Sprawdź czy kontener akcji istnieje przed inicjalizacją
-        if ($('.actions-container').length === 0 && $('.actions-list').length === 0) {
-            console.warn('Actions container not found, skipping initialization');
+        if ($('.answer-actions-manager').length === 0) {
+            console.log('Actions manager container not found, skipping initialization');
             return;
         }
 
-        // Utwórz instancję globalną tylko jeśli jeszcze nie istnieje
+        // Sprawdź czy już została utworzona i zainicjalizowana instancja przez npc-admin.js
+        if (window.answerActionsManager && window.answerActionsManager.isInitialized) {
+            console.log('AnswerActionsManager already initialized by NPCAdmin');
+            return;
+        }
+
+        // Jeśli NPCAdmin utworzył instancję ale nie zainicjalizował (nie powinno się zdarzyć)
+        if (window.answerActionsManager && !window.answerActionsManager.isInitialized) {
+            console.log('Initializing existing AnswerActionsManager instance');
+            window.answerActionsManager.init();
+            return;
+        }
+
+        // Utwórz nową instancję globalną tylko jeśli jeszcze nie istnieje
         if (!window.answerActionsManager) {
+            console.log('Creating new AnswerActionsManager instance from document.ready');
             window.answerActionsManager = new AnswerActionsManager();
+            window.answerActionsManager.init();
         }
 
         // Dodaj obsługę wysyłania formularza

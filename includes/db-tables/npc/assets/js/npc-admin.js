@@ -62,9 +62,14 @@
                 this.components.table = window.tableEnhancements || new window.TableEnhancements();
             }
 
-            // Answer Actions Manager
-            if (window.AnswerActionsManager) {
+            // Answer Actions Manager - tylko jeśli kontener istnieje
+            if (window.AnswerActionsManager && $('.answer-actions-manager').length > 0) {
+                console.log('NPCAdmin: Initializing AnswerActionsManager');
                 this.components.answerActions = window.answerActionsManager || new window.AnswerActionsManager();
+                // Ustaw globalną referencję
+                window.answerActionsManager = this.components.answerActions;
+                // Inicjalizuj instancję
+                this.components.answerActions.init();
             }
         }
 
