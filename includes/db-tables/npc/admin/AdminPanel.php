@@ -238,6 +238,23 @@ class NPC_AdminPanel
             'name' => sanitize_text_field($_POST['name']),
             'description' => sanitize_textarea_field($_POST['description']),
             'image_url' => esc_url_raw($_POST['image_url']),
+            'avatar' => !empty($_POST['avatar']) ? intval($_POST['avatar']) : null,
+            'avatar_full' => !empty($_POST['avatar_full']) ? intval($_POST['avatar_full']) : null,
+            'avatar_full_back' => !empty($_POST['avatar_full_back']) ? intval($_POST['avatar_full_back']) : null,
+            'strength' => intval($_POST['strength'] ?? 0),
+            'defence' => intval($_POST['defence'] ?? 0),
+            'dexterity' => intval($_POST['dexterity'] ?? 0),
+            'perception' => intval($_POST['perception'] ?? 0),
+            'technical' => intval($_POST['technical'] ?? 0),
+            'charisma' => intval($_POST['charisma'] ?? 0),
+            'combat' => intval($_POST['combat'] ?? 0),
+            'steal' => intval($_POST['steal'] ?? 0),
+            'craft' => intval($_POST['craft'] ?? 0),
+            'trade' => intval($_POST['trade'] ?? 0),
+            'relations' => intval($_POST['relations'] ?? 0),
+            'street' => intval($_POST['street'] ?? 0),
+            'life' => intval($_POST['life'] ?? 0),
+            'max_life' => intval($_POST['max_life'] ?? 0),
             'metadata' => []
         ];
 
@@ -262,7 +279,24 @@ class NPC_AdminPanel
         $data = [
             'name' => sanitize_text_field($_POST['name']),
             'description' => sanitize_textarea_field($_POST['description']),
-            'image_url' => esc_url_raw($_POST['image_url'])
+            'image_url' => esc_url_raw($_POST['image_url']),
+            'avatar' => !empty($_POST['avatar']) ? intval($_POST['avatar']) : null,
+            'avatar_full' => !empty($_POST['avatar_full']) ? intval($_POST['avatar_full']) : null,
+            'avatar_full_back' => !empty($_POST['avatar_full_back']) ? intval($_POST['avatar_full_back']) : null,
+            'strength' => intval($_POST['strength'] ?? 0),
+            'defence' => intval($_POST['defence'] ?? 0),
+            'dexterity' => intval($_POST['dexterity'] ?? 0),
+            'perception' => intval($_POST['perception'] ?? 0),
+            'technical' => intval($_POST['technical'] ?? 0),
+            'charisma' => intval($_POST['charisma'] ?? 0),
+            'combat' => intval($_POST['combat'] ?? 0),
+            'steal' => intval($_POST['steal'] ?? 0),
+            'craft' => intval($_POST['craft'] ?? 0),
+            'trade' => intval($_POST['trade'] ?? 0),
+            'relations' => intval($_POST['relations'] ?? 0),
+            'street' => intval($_POST['street'] ?? 0),
+            'life' => intval($_POST['life'] ?? 0),
+            'max_life' => intval($_POST['max_life'] ?? 0)
         ];
 
         $result = $this->npc_repository->update($npc_id, $data);
@@ -424,8 +458,6 @@ class NPC_AdminPanel
      */
     private function handle_create_answer()
     {
-        require_once dirname(__FILE__) . '/components/ConditionManager.php';
-
         $dialog_id = intval($_POST['dialog_id']);
         $npc_id = intval($_POST['npc_id']);
 
@@ -434,7 +466,6 @@ class NPC_AdminPanel
             'text' => sanitize_textarea_field($_POST['answer_text']),
             'next_dialog_id' => empty($_POST['answer_next_dialog_id']) ? null : intval($_POST['answer_next_dialog_id']),
             'answer_order' => intval($_POST['answer_order']),
-            'conditions' => NPC_ConditionManager::sanitize_conditions($_POST['answer_conditions'] ?? ''),
             'status' => 'active'
         ];
 

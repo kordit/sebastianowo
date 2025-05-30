@@ -83,7 +83,6 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
     <div class="npc-form-container">
         <!-- Formularz NPC -->
         <div class="npc-basic-info">
-            <h2>Podstawowe informacje</h2>
             <form method="post" action="<?php echo admin_url('admin.php?page=npc-add'); ?>" class="npc-form">
                 <?php wp_nonce_field('npc_admin_action', 'npc_nonce'); ?>
                 <input type="hidden" name="action" value="<?php echo $is_edit ? 'update_npc' : 'create_npc'; ?>">
@@ -91,55 +90,171 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                     <input type="hidden" name="npc_id" value="<?php echo $npc->id; ?>">
                 <?php endif; ?>
 
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">
-                            <label for="name">Nazwa NPC <span class="required">*</span></label>
-                        </th>
-                        <td>
-                            <input type="text" id="name" name="name"
-                                value="<?php echo esc_attr($npc->name ?? ''); ?>"
-                                class="regular-text" required>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">
-                            <label for="description">Opis</label>
-                        </th>
-                        <td>
-                            <textarea id="description" name="description"
-                                rows="4" class="large-text"><?php echo esc_textarea($npc->description ?? ''); ?></textarea>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">
-                            <label for="image_url">URL obrazka</label>
-                        </th>
-                        <td>
-                            <input type="url" id="image_url" name="image_url"
-                                value="<?php echo esc_url($npc->image_url ?? ''); ?>"
-                                class="regular-text">
-                            <button type="button" class="button" id="upload-image-btn">Wybierz plik</button>
-                            <?php if ($npc && $npc->image_url): ?>
-                                <div class="image-preview">
-                                    <img src="<?php echo esc_url($npc->image_url); ?>"
-                                        alt="<?php echo esc_attr($npc->name); ?>"
-                                        style="max-width: 100px; height: auto;">
-                                </div>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
+                <!-- Zakładki formularza -->
+                <div class="npc-form-tabs">
+                    <a href="#tab-basic" class="npc-tab-link-style npc-tab-link active">Podstawowe</a>
+                    <a href="#tab-stats" class="npc-tab-link-style npc-tab-link">Statystyki</a>
+                </div>
 
-                </table>
+                <!-- Zakładka: Podstawowe informacje -->
+                <div id="tab-basic" class="npc-tab-content active">
+                    <div class="npc-form-card">
+                        <h3>Podstawowe informacje</h3>
+                        <table class="form-table">
+                            <tr>
+                                <th scope="row">
+                                    <label for="name">Nazwa NPC <span class="required">*</span></label>
+                                </th>
+                                <td>
+                                    <input type="text" id="name" name="name"
+                                        value="<?php echo esc_attr($npc->name ?? ''); ?>"
+                                        class="regular-text" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="description">Opis</label>
+                                </th>
+                                <td>
+                                    <textarea id="description" name="description"
+                                        rows="4" class="large-text"><?php echo esc_textarea($npc->description ?? ''); ?></textarea>
+                                </td>
+                            </tr>
+                        </table>
+                        <h3>Avatary postaci</h3>
+                        <div class="npc-form-grid">
+                            <div class="avatar-field">
+                                <label for="avatar">Avatar (ID obrazka)</label>
+                                <input type="number" id="avatar" name="avatar"
+                                    value="<?php echo esc_attr($npc->avatar ?? ''); ?>"
+                                    class="regular-text" min="0">
+                                <p class="description">ID obrazka z media library do użycia jako avatar.</p>
+                            </div>
+                            <div class="avatar-field">
+                                <label for="avatar_full">Avatar pełny (ID obrazka)</label>
+                                <input type="number" id="avatar_full" name="avatar_full"
+                                    value="<?php echo esc_attr($npc->avatar_full ?? ''); ?>"
+                                    class="regular-text" min="0">
+                                <p class="description">ID obrazka z media library do użycia jako pełny avatar.</p>
+                            </div>
+                            <div class="avatar-field">
+                                <label for="avatar_full_back">Avatar tył (ID obrazka)</label>
+                                <input type="number" id="avatar_full_back" name="avatar_full_back"
+                                    value="<?php echo esc_attr($npc->avatar_full_back ?? ''); ?>"
+                                    class="regular-text" min="0">
+                                <p class="description">ID obrazka z media library do użycia jako avatar z tyłu.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                <p class="submit">
+                <!-- Zakładka: Statystyki -->
+                <div id="tab-stats" class="npc-tab-content">
+                    <div class="npc-form-card">
+                        <h3>Statystyki podstawowe</h3>
+                        <div class="stats-group">
+                            <div class="stat-item">
+                                <label for="strength">Siła</label>
+                                <input type="number" id="strength" name="strength"
+                                    value="<?php echo esc_attr($npc->strength ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                            <div class="stat-item">
+                                <label for="defence">Obrona</label>
+                                <input type="number" id="defence" name="defence"
+                                    value="<?php echo esc_attr($npc->defence ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                            <div class="stat-item">
+                                <label for="dexterity">Zręczność</label>
+                                <input type="number" id="dexterity" name="dexterity"
+                                    value="<?php echo esc_attr($npc->dexterity ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                            <div class="stat-item">
+                                <label for="perception">Percepcja</label>
+                                <input type="number" id="perception" name="perception"
+                                    value="<?php echo esc_attr($npc->perception ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                            <div class="stat-item">
+                                <label for="technical">Technika</label>
+                                <input type="number" id="technical" name="technical"
+                                    value="<?php echo esc_attr($npc->technical ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                            <div class="stat-item">
+                                <label for="charisma">Charyzma</label>
+                                <input type="number" id="charisma" name="charisma"
+                                    value="<?php echo esc_attr($npc->charisma ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                        </div>
+                        <h3>Umiejętności</h3>
+                        <div class="stats-group">
+                            <div class="stat-item">
+                                <label for="combat">Walka</label>
+                                <input type="number" id="combat" name="combat"
+                                    value="<?php echo esc_attr($npc->combat ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                            <div class="stat-item">
+                                <label for="steal">Kradzież</label>
+                                <input type="number" id="steal" name="steal"
+                                    value="<?php echo esc_attr($npc->steal ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                            <div class="stat-item">
+                                <label for="craft">Rzemiosło</label>
+                                <input type="number" id="craft" name="craft"
+                                    value="<?php echo esc_attr($npc->craft ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                            <div class="stat-item">
+                                <label for="trade">Handel</label>
+                                <input type="number" id="trade" name="trade"
+                                    value="<?php echo esc_attr($npc->trade ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                            <div class="stat-item">
+                                <label for="relations">Relacje</label>
+                                <input type="number" id="relations" name="relations"
+                                    value="<?php echo esc_attr($npc->relations ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                            <div class="stat-item">
+                                <label for="street">Ulica</label>
+                                <input type="number" id="street" name="street"
+                                    value="<?php echo esc_attr($npc->street ?? 0); ?>"
+                                    min="0" max="100">
+                            </div>
+                        </div>
+                        <h3>Punkty życia</h3>
+                        <div class="stats-group">
+                            <div class="stat-item">
+                                <label for="life">Obecne życie</label>
+                                <input type="number" id="life" name="life"
+                                    value="<?php echo esc_attr($npc->life ?? 0); ?>"
+                                    min="0">
+                            </div>
+                            <div class="stat-item">
+                                <label for="max_life">Maksymalne życie</label>
+                                <input type="number" id="max_life" name="max_life"
+                                    value="<?php echo esc_attr($npc->max_life ?? 0); ?>"
+                                    min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="npc-form-actions">
                     <button type="submit" class="button button-primary">
                         <?php echo $is_edit ? 'Zaktualizuj NPC' : 'Utwórz NPC'; ?>
                     </button>
                     <a href="<?php echo admin_url('admin.php?page=npc-manager'); ?>" class="button">
                         Powrót do listy
                     </a>
-                </p>
+                </div>
             </form>
         </div>
 
@@ -176,7 +291,7 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                             <div class="nav-tab-wrapper">
                                 <?php foreach ($locations as $index => $location): ?>
                                     <a href="#tab-<?php echo esc_attr($location['slug']); ?>"
-                                        class="nav-tab <?php echo $index === 0 ? 'nav-tab-active' : ''; ?>"
+                                        class="npc-tab-link-style nav-tab <?php echo $index === 0 ? 'nav-tab-active' : ''; ?>"
                                         data-location="<?php echo esc_attr($location['slug']); ?>">
                                         <?php echo esc_html($location['title']); ?>
                                         <span class="count">(<?php echo $location['count']; ?>)</span>

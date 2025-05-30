@@ -15,6 +15,7 @@
             this.initImageUploader();
             this.initSortable();
             this.initLocationTabs();
+            this.initFormTabs(); // Dodanie inicjalizacji zakładek formularza
         }
 
         bindEvents() {
@@ -106,10 +107,15 @@
         }
 
         closeModal() {
-            $('.npc-modal').fadeOut(200);
+            // Dodajemy efekt płynnego wyjścia
+            $('.npc-modal').fadeOut(300, function () {
+                // Resetujemy formularze po ukryciu modalu
+                $('#dialog-form, #answer-form').trigger('reset');
+            });
         }
 
         closeModalOnOverlay(event) {
+            // Zamykamy modal tylko gdy kliknięcie trafia w overlay, nie w jego zawartość
             if (event.target === event.currentTarget) {
                 this.closeModal();
             }
@@ -185,6 +191,8 @@
                 event.preventDefault();
                 this.showNotice('Nazwa NPC jest wymagana.', 'error');
                 $('#name').focus();
+                // Przełącz na zakładkę z danymi podstawowymi
+                $('.npc-tab-link[href="#tab-basic"]').click();
                 return false;
             }
 
@@ -194,6 +202,40 @@
                 event.preventDefault();
                 this.showNotice('Podaj prawidłowy URL obrazka.', 'error');
                 $('#image_url').focus();
+                // Przełącz na zakładkę z danymi podstawowymi
+                $('.npc-tab-link[href="#tab-basic"]').click();
+                return false;
+            }
+
+            // Sprawdź czy statystyki są w zakresie 0-100
+            const stats = ['strength', 'defence', 'dexterity', 'perception', 'technical', 'charisma',
+                'combat', 'steal', 'craft', 'trade', 'relations', 'street'];
+
+            let invalidStat = false;
+            let tabToShow = '';
+
+            stats.forEach(stat => {
+                const value = parseInt($('#' + stat).val() || 0);
+                if (value < 0 || value > 100) {
+                    event.preventDefault();
+                    invalidStat = stat;
+
+                    // Określ odpowiednią zakładkę dla danej statystyki
+                    if (['strength', 'defence', 'dexterity', 'perception', 'technical', 'charisma'].includes(stat)) {
+                        tabToShow = '#tab-stats';
+                    } else {
+                        tabToShow = '#tab-skills';
+                    }
+
+                    return false; // przerwij pętlę forEach
+                }
+            });
+
+            if (invalidStat) {
+                this.showNotice(`Wartość dla ${invalidStat} musi być między 0 a 100.`, 'error');
+                $('#' + invalidStat).focus();
+                // Przełącz na odpowiednią zakładkę
+                $('.npc-tab-link[href="' + tabToShow + '"]').click();
                 return false;
             }
 
@@ -590,6 +632,59 @@
                     });
                 });
             }
+        }
+
+        // Inicjalizacja zakładek formularza NPC
+        initFormTabs() {
+            // Usprawniona obsługa zakładek
+            $(document).on('click', '.npc-tab-link', function (e) {
+                e.preventDefault();
+                const target = $(this).attr('href');
+
+                // Animowane przejście
+                $('.npc-tab-content').removeClass('active');
+                $('.npc-tab-link').removeClass('active');
+
+                // Efekt animacji
+                setTimeout(() => {
+                    $(target).addClass('active');
+                    $(this).addClass('active');
+
+                    // Aktualizacja URL dla lepszej nawigacji
+                    if (history.pushState) {
+                        history.replaceState(null, null, target);
+                    }
+
+                    // Animowane przewinięcie do zakładki na urządzeniach mobilnych
+                    if (window.innerWidth < 782) {
+                        $('html, body').animate({
+                            scrollTop: $(target).offset().top - 100
+                        }, 300);
+                    }
+                }, 100);
+            });
+
+            // Otwórz zakładkę wskazaną w URL
+            if (window.location.hash && $(window.location.hash).length) {
+                $('.npc-tab-link[href="' + window.location.hash + '"]').click();
+            } else {
+                // Domyślnie otwiera pierwszą zakładkę jeśli nie ma hasha
+                $('.npc-tab-link').first().click();
+            }
+
+            // Dostosowanie wysokości zakładki - używamy funkcji anonimowej
+            const adjustTabContentHeight = function () {
+                // Pozwala na automatyczne dostosowanie wysokości zawartości zakładek
+                const activeContent = $('.npc-tab-content.active');
+                if (activeContent.length) {
+                    const contentHeight = activeContent.outerHeight();
+                    $('.npc-form').css('min-height', contentHeight + 80);
+                }
+            };
+
+            // Wywołujemy od razu i rejestrujemy na zdarzenie resize
+            adjustTabContentHeight();
+            $(window).on('resize', adjustTabContentHeight);
         }
     }
 

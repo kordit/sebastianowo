@@ -26,6 +26,18 @@ function npc_system_autoloader($class_name)
 
     $class_name = substr($class_name, strlen($prefix));
 
+    // Mapowanie specjalnych nazw klas na nazwy plików
+    $class_file_map = [
+        'DatabaseManager' => 'DatabaseManager'
+    ];
+
+    // Sprawdź czy klasa ma specjalne mapowanie
+    if (isset($class_file_map[$class_name])) {
+        $file_name = $class_file_map[$class_name];
+    } else {
+        $file_name = $class_name;
+    }
+
     $directories = [
         'core',
         'repositories',
@@ -35,7 +47,7 @@ function npc_system_autoloader($class_name)
     ];
 
     foreach ($directories as $dir) {
-        $file_path = NPC_PLUGIN_PATH . $dir . '/' . $class_name . '.php';
+        $file_path = NPC_PLUGIN_PATH . $dir . '/' . $file_name . '.php';
         if (file_exists($file_path)) {
             require_once $file_path;
             return;
@@ -78,9 +90,6 @@ class NPCDialogSystem
         if (!$db_manager->tables_exist()) {
             $db_manager->create_tables();
         }
-
-        // Wykonaj migracje bazy danych
-        $db_manager->migrate_database();
 
         // Panel administracyjny
         if (is_admin()) {

@@ -47,14 +47,38 @@ class NPC_DatabaseManager
             name varchar(255) NOT NULL,
             description text,
             image_url varchar(500),
+            avatar int(11) DEFAULT NULL,
+            avatar_full int(11) DEFAULT NULL,
+            avatar_full_back int(11) DEFAULT NULL,
+            strength int(11) DEFAULT 0,
+            defence int(11) DEFAULT 0,
+            dexterity int(11) DEFAULT 0,
+            perception int(11) DEFAULT 0,
+            technical int(11) DEFAULT 0,
+            charisma int(11) DEFAULT 0,
+            combat int(11) DEFAULT 0,
+            steal int(11) DEFAULT 0,
+            craft int(11) DEFAULT 0,
+            trade int(11) DEFAULT 0,
+            relations int(11) DEFAULT 0,
+            street int(11) DEFAULT 0,
+            life int(11) DEFAULT 0,
+            max_life int(11) DEFAULT 0,
+            location varchar(255),
+            status enum('active', 'inactive') DEFAULT 'active',
             metadata json,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (id)
+            PRIMARY KEY (id),
+            INDEX idx_status (status),
+            INDEX idx_location (location)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
+
+        // Dodaj nowe kolumny jeśli nie istnieją
+        $this->add_new_columns_if_not_exist();
     }
 
     /**
@@ -68,10 +92,8 @@ class NPC_DatabaseManager
             title varchar(255) NOT NULL,
             content text NOT NULL,
             dialog_order int(11) DEFAULT 0,
-            location varchar(255) DEFAULT NULL,
             conditions json,
             actions json,
-            is_starting_dialog tinyint(1) DEFAULT 0,
             status enum('active', 'inactive') DEFAULT 'active',
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -79,8 +101,7 @@ class NPC_DatabaseManager
             FOREIGN KEY (npc_id) REFERENCES {$this->npc_table}(id) ON DELETE CASCADE,
             INDEX idx_npc_id (npc_id),
             INDEX idx_status (status),
-            INDEX idx_starting (is_starting_dialog),
-            INDEX idx_location (location)
+            INDEX idx_dialog_order (dialog_order)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -138,35 +159,6 @@ class NPC_DatabaseManager
     }
 
     /**
-     * Migruje bazę danych - dodaje brakujące kolumny
-     */
-    public function migrate_database()
-    {
-        $this->add_location_column_if_not_exists();
-    }
-
-    /**
-     * Dodaje kolumnę location do tabeli dialogów jeśli nie istnieje
-     */
-    private function add_location_column_if_not_exists()
-    {
-        $column_exists = $this->wpdb->get_results(
-            $this->wpdb->prepare(
-                "SHOW COLUMNS FROM {$this->dialog_table} LIKE %s",
-                'location'
-            )
-        );
-
-        if (empty($column_exists)) {
-            $this->wpdb->query(
-                "ALTER TABLE {$this->dialog_table} 
-                 ADD COLUMN location varchar(255) DEFAULT NULL AFTER dialog_order,
-                 ADD INDEX idx_location (location)"
-            );
-        }
-    }
-
-    /**
      * Pobiera nazwy tabel
      */
     public function get_table_names()
@@ -176,5 +168,47 @@ class NPC_DatabaseManager
             'dialog' => $this->dialog_table,
             'answer' => $this->answer_table
         ];
+    }
+
+    /**
+     * Dodaje nowe kolumny NPC jeśli nie istnieją
+     */
+    private function add_new_columns_if_not_exist()
+    {
+        $columns_to_add = [
+            'avatar' => 'int(11) DEFAULT NULL',
+            'avatar_full' => 'int(11) DEFAULT NULL',
+            'avatar_full_back' => 'int(11) DEFAULT NULL',
+            'strength' => 'int(11) DEFAULT 0',
+            'defence' => 'int(11) DEFAULT 0',
+            'dexterity' => 'int(11) DEFAULT 0',
+            'perception' => 'int(11) DEFAULT 0',
+            'technical' => 'int(11) DEFAULT 0',
+            'charisma' => 'int(11) DEFAULT 0',
+            'combat' => 'int(11) DEFAULT 0',
+            'steal' => 'int(11) DEFAULT 0',
+            'craft' => 'int(11) DEFAULT 0',
+            'trade' => 'int(11) DEFAULT 0',
+            'relations' => 'int(11) DEFAULT 0',
+            'street' => 'int(11) DEFAULT 0',
+            'life' => 'int(11) DEFAULT 0',
+            'max_life' => 'int(11) DEFAULT 0'
+        ];
+
+        foreach ($columns_to_add as $column_name => $column_definition) {
+            $column_exists = $this->wpdb->get_results(
+                $this->wpdb->prepare(
+                    "SHOW COLUMNS FROM {$this->npc_table} LIKE %s",
+                    $column_name
+                )
+            );
+
+            if (empty($column_exists)) {
+                $this->wpdb->query(
+                    "ALTER TABLE {$this->npc_table} 
+                     ADD COLUMN {$column_name} {$column_definition}"
+                );
+            }
+        }
     }
 }
