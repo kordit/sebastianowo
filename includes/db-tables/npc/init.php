@@ -139,7 +139,15 @@ class NPCDialogSystem
             NPC_PLUGIN_VERSION,
             true
         );
-        // Usunięto ładowanie skryptów związanych z warunkami
+
+        // Skrypt dla obsługi akcji odpowiedzi
+        wp_enqueue_script(
+            'npc-answer-actions',
+            NPC_PLUGIN_URL . 'assets/js/answer-action.js',
+            ['jquery'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
 
         wp_enqueue_style(
             'npc-admin-css',
@@ -152,6 +160,14 @@ class NPCDialogSystem
         wp_enqueue_style(
             'npc-sortable-css',
             NPC_PLUGIN_URL . 'assets/css/npc-sortable.css',
+            [],
+            NPC_PLUGIN_VERSION
+        );
+
+        // Style dla obsługi akcji odpowiedzi
+        wp_enqueue_style(
+            'npc-answer-actions',
+            NPC_PLUGIN_URL . 'assets/css/answer-action.css',
             [],
             NPC_PLUGIN_VERSION
         );

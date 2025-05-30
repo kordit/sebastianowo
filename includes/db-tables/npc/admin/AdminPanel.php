@@ -461,11 +461,22 @@ class NPC_AdminPanel
         $dialog_id = intval($_POST['dialog_id']);
         $npc_id = intval($_POST['npc_id']);
 
+        // Obsługa akcji
+        $actions = [];
+        if (!empty($_POST['answer_actions'])) {
+            $actions_json = stripslashes($_POST['answer_actions']);
+            $actions = json_decode($actions_json, true);
+            if (!is_array($actions)) {
+                $actions = [];
+            }
+        }
+
         $data = [
             'dialog_id' => $dialog_id,
             'text' => sanitize_textarea_field($_POST['answer_text']),
             'next_dialog_id' => empty($_POST['answer_next_dialog_id']) ? null : intval($_POST['answer_next_dialog_id']),
             'answer_order' => intval($_POST['answer_order']),
+            'actions' => $actions,
             'status' => 'active'
         ];
 
@@ -489,10 +500,21 @@ class NPC_AdminPanel
         $answer_id = intval($_POST['answer_id']);
         $npc_id = intval($_POST['npc_id']);
 
+        // Obsługa akcji
+        $actions = [];
+        if (!empty($_POST['answer_actions'])) {
+            $actions_json = stripslashes($_POST['answer_actions']);
+            $actions = json_decode($actions_json, true);
+            if (!is_array($actions)) {
+                $actions = [];
+            }
+        }
+
         $data = [
             'text' => sanitize_textarea_field($_POST['answer_text']),
             'next_dialog_id' => empty($_POST['answer_next_dialog_id']) ? null : intval($_POST['answer_next_dialog_id']),
             'answer_order' => intval($_POST['answer_order']),
+            'actions' => $actions,
         ];
 
         $result = $this->answer_repository->update($answer_id, $data);

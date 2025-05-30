@@ -169,7 +169,18 @@
                         $('#answer_order').val(answer.answer_order);
                         $('#answer_next_dialog_id').val(answer.next_dialog_id || '');
 
-                        // Usunięto ładowanie warunków odpowiedzi
+                        // Załaduj akcje jeśli istnieją
+                        if (window.answerActionsManager && answer.actions) {
+                            let actions = [];
+                            try {
+                                actions = typeof answer.actions === 'string' ? JSON.parse(answer.actions) : answer.actions;
+                            } catch (e) {
+                                console.error('Error parsing actions:', e);
+                                actions = [];
+                            }
+                            window.answerActionsManager.loadActions(actions);
+                        }
+
                     } else {
                         this.showNotice('Błąd podczas ładowania danych odpowiedzi.', 'error');
                     }

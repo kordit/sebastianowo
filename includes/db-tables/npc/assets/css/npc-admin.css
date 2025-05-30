@@ -587,6 +587,9 @@
 /* Animacje dla list dialogów */
 .dialogs-container {
     min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px
 }
 
 @keyframes fadeIn {
@@ -603,4 +606,6 @@
 
 .dialog-item {
     animation: fadeIn 0.4s ease-out;
+    border: solid 2px #2271b1;
+    border-radius: 10px;
 }

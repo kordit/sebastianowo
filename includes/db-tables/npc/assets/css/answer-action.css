@@ -1,0 +1,151 @@
+/* Answer Actions CSS */
+.answer-actions-manager {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.answer-actions-manager h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #23282d;
+}
+
+.actions-list {
+    margin-bottom: 15px;
+}
+
+.action-item {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.action-header {
+    background: #f0f0f1;
+    padding: 10px 15px;
+    border-bottom: 1px solid #c3c4c7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.action-header h5 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.remove-action-btn {
+    background: none;
+    border: none;
+    color: #d63638;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-action-btn:hover {
+    color: #d63638;
+    background: rgba(214, 54, 56, 0.1);
+    border-radius: 2px;
+}
+
+.action-body {
+    padding: 15px;
+}
+
+.action-description {
+    font-size: 12px;
+    color: #646970;
+    margin: 0 0 15px 0;
+    font-style: italic;
+}
+
+.action-field {
+    margin-bottom: 15px;
+}
+
+.action-field:last-child {
+    margin-bottom: 0;
+}
+
+.action-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 13px;
+    color: #1d2327;
+}
+
+.action-field-input {
+    width: 100%;
+    max-width: 300px;
+}
+
+.add-action-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.action-type-select {
+    min-width: 200px;
+}
+
+.add-action-btn {
+    white-space: nowrap;
+}
+
+/* Empty state */
+.actions-list:empty::before {
+    content: "Brak akcji. Dodaj pierwszą akcję używając kontrolek poniżej.";
+    display: block;
+    color: #646970;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+    background: #fff;
+    border: 1px dashed #c3c4c7;
+    border-radius: 4px;
+}
+
+/* Action type specific styling */
+.action-item[data-type="give_gold"] .action-header {
+    background: #fff3cd;
+    border-bottom-color: #ffeaa7;
+}
+
+.action-item[data-type="start_combat"] .action-header {
+    background: #f8d7da;
+    border-bottom-color: #f5c6cb;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .add-action-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .action-type-select {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .action-field-input {
+        max-width: 100%;
+    }
+}

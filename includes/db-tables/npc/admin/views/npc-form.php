@@ -8,6 +8,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Include komponentu akcji
+require_once NPC_PLUGIN_PATH . 'admin/components/answer-actions.php';
+
 $is_edit = $npc && $npc->id;
 $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC';
 ?>
@@ -502,6 +505,14 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                                 <?php endforeach; ?>
                             </select>
                             <p class="description">Wybierz dialog, który zostanie wyświetlony po wybraniu tej odpowiedzi.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <?php
+                            // Renderuj komponent akcji
+                            render_answer_actions_manager(null, []);
+                            ?>
                         </td>
                     </tr>
                     <!-- Usunięto pole Kolejność. Kolejność będzie ustalana przez przeciąganie -->
