@@ -6,6 +6,81 @@
 (function ($) {
     'use strict';
 
+
+    // Globalna funkcja do pobierania listy przedmiotów
+    window.get_items = function () {
+        return new Promise((resolve) => {
+            $.post(npcAdmin.ajax_url, {
+                action: 'npc_get_items',
+                nonce: npcAdmin.nonce
+            })
+                .done(function (response) {
+                    if (response.success) {
+                        const options = {};
+                        response.data.forEach(item => {
+                            options[item.id] = item.title;
+                        });
+                        resolve(options);
+                    } else {
+                        console.error('Błąd pobierania przedmiotów:', response.data);
+                        resolve({});
+                    }
+                })
+                .fail(function () {
+                    console.error('Błąd połączenia podczas pobierania przedmiotów');
+                    resolve({});
+                });
+        });
+    };
+
+    window.get_locations = function () {
+        return new Promise((resolve) => {
+            $.post(npcAdmin.ajax_url, {
+                action: 'npc_get_locations',
+                nonce: npcAdmin.nonce
+            })
+                .done(function (response) {
+                    if (response.success) {
+                        const options = {};
+                        response.data.forEach(location => {
+                            options[location.id] = location.title;
+                        });
+                        resolve(options);
+                    } else {
+                        console.error('Błąd pobierania lokacji:', response.data);
+                        resolve({});
+                    }
+                })
+                .fail(function () {
+                    console.error('Błąd połączenia podczas pobierania lokacji');
+                    resolve({});
+                });
+        });
+    };
+
+    window.get_locations_with_scenes = function () {
+        return new Promise((resolve) => {
+            $.post(npcAdmin.ajax_url, {
+                action: 'npc_get_locations_with_scenes',
+                nonce: npcAdmin.nonce
+            })
+                .done(function (response) {
+                    if (response.success) {
+                        resolve(response.data);
+                    } else {
+                        console.error('Błąd pobierania lokacji ze scenami:', response.data);
+                        resolve([]);
+                    }
+                })
+                .fail(function () {
+                    console.error('Błąd połączenia podczas pobierania lokacji ze scenami');
+                    resolve([]);
+                });
+        });
+    };
+
+
+
     class AnswerActionsManager {
         constructor() {
             this.actionTypes = {};
@@ -22,17 +97,23 @@
         }
 
         loadActionTypes() {
-
             const configScript = document.getElementById('action-types-config');
 
             if (configScript) {
                 try {
-                    this.actionTypes = JSON.parse(configScript.textContent);
+                    const config = JSON.parse(configScript.textContent);
+                    if (typeof config !== 'object' || !config) {
+                        throw new Error('Invalid action types configuration format');
+                    }
+                    this.actionTypes = config;
+                    console.log('Loaded action types:', Object.keys(this.actionTypes));
                 } catch (e) {
                     console.error('Error parsing action types config:', e);
+                    this.actionTypes = {};
                 }
             } else {
                 console.warn('No action-types-config script found');
+                this.actionTypes = {};
             }
         }
 
@@ -51,10 +132,10 @@
         loadExistingActions() {
             const dataInput = document.getElementById('answer-actions-data');
 
-
             if (dataInput && dataInput.value) {
                 try {
-                    this.actionsData = JSON.parse(dataInput.value) || [];
+                    const actions = JSON.parse(dataInput.value) || [];
+                    this.actionsData = actions;
                 } catch (e) {
                     console.error('Error parsing existing actions data:', e);
                     this.actionsData = [];
@@ -70,11 +151,6 @@
 
             const selectedType = typeSelect ? typeSelect.value : '';
 
-            if (!selectedType || !this.actionTypes[selectedType]) {
-                alert('Wybierz typ akcji.');
-                return;
-            }
-
             const actionConfig = this.actionTypes[selectedType];
             const actionIndex = this.actionsData.length;
 
@@ -84,12 +160,6 @@
                 type: selectedType,
                 params: {}
             };
-
-            // Ustaw domyślne wartości
-            Object.keys(actionConfig.fields).forEach(fieldName => {
-                const fieldConfig = actionConfig.fields[fieldName];
-                newAction.params[fieldName] = fieldConfig.default || '';
-            });
 
             this.actionsData.push(newAction);
 
@@ -129,6 +199,10 @@
 
         renderAction(action, index) {
             const actionConfig = this.actionTypes[action.type];
+            if (!actionConfig) {
+                return;
+            }
+
             const $actionsList = $('.actions-list');
 
             const $actionItem = $(`
@@ -147,8 +221,13 @@
             const $fieldsContainer = $actionItem.find('.action-fields');
 
             // Renderuj pola
-            Object.keys(actionConfig.fields).forEach(fieldName => {
+            Object.keys(actionConfig.fields || {}).forEach(fieldName => {
                 const fieldConfig = actionConfig.fields[fieldName];
+                if (!fieldConfig) {
+                    console.error('Missing field configuration:', fieldName);
+                    return;
+                }
+
                 const fieldValue = action.params[fieldName] || fieldConfig.default || '';
 
                 const $fieldWrapper = $(`
@@ -158,8 +237,10 @@
                 `);
 
                 const $fieldInput = this.createFieldInput(fieldName, fieldConfig, fieldValue);
-                $fieldWrapper.append($fieldInput);
-                $fieldsContainer.append($fieldWrapper);
+                if ($fieldInput) {
+                    $fieldWrapper.append($fieldInput);
+                    $fieldsContainer.append($fieldWrapper);
+                }
             });
 
             $actionsList.append($actionItem);
@@ -194,20 +275,107 @@
                 case 'select':
                     $input = $(`
                         <select class="regular-text action-field-input" data-field="${fieldName}">
+                            <option value="">-- Wybierz --</option>
                         </select>
                     `);
 
-                    let options = {};
-                    if (typeof fieldConfig.options === 'string' && window[fieldConfig.options]) {
-                        options = window[fieldConfig.options]();
-                    } else if (typeof fieldConfig.options === 'object') {
-                        options = fieldConfig.options;
+                    const populateOptions = (options) => {
+                        $input.find('option:not(:first)').remove(); // Usuń wszystkie opcje oprócz pierwszej
+
+                        if (Array.isArray(options)) {
+                            // Prosty array lub array obiektów
+                            options.forEach(option => {
+                                const optionValue = typeof option === 'object' ? option.id : option;
+                                const optionLabel = typeof option === 'object' ? option.title : option;
+                                const optionScenes = typeof option === 'object' ? option.scenes : null;
+                                const selected = value == optionValue ? 'selected' : '';
+                                const scenesAttr = optionScenes ? ` data-scenes='${JSON.stringify(optionScenes)}'` : '';
+                                $input.append(`<option value="${optionValue}" ${selected}${scenesAttr}>${optionLabel}</option>`);
+                            });
+                        } else if (typeof options === 'object') {
+                            // Obiekt z tytułami i scenami
+                            Object.entries(options).forEach(([optionValue, optionData]) => {
+                                if (optionValue === '0') {
+                                    // Specjalna obsługa placeholdera
+                                    $input.find('option:first').text(optionData);
+                                } else {
+                                    const optionLabel = typeof optionData === 'object' ? optionData.title : optionData;
+                                    const optionScenes = typeof optionData === 'object' ? optionData.scenes : null;
+                                    const selected = value == optionValue ? 'selected' : '';
+                                    const scenesAttr = optionScenes ? ` data-scenes='${JSON.stringify(optionScenes)}'` : '';
+                                    $input.append(`<option value="${optionValue}" ${selected}${scenesAttr}>${optionLabel}</option>`);
+                                }
+                            });
+                        }
+
+                        // Debug: sprawdź czy dane scen zostały dodane
+                        console.log('Opcje po populacji:', $input.find('option').map(function () {
+                            return {
+                                value: $(this).val(),
+                                scenes: $(this).attr('data-scenes')
+                            };
+                        }).get());
+                    };
+
+                    // Jeśli pole zależy od innego pola
+                    if (fieldConfig.depends_on) {
+                        // Opóźniamy bindowanie eventów aby mieć pewność że elementy są w DOM
+                        setTimeout(() => {
+                            const $parentField = $input.closest('.action-item').find(`[data-field="${fieldConfig.depends_on}"]`);
+
+                            if (!$parentField.length) {
+                                console.error(`Nie znaleziono pola nadrzędnego: ${fieldConfig.depends_on}`);
+                                return;
+                            }
+
+                            // Aktualizuj opcje gdy zmienia się pole nadrzędne
+                            $parentField.on('change', (event) => {
+                                const $selectedOption = $(event.target).find('option:selected');
+                                console.log('Wybrana lokalizacja:', $selectedOption.val());
+
+                                // Próbujemy pobrać dane scen bezpośrednio z atrybutu data
+                                const rawScenes = $selectedOption.attr('data-scenes');
+                                console.log('Surowe dane scen:', rawScenes);
+
+                                let scenes = [];
+                                try {
+                                    scenes = rawScenes ? JSON.parse(rawScenes) : [];
+                                } catch (e) {
+                                    console.error('Błąd parsowania danych scen:', e);
+                                }
+
+                                console.log('Przetworzone sceny:', scenes);
+
+                                // Aktualizuj opcje pola zależnego
+                                $input.find('option:not(:first)').remove();
+                                if (Array.isArray(scenes) && scenes.length > 0) {
+                                    scenes.forEach(scene => {
+                                        const selected = value == scene.id ? 'selected' : '';
+                                        const sceneTitle = scene.title || `Scena ${scene.id}`;
+                                        $input.append(`<option value="${scene.id}" ${selected}>${sceneTitle}</option>`);
+                                    });
+                                } else {
+                                    console.log('Brak scen dla wybranej lokalizacji');
+                                    $input.val('');
+                                }
+                            });
+
+                            // Wyzwól zmianę na polu nadrzędnym aby załadować początkowe opcje
+                            if ($parentField.val()) {
+                                console.log('Wyzwalanie początkowej zmiany dla lokalizacji:', $parentField.val());
+                                $parentField.trigger('change');
+                            }
+                        }, 100); // Zwiększamy opóźnienie do 100ms dla pewności
+                    }
+                    // Jeśli pole ma dynamiczne opcje (funkcja)
+                    else if (typeof fieldConfig.options === 'string' && window[fieldConfig.options]) {
+                        window[fieldConfig.options]().then(populateOptions);
+                    }
+                    // Jeśli pole ma statyczne opcje
+                    else if (typeof fieldConfig.options === 'object') {
+                        populateOptions(fieldConfig.options);
                     }
 
-                    Object.keys(options).forEach(optionValue => {
-                        const selected = value == optionValue ? 'selected' : '';
-                        $input.append(`<option value="${optionValue}" ${selected}>${options[optionValue]}</option>`);
-                    });
                     break;
 
                 default:
@@ -260,7 +428,7 @@
                         // Zaktualizuj kolejność w danych
                         const oldIndex = evt.oldIndex;
                         const newIndex = evt.newIndex;
-                        
+
                         if (oldIndex !== newIndex) {
                             const item = this.actionsData.splice(oldIndex, 1)[0];
                             this.actionsData.splice(newIndex, 0, item);

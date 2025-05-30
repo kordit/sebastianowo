@@ -485,6 +485,16 @@
     outline: 2px solid transparent;
 }
 
+.action-fields {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.actions-list.sortable {
+    margin-top: 30px;
+}
+
 .modal-footer {
     padding: 15px 20px;
     background-color: #f8f8f8;
@@ -494,6 +504,7 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    gap: 20px;
 }
 
 .modal-footer button {

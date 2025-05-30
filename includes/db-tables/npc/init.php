@@ -118,7 +118,9 @@ class NPCDialogSystem
     {
         if (strpos($hook, 'npc-manager') === false) {
             return;
-        }        // Dodaj jQuery UI dla funkcji przeciągania i sortowania
+        }
+
+        // Dodaj jQuery UI dla funkcji przeciągania i sortowania
         wp_enqueue_script('jquery-ui-core');
         wp_enqueue_script('jquery-ui-sortable');
         wp_enqueue_script('jquery-ui-draggable');
@@ -195,24 +197,31 @@ class NPCDialogSystem
             true
         );
 
-        // Skrypt dla obsługi akcji odpowiedzi
-        wp_enqueue_script(
-            'npc-answer-actions',
-            NPC_PLUGIN_URL . 'assets/js/answer-action.js',
-            ['jquery'],
-            NPC_PLUGIN_VERSION,
-            true
-        );
-
-        // Główny orchestrator - zawsze ostatni
+        // Główny orchestrator
         wp_enqueue_script(
             'npc-admin-js',
             NPC_PLUGIN_URL . 'assets/js/npc-admin.js',
-            ['jquery', 'wp-api', 'npc-notification-manager', 'npc-modal-manager', 'npc-form-validator', 'npc-tab-manager', 'npc-sortable-manager', 'npc-image-uploader', 'npc-auto-save-manager', 'npc-table-enhancements', 'npc-answer-actions'],
+            ['jquery', 'wp-api', 'npc-notification-manager', 'npc-modal-manager', 'npc-form-validator', 'npc-tab-manager', 'npc-sortable-manager', 'npc-image-uploader', 'npc-auto-save-manager', 'npc-table-enhancements'],
             NPC_PLUGIN_VERSION,
             true
         );
 
+        // Lokalizacja skryptu - musi być po zarejestrowaniu głównego skryptu
+        wp_localize_script('npc-admin-js', 'npcAdmin', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('npc_admin_nonce')
+        ]);
+
+        // Skrypt dla obsługi akcji odpowiedzi - używa danych z npcAdmin
+        wp_enqueue_script(
+            'npc-answer-actions',
+            NPC_PLUGIN_URL . 'assets/js/answer-action.js',
+            ['jquery', 'npc-admin-js'],
+            NPC_PLUGIN_VERSION,
+            true
+        );
+
+        // Style CSS
         wp_enqueue_style(
             'npc-admin-css',
             NPC_PLUGIN_URL . 'assets/css/npc-admin.css',
@@ -220,7 +229,6 @@ class NPCDialogSystem
             NPC_PLUGIN_VERSION
         );
 
-        // Dodaj nowy arkusz CSS dla funkcji sortowania
         wp_enqueue_style(
             'npc-sortable-css',
             NPC_PLUGIN_URL . 'assets/css/npc-sortable.css',
@@ -228,18 +236,12 @@ class NPCDialogSystem
             NPC_PLUGIN_VERSION
         );
 
-        // Style dla obsługi akcji odpowiedzi
         wp_enqueue_style(
             'npc-answer-actions',
             NPC_PLUGIN_URL . 'assets/css/answer-action.css',
             [],
             NPC_PLUGIN_VERSION
         );
-
-        wp_localize_script('npc-admin-js', 'npcAdmin', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('npc_admin_nonce'),
-        ]);
     }
 
     public function activate()

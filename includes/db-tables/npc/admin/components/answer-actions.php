@@ -16,21 +16,101 @@ function render_answer_actions_manager($answer_id = null, $existing_actions = []
 {
     // Dostępne typy akcji
     $action_types = [
-        'give_gold' => [
-            'label' => 'Daj złoto',
-            'description' => 'Dodaje określoną ilość złota do portfela gracza',
+        'modify_gold' => [
+            'label' => 'złoto',
+            'description' => 'Dodaje lub odejmuje złoto graczowi (użyj ujemnej wartości aby odjąć)',
             'fields' => [
                 'amount' => [
                     'type' => 'number',
                     'label' => 'Ilość złota',
-                    'min' => 1,
-                    'default' => 100
+                    'default' => 0
+                ]
+            ]
+        ],
+        'modify_cigarettes' => [
+            'label' => 'papierosy',
+            'description' => 'Dodaje lub odejmuje papierosy graczowi (użyj ujemnej wartości aby odjąć)',
+            'fields' => [
+                'amount' => [
+                    'type' => 'number',
+                    'label' => 'Ilość papierosów',
+                    'default' => 0
+                ]
+            ]
+        ],
+        'modify_stat' => [
+            'label' => 'statystykę',
+            'description' => 'Modyfikuje wartość wybranej statystyki',
+            'fields' => [
+                'stat' => [
+                    'type' => 'select',
+                    'label' => 'Statystyka',
+                    'options' => [
+                        'strength' => 'Siła',
+                        'defence' => 'Obrona',
+                        'dexterity' => 'Zręczność',
+                        'perception' => 'Percepcja',
+                        'technical' => 'Technika',
+                        'charisma' => 'Charyzma'
+                    ],
+                    'default' => 'strength'
+                ],
+                'amount' => [
+                    'type' => 'number',
+                    'label' => 'Zmiana wartości',
+                    'default' => 0,
+                ]
+            ]
+        ],
+        'modify_skill' => [
+            'label' => 'umiejętność',
+            'description' => 'Modyfikuje wartość wybranej umiejętności',
+            'fields' => [
+                'skill' => [
+                    'type' => 'select',
+                    'label' => 'Umiejętność',
+                    'options' => [
+                        'combat' => 'Walka',
+                        'steal' => 'Kradzież',
+                        'craft' => 'Rzemiosło',
+                        'trade' => 'Handel',
+                        'relations' => 'Relacje',
+                        'street' => 'Ulica'
+                    ],
+                    'default' => 'combat'
+                ],
+                'amount' => [
+                    'type' => 'number',
+                    'label' => 'Zmiana wartości',
+                    'default' => 0,
+                ]
+            ]
+        ],
+        'modify_exp' => [
+            'label' => 'doświadczenie',
+            'description' => 'Dodaje lub odejmuje punkty doświadczenia',
+            'fields' => [
+                'amount' => [
+                    'type' => 'number',
+                    'label' => 'Ilość doświadczenia',
+                    'default' => 0
+                ]
+            ]
+        ],
+        'modify_reputation' => [
+            'label' => 'reputację',
+            'description' => 'Dodaje lub odejmuje punkty reputacji',
+            'fields' => [
+                'amount' => [
+                    'type' => 'number',
+                    'label' => 'Zmiana reputacji',
+                    'default' => 0
                 ]
             ]
         ],
         'start_combat' => [
             'label' => 'Rozpocznij walkę',
-            'description' => 'Rozpoczyna walkę z określonym przeciwnikiem',
+            'description' => 'Rozpoczyna walkę z wybranym przeciwnikiem',
             'fields' => [
                 'enemy_id' => [
                     'type' => 'select',
@@ -49,6 +129,61 @@ function render_answer_actions_manager($answer_id = null, $existing_actions = []
                     'default' => 'normal'
                 ]
             ]
+        ],
+        'modify_items' => [
+            'label' => 'przedmiot',
+            'description' => 'Dodaje lub odejmuje przedmiot graczowi (użyj ujemnej wartości aby odebrać)',
+            'fields' => [
+                'item_id' => [
+                    'type' => 'select',
+                    'label' => 'Przedmiot',
+                    'options' => 'get_items',
+                    'default' => ''
+                ],
+                'amount' => [
+                    'type' => 'number',
+                    'label' => 'Ilość',
+                    'default' => 1
+                ]
+            ]
+        ],
+        'change_location' => [
+            'label' => 'zmiana lokalizacji',
+            'description' => 'Przenosi gracza do wybranej lokalizacji',
+            'fields' => [
+                'location_id' => [
+                    'type' => 'select',
+                    'label' => 'Lokalizacja',
+                    'options' => 'get_locations_with_scenes',
+                    'default' => ''
+                ],
+                'scene_id' => [
+                    'type' => 'select',
+                    'label' => 'Scena',
+                    'options' => [],
+                    'default' => '',
+                    'depends_on' => 'location_id'
+                ]
+            ]
+        ],
+        'unlock_location' => [
+            'label' => 'odblokowanie lokalizacji',
+            'description' => 'Odblokowuje dostęp do lokalizacji i określonej sceny',
+            'fields' => [
+                'location_id' => [
+                    'type' => 'select',
+                    'label' => 'Lokalizacja',
+                    'options' => 'get_locations_with_scenes',
+                    'default' => ''
+                ],
+                'scene_id' => [
+                    'type' => 'select',
+                    'label' => 'Scena',
+                    'options' => [],
+                    'default' => '',
+                    'depends_on' => 'location_id'
+                ]
+            ]
         ]
     ];
 
@@ -58,6 +193,11 @@ function render_answer_actions_manager($answer_id = null, $existing_actions = []
     <div class="answer-actions-manager" data-answer-id="<?php echo esc_attr($answer_id); ?>">
         <h4>Akcje odpowiedzi</h4>
         <p class="description">Dodaj akcje, które wykonają się po wybraniu tej odpowiedzi przez gracza. Przeciągnij, aby zmienić kolejność.</p>
+
+        <!-- Configuration script -->
+        <script type="application/json" id="action-types-config">
+            <?php echo json_encode($action_types); ?>
+        </script>
 
         <div class="actions-list sortable" id="actions-list">
             <?php if (!empty($existing_actions)): ?>
@@ -96,10 +236,6 @@ function render_answer_actions_manager($answer_id = null, $existing_actions = []
             </div>
         <?php endforeach; ?>
     </div>
-
-    <script type="application/json" id="action-types-config">
-        <?php echo json_encode($action_types); ?>
-    </script>
 
 <?php
 }
@@ -234,6 +370,68 @@ function get_enemies_list()
     $options = ['0' => '-- Wybierz przeciwnika --'];
     foreach ($enemies as $enemy) {
         $options[$enemy->ID] = $enemy->post_title;
+    }
+
+    return $options;
+}
+
+/**
+ * Pobiera listę przedmiotów (funkcja pomocnicza)
+ */
+function get_items()
+{
+    global $wpdb;
+
+    // Można pobrać z tabeli items lub z CPT
+    $items = $wpdb->get_results(
+        "SELECT ID, post_title FROM {$wpdb->posts} 
+         WHERE post_type = 'item' AND post_status = 'publish'
+         ORDER BY post_title ASC"
+    );
+
+    $options = ['0' => '-- Wybierz przedmiot --'];
+    foreach ($items as $item) {
+        $options[$item->ID] = $item->post_title;
+    }
+
+    return $options;
+}
+
+/**
+ * Pobiera listę lokalizacji ze scenami (funkcja pomocnicza)
+ */
+function get_locations_with_scenes()
+{
+    // Pobierz lokalizacje z post type 'tereny'
+    $locations = get_posts([
+        'post_type' => 'tereny',
+        'post_status' => 'publish',
+        'numberposts' => -1,
+        'orderby' => 'title',
+        'order' => 'ASC'
+    ]);
+
+    $options = ['0' => '-- Wybierz lokalizację --'];
+
+    foreach ($locations as $location) {
+        // Pobierz sceny dla lokalizacji z ACF
+        $scenes = [];
+        if (have_rows('scenes', $location->ID)) {
+            while (have_rows('scenes', $location->ID)) {
+                the_row();
+                $scenes[] = [
+                    'id' => get_sub_field('id_sceny'),
+                ];
+            }
+        }
+
+        // Dodaj lokalizację do opcji tylko jeśli ma sceny
+        if (!empty($scenes)) {
+            $options[$location->post_name] = [
+                'title' => $location->post_title,
+                'scenes' => $scenes
+            ];
+        }
     }
 
     return $options;

@@ -33,9 +33,10 @@ class NPC_AdminPanel
         add_action('wp_ajax_npc_update_dialog_order', [$this, 'ajax_update_dialog_order']);
         add_action('wp_ajax_npc_update_answer_order', [$this, 'ajax_update_answer_order']);
         add_action('wp_ajax_npc_get_items', [$this, 'ajax_get_items']);
+        add_action('wp_ajax_npc_get_locations', [$this, 'ajax_get_locations']);
         add_action('wp_ajax_npc_get_missions', [$this, 'ajax_get_missions']);
         add_action('wp_ajax_npc_get_quests_for_mission', [$this, 'ajax_get_quests_for_mission']);
-        add_action('wp_ajax_npc_get_locations', [$this, 'ajax_get_locations']);
+        add_action('wp_ajax_npc_get_locations_with_scenes', [$this, 'ajax_get_locations_with_scenes']);
     }
 
     /**
@@ -85,8 +86,10 @@ class NPC_AdminPanel
             return;
         }
 
-        if (!wp_verify_nonce($_POST['npc_nonce'] ?? '', 'npc_admin_action')) {
-            NPC_Debug::log('Nieprawidłowy nonce');
+        // Sprawdź nonce w POST lub GET
+        $nonce = $_POST['npc_nonce'] ?? $_GET['npc_nonce'] ?? '';
+        if (!wp_verify_nonce($nonce, 'npc_admin_action')) {
+            NPC_Debug::log('Nieprawidłowy nonce: ' . $nonce);
             return;
         }
 
@@ -770,10 +773,13 @@ class NPC_AdminPanel
     /**
      * AJAX endpoint dla pobierania lokalizacji z post_type='tereny'
      */
-    public function ajax_get_locations()
+    public function ajax_get_locations_with_scenes()
     {
         if (!wp_verify_nonce($_POST['nonce'], 'npc_admin_nonce')) {
+            NPC_Debug::log('Nieprawidłowy nonce w ajax_get_locations_with_scenes');
+            NPC_Debug::log('Otrzymany nonce:', $_POST['nonce']);
             wp_send_json_error('Nieprawidłowy nonce');
+            return;
         }
 
         if (!current_user_can('manage_options')) {
@@ -789,11 +795,24 @@ class NPC_AdminPanel
         ]);
 
         $locations_data = [];
+
         foreach ($locations as $location) {
+            $scenes = [];
+            if (have_rows('scenes', $location->ID)) {
+                while (have_rows('scenes', $location->ID)) {
+                    the_row();
+                    $scenes[] = [
+                        'id' => get_sub_field('id_sceny'),
+                        'title' => get_sub_field('nazwa') ?: ('Scena ' . get_sub_field('id_sceny'))
+                    ];
+                }
+            }
+
             $locations_data[] = [
                 'id' => $location->post_name,
                 'title' => $location->post_title,
-                'slug' => $location->post_name
+                'slug' => $location->post_name,
+                'scenes' => $scenes
             ];
         }
 

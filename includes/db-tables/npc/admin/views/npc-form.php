@@ -350,11 +350,16 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                                                                                 data-dialog-id="<?php echo $dialog->id; ?>">
                                                                                 Edytuj
                                                                             </button>
-                                                                            <a href="<?php echo wp_nonce_url(
-                                                                                            admin_url('admin.php?page=npc-add&action=delete_answer&answer_id=' . $answer->id . '&npc_id=' . $npc->id),
-                                                                                            'npc_admin_action',
-                                                                                            'npc_nonce'
-                                                                                        ); ?>"
+                                                                            <?php
+                                                                            $delete_url = add_query_arg([
+                                                                                'page' => 'npc-add',
+                                                                                'action' => 'delete_answer',
+                                                                                'answer_id' => $answer->id,
+                                                                                'npc_id' => $npc->id,
+                                                                                'npc_nonce' => wp_create_nonce('npc_admin_action')
+                                                                            ], admin_url('admin.php'));
+                                                                            ?>
+                                                                            <a href="<?php echo esc_url($delete_url); ?>"
                                                                                 onclick="return confirm('Czy na pewno chcesz usunąć tę odpowiedź?');"
                                                                                 class="button-link delete-answer-btn">
                                                                                 Usuń
