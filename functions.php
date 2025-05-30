@@ -18,6 +18,9 @@ load_theme_files([
     'includes/db-tables'
 ]);
 
+include_once get_template_directory() . '/includes/db-tables/user/init.php';
+include_once get_template_directory() . '/includes/db-tables/npc/init.php';
+
 add_action('wp_footer', function () {
     $current_area_id = get_field('current_area', 'user_' . get_current_user_id());
     if (!$current_area_id) return;
