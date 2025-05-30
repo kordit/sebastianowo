@@ -38,6 +38,42 @@ class NPC_DialogRepository
     }
 
     /**
+     * Pobiera dialogi dla NPC w określonej lokalizacji
+     */
+    public function get_by_npc_id_and_location($npc_id, $location = null, $status = 'active')
+    {
+        if ($location === null) {
+            return $this->get_by_npc_id($npc_id, $status);
+        }
+
+        $sql = $this->wpdb->prepare(
+            "SELECT * FROM {$this->table_name} 
+             WHERE npc_id = %d AND location = %s AND status = %s 
+             ORDER BY dialog_order ASC, id ASC",
+            $npc_id,
+            $location,
+            $status
+        );
+
+        return $this->wpdb->get_results($sql);
+    }
+
+    /**
+     * Pobiera dostępne lokalizacje dla dialogów NPC
+     */
+    public function get_locations_by_npc_id($npc_id)
+    {
+        $sql = $this->wpdb->prepare(
+            "SELECT DISTINCT location FROM {$this->table_name} 
+             WHERE npc_id = %d AND location IS NOT NULL AND location != '' 
+             ORDER BY location ASC",
+            $npc_id
+        );
+
+        return $this->wpdb->get_col($sql);
+    }
+
+    /**
      * Pobiera dialog po ID
      */
     public function get_by_id($id)
@@ -82,6 +118,7 @@ class NPC_DialogRepository
                 'title' => $data['title'],
                 'content' => $data['content'],
                 'dialog_order' => $data['dialog_order'] ?? 0,
+                'location' => $data['location'] ?? null,
                 'conditions' => isset($data['conditions']) ? json_encode($data['conditions']) : null,
                 'actions' => isset($data['actions']) ? json_encode($data['actions']) : null,
                 'status' => $data['status'] ?? 'active'
@@ -93,7 +130,7 @@ class NPC_DialogRepository
                 '%d',
                 '%s',
                 '%s',
-                '%d',
+                '%s',
                 '%s'
             ]
         );
@@ -124,6 +161,10 @@ class NPC_DialogRepository
         if (isset($data['dialog_order'])) {
             $update_data['dialog_order'] = $data['dialog_order'];
             $format[] = '%d';
+        }
+        if (isset($data['location'])) {
+            $update_data['location'] = $data['location'];
+            $format[] = '%s';
         }
         if (isset($data['conditions'])) {
             $update_data['conditions'] = json_encode($data['conditions']);

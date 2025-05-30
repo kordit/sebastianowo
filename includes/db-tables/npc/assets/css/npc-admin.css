@@ -539,6 +539,122 @@ select.conditions-logic-operator {
     line-height: 1.4;
 }
 
+/* Location Tabs Styles */
+.location-tabs {
+    margin: 20px 0;
+}
+
+.location-tabs .nav-tab-wrapper {
+    border-bottom: 1px solid #c3c4c7;
+    margin: 0;
+    padding: 0;
+}
+
+.location-tabs .nav-tab {
+    border: 1px solid #c3c4c7;
+    border-bottom: none;
+    background: #f6f7f7;
+    color: #646970;
+    text-decoration: none;
+    padding: 8px 14px;
+    margin: 0 4px 0 0;
+    border-radius: 3px 3px 0 0;
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.location-tabs .nav-tab:hover {
+    background: #fff;
+    color: #2271b1;
+}
+
+.location-tabs .nav-tab.nav-tab-active {
+    background: #fff;
+    border-bottom: 1px solid #fff;
+    color: #2271b1;
+    font-weight: 600;
+}
+
+.location-tabs .nav-tab .count {
+    background: #646970;
+    color: #fff;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 11px;
+    margin-left: 5px;
+}
+
+.location-tabs .nav-tab.nav-tab-active .count {
+    background: #2271b1;
+}
+
+.location-tab-content {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-top: none;
+    padding: 0;
+}
+
+.tab-pane {
+    display: none;
+    padding: 20px;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.location-badge {
+    background: #2271b1;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-left: 10px;
+    text-transform: uppercase;
+}
+
+/* Enhanced dialog styles for tabs */
+.dialogs-container[data-location] {
+    min-height: 200px;
+}
+
+.dialogs-container[data-location] .no-dialogs {
+    text-align: center;
+    padding: 40px 20px;
+    color: #646970;
+    background: #f9f9f9;
+    border-radius: 4px;
+    margin: 20px 0;
+}
+
+/* Responsive tab styles */
+@media screen and (max-width: 768px) {
+    .location-tabs .nav-tab {
+        display: block;
+        margin: 2px 0;
+        border-radius: 3px;
+        border: 1px solid #c3c4c7;
+    }
+
+    .location-tabs .nav-tab-wrapper {
+        border-bottom: none;
+    }
+
+    .location-tab-content {
+        border: none;
+        margin-top: 10px;
+    }
+
+    .tab-pane {
+        border: 1px solid #c3c4c7;
+        border-radius: 4px;
+    }
+}
+
 /* Responsive adjustments */
 @media (max-width: 782px) {
     .conditions-header {

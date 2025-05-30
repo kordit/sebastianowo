@@ -161,83 +161,117 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                         <li>Pierwszy dialog jest automatycznie dialogiem początkowym.</li>
                         <li>System wybierze pierwszy dialog, który spełnia wszystkie warunki.</li>
                         <li>Odpowiedzi również można sortować przez przeciągnięcie.</li>
+                        <li>Dialogi są zorganizowane według lokalizacji w zakładkach.</li>
                     </ol>
                 </div>
 
-                <div class="dialogs-container">
-                    <?php if (empty($dialogs)): ?>
-                        <div class="no-dialogs">
-                            <p>Ten NPC nie ma jeszcze żadnych dialogów.</p>
+                <?php if (empty($dialogs)): ?>
+                    <div class="no-dialogs">
+                        <p>Ten NPC nie ma jeszcze żadnych dialogów.</p>
+                    </div>
+                <?php else: ?>
+                    <!-- Tabbed Interface for Locations -->
+                    <?php if (count($locations) > 1): ?>
+                        <div class="location-tabs">
+                            <div class="nav-tab-wrapper">
+                                <?php foreach ($locations as $index => $location): ?>
+                                    <a href="#tab-<?php echo esc_attr($location['slug']); ?>"
+                                        class="nav-tab <?php echo $index === 0 ? 'nav-tab-active' : ''; ?>"
+                                        data-location="<?php echo esc_attr($location['slug']); ?>">
+                                        <?php echo esc_html($location['title']); ?>
+                                        <span class="count">(<?php echo $location['count']; ?>)</span>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
-                    <?php else: ?>
-                        <?php
-                        foreach ($dialogs as $dialog):
-                        ?>
-                            <div class="dialog-item" data-dialog-id="<?php echo $dialog->id; ?>">
-                                <div class="dialog-header">
-                                    <h3 class="dialog-title">
-                                        <?php echo esc_html($dialog->title); ?>
-                                    </h3>
-                                    <div class="dialog-actions">
-                                        <button type="button" class="button-link edit-dialog-btn">Edytuj</button>
-                                        <a href="<?php echo wp_nonce_url(
-                                                        admin_url('admin.php?page=npc-add&action=delete_dialog&dialog_id=' . $dialog->id . '&npc_id=' . $npc->id),
-                                                        'npc_admin_action',
-                                                        'npc_nonce'
-                                                    ); ?>"
-                                            onclick="return confirm('Czy na pewno chcesz usunąć ten dialog?');"
-                                            class="button-link delete-dialog-btn">
-                                            Usuń
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="dialog-content">
-                                    <p><?php echo esc_html(wp_trim_words($dialog->content, 20)); ?></p>
-                                    <?php if (!empty($dialog->answers)): ?>
-                                        <div class="dialog-answers">
-                                            <strong>Odpowiedzi (<?php echo count($dialog->answers); ?>):</strong>
-                                            <ul>
-                                                <?php foreach ($dialog->answers as $answer): ?>
-                                                    <li>
-                                                        <?php echo esc_html(wp_trim_words($answer->text, 10)); ?>
-                                                        <div class="answer-actions">
-                                                            <button type="button" class="button-link edit-answer-btn"
-                                                                data-answer-id="<?php echo $answer->id; ?>"
+                    <?php endif; ?>
+
+                    <!-- Tab Content -->
+                    <div class="location-tab-content">
+                        <?php foreach ($locations as $index => $location): ?>
+                            <div id="tab-<?php echo esc_attr($location['slug']); ?>"
+                                class="tab-pane <?php echo $index === 0 ? 'active' : ''; ?>"
+                                data-location="<?php echo esc_attr($location['slug']); ?>">
+
+                                <div class="dialogs-container" data-location="<?php echo esc_attr($location['slug']); ?>">
+                                    <?php if (!empty($dialogs_by_location[$location['slug']])): ?>
+                                        <?php foreach ($dialogs_by_location[$location['slug']] as $dialog): ?>
+                                            <div class="dialog-item" data-dialog-id="<?php echo $dialog->id; ?>">
+                                                <div class="dialog-header">
+                                                    <h3 class="dialog-title">
+                                                        <?php echo esc_html($dialog->title); ?>
+                                                        <?php if (!empty($dialog->location) && $dialog->location !== '__none__'): ?>
+                                                            <span class="location-badge"><?php echo esc_html($dialog->location); ?></span>
+                                                        <?php endif; ?>
+                                                    </h3>
+                                                    <div class="dialog-actions">
+                                                        <button type="button" class="button-link edit-dialog-btn">Edytuj</button>
+                                                        <a href="<?php echo wp_nonce_url(
+                                                                        admin_url('admin.php?page=npc-add&action=delete_dialog&dialog_id=' . $dialog->id . '&npc_id=' . $npc->id),
+                                                                        'npc_admin_action',
+                                                                        'npc_nonce'
+                                                                    ); ?>"
+                                                            onclick="return confirm('Czy na pewno chcesz usunąć ten dialog?');"
+                                                            class="button-link delete-dialog-btn">
+                                                            Usuń
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="dialog-content">
+                                                    <p><?php echo esc_html(wp_trim_words($dialog->content, 20)); ?></p>
+                                                    <?php if (!empty($dialog->answers)): ?>
+                                                        <div class="dialog-answers">
+                                                            <strong>Odpowiedzi (<?php echo count($dialog->answers); ?>):</strong>
+                                                            <ul>
+                                                                <?php foreach ($dialog->answers as $answer): ?>
+                                                                    <li>
+                                                                        <?php echo esc_html(wp_trim_words($answer->text, 10)); ?>
+                                                                        <div class="answer-actions">
+                                                                            <button type="button" class="button-link edit-answer-btn"
+                                                                                data-answer-id="<?php echo $answer->id; ?>"
+                                                                                data-dialog-id="<?php echo $dialog->id; ?>">
+                                                                                Edytuj
+                                                                            </button>
+                                                                            <a href="<?php echo wp_nonce_url(
+                                                                                            admin_url('admin.php?page=npc-add&action=delete_answer&answer_id=' . $answer->id . '&npc_id=' . $npc->id),
+                                                                                            'npc_admin_action',
+                                                                                            'npc_nonce'
+                                                                                        ); ?>"
+                                                                                onclick="return confirm('Czy na pewno chcesz usunąć tę odpowiedź?');"
+                                                                                class="button-link delete-answer-btn">
+                                                                                Usuń
+                                                                            </a>
+                                                                        </div>
+                                                                    </li>
+                                                                <?php endforeach; ?>
+                                                            </ul>
+                                                            <button type="button" class="button button-secondary add-answer-btn"
                                                                 data-dialog-id="<?php echo $dialog->id; ?>">
-                                                                Edytuj
+                                                                Dodaj odpowiedź
                                                             </button>
-                                                            <a href="<?php echo wp_nonce_url(
-                                                                            admin_url('admin.php?page=npc-add&action=delete_answer&answer_id=' . $answer->id . '&npc_id=' . $npc->id),
-                                                                            'npc_admin_action',
-                                                                            'npc_nonce'
-                                                                        ); ?>"
-                                                                onclick="return confirm('Czy na pewno chcesz usunąć tę odpowiedź?');"
-                                                                class="button-link delete-answer-btn">
-                                                                Usuń
-                                                            </a>
                                                         </div>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                            <button type="button" class="button button-secondary add-answer-btn"
-                                                data-dialog-id="<?php echo $dialog->id; ?>">
-                                                Dodaj odpowiedź
-                                            </button>
-                                        </div>
+                                                    <?php else: ?>
+                                                        <div class="dialog-answers">
+                                                            <p>Brak odpowiedzi dla tego dialogu.</p>
+                                                            <button type="button" class="button button-secondary add-answer-btn"
+                                                                data-dialog-id="<?php echo $dialog->id; ?>">
+                                                                Dodaj odpowiedź
+                                                            </button>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
                                     <?php else: ?>
-                                        <div class="dialog-answers">
-                                            <p>Brak odpowiedzi dla tego dialogu.</p>
-                                            <button type="button" class="button button-secondary add-answer-btn"
-                                                data-dialog-id="<?php echo $dialog->id; ?>">
-                                                Dodaj odpowiedź
-                                            </button>
+                                        <div class="no-dialogs">
+                                            <p>Brak dialogów w tej lokalizacji.</p>
                                         </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
+                    </div>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>
@@ -274,6 +308,24 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                         <td>
                             <textarea id="dialog_content" name="dialog_content"
                                 rows="6" class="large-text" required></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="dialog_location">Lokalizacja</label>
+                        </th>
+                        <td>
+                            <select id="dialog_location" name="dialog_location" class="regular-text">
+                                <option value="">-- Bez lokalizacji --</option>
+                                <?php if (isset($all_locations) && !empty($all_locations)): ?>
+                                    <?php foreach ($all_locations as $location): ?>
+                                        <option value="<?php echo esc_attr($location->post_name); ?>">
+                                            <?php echo esc_html($location->post_title); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                            <p class="description">Wybierz lokalizację, w której będzie dostępny ten dialog. Pozostaw puste dla dialogów uniwersalnych.</p>
                         </td>
                     </tr>
                     <!-- Usunięto pola Kolejność i Dialog początkowy. Kolejność będzie ustalana przez przeciąganie -->

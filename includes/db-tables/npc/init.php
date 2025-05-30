@@ -79,6 +79,9 @@ class NPCDialogSystem
             $db_manager->create_tables();
         }
 
+        // Wykonaj migracje bazy danych
+        $db_manager->migrate_database();
+
         // Panel administracyjny
         if (is_admin()) {
             new NPC_AdminPanel();

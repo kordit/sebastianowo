@@ -68,6 +68,7 @@ class NPC_DatabaseManager
             title varchar(255) NOT NULL,
             content text NOT NULL,
             dialog_order int(11) DEFAULT 0,
+            location varchar(255) DEFAULT NULL,
             conditions json,
             actions json,
             is_starting_dialog tinyint(1) DEFAULT 0,
@@ -78,7 +79,8 @@ class NPC_DatabaseManager
             FOREIGN KEY (npc_id) REFERENCES {$this->npc_table}(id) ON DELETE CASCADE,
             INDEX idx_npc_id (npc_id),
             INDEX idx_status (status),
-            INDEX idx_starting (is_starting_dialog)
+            INDEX idx_starting (is_starting_dialog),
+            INDEX idx_location (location)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -133,6 +135,35 @@ class NPC_DatabaseManager
         $answer_exists = $this->wpdb->get_var("SHOW TABLES LIKE '{$this->answer_table}'") == $this->answer_table;
 
         return $npc_exists && $dialog_exists && $answer_exists;
+    }
+
+    /**
+     * Migruje bazę danych - dodaje brakujące kolumny
+     */
+    public function migrate_database()
+    {
+        $this->add_location_column_if_not_exists();
+    }
+
+    /**
+     * Dodaje kolumnę location do tabeli dialogów jeśli nie istnieje
+     */
+    private function add_location_column_if_not_exists()
+    {
+        $column_exists = $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SHOW COLUMNS FROM {$this->dialog_table} LIKE %s",
+                'location'
+            )
+        );
+
+        if (empty($column_exists)) {
+            $this->wpdb->query(
+                "ALTER TABLE {$this->dialog_table} 
+                 ADD COLUMN location varchar(255) DEFAULT NULL AFTER dialog_order,
+                 ADD INDEX idx_location (location)"
+            );
+        }
     }
 
     /**

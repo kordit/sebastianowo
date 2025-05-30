@@ -30,6 +30,7 @@ class NPC_AdminPanel
         add_action('wp_ajax_npc_get_items', [$this, 'ajax_get_items']);
         add_action('wp_ajax_npc_get_missions', [$this, 'ajax_get_missions']);
         add_action('wp_ajax_npc_get_quests_for_mission', [$this, 'ajax_get_quests_for_mission']);
+        add_action('wp_ajax_npc_get_locations', [$this, 'ajax_get_locations']);
     }
 
     /**
@@ -131,6 +132,8 @@ class NPC_AdminPanel
         $npc_id = $_GET['npc_id'] ?? 0;
         $npc = null;
         $dialogs = [];
+        $locations = [];
+        $dialogs_by_location = [];
 
         if ($npc_id) {
             $npc = $this->npc_repository->get_by_id($npc_id);
@@ -159,8 +162,69 @@ class NPC_AdminPanel
                     $dialog->answers = $this->answer_repository->get_by_dialog_id($dialog->id);
                 }
                 unset($dialog); // Usuń referencję!
+
+                // Pobierz dostępne lokalizacje z WordPress (post_type='tereny')
+                $available_locations = get_posts([
+                    'post_type' => 'tereny',
+                    'post_status' => 'publish',
+                    'numberposts' => -1,
+                    'orderby' => 'title',
+                    'order' => 'ASC'
+                ]);
+
+                // Pobierz lokalizacje używane przez dialogi tego NPC
+                $used_locations = $this->dialog_repository->get_locations_by_npc_id($npc_id);
+
+                // Organizuj dialogi według lokalizacji
+                $dialogs_by_location = ['__none__' => []]; // Dialogi bez lokalizacji
+
+                foreach ($dialogs as $dialog) {
+                    $location_key = empty($dialog->location) ? '__none__' : $dialog->location;
+                    if (!isset($dialogs_by_location[$location_key])) {
+                        $dialogs_by_location[$location_key] = [];
+                    }
+                    $dialogs_by_location[$location_key][] = $dialog;
+                }
+
+                // Przygotuj listę lokalizacji do tabu
+                $locations = [];
+
+                // Dodaj "Bez lokalizacji" jako pierwszy tab jeśli są takie dialogi
+                if (!empty($dialogs_by_location['__none__'])) {
+                    $locations[] = [
+                        'slug' => '__none__',
+                        'title' => 'Bez lokalizacji',
+                        'count' => count($dialogs_by_location['__none__'])
+                    ];
+                }
+
+                // Dodaj używane lokalizacje
+                foreach ($used_locations as $location_slug) {
+                    $location_post = null;
+                    foreach ($available_locations as $loc) {
+                        if ($loc->post_name === $location_slug) {
+                            $location_post = $loc;
+                            break;
+                        }
+                    }
+
+                    $locations[] = [
+                        'slug' => $location_slug,
+                        'title' => $location_post ? $location_post->post_title : $location_slug,
+                        'count' => isset($dialogs_by_location[$location_slug]) ? count($dialogs_by_location[$location_slug]) : 0
+                    ];
+                }
             }
         }
+
+        // Pobierz wszystkie dostępne lokalizacje dla selecta
+        $all_locations = get_posts([
+            'post_type' => 'tereny',
+            'post_status' => 'publish',
+            'numberposts' => -1,
+            'orderby' => 'title',
+            'order' => 'ASC'
+        ]);
 
         include NPC_PLUGIN_PATH . 'admin/views/npc-form.php';
     }
@@ -244,6 +308,7 @@ class NPC_AdminPanel
             'title' => sanitize_text_field($_POST['dialog_title']),
             'content' => sanitize_textarea_field($_POST['dialog_content']),
             'dialog_order' => ($existing_dialogs_count === 0) ? 0 : intval($_POST['dialog_order']),
+            'location' => !empty($_POST['dialog_location']) ? sanitize_text_field($_POST['dialog_location']) : null,
             'status' => 'active'
         ];
 
@@ -274,6 +339,7 @@ class NPC_AdminPanel
             'title' => sanitize_text_field($_POST['dialog_title']),
             'content' => sanitize_textarea_field($_POST['dialog_content']),
             'dialog_order' => intval($_POST['dialog_order']),
+            'location' => !empty($_POST['dialog_location']) ? sanitize_text_field($_POST['dialog_location']) : null,
             // Nie używamy już flagi is_starting_dialog
         ];
 
@@ -622,5 +688,38 @@ class NPC_AdminPanel
         }
 
         wp_send_json_success($quests_data);
+    }
+
+    /**
+     * AJAX endpoint dla pobierania lokalizacji z post_type='tereny'
+     */
+    public function ajax_get_locations()
+    {
+        if (!wp_verify_nonce($_POST['nonce'], 'npc_admin_nonce')) {
+            wp_send_json_error('Nieprawidłowy nonce');
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Brak uprawnień');
+        }
+
+        $locations = get_posts([
+            'post_type' => 'tereny',
+            'post_status' => 'publish',
+            'numberposts' => -1,
+            'orderby' => 'title',
+            'order' => 'ASC'
+        ]);
+
+        $locations_data = [];
+        foreach ($locations as $location) {
+            $locations_data[] = [
+                'id' => $location->post_name,
+                'title' => $location->post_title,
+                'slug' => $location->post_name
+            ];
+        }
+
+        wp_send_json_success($locations_data);
     }
 }

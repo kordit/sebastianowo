@@ -14,6 +14,7 @@
             this.bindEvents();
             this.initImageUploader();
             this.initSortable();
+            this.initLocationTabs();
         }
 
         bindEvents() {
@@ -26,6 +27,9 @@
             // Modal controls dla odpowiedzi
             $(document).on('click', '.add-answer-btn', this.openAnswerModal.bind(this, 'create'));
             $(document).on('click', '.edit-answer-btn', this.openAnswerModal.bind(this, 'edit'));
+
+            // Location tabs
+            $(document).on('click', '.location-tabs .nav-tab', this.switchTab.bind(this));
 
             // Form validation
             $(document).on('submit', '#dialog-form', this.validateDialogForm.bind(this));
@@ -125,6 +129,13 @@
                         $('#dialog_title').val(dialog.title);
                         $('#dialog_content').val(dialog.content);
                         $('#dialog_order').val(dialog.dialog_order);
+
+                        // Load location field
+                        if (dialog.location) {
+                            $('#dialog_location').val(dialog.location);
+                        } else {
+                            $('#dialog_location').val('');
+                        }
 
                         // Nie używamy już pola is_starting_dialog
                         // Dialog początkowy to ten, który ma najmniejszy dialog_order
@@ -472,6 +483,113 @@
                     }
                 }
             });
+        }
+
+        // Funkcja inicjalizująca taby lokalizacji
+        initLocationTabs() {
+            console.log('Initializing location tabs functionality...');
+
+            // Sprawdź czy istnieją taby lokalizacji
+            if ($('.location-tabs').length === 0) {
+                console.log('No location tabs found');
+                return;
+            }
+
+            // Ustaw aktywny tab na podstawie URL hash lub pierwszy tab
+            this.setActiveTabFromUrl();
+        }
+
+        // Funkcja przełączania tabów
+        switchTab(event) {
+            event.preventDefault();
+
+            const $clickedTab = $(event.currentTarget);
+            const targetLocation = $clickedTab.data('location');
+
+            console.log('Switching to tab:', targetLocation);
+
+            // Usuń aktywną klasę ze wszystkich tabów
+            $('.location-tabs .nav-tab').removeClass('nav-tab-active');
+
+            // Dodaj aktywną klasę do klikniętego tabu
+            $clickedTab.addClass('nav-tab-active');
+
+            // Ukryj wszystkie zawartości tabów
+            $('.tab-pane').removeClass('active');
+
+            // Pokaż zawartość odpowiedniego tabu
+            $(`#tab-${targetLocation}`).addClass('active');
+
+            // Aktualizuj URL hash (opcjonalnie)
+            if (history.pushState) {
+                const newUrl = window.location.pathname + window.location.search + '#tab-' + targetLocation;
+                history.pushState(null, null, newUrl);
+            }
+
+            // Re-initialize sortable for the new visible dialogs
+            this.reinitializeSortableForTab(targetLocation);
+        }
+
+        // Ustaw aktywny tab na podstawie URL hash
+        setActiveTabFromUrl() {
+            const hash = window.location.hash;
+
+            if (hash && hash.startsWith('#tab-')) {
+                const targetLocation = hash.substring(5); // Remove '#tab-'
+                const $targetTab = $(`.location-tabs .nav-tab[data-location="${targetLocation}"]`);
+
+                if ($targetTab.length > 0) {
+                    // Trigger click on the target tab
+                    $targetTab.trigger('click');
+                    return;
+                }
+            }
+
+            // If no valid hash found, ensure first tab is active
+            const $firstTab = $('.location-tabs .nav-tab:first');
+            if ($firstTab.length > 0 && !$firstTab.hasClass('nav-tab-active')) {
+                $firstTab.trigger('click');
+            }
+        }
+
+        // Przeinicjalizuj sortowanie dla konkretnego tabu
+        reinitializeSortableForTab(location) {
+            if ($.fn.sortable) {
+                const $container = $(`.dialogs-container[data-location="${location}"]`);
+
+                // Destroy existing sortable if exists
+                if ($container.hasClass('ui-sortable')) {
+                    $container.sortable('destroy');
+                }
+
+                // Reinitialize sortable for this container
+                $container.sortable({
+                    items: '.dialog-item',
+                    handle: '.dialog-header',
+                    placeholder: 'dialog-item-placeholder',
+                    opacity: 0.7,
+                    update: (event, ui) => {
+                        this.updateDialogOrder(event, ui);
+                    }
+                });
+
+                // Also reinitialize answer sorting
+                $container.find('.dialog-answers ul').each((index, element) => {
+                    const $ul = $(element);
+                    if ($ul.hasClass('ui-sortable')) {
+                        $ul.sortable('destroy');
+                    }
+
+                    $ul.sortable({
+                        items: 'li',
+                        placeholder: 'answer-item-placeholder',
+                        opacity: 0.7,
+                        update: (event, ui) => {
+                            this.updateAnswerOrder(event, ui);
+                        }
+                    });
+                });
+            }
         }
     }
 
