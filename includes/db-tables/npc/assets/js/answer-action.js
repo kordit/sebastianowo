@@ -1,101 +1,325 @@
 /**
- * Answer Actions JavaScript
+ * Answer Actions JavaScript - Zrefaktoryzowany
  * Obsługuje zarządzanie akcjami w odpowiedziach NPC
  */
 
 (function ($) {
     'use strict';
 
-
-    // Globalna funkcja do pobierania listy przedmiotów
-    window.get_items = function () {
-        return new Promise((resolve) => {
-            $.post(npcAdmin.ajax_url, {
-                action: 'npc_get_items',
-                nonce: npcAdmin.nonce
-            })
-                .done(function (response) {
-                    if (response.success) {
-                        const options = {};
-                        response.data.forEach(item => {
-                            options[item.id] = item.title;
-                        });
-                        resolve(options);
-                    } else {
-                        console.error('Błąd pobierania przedmiotów:', response.data);
-                        resolve({});
-                    }
-                })
-                .fail(function () {
-                    console.error('Błąd połączenia podczas pobierania przedmiotów');
-                    resolve({});
+    // === MODUŁ API ===
+    const API = {
+        /**
+         * Pobiera listę przedmiotów z serwera
+         */
+        async getItems() {
+            try {
+                const response = await $.post(npcAdmin.ajax_url, {
+                    action: 'npc_get_items',
+                    nonce: npcAdmin.nonce
                 });
-        });
+
+                if (response.success) {
+                    const options = {};
+                    response.data.forEach(item => {
+                        options[item.id] = item.title;
+                    });
+                    return options;
+                }
+                throw new Error(response.data || 'Błąd pobierania przedmiotów');
+            } catch (error) {
+                console.error('API.getItems error:', error);
+                return {};
+            }
+        },
+
+        /**
+         * Pobiera listę lokacji z serwera
+         */
+        async getLocations() {
+            try {
+                const response = await $.post(npcAdmin.ajax_url, {
+                    action: 'npc_get_locations',
+                    nonce: npcAdmin.nonce
+                });
+
+                if (response.success) {
+                    const options = {};
+                    response.data.forEach(location => {
+                        options[location.id] = location.title;
+                    });
+                    return options;
+                }
+                throw new Error(response.data || 'Błąd pobierania lokacji');
+            } catch (error) {
+                console.error('API.getLocations error:', error);
+                return {};
+            }
+        },
+
+        /**
+         * Pobiera listę lokacji ze scenami z serwera
+         */
+        async getLocationsWithScenes() {
+            try {
+                const response = await $.post(npcAdmin.ajax_url, {
+                    action: 'npc_get_locations_with_scenes',
+                    nonce: npcAdmin.nonce
+                });
+
+                if (response.success) {
+                    return response.data;
+                }
+                throw new Error(response.data || 'Błąd pobierania lokacji ze scenami');
+            } catch (error) {
+                console.error('API.getLocationsWithScenes error:', error);
+                return [];
+            }
+        }
     };
 
-    window.get_locations = function () {
-        return new Promise((resolve) => {
-            $.post(npcAdmin.ajax_url, {
-                action: 'npc_get_locations',
-                nonce: npcAdmin.nonce
-            })
-                .done(function (response) {
-                    if (response.success) {
-                        const options = {};
-                        response.data.forEach(location => {
-                            options[location.id] = location.title;
-                        });
-                        resolve(options);
-                    } else {
-                        console.error('Błąd pobierania lokacji:', response.data);
-                        resolve({});
-                    }
-                })
-                .fail(function () {
-                    console.error('Błąd połączenia podczas pobierania lokacji');
-                    resolve({});
+    // === MODUŁ POLA FORMULARZA ===
+    class FieldInputFactory {
+        constructor() {
+            this.fieldRenderers = {
+                'number': this.createNumberInput.bind(this),
+                'text': this.createTextInput.bind(this),
+                'select': this.createSelectInput.bind(this),
+            };
+        }
+
+        /**
+         * Tworzy input na podstawie konfiguracji pola
+         */
+        async createField(fieldName, fieldConfig, value = '') {
+            const renderer = this.fieldRenderers[fieldConfig.type] || this.createTextInput.bind(this);
+            return await renderer(fieldName, fieldConfig, value);
+        }
+
+        /**
+         * Tworzy input typu number
+         */
+        createNumberInput(fieldName, fieldConfig, value) {
+            return $(`
+                <input type="number" 
+                       class="regular-text action-field-input"
+                       data-field="${fieldName}"
+                       value="${value}"
+                       min="${fieldConfig.min || 0}"
+                       max="${fieldConfig.max || ''}"
+                       ${fieldConfig.required ? 'required' : ''}
+                       />
+            `);
+        }
+
+        /**
+         * Tworzy input typu text
+         */
+        createTextInput(fieldName, fieldConfig, value) {
+            return $(`
+                <input type="text" 
+                       class="regular-text action-field-input"
+                       data-field="${fieldName}"
+                       value="${value}"
+                       ${fieldConfig.required ? 'required' : ''}
+                       />
+            `);
+        }
+
+        /**
+         * Tworzy select input z opcjami
+         */
+        async createSelectInput(fieldName, fieldConfig, value) {
+            const $select = $(`
+                <select class="regular-text action-field-input" 
+                        data-field="${fieldName}"
+                        ${fieldConfig.required ? 'required' : ''}>
+                    <option value="">-- Wybierz --</option>
+                </select>
+            `);
+
+            // Pobierz opcje i wypełnij select
+            let options = [];
+
+            if (typeof fieldConfig.options === 'string' && window[fieldConfig.options]) {
+                options = await window[fieldConfig.options]();
+            } else if (typeof fieldConfig.options === 'object') {
+                options = fieldConfig.options;
+            }
+
+            this.populateSelectOptions($select, options, value);
+            return $select;
+        }
+
+        /**
+         * Wypełnia opcje w select
+         */
+        populateSelectOptions($select, options, selectedValue = '') {
+            // Usuń wszystkie opcje oprócz pierwszej (placeholder)
+            $select.find('option:not(:first)').remove();
+
+            if (Array.isArray(options)) {
+                // Array obiektów
+                options.forEach(option => {
+                    const optionValue = typeof option === 'object' ? option.id : option;
+                    const optionLabel = typeof option === 'object' ? option.title : option;
+                    const optionScenes = typeof option === 'object' ? option.scenes : null;
+                    const selected = selectedValue == optionValue ? 'selected' : '';
+                    const scenesAttr = optionScenes ? ` data-scenes='${JSON.stringify(optionScenes)}'` : '';
+
+                    $select.append(`
+                        <option value="${optionValue}" ${selected}${scenesAttr}>
+                            ${optionLabel}
+                        </option>
+                    `);
                 });
-        });
-    };
-
-    window.get_locations_with_scenes = function () {
-        return new Promise((resolve) => {
-            $.post(npcAdmin.ajax_url, {
-                action: 'npc_get_locations_with_scenes',
-                nonce: npcAdmin.nonce
-            })
-                .done(function (response) {
-                    if (response.success) {
-                        resolve(response.data);
+            } else if (typeof options === 'object') {
+                // Obiekt key-value
+                Object.entries(options).forEach(([optionValue, optionData]) => {
+                    if (optionValue === '0') {
+                        // Aktualizuj placeholder
+                        $select.find('option:first').text(optionData);
                     } else {
-                        console.error('Błąd pobierania lokacji ze scenami:', response.data);
-                        resolve([]);
+                        const optionLabel = typeof optionData === 'object' ? optionData.title : optionData;
+                        const optionScenes = typeof optionData === 'object' ? optionData.scenes : null;
+                        const selected = selectedValue == optionValue ? 'selected' : '';
+                        const scenesAttr = optionScenes ? ` data-scenes='${JSON.stringify(optionScenes)}'` : '';
+
+                        $select.append(`
+                            <option value="${optionValue}" ${selected}${scenesAttr}>
+                                ${optionLabel}
+                            </option>
+                        `);
                     }
-                })
-                .fail(function () {
-                    console.error('Błąd połączenia podczas pobierania lokacji ze scenami');
-                    resolve([]);
                 });
-        });
-    };
+            }
+        }
+    }
 
+    // === MODUŁ ZALEŻNOŚCI MIĘDZY POLAMI ===
+    class FieldDependencyManager {
+        constructor() {
+            this.dependencies = new Map();
+        }
 
+        /**
+         * Rejestruje zależność między polami
+         */
+        registerDependency($parentField, $childField, fieldConfig) {
+            const parentFieldName = $parentField.data('field');
+            const childFieldName = $childField.data('field');
 
+            if (!this.dependencies.has(parentFieldName)) {
+                this.dependencies.set(parentFieldName, []);
+            }
+
+            this.dependencies.get(parentFieldName).push({
+                childField: $childField,
+                childFieldName,
+                config: fieldConfig
+            });
+
+            // Binduj event na pole nadrzędne
+            $parentField.on('change.dependency', (event) => {
+                this.handleParentFieldChange(event);
+            });
+        }
+
+        /**
+         * Obsługuje zmianę w polu nadrzędnym
+         */
+        async handleParentFieldChange(event) {
+            const $parentField = $(event.target);
+            const parentFieldName = $parentField.data('field');
+            const $selectedOption = $parentField.find('option:selected');
+
+            const dependencies = this.dependencies.get(parentFieldName) || [];
+
+            for (const dependency of dependencies) {
+                const { childField: $childField, config } = dependency;
+
+                if (config.depends_on === parentFieldName) {
+                    await this.updateChildField($childField, $selectedOption, config);
+                }
+            }
+        }
+
+        /**
+         * Aktualizuje pole zależne na podstawie wyboru w polu nadrzędnym
+         */
+        async updateChildField($childField, $selectedOption, fieldConfig) {
+            // Wyczyść opcje pola zależnego
+            $childField.find('option:not(:first)').remove();
+            $childField.val('');
+
+            const rawScenes = $selectedOption.attr('data-scenes');
+            if (!rawScenes) {
+                return;
+            }
+
+            try {
+                const scenes = JSON.parse(rawScenes);
+                if (Array.isArray(scenes) && scenes.length > 0) {
+                    scenes.forEach(scene => {
+                        const sceneTitle = scene.title || `Scena ${scene.id}`;
+                        $childField.append(`
+                            <option value="${scene.id}">
+                                ${sceneTitle}
+                            </option>
+                        `);
+                    });
+                }
+            } catch (error) {
+                console.error('Błąd parsowania danych scen:', error);
+            }
+        }
+
+        /**
+         * Usuwa wszystkie zależności dla danego kontenera
+         */
+        cleanup($container) {
+            $container.find('.action-field-input').off('.dependency');
+        }
+    }
+
+    // === GŁÓWNA KLASA ZARZĄDZAJĄCA AKCJAMI ===
     class AnswerActionsManager {
         constructor() {
             this.actionTypes = {};
-            this.actionsData = [];
+            this.actions = [];
+            this.fieldFactory = new FieldInputFactory();
+            this.dependencyManager = new FieldDependencyManager();
             this.sortable = null;
+            this.isInitialized = false;
+            this.eventsBound = false;
+            this.isProcessing = false; // Flaga zapobiegająca podwójnemu kliknięciu
+
             this.init();
         }
 
-        init() {
-            this.loadActionTypes();
-            this.bindEvents();
-            this.loadExistingActions();
-            this.initSortable();
+        /**
+         * Inicjalizacja managera
+         */
+        async init() {
+            if (this.isInitialized) {
+                console.warn('AnswerActionsManager already initialized');
+                return;
+            }
+
+            try {
+                this.loadActionTypes();
+                this.bindEvents();
+                await this.loadExistingActions();
+                this.initSortable();
+                this.isInitialized = true;
+                console.log('AnswerActionsManager initialized successfully');
+            } catch (error) {
+                console.error('Error initializing AnswerActionsManager:', error);
+            }
         }
 
+        /**
+         * Ładuje konfigurację typów akcji
+         */
         loadActionTypes() {
             const configScript = document.getElementById('action-types-config');
 
@@ -117,77 +341,154 @@
             }
         }
 
+        /**
+         * Binduje eventy - tylko raz!
+         */
         bindEvents() {
-
-            // Dodawanie nowej akcji
-            $(document).on('click', '.add-action-btn', this.addAction.bind(this));
-
-            // Usuwanie akcji
-            $(document).on('click', '.remove-action-btn', this.removeAction.bind(this));
-
-            // Zmiana wartości pól akcji
-            $(document).on('change input', '.action-field-input', this.updateActionData.bind(this));
-        }
-
-        loadExistingActions() {
-            const dataInput = document.getElementById('answer-actions-data');
-
-            if (dataInput && dataInput.value) {
-                try {
-                    const actions = JSON.parse(dataInput.value) || [];
-                    this.actionsData = actions;
-                } catch (e) {
-                    console.error('Error parsing existing actions data:', e);
-                    this.actionsData = [];
-                }
-            } else {
-                this.actionsData = [];
-            }
-        }
-
-        addAction() {
-
-            const typeSelect = document.getElementById('new-action-type');
-
-            const selectedType = typeSelect ? typeSelect.value : '';
-
-            const actionConfig = this.actionTypes[selectedType];
-            const actionIndex = this.actionsData.length;
-
-
-            // Dodaj do danych
-            const newAction = {
-                type: selectedType,
-                params: {}
-            };
-
-            this.actionsData.push(newAction);
-
-            // Renderuj w interfejsie
-            this.renderAction(newAction, actionIndex);
-
-            // Wyczyść select
-            typeSelect.value = '';
-
-            // Zaktualizuj hidden input
-            this.updateHiddenInput();
-        }
-
-        removeAction(event) {
-            const actionItem = $(event.target).closest('.action-item');
-
-            const actionIndex = parseInt(actionItem.data('index'));
-
-            if (isNaN(actionIndex)) {
-                console.error('Invalid action index');
+            if (this.eventsBound) {
+                console.warn('Events already bound');
                 return;
             }
 
+            // Usuń wszystkie poprzednie eventy
+            $(document).off('.answerActions');
+
+            // Binduj eventy z namespace
+            $(document).on('click.answerActions', '.add-action-btn', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.addAction();
+            });
+
+            $(document).on('click.answerActions', '.remove-action-btn', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.removeAction(e);
+            });
+
+            $(document).on('change.answerActions input.answerActions', '.action-field-input', (e) => {
+                e.stopPropagation();
+                this.updateActionData(e);
+            });
+
+            this.eventsBound = true;
+            console.log('Events bound successfully');
+        }
+
+        /**
+         * Ładuje istniejące akcje z hidden input
+         */
+        async loadExistingActions() {
+            const dataInput = document.getElementById('answer-actions-data');
+
+            if (dataInput && dataInput.value.trim()) {
+                try {
+                    const actions = JSON.parse(dataInput.value) || [];
+                    await this.loadActions(actions);
+                } catch (e) {
+                    console.error('Error parsing existing actions data:', e);
+                    this.actions = [];
+                }
+            } else {
+                this.actions = [];
+            }
+        }
+
+        /**
+         * Dodaje nową akcję
+         */
+        async addAction() {
+            // Zapobiegaj podwójnemu dodawaniu
+            if (this.isProcessing) {
+                console.warn('Already processing action, ignoring duplicate click');
+                return;
+            }
+
+            this.isProcessing = true;
+            console.log('Adding new action...');
+
+            try {
+                const typeSelect = document.getElementById('new-action-type');
+                const selectedType = typeSelect ? typeSelect.value : '';
+
+                if (!selectedType) {
+                    console.warn('No action type selected');
+                    return;
+                }
+
+                const actionConfig = this.actionTypes[selectedType];
+                if (!actionConfig) {
+                    console.error('Brak konfiguracji dla typu akcji:', selectedType);
+                    return;
+                }
+
+                // Przygotuj nową akcję
+                const newAction = {
+                    type: selectedType,
+                    params: {}
+                };
+
+                // Dodaj domyślne wartości dla parametrów
+                if (actionConfig.fields) {
+                    Object.keys(actionConfig.fields).forEach(fieldName => {
+                        const field = actionConfig.fields[fieldName];
+                        if ('default' in field) {
+                            newAction.params[fieldName] = field.default;
+                        }
+                    });
+                }
+
+                // Dodaj do listy akcji
+                this.actions.push(newAction);
+                const newIndex = this.actions.length - 1;
+
+                console.log('Action added to array, index:', newIndex, 'Total actions:', this.actions.length);
+
+                // Renderuj w interfejsie
+                await this.renderAction(newAction, newIndex);
+
+                // Wyczyść select
+                if (typeSelect) {
+                    typeSelect.value = '';
+                }
+
+                // Aktualizuj hidden input
+                this.updateHiddenInput();
+
+                console.log('Action added successfully');
+            } catch (error) {
+                console.error('Error adding action:', error);
+            } finally {
+                // Zawsze resetuj flagę po zakończeniu operacji
+                setTimeout(() => {
+                    this.isProcessing = false;
+                }, 200);
+            }
+        }
+
+        /**
+         * Usuwa akcję
+         */
+        removeAction(event) {
+            const $actionItem = $(event.target).closest('.action-item');
+            const actionIndex = parseInt($actionItem.data('index'));
+
+            console.log('Removing action at index:', actionIndex, 'Actions length:', this.actions.length);
+
+            if (isNaN(actionIndex) || actionIndex < 0 || actionIndex >= this.actions.length) {
+                console.error('Invalid action index:', actionIndex, 'Actions length:', this.actions.length);
+                console.log('Available actions:', this.actions);
+                return;
+            }
+
+            // Wyczyść zależności dla tego kontenera
+            this.dependencyManager.cleanup($actionItem);
+
             // Usuń z danych
-            this.actionsData.splice(actionIndex, 1);
+            this.actions.splice(actionIndex, 1);
 
             // Usuń z interfejsu
-            actionItem.remove();
+            $actionItem.remove();
 
             // Ponownie indeksuj pozostałe akcje
             this.reindexActions();
@@ -195,11 +496,16 @@
             // Zaktualizuj hidden input
             this.updateHiddenInput();
 
+            console.log('Action removed, new total:', this.actions.length);
         }
 
-        renderAction(action, index) {
+        /**
+         * Renderuje akcję w interfejsie
+         */
+        async renderAction(action, index) {
             const actionConfig = this.actionTypes[action.type];
             if (!actionConfig) {
+                console.error('Brak konfiguracji dla akcji:', action.type);
                 return;
             }
 
@@ -221,7 +527,7 @@
             const $fieldsContainer = $actionItem.find('.action-fields');
 
             // Renderuj pola
-            Object.keys(actionConfig.fields || {}).forEach(fieldName => {
+            const fieldPromises = Object.keys(actionConfig.fields || {}).map(async (fieldName) => {
                 const fieldConfig = actionConfig.fields[fieldName];
                 if (!fieldConfig) {
                     console.error('Missing field configuration:', fieldName);
@@ -236,203 +542,101 @@
                     </div>
                 `);
 
-                const $fieldInput = this.createFieldInput(fieldName, fieldConfig, fieldValue);
+                const $fieldInput = await this.fieldFactory.createField(fieldName, fieldConfig, fieldValue);
                 if ($fieldInput) {
                     $fieldWrapper.append($fieldInput);
                     $fieldsContainer.append($fieldWrapper);
+
+                    // Zarejestruj zależności jeśli istnieją
+                    if (fieldConfig.depends_on) {
+                        setTimeout(() => {
+                            const $parentField = $actionItem.find(`[data-field="${fieldConfig.depends_on}"]`);
+                            if ($parentField.length) {
+                                this.dependencyManager.registerDependency($parentField, $fieldInput, fieldConfig);
+
+                                // Wyzwól początkową zmianę jeśli pole nadrzędne ma wartość
+                                if ($parentField.val()) {
+                                    $parentField.trigger('change.dependency');
+                                }
+                            }
+                        }, 50);
+                    }
                 }
             });
+
+            // Poczekaj na wyrenderowanie wszystkich pól
+            await Promise.all(fieldPromises);
 
             $actionsList.append($actionItem);
         }
 
-        createFieldInput(fieldName, fieldConfig, value) {
-            let $input;
-
-            switch (fieldConfig.type) {
-                case 'number':
-                    $input = $(`
-                        <input type="number" 
-                               class="regular-text action-field-input"
-                               data-field="${fieldName}"
-                               value="${value}"
-                               min="${fieldConfig.min || 0}"
-                               max="${fieldConfig.max || ''}"
-                               />
-                    `);
-                    break;
-
-                case 'text':
-                    $input = $(`
-                        <input type="text" 
-                               class="regular-text action-field-input"
-                               data-field="${fieldName}"
-                               value="${value}"
-                               />
-                    `);
-                    break;
-
-                case 'select':
-                    $input = $(`
-                        <select class="regular-text action-field-input" data-field="${fieldName}">
-                            <option value="">-- Wybierz --</option>
-                        </select>
-                    `);
-
-                    const populateOptions = (options) => {
-                        $input.find('option:not(:first)').remove(); // Usuń wszystkie opcje oprócz pierwszej
-
-                        if (Array.isArray(options)) {
-                            // Prosty array lub array obiektów
-                            options.forEach(option => {
-                                const optionValue = typeof option === 'object' ? option.id : option;
-                                const optionLabel = typeof option === 'object' ? option.title : option;
-                                const optionScenes = typeof option === 'object' ? option.scenes : null;
-                                const selected = value == optionValue ? 'selected' : '';
-                                const scenesAttr = optionScenes ? ` data-scenes='${JSON.stringify(optionScenes)}'` : '';
-                                $input.append(`<option value="${optionValue}" ${selected}${scenesAttr}>${optionLabel}</option>`);
-                            });
-                        } else if (typeof options === 'object') {
-                            // Obiekt z tytułami i scenami
-                            Object.entries(options).forEach(([optionValue, optionData]) => {
-                                if (optionValue === '0') {
-                                    // Specjalna obsługa placeholdera
-                                    $input.find('option:first').text(optionData);
-                                } else {
-                                    const optionLabel = typeof optionData === 'object' ? optionData.title : optionData;
-                                    const optionScenes = typeof optionData === 'object' ? optionData.scenes : null;
-                                    const selected = value == optionValue ? 'selected' : '';
-                                    const scenesAttr = optionScenes ? ` data-scenes='${JSON.stringify(optionScenes)}'` : '';
-                                    $input.append(`<option value="${optionValue}" ${selected}${scenesAttr}>${optionLabel}</option>`);
-                                }
-                            });
-                        }
-
-                        // Debug: sprawdź czy dane scen zostały dodane
-                        console.log('Opcje po populacji:', $input.find('option').map(function () {
-                            return {
-                                value: $(this).val(),
-                                scenes: $(this).attr('data-scenes')
-                            };
-                        }).get());
-                    };
-
-                    // Jeśli pole zależy od innego pola
-                    if (fieldConfig.depends_on) {
-                        // Opóźniamy bindowanie eventów aby mieć pewność że elementy są w DOM
-                        setTimeout(() => {
-                            const $parentField = $input.closest('.action-item').find(`[data-field="${fieldConfig.depends_on}"]`);
-
-                            if (!$parentField.length) {
-                                console.error(`Nie znaleziono pola nadrzędnego: ${fieldConfig.depends_on}`);
-                                return;
-                            }
-
-                            // Aktualizuj opcje gdy zmienia się pole nadrzędne
-                            $parentField.on('change', (event) => {
-                                const $selectedOption = $(event.target).find('option:selected');
-                                console.log('Wybrana lokalizacja:', $selectedOption.val());
-
-                                // Próbujemy pobrać dane scen bezpośrednio z atrybutu data
-                                const rawScenes = $selectedOption.attr('data-scenes');
-                                console.log('Surowe dane scen:', rawScenes);
-
-                                let scenes = [];
-                                try {
-                                    scenes = rawScenes ? JSON.parse(rawScenes) : [];
-                                } catch (e) {
-                                    console.error('Błąd parsowania danych scen:', e);
-                                }
-
-                                console.log('Przetworzone sceny:', scenes);
-
-                                // Aktualizuj opcje pola zależnego
-                                $input.find('option:not(:first)').remove();
-                                if (Array.isArray(scenes) && scenes.length > 0) {
-                                    scenes.forEach(scene => {
-                                        const selected = value == scene.id ? 'selected' : '';
-                                        const sceneTitle = scene.title || `Scena ${scene.id}`;
-                                        $input.append(`<option value="${scene.id}" ${selected}>${sceneTitle}</option>`);
-                                    });
-                                } else {
-                                    console.log('Brak scen dla wybranej lokalizacji');
-                                    $input.val('');
-                                }
-                            });
-
-                            // Wyzwól zmianę na polu nadrzędnym aby załadować początkowe opcje
-                            if ($parentField.val()) {
-                                console.log('Wyzwalanie początkowej zmiany dla lokalizacji:', $parentField.val());
-                                $parentField.trigger('change');
-                            }
-                        }, 100); // Zwiększamy opóźnienie do 100ms dla pewności
-                    }
-                    // Jeśli pole ma dynamiczne opcje (funkcja)
-                    else if (typeof fieldConfig.options === 'string' && window[fieldConfig.options]) {
-                        window[fieldConfig.options]().then(populateOptions);
-                    }
-                    // Jeśli pole ma statyczne opcje
-                    else if (typeof fieldConfig.options === 'object') {
-                        populateOptions(fieldConfig.options);
-                    }
-
-                    break;
-
-                default:
-                    $input = $(`<input type="text" class="regular-text action-field-input" data-field="${fieldName}" value="${value}" />`);
-            }
-
-            return $input;
-        }
-
+        /**
+         * Aktualizuje dane akcji na podstawie zmian w polach
+         */
         updateActionData(event) {
             const $input = $(event.target);
             const $actionItem = $input.closest('.action-item');
             const actionIndex = parseInt($actionItem.data('index'));
             const fieldName = $input.data('field');
-            const fieldValue = $input.val();
+            const value = $input.val();
 
-            if (isNaN(actionIndex) || !fieldName) {
+            if (isNaN(actionIndex) || actionIndex < 0 || actionIndex >= this.actions.length) {
+                console.error('Invalid action index for update:', actionIndex, 'Actions length:', this.actions.length);
                 return;
             }
 
-            if (!this.actionsData[actionIndex]) {
-                return;
+            // Aktualizuj dane akcji
+            if (!this.actions[actionIndex].params) {
+                this.actions[actionIndex].params = {};
             }
+            this.actions[actionIndex].params[fieldName] = value;
 
-            // Zaktualizuj dane
-            this.actionsData[actionIndex].params[fieldName] = fieldValue;
+            // Dodaj klasę modified do elementu action-item
+            $actionItem.addClass('modified');
 
             // Zaktualizuj hidden input
             this.updateHiddenInput();
         }
 
+        /**
+         * Ponownie indeksuje akcje po usunięciu
+         */
         reindexActions() {
             $('.actions-list .action-item').each((index, element) => {
                 $(element).attr('data-index', index);
             });
         }
 
+        /**
+         * Aktualizuje hidden input z danymi akcji
+         */
         updateHiddenInput() {
             const $hiddenInput = $('#answer-actions-data');
-            $hiddenInput.val(JSON.stringify(this.actionsData));
+            $hiddenInput.val(JSON.stringify(this.actions));
         }
 
+        /**
+         * Inicjalizuje sortowanie akcji
+         */
         initSortable() {
             const $actionsList = $('.actions-list');
-            if ($actionsList.length) {
+            if ($actionsList.length && typeof Sortable !== 'undefined') {
                 this.sortable = new Sortable($actionsList[0], {
                     animation: 150,
-                    handle: '.action-header', // używaj nagłówka jako uchwytu do przeciągania
+                    handle: '.action-header',
                     onEnd: (evt) => {
-                        // Zaktualizuj kolejność w danych
                         const oldIndex = evt.oldIndex;
                         const newIndex = evt.newIndex;
 
                         if (oldIndex !== newIndex) {
-                            const item = this.actionsData.splice(oldIndex, 1)[0];
-                            this.actionsData.splice(newIndex, 0, item);
+                            // Przenieś w tablicy danych
+                            const item = this.actions.splice(oldIndex, 1)[0];
+                            this.actions.splice(newIndex, 0, item);
+
+                            // Ponownie indeksuj
                             this.reindexActions();
+
+                            // Aktualizuj hidden input
                             this.updateHiddenInput();
                         }
                     }
@@ -440,26 +644,160 @@
             }
         }
 
-        // Publiczna metoda do ładowania akcji (używana przy edycji)
-        loadActions(actions) {
-            this.actionsData = actions || [];
+        /**
+         * Ładuje akcje (używane przy edycji)
+         */
+        async loadActions(actions) {
+            this.actions = actions || [];
             $('.actions-list').empty();
 
-            this.actionsData.forEach((action, index) => {
-                this.renderAction(action, index);
-            });
+            for (let i = 0; i < this.actions.length; i++) {
+                await this.renderAction(this.actions[i], i);
+            }
 
             this.updateHiddenInput();
         }
+
+        /**
+         * Zbiera dane formularza przed wysłaniem
+         */
+        collectFormData() {
+            // Wyczyść tablicę akcji
+            this.actions = [];
+
+            // Przejdź przez wszystkie akcje w formularzu
+            $('.action-item').each((index, actionElement) => {
+                const $actionItem = $(actionElement);
+                const actionType = $actionItem.data('type');
+                const actionConfig = this.actionTypes[actionType];
+
+                if (!actionType || !actionConfig) {
+                    return;
+                }
+
+                // Stwórz nowy obiekt akcji
+                const action = {
+                    type: actionType,
+                    params: {}
+                };
+
+                let hasValidData = false;
+
+                // Zbierz wartości wszystkich pól dla tej akcji
+                $actionItem.find('.action-field-input').each((_, input) => {
+                    const $input = $(input);
+                    const fieldName = $input.data('field');
+                    const fieldValue = $input.val();
+                    const fieldConfig = actionConfig.fields[fieldName];
+
+                    if (!fieldName || !fieldConfig) {
+                        return;
+                    }
+
+                    // Sprawdź czy pole ma wartość
+                    if (fieldValue !== '' && fieldValue !== null && fieldValue !== undefined) {
+                        action.params[fieldName] = fieldValue;
+
+                        // Jeśli wartość różni się od domyślnej, uznaj akcję za ważną
+                        if (fieldValue !== fieldConfig.default && fieldValue !== '0') {
+                            hasValidData = true;
+                        }
+                    }
+                });
+
+                // Dodaj akcję tylko jeśli ma jakieś ważne dane
+                if (hasValidData && Object.keys(action.params).length > 0) {
+                    this.actions.push(action);
+                }
+            });
+
+            // Zaktualizuj hidden input z nowymi danymi
+            this.updateHiddenInput();
+        }
+
+        /**
+         * Waliduje akcje przed wysłaniem
+         */
+        validateActions() {
+            const errors = [];
+
+            $('.action-item').each((index, actionElement) => {
+                const $actionItem = $(actionElement);
+                const actionType = $actionItem.data('type');
+                const actionConfig = this.actionTypes[actionType];
+
+                if (!actionConfig) return;
+
+                // Sprawdź wymagane pola
+                Object.keys(actionConfig.fields || {}).forEach(fieldName => {
+                    const fieldConfig = actionConfig.fields[fieldName];
+                    if (fieldConfig.required) {
+                        const $input = $actionItem.find(`[data-field="${fieldName}"]`);
+                        if (!$input.val()) {
+                            errors.push(`Akcja "${actionConfig.label}": Pole "${fieldConfig.label}" jest wymagane`);
+                        }
+                    }
+                });
+            });
+
+            return errors;
+        }
+
+        /**
+         * Publiczna metoda do pobierania aktualnych akcji
+         */
+        getActions() {
+            return this.actions;
+        }
+
+        /**
+         * Publiczna metoda do resetowania managera
+         */
+        reset() {
+            this.actions = [];
+            $('.actions-list').empty();
+            this.updateHiddenInput();
+        }
     }
+
+    // Globalne funkcje dla kompatybilności wstecznej
+    window.get_items = API.getItems;
+    window.get_locations = API.getLocations;
+    window.get_locations_with_scenes = API.getLocationsWithScenes;
 
     // Globalna instancja
     window.AnswerActionsManager = AnswerActionsManager;
 
     // Inicjalizacja po załadowaniu DOM
     $(document).ready(function () {
-        // Zawsze utwórz instancję globalną, niezależnie od tego czy element istnieje
-        window.answerActionsManager = new AnswerActionsManager();
+        // Sprawdź czy kontener akcji istnieje przed inicjalizacją
+        if ($('.actions-container').length === 0 && $('.actions-list').length === 0) {
+            console.warn('Actions container not found, skipping initialization');
+            return;
+        }
+
+        // Utwórz instancję globalną tylko jeśli jeszcze nie istnieje
+        if (!window.answerActionsManager) {
+            window.answerActionsManager = new AnswerActionsManager();
+        }
+
+        // Dodaj obsługę wysyłania formularza
+        $('#answer-form').off('submit.answerActions').on('submit.answerActions', function (e) {
+            if (!window.answerActionsManager) {
+                return true;
+            }
+
+            // Waliduj akcje
+            const errors = window.answerActionsManager.validateActions();
+            if (errors.length > 0) {
+                alert('Błędy walidacji:\n' + errors.join('\n'));
+                e.preventDefault();
+                return false;
+            }
+
+            // Pobierz wszystkie dane z formularza przed wysłaniem
+            window.answerActionsManager.collectFormData();
+        });
     });
 
 })(jQuery);

@@ -523,8 +523,7 @@ class NPC_AdminPanel
         // Obsługa akcji
         $actions = [];
         if (!empty($_POST['answer_actions'])) {
-            $actions_json = stripslashes($_POST['answer_actions']);
-            $actions = json_decode($actions_json, true);
+            $actions = json_decode(wp_unslash($_POST['answer_actions']), true);
             if (!is_array($actions)) {
                 $actions = [];
             }
