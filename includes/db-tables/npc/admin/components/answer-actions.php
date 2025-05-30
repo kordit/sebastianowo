@@ -419,6 +419,7 @@ function get_locations_with_scenes()
                 the_row();
                 $scenes[] = [
                     'id' => get_sub_field('id_sceny'),
+                    'title' => get_sub_field('nazwa') ?: ('Scena ' . get_sub_field('id_sceny'))
                 ];
             }
         }

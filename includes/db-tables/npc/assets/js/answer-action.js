@@ -67,12 +67,22 @@
                 });
 
                 if (response.success) {
-                    return response.data;
+                    // Konwertuj format tablicy na format key-value dla kompatybilności
+                    const options = { '0': '-- Wybierz lokalizację --' };
+
+                    response.data.forEach(location => {
+                        options[location.id] = {
+                            title: location.title,
+                            scenes: location.scenes
+                        };
+                    });
+
+                    return options;
                 }
                 throw new Error(response.data || 'Błąd pobierania lokacji ze scenami');
             } catch (error) {
                 console.error('API.getLocationsWithScenes error:', error);
-                return [];
+                return { '0': '-- Wybierz lokalizację --' };
             }
         }
     };
@@ -138,9 +148,14 @@
             // Pobierz opcje i wypełnij select
             let options = [];
 
+            console.log('Creating select for field:', fieldName, 'with config:', fieldConfig);
+
             if (typeof fieldConfig.options === 'string' && window[fieldConfig.options]) {
+                console.log('Using window function:', fieldConfig.options);
                 options = await window[fieldConfig.options]();
+                console.log('Options from window function:', options);
             } else if (typeof fieldConfig.options === 'object') {
+                console.log('Using direct options object:', fieldConfig.options);
                 options = fieldConfig.options;
             }
 
@@ -152,10 +167,13 @@
          * Wypełnia opcje w select
          */
         populateSelectOptions($select, options, selectedValue = '') {
+            console.log('Populating select options:', options, 'Selected value:', selectedValue);
+
             // Usuń wszystkie opcje oprócz pierwszej (placeholder)
             $select.find('option:not(:first)').remove();
 
             if (Array.isArray(options)) {
+                console.log('Processing array options');
                 // Array obiektów
                 options.forEach(option => {
                     const optionValue = typeof option === 'object' ? option.id : option;
@@ -164,6 +182,8 @@
                     const selected = selectedValue == optionValue ? 'selected' : '';
                     const scenesAttr = optionScenes ? ` data-scenes='${JSON.stringify(optionScenes)}'` : '';
 
+                    console.log('Adding array option:', optionValue, optionLabel, optionScenes);
+
                     $select.append(`
                         <option value="${optionValue}" ${selected}${scenesAttr}>
                             ${optionLabel}
@@ -171,6 +191,7 @@
                     `);
                 });
             } else if (typeof options === 'object') {
+                console.log('Processing object options');
                 // Obiekt key-value
                 Object.entries(options).forEach(([optionValue, optionData]) => {
                     if (optionValue === '0') {
@@ -182,6 +203,8 @@
                         const selected = selectedValue == optionValue ? 'selected' : '';
                         const scenesAttr = optionScenes ? ` data-scenes='${JSON.stringify(optionScenes)}'` : '';
 
+                        console.log('Adding object option:', optionValue, optionLabel, optionScenes);
+
                         $select.append(`
                             <option value="${optionValue}" ${selected}${scenesAttr}>
                                 ${optionLabel}
@@ -190,6 +213,8 @@
                     }
                 });
             }
+
+            console.log('Final select HTML:', $select.html());
         }
     }
 
@@ -202,38 +227,76 @@
         /**
          * Rejestruje zależność między polami
          */
-        registerDependency($parentField, $childField, fieldConfig) {
+        registerDependency($parentField, $childField, fieldConfig, actionIndex) {
             const parentFieldName = $parentField.data('field');
             const childFieldName = $childField.data('field');
 
-            if (!this.dependencies.has(parentFieldName)) {
-                this.dependencies.set(parentFieldName, []);
+            // Twórz unikalny klucz uwzględniający indeks akcji
+            const dependencyKey = `${actionIndex}-${parentFieldName}`;
+
+            console.log(`Registering dependency: ${childFieldName} depends on ${parentFieldName} in action ${actionIndex}`, {
+                dependencyKey: dependencyKey,
+                parentField: $parentField.length,
+                childField: $childField.length,
+                fieldConfig: fieldConfig
+            });
+
+            if (!this.dependencies.has(dependencyKey)) {
+                this.dependencies.set(dependencyKey, []);
             }
 
-            this.dependencies.get(parentFieldName).push({
+            this.dependencies.get(dependencyKey).push({
                 childField: $childField,
                 childFieldName,
-                config: fieldConfig
+                config: fieldConfig,
+                actionIndex: actionIndex
             });
 
-            // Binduj event na pole nadrzędne
-            $parentField.on('change.dependency', (event) => {
-                this.handleParentFieldChange(event);
-            });
+            // Sprawdź czy event już jest zbindowany dla tego konkretnego pola w tej akcji
+            const existingEvents = $._data($parentField[0], 'events');
+            const hasChangeEvent = existingEvents && existingEvents.change &&
+                existingEvents.change.some(event => event.namespace === `dependency-${actionIndex}`);
+
+            if (!hasChangeEvent) {
+                console.log(`Binding change event to ${parentFieldName} in action ${actionIndex}`);
+                // Binduj event z unikalnym namespace dla akcji
+                $parentField.on(`change.dependency-${actionIndex}`, (event) => {
+                    console.log(`Parent field ${parentFieldName} changed in action ${actionIndex}, triggering dependency update`);
+                    this.handleParentFieldChange(event, actionIndex);
+                });
+            } else {
+                console.log(`Change event already bound to ${parentFieldName} in action ${actionIndex}`);
+            }
+
+            console.log(`Dependencies for ${dependencyKey}:`, this.dependencies.get(dependencyKey).length);
         }
 
         /**
          * Obsługuje zmianę w polu nadrzędnym
          */
-        async handleParentFieldChange(event) {
+        async handleParentFieldChange(event, actionIndex) {
             const $parentField = $(event.target);
             const parentFieldName = $parentField.data('field');
+            const parentValue = $parentField.val();
             const $selectedOption = $parentField.find('option:selected');
 
-            const dependencies = this.dependencies.get(parentFieldName) || [];
+            // Utwórz action-specific dependency key
+            const dependencyKey = `${actionIndex}-${parentFieldName}`;
+
+            console.log(`🔄 handleParentFieldChange called for ${parentFieldName} in action ${actionIndex} with value:`, parentValue);
+            console.log(`🔍 Looking for dependencies with key: ${dependencyKey}`);
+            console.log('Selected option:', $selectedOption.length, $selectedOption.attr('data-scenes'));
+
+            const dependencies = this.dependencies.get(dependencyKey) || [];
+            console.log(`Found ${dependencies.length} dependencies for ${dependencyKey}`);
 
             for (const dependency of dependencies) {
-                const { childField: $childField, config } = dependency;
+                const { childField: $childField, childFieldName, config, actionIndex: depActionIndex } = dependency;
+
+                console.log(`Processing dependency: ${childFieldName} depends on ${parentFieldName} (action ${depActionIndex})`, {
+                    configDependsOn: config.depends_on,
+                    matches: config.depends_on === parentFieldName
+                });
 
                 if (config.depends_on === parentFieldName) {
                     await this.updateChildField($childField, $selectedOption, config);
@@ -245,37 +308,71 @@
          * Aktualizuje pole zależne na podstawie wyboru w polu nadrzędnym
          */
         async updateChildField($childField, $selectedOption, fieldConfig) {
+            const childFieldName = $childField.data('field');
+            console.log(`🔄 updateChildField called for ${childFieldName}`);
+
             // Wyczyść opcje pola zależnego
             $childField.find('option:not(:first)').remove();
             $childField.val('');
+            console.log(`Cleared ${childFieldName} options`);
 
             const rawScenes = $selectedOption.attr('data-scenes');
+            console.log(`Raw scenes data from selected option:`, rawScenes);
+
             if (!rawScenes) {
+                console.log('❌ No scenes data found for selected option');
                 return;
             }
 
             try {
                 const scenes = JSON.parse(rawScenes);
+                console.log(`✅ Parsed scenes data:`, scenes, `(${scenes.length} scenes)`);
+
                 if (Array.isArray(scenes) && scenes.length > 0) {
-                    scenes.forEach(scene => {
-                        const sceneTitle = scene.title || `Scena ${scene.id}`;
+                    console.log(`Adding ${scenes.length} scene options to ${childFieldName}`);
+                    scenes.forEach((scene, index) => {
+                        const sceneTitle = scene.title || scene.nazwa || `Scena ${scene.id}`;
+                        console.log(`  - Adding scene ${index + 1}: ${scene.id} = ${sceneTitle}`);
                         $childField.append(`
                             <option value="${scene.id}">
                                 ${sceneTitle}
                             </option>
                         `);
                     });
+
+                    console.log(`✅ Successfully added all scenes to ${childFieldName}`);
+                    console.log(`Final ${childFieldName} HTML:`, $childField.html());
+                } else {
+                    console.log('❌ No valid scenes found in data - array is empty or not an array');
                 }
             } catch (error) {
-                console.error('Błąd parsowania danych scen:', error);
+                console.error('❌ Error parsing scenes data:', error);
             }
         }
 
         /**
          * Usuwa wszystkie zależności dla danego kontenera
          */
-        cleanup($container) {
-            $container.find('.action-field-input').off('.dependency');
+        cleanup($container, actionIndex = null) {
+            if (actionIndex !== null) {
+                // Usuń eventy dla konkretnej akcji
+                $container.find('.action-field-input').off(`.dependency-${actionIndex}`);
+
+                // Usuń z mapy zależności
+                const keysToRemove = [];
+                for (const [key, dependencies] of this.dependencies) {
+                    if (key.startsWith(`${actionIndex}-`)) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(key => this.dependencies.delete(key));
+
+                console.log(`🧹 Cleaned up dependencies for action ${actionIndex}`);
+            } else {
+                // Usuń wszystkie eventy dependency
+                $container.find('.action-field-input').off('.dependency');
+                console.log(`🧹 Cleaned up all dependencies`);
+            }
         }
     }
 
@@ -508,8 +605,8 @@
                 return;
             }
 
-            // Wyczyść zależności dla tego kontenera
-            this.dependencyManager.cleanup($actionItem);
+            // Wyczyść zależności dla tego kontenera z action-specific cleanup
+            this.dependencyManager.cleanup($actionItem, actionIndex);
 
             // Usuń z danych
             this.actions.splice(actionIndex, 1);
@@ -553,12 +650,17 @@
 
             const $fieldsContainer = $actionItem.find('.action-fields');
 
-            // Renderuj pola
-            const fieldPromises = Object.keys(actionConfig.fields || {}).map(async (fieldName) => {
-                const fieldConfig = actionConfig.fields[fieldName];
+            // Sortuj pola - najpierw te bez zależności, potem te z zależnościami
+            const fieldsArray = Object.entries(actionConfig.fields || {});
+            const independentFields = fieldsArray.filter(([fieldName, fieldConfig]) => !fieldConfig.depends_on);
+            const dependentFields = fieldsArray.filter(([fieldName, fieldConfig]) => fieldConfig.depends_on);
+            const sortedFields = [...independentFields, ...dependentFields]; console.log('Rendering fields in order:', sortedFields.map(([name, config]) => `${name}${config.depends_on ? ` (depends on ${config.depends_on})` : ''}`));
+
+            // Renderuj pola w poprawnej kolejności
+            const fieldPromises = sortedFields.map(async ([fieldName, fieldConfig]) => {
                 if (!fieldConfig) {
                     console.error('Missing field configuration:', fieldName);
-                    return;
+                    return null;
                 }
 
                 const fieldValue = action.params[fieldName] || fieldConfig.default || '';
@@ -574,25 +676,40 @@
                     $fieldWrapper.append($fieldInput);
                     $fieldsContainer.append($fieldWrapper);
 
-                    // Zarejestruj zależności jeśli istnieją
-                    if (fieldConfig.depends_on) {
-                        setTimeout(() => {
-                            const $parentField = $actionItem.find(`[data-field="${fieldConfig.depends_on}"]`);
-                            if ($parentField.length) {
-                                this.dependencyManager.registerDependency($parentField, $fieldInput, fieldConfig);
-
-                                // Wyzwól początkową zmianę jeśli pole nadrzędne ma wartość
-                                if ($parentField.val()) {
-                                    $parentField.trigger('change.dependency');
-                                }
-                            }
-                        }, 50);
-                    }
+                    return {
+                        fieldName,
+                        fieldConfig,
+                        $fieldInput
+                    };
                 }
+                return null;
             });
 
             // Poczekaj na wyrenderowanie wszystkich pól
-            await Promise.all(fieldPromises);
+            const renderedFields = await Promise.all(fieldPromises);
+
+            // Teraz zarejestruj zależności - wszystkie pola już istnieją w DOM
+            renderedFields.filter(field => field !== null).forEach(({ fieldName, fieldConfig, $fieldInput }) => {
+                if (fieldConfig.depends_on) {
+                    const $parentField = $actionItem.find(`[data-field="${fieldConfig.depends_on}"]`);
+                    console.log(`Registering dependency: ${fieldName} depends on ${fieldConfig.depends_on}`, {
+                        parentFieldExists: $parentField.length > 0,
+                        parentFieldValue: $parentField.val()
+                    });
+
+                    if ($parentField.length) {
+                        this.dependencyManager.registerDependency($parentField, $fieldInput, fieldConfig, index);
+
+                        // Wyzwól początkową zmianę jeśli pole nadrzędne ma wartość
+                        if ($parentField.val()) {
+                            console.log(`Triggering initial change for ${fieldConfig.depends_on} with value:`, $parentField.val());
+                            $parentField.trigger(`change.dependency-${index}`);
+                        }
+                    } else {
+                        console.warn(`Parent field ${fieldConfig.depends_on} not found for ${fieldName}`);
+                    }
+                }
+            });
 
             $actionsList.append($actionItem);
         }
@@ -607,6 +724,8 @@
             const fieldName = $input.data('field');
             const value = $input.val();
 
+            console.log(`🔄 updateActionData: field "${fieldName}" = "${value}" in action ${actionIndex}`);
+
             if (isNaN(actionIndex) || actionIndex < 0 || actionIndex >= this.actions.length) {
                 console.error('Invalid action index for update:', actionIndex, 'Actions length:', this.actions.length);
                 return;
@@ -617,6 +736,8 @@
                 this.actions[actionIndex].params = {};
             }
             this.actions[actionIndex].params[fieldName] = value;
+
+            console.log(`✅ Updated action ${actionIndex} params:`, this.actions[actionIndex].params);
 
             // Dodaj klasę modified do elementu action-item
             $actionItem.addClass('modified');
@@ -639,7 +760,9 @@
          */
         updateHiddenInput() {
             const $hiddenInput = $('#answer-actions-data');
-            $hiddenInput.val(JSON.stringify(this.actions));
+            const jsonData = JSON.stringify(this.actions);
+            console.log(`📝 updateHiddenInput: Setting hidden input to:`, jsonData);
+            $hiddenInput.val(jsonData);
         }
 
         /**
@@ -699,16 +822,23 @@
          * Zbiera dane formularza przed wysłaniem
          */
         collectFormData() {
+            console.log('🗂️ Starting collectFormData...');
+            
             // Wyczyść tablicę akcji
             this.actions = [];
 
             // Przejdź przez wszystkie akcje w formularzu
             $('.action-item').each((index, actionElement) => {
+                console.log(`📝 Processing action item ${index}...`);
+                
                 const $actionItem = $(actionElement);
                 const actionType = $actionItem.data('type');
                 const actionConfig = this.actionTypes[actionType];
 
+                console.log(`🔍 Action type: ${actionType}`, { actionConfig: !!actionConfig });
+
                 if (!actionType || !actionConfig) {
+                    console.warn(`⚠️ Skipping action - missing type or config:`, { actionType, actionConfig });
                     return;
                 }
 
@@ -727,26 +857,44 @@
                     const fieldValue = $input.val();
                     const fieldConfig = actionConfig.fields[fieldName];
 
+                    console.log(`📋 Collecting field: ${fieldName} = "${fieldValue}" (type: ${typeof fieldValue})`);
+
                     if (!fieldName || !fieldConfig) {
+                        console.warn(`⚠️ Skipping field - missing name or config:`, { fieldName, fieldConfig });
                         return;
                     }
 
-                    // Sprawdź czy pole ma wartość
+                    // Zapisz wartość jeśli nie jest pusta (ale '0' jest poprawną wartością!)
                     if (fieldValue !== '' && fieldValue !== null && fieldValue !== undefined) {
                         action.params[fieldName] = fieldValue;
+                        console.log(`✅ Added field ${fieldName}: "${fieldValue}"`);
 
-                        // Jeśli wartość różni się od domyślnej, uznaj akcję za ważną
-                        if (fieldValue !== fieldConfig.default && fieldValue !== '0') {
+                        // Sprawdź czy to jest wymagane pole lub ma niepustą wartość
+                        if (fieldConfig.required || (fieldValue !== fieldConfig.default && fieldValue !== '')) {
                             hasValidData = true;
+                            console.log(`🎯 Field ${fieldName} marked as valid data`);
                         }
+                    } else {
+                        console.log(`⏭️ Skipping empty field: ${fieldName}`);
                     }
                 });
 
-                // Dodaj akcję tylko jeśli ma jakieś ważne dane
-                if (hasValidData && Object.keys(action.params).length > 0) {
+                console.log(`📊 Action ${actionType} summary:`, {
+                    hasValidData,
+                    paramsCount: Object.keys(action.params).length,
+                    params: action.params
+                });
+
+                // Dodaj akcję jeśli ma jakieś parametry (usuń zbyt restrykcyjną walidację)
+                if (Object.keys(action.params).length > 0) {
                     this.actions.push(action);
+                    console.log(`✅ Added action ${actionType} to actions array`);
+                } else {
+                    console.log(`❌ Skipped action ${actionType} - no parameters`);
                 }
             });
+
+            console.log(`🏁 collectFormData completed. Total actions collected: ${this.actions.length}`, this.actions);
 
             // Zaktualizuj hidden input z nowymi danymi
             this.updateHiddenInput();
