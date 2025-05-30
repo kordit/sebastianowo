@@ -159,38 +159,32 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                             <div class="stat-item">
                                 <label for="strength">Siła</label>
                                 <input type="number" id="strength" name="strength"
-                                    value="<?php echo esc_attr($npc->strength ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->strength ?? 0); ?>">
                             </div>
                             <div class="stat-item">
                                 <label for="defence">Obrona</label>
                                 <input type="number" id="defence" name="defence"
-                                    value="<?php echo esc_attr($npc->defence ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->defence ?? 0); ?>">
                             </div>
                             <div class="stat-item">
                                 <label for="dexterity">Zręczność</label>
                                 <input type="number" id="dexterity" name="dexterity"
-                                    value="<?php echo esc_attr($npc->dexterity ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->dexterity ?? 0); ?>">
                             </div>
                             <div class="stat-item">
                                 <label for="perception">Percepcja</label>
                                 <input type="number" id="perception" name="perception"
-                                    value="<?php echo esc_attr($npc->perception ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->perception ?? 0); ?>">
                             </div>
                             <div class="stat-item">
                                 <label for="technical">Technika</label>
                                 <input type="number" id="technical" name="technical"
-                                    value="<?php echo esc_attr($npc->technical ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->technical ?? 0); ?>">
                             </div>
                             <div class="stat-item">
                                 <label for="charisma">Charyzma</label>
                                 <input type="number" id="charisma" name="charisma"
-                                    value="<?php echo esc_attr($npc->charisma ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->charisma ?? 0); ?>">
                             </div>
                         </div>
                         <h3>Umiejętności</h3>
@@ -198,38 +192,32 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                             <div class="stat-item">
                                 <label for="combat">Walka</label>
                                 <input type="number" id="combat" name="combat"
-                                    value="<?php echo esc_attr($npc->combat ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->combat ?? 0); ?>">
                             </div>
                             <div class="stat-item">
                                 <label for="steal">Kradzież</label>
                                 <input type="number" id="steal" name="steal"
-                                    value="<?php echo esc_attr($npc->steal ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->steal ?? 0); ?>">
                             </div>
                             <div class="stat-item">
                                 <label for="craft">Rzemiosło</label>
                                 <input type="number" id="craft" name="craft"
-                                    value="<?php echo esc_attr($npc->craft ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->craft ?? 0); ?>">
                             </div>
                             <div class="stat-item">
                                 <label for="trade">Handel</label>
                                 <input type="number" id="trade" name="trade"
-                                    value="<?php echo esc_attr($npc->trade ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->trade ?? 0); ?>">
                             </div>
                             <div class="stat-item">
                                 <label for="relations">Relacje</label>
                                 <input type="number" id="relations" name="relations"
-                                    value="<?php echo esc_attr($npc->relations ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->relations ?? 0); ?>">
                             </div>
                             <div class="stat-item">
                                 <label for="street">Ulica</label>
                                 <input type="number" id="street" name="street"
-                                    value="<?php echo esc_attr($npc->street ?? 0); ?>"
-                                    min="0" max="100">
+                                    value="<?php echo esc_attr($npc->street ?? 0); ?>">
                             </div>
                         </div>
                         <h3>Punkty życia</h3>
@@ -344,6 +332,12 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                                                                 <?php foreach ($dialog->answers as $answer): ?>
                                                                     <li>
                                                                         <?php echo esc_html(wp_trim_words($answer->text, 10)); ?>
+                                                                        <?php
+                                                                        // Wyświetl miniaturki akcji
+                                                                        if (!empty($answer->actions)) {
+                                                                            echo generate_action_badges($answer->actions);
+                                                                        }
+                                                                        ?>
                                                                         <div class="answer-actions">
                                                                             <button type="button" class="button-link edit-answer-btn"
                                                                                 data-answer-id="<?php echo $answer->id; ?>"

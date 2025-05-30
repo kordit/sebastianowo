@@ -242,6 +242,20 @@ class NPCDialogSystem
             [],
             NPC_PLUGIN_VERSION
         );
+
+        wp_enqueue_style(
+            'npc-action-badges',
+            NPC_PLUGIN_URL . 'assets/css/action-badges.css',
+            [],
+            NPC_PLUGIN_VERSION
+        );
+
+        wp_enqueue_style(
+            'npc-action-badges',
+            NPC_PLUGIN_URL . 'assets/css/action-badges.css',
+            [],
+            NPC_PLUGIN_VERSION
+        );
     }
 
     public function activate()
@@ -256,6 +270,10 @@ class NPCDialogSystem
         flush_rewrite_rules();
     }
 }
+
+// Komponenty
+require_once NPC_PLUGIN_PATH . 'admin/components/answer-actions.php';
+require_once NPC_PLUGIN_PATH . 'admin/components/action-badges.php';
 
 // Inicjalizacja systemu
 NPCDialogSystem::getInstance();

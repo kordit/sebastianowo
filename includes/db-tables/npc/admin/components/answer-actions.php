@@ -311,8 +311,6 @@ function render_action_field($field_name, $field_config, $value = '', $is_templa
             <input type="number"
                 name="<?php echo esc_attr($name_attr); ?>"
                 value="<?php echo esc_attr($value); ?>"
-                min="<?php echo esc_attr($field_config['min'] ?? 0); ?>"
-                max="<?php echo esc_attr($field_config['max'] ?? ''); ?>"
                 class="regular-text action-field-input"
                 data-field="<?php echo esc_attr($field_name); ?>">
         <?php

@@ -104,8 +104,6 @@
                        class="regular-text action-field-input"
                        data-field="${fieldName}"
                        value="${value}"
-                       min="${fieldConfig.min || 0}"
-                       max="${fieldConfig.max || ''}"
                        ${fieldConfig.required ? 'required' : ''}
                        />
             `);
@@ -365,14 +363,14 @@
             $actionsContainer.on('click.answerActions', '.add-action-btn', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 // Dodatkowe sprawdzenie czy to faktycznie przycisk dodawania akcji
                 const $target = $(e.target);
                 if (!$target.hasClass('add-action-btn') && !$target.closest('.add-action-btn').length) {
                     console.log('Event caught but not from add-action-btn, ignoring');
                     return;
                 }
-                
+
                 console.log('Add action button clicked');
                 this.addAction();
             });
