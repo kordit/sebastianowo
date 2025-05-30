@@ -472,7 +472,7 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
             <input type="hidden" name="action" id="answer-action" value="create_answer">
             <input type="hidden" name="npc_id" value="<?php echo $npc->id; ?>">
             <input type="hidden" name="dialog_id" id="answer-dialog-id" value="">
-            <input type="hidden" name="answer_id" id="answer-id" value="">
+            <input type="hidden" name="answer_id" id="answer_id" value="">
 
             <div class="modal-body">
                 <table class="form-table">

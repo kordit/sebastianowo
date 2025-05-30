@@ -10,6 +10,7 @@
         constructor() {
             this.actionTypes = {};
             this.actionsData = [];
+            this.sortable = null;
             this.init();
         }
 
@@ -17,6 +18,7 @@
             this.loadActionTypes();
             this.bindEvents();
             this.loadExistingActions();
+            this.initSortable();
         }
 
         loadActionTypes() {
@@ -246,6 +248,28 @@
         updateHiddenInput() {
             const $hiddenInput = $('#answer-actions-data');
             $hiddenInput.val(JSON.stringify(this.actionsData));
+        }
+
+        initSortable() {
+            const $actionsList = $('.actions-list');
+            if ($actionsList.length) {
+                this.sortable = new Sortable($actionsList[0], {
+                    animation: 150,
+                    handle: '.action-header', // używaj nagłówka jako uchwytu do przeciągania
+                    onEnd: (evt) => {
+                        // Zaktualizuj kolejność w danych
+                        const oldIndex = evt.oldIndex;
+                        const newIndex = evt.newIndex;
+                        
+                        if (oldIndex !== newIndex) {
+                            const item = this.actionsData.splice(oldIndex, 1)[0];
+                            this.actionsData.splice(newIndex, 0, item);
+                            this.reindexActions();
+                            this.updateHiddenInput();
+                        }
+                    }
+                });
+            }
         }
 
         // Publiczna metoda do ładowania akcji (używana przy edycji)

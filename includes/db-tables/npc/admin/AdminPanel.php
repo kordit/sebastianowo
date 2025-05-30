@@ -9,6 +9,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Upewnij się, że mamy dostęp do funkcji WordPress
+require_once(ABSPATH . 'wp-includes/pluggable.php');
+require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+require_once dirname(__FILE__) . '/../debug.php';
+
 class NPC_AdminPanel
 {
     private $npc_repository;
@@ -72,15 +77,21 @@ class NPC_AdminPanel
      */
     public function handle_admin_actions()
     {
+        NPC_Debug::log('Rozpoczęcie handle_admin_actions');
+        NPC_Debug::log_post();
+
         if (!isset($_GET['page']) || strpos($_GET['page'], 'npc-') !== 0) {
+            NPC_Debug::log('Brak strony NPC w GET');
             return;
         }
 
         if (!wp_verify_nonce($_POST['npc_nonce'] ?? '', 'npc_admin_action')) {
+            NPC_Debug::log('Nieprawidłowy nonce');
             return;
         }
 
         $action = $_POST['action'] ?? $_GET['action'] ?? '';
+        NPC_Debug::log('Akcja:', $action);
 
         switch ($action) {
             case 'create_npc':
@@ -105,6 +116,7 @@ class NPC_AdminPanel
                 $this->handle_create_answer();
                 break;
             case 'update_answer':
+                NPC_Debug::log('Rozpoczęcie obsługi update_answer');
                 $this->handle_update_answer();
                 break;
             case 'delete_answer':
@@ -496,9 +508,14 @@ class NPC_AdminPanel
      */
     private function handle_update_answer()
     {
+        NPC_Debug::log('Rozpoczęcie aktualizacji odpowiedzi');
+        NPC_Debug::log_post();
 
         $answer_id = intval($_POST['answer_id']);
         $npc_id = intval($_POST['npc_id']);
+
+        NPC_Debug::log('ID odpowiedzi:', $answer_id);
+        NPC_Debug::log('ID NPC:', $npc_id);
 
         // Obsługa akcji
         $actions = [];
@@ -510,6 +527,8 @@ class NPC_AdminPanel
             }
         }
 
+        NPC_Debug::log('Akcje:', $actions);
+
         $data = [
             'text' => sanitize_textarea_field($_POST['answer_text']),
             'next_dialog_id' => empty($_POST['answer_next_dialog_id']) ? null : intval($_POST['answer_next_dialog_id']),
@@ -517,12 +536,17 @@ class NPC_AdminPanel
             'actions' => $actions,
         ];
 
+        NPC_Debug::log('Dane do aktualizacji:', $data);
+
         $result = $this->answer_repository->update($answer_id, $data);
+        NPC_Debug::log('Wynik aktualizacji:', $result);
 
         if ($result !== false) {
+            NPC_Debug::log('Aktualizacja udana, przekierowanie do:', admin_url('admin.php?page=npc-add&npc_id=' . $npc_id . '&message=answer_updated'));
             wp_redirect(admin_url('admin.php?page=npc-add&npc_id=' . $npc_id . '&message=answer_updated'));
             exit;
         } else {
+            NPC_Debug::log('Aktualizacja nieudana, przekierowanie do:', admin_url('admin.php?page=npc-add&npc_id=' . $npc_id . '&error=answer_update_failed'));
             wp_redirect(admin_url('admin.php?page=npc-add&npc_id=' . $npc_id . '&error=answer_update_failed'));
             exit;
         }

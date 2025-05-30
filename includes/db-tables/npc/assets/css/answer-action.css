@@ -15,20 +15,23 @@
 
 .actions-list {
     margin-bottom: 15px;
+    min-height: 20px;
 }
 
 .action-item {
     background: #fff;
-    border: 1px solid #c3c4c7;
+    border: 1px solid #ddd;
     border-radius: 4px;
     margin-bottom: 10px;
     position: relative;
 }
 
 .action-header {
-    background: #f0f0f1;
-    padding: 10px 15px;
-    border-bottom: 1px solid #c3c4c7;
+    background: #f8f8f8;
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+    border-radius: 4px 4px 0 0;
+    cursor: move;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -36,9 +39,11 @@
 
 .action-header h5 {
     margin: 0;
-    font-size: 13px;
-    font-weight: 600;
-    color: #1d2327;
+    font-size: 14px;
+}
+
+.action-header:hover {
+    background: #f0f0f0;
 }
 
 .remove-action-btn {
@@ -131,6 +136,17 @@
 .action-item[data-type="start_combat"] .action-header {
     background: #f8d7da;
     border-bottom-color: #f5c6cb;
+}
+
+/* Sortable actions */
+.sortable-ghost {
+    opacity: 0.5;
+    background: #f0f0f0;
+}
+
+.sortable-chosen {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive design */

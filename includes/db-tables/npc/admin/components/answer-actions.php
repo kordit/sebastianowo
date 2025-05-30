@@ -57,9 +57,9 @@ function render_answer_actions_manager($answer_id = null, $existing_actions = []
 
     <div class="answer-actions-manager" data-answer-id="<?php echo esc_attr($answer_id); ?>">
         <h4>Akcje odpowiedzi</h4>
-        <p class="description">Dodaj akcje, które wykonają się po wybraniu tej odpowiedzi przez gracza.</p>
+        <p class="description">Dodaj akcje, które wykonają się po wybraniu tej odpowiedzi przez gracza. Przeciągnij, aby zmienić kolejność.</p>
 
-        <div class="actions-list" id="actions-list">
+        <div class="actions-list sortable" id="actions-list">
             <?php if (!empty($existing_actions)): ?>
                 <?php foreach ($existing_actions as $index => $action): ?>
                     <?php render_single_action($action, $index, $action_types); ?>
@@ -84,6 +84,9 @@ function render_answer_actions_manager($answer_id = null, $existing_actions = []
         <!-- Hidden input to store actions data -->
         <input type="hidden" name="answer_actions" id="answer-actions-data" value="<?php echo esc_attr(json_encode($existing_actions)); ?>">
     </div>
+
+    <!-- Sortable.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <!-- Action templates (hidden) -->
     <div class="action-templates" style="display: none;">
