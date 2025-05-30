@@ -465,6 +465,23 @@ class NPC_AdminPanel
             wp_send_json_error('Odpowiedź nie została znaleziona');
         }
 
+        // Debug: sprawdź jak działają dane akcji
+        error_log("🔍 DEBUG ajax_get_answer - Answer ID: {$answer_id}");
+        error_log("🔍 DEBUG ajax_get_answer - Raw actions from DB: " . print_r($answer->actions, true));
+        error_log("🔍 DEBUG ajax_get_answer - Actions type: " . gettype($answer->actions));
+
+        // Jeśli actions to string JSON, spróbuj go zdekodować
+        if (is_string($answer->actions) && !empty($answer->actions)) {
+            $decoded_actions = json_decode($answer->actions, true);
+            error_log("🔍 DEBUG ajax_get_answer - Decoded actions: " . print_r($decoded_actions, true));
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $answer->actions = $decoded_actions;
+                error_log("✅ DEBUG ajax_get_answer - Successfully decoded actions");
+            } else {
+                error_log("❌ DEBUG ajax_get_answer - JSON decode error: " . json_last_error_msg());
+            }
+        }
+
         wp_send_json_success($answer);
     }
 

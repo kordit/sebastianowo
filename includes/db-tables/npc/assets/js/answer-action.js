@@ -309,11 +309,24 @@
          */
         async updateChildField($childField, $selectedOption, fieldConfig) {
             const childFieldName = $childField.data('field');
-            console.log(`🔄 updateChildField called for ${childFieldName}`);
+            
+            // Sprawdź czy to pole ma wartość w danych akcji (dla istniejących akcji)
+            const $actionItem = $childField.closest('.action-item');
+            const actionIndex = parseInt($actionItem.data('index'));
+            const actionType = $actionItem.data('type');
+            let originalValue = '';
+            
+            // Pobierz oryginalną wartość z danych akcji jeśli istnieje
+            if (!isNaN(actionIndex) && window.answerActionsManager && window.answerActionsManager.actions && window.answerActionsManager.actions[actionIndex]) {
+                originalValue = window.answerActionsManager.actions[actionIndex].params[childFieldName] || '';
+                console.log(`🎯 Found original value for ${childFieldName} in action ${actionIndex}: "${originalValue}"`);
+            }
+            
+            const currentValue = $childField.val() || originalValue; // Używaj currentValue lub originalValue
+            console.log(`🔄 updateChildField called for ${childFieldName}, current value: "${currentValue}", original value: "${originalValue}"`);
 
             // Wyczyść opcje pola zależnego
             $childField.find('option:not(:first)').remove();
-            $childField.val('');
             console.log(`Cleared ${childFieldName} options`);
 
             const rawScenes = $selectedOption.attr('data-scenes');
@@ -321,6 +334,7 @@
 
             if (!rawScenes) {
                 console.log('❌ No scenes data found for selected option');
+                $childField.val(''); // Tylko wtedy wyczyść wartość gdy nie ma opcji
                 return;
             }
 
@@ -332,21 +346,47 @@
                     console.log(`Adding ${scenes.length} scene options to ${childFieldName}`);
                     scenes.forEach((scene, index) => {
                         const sceneTitle = scene.title || scene.nazwa || `Scena ${scene.id}`;
-                        console.log(`  - Adding scene ${index + 1}: ${scene.id} = ${sceneTitle}`);
+                        const isSelected = currentValue && currentValue === scene.id ? 'selected' : '';
+                        console.log(`  - Adding scene ${index + 1}: ${scene.id} = ${sceneTitle}${isSelected ? ' (SELECTED)' : ''}`);
                         $childField.append(`
-                            <option value="${scene.id}">
+                            <option value="${scene.id}" ${isSelected}>
                                 ${sceneTitle}
                             </option>
                         `);
                     });
 
+                    // Przywróć wartość jeśli nadal jest dostępna w opcjach - KLUCZOWE!
+                    if (currentValue) {
+                        const optionExists = $childField.find(`option[value="${currentValue}"]`).length > 0;
+                        if (optionExists) {
+                            // Użyj setTimeout aby upewnić się, że DOM jest zaktualizowany
+                            setTimeout(() => {
+                                $childField.val(currentValue);
+                                console.log(`✅ DELAYED: Restored ${childFieldName} value to: "${currentValue}"`);
+                                console.log(`✅ DELAYED: Final ${childFieldName} value check:`, $childField.val());
+                                
+                                // Sprawdź czy opcja jest faktycznie selected
+                                const $selectedOption = $childField.find('option:selected');
+                                console.log(`✅ DELAYED: Selected option text: "${$selectedOption.text()}", value: "${$selectedOption.val()}"`);
+                            }, 10);
+                            
+                            console.log(`✅ Restored ${childFieldName} value to: "${currentValue}"`);
+                        } else {
+                            $childField.val('');
+                            console.log(`⚠️ Previous value "${currentValue}" not available in new options, clearing ${childFieldName}`);
+                        }
+                    }
+
                     console.log(`✅ Successfully added all scenes to ${childFieldName}`);
                     console.log(`Final ${childFieldName} HTML:`, $childField.html());
+                    console.log(`Final ${childFieldName} value:`, $childField.val());
                 } else {
                     console.log('❌ No valid scenes found in data - array is empty or not an array');
+                    $childField.val(''); // Wyczyść wartość gdy nie ma opcji
                 }
             } catch (error) {
                 console.error('❌ Error parsing scenes data:', error);
+                $childField.val(''); // Wyczyść wartość przy błędzie
             }
         }
 
@@ -823,14 +863,14 @@
          */
         collectFormData() {
             console.log('🗂️ Starting collectFormData...');
-            
+
             // Wyczyść tablicę akcji
             this.actions = [];
 
             // Przejdź przez wszystkie akcje w formularzu
             $('.action-item').each((index, actionElement) => {
                 console.log(`📝 Processing action item ${index}...`);
-                
+
                 const $actionItem = $(actionElement);
                 const actionType = $actionItem.data('type');
                 const actionConfig = this.actionTypes[actionType];
