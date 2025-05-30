@@ -620,3 +620,15 @@
     border: solid 2px #2271b1;
     border-radius: 10px;
 }
+
+/* Filtrowanie opcji w select */
+#answer_next_dialog_id option[style*="display: none"] {
+    display: none !important;
+}
+
+/* Informacje o lokalizacji w opcjach */
+.location-info {
+    color: #666;
+    font-style: italic;
+    font-size: 0.9em;
+}

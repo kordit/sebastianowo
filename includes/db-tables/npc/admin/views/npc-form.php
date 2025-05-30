@@ -497,11 +497,25 @@ $page_title = $is_edit ? 'Edytuj NPC: ' . esc_html($npc->name) : 'Dodaj Nowy NPC
                                         continue;
                                     }
                                     $unique_dialog_ids_select[] = $d->id;
+
+                                    // Określ lokalizację dialogu
+                                    $dialog_location = empty($d->location) ? '__none__' : $d->location;
                                 ?>
-                                    <option value="<?php echo $d->id; ?>"><?php echo esc_html($d->title); ?></option>
+                                    <option value="<?php echo $d->id; ?>"
+                                        data-location="<?php echo esc_attr($dialog_location); ?>"
+                                        title="<?php echo !empty($d->location) && $d->location !== '__none__' ? 'Lokalizacja: ' . esc_attr($d->location) : 'Bez lokalizacji'; ?>">
+                                        <?php echo esc_html($d->title); ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
-                            <p class="description">Wybierz dialog, który zostanie wyświetlony po wybraniu tej odpowiedzi.</p>
+                            <button type="button" id="toggle-dialog-filter" class="button button-small" style="margin-left: 5px;" title="Pokaż/ukryj wszystkie dialogi">
+                                🔍
+                            </button>
+                            <p class="description">
+                                Wybierz dialog, który zostanie wyświetlony po wybraniu tej odpowiedzi.
+                                <strong>Wyświetlane są tylko dialogi z tej samej lokalizacji.</strong>
+                                <br><small>💡 Aby dodać dialog z innej lokalizacji, przełącz się na odpowiednią zakładkę lokalizacji lub kliknij przycisk 🔍.</small>
+                            </p>
                         </td>
                     </tr>
                     <tr>

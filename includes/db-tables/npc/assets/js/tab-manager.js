@@ -62,6 +62,11 @@
 
             // Re-initialize sortable for the new visible dialogs
             window.sortableManager?.reinitializeSortableForTab(targetLocation);
+
+            // Aktualizuj filtrowanie dialogów w modalu odpowiedzi, jeśli jest otwarty
+            if ($('#answer-modal').is(':visible')) {
+                window.modalManager?.filterNextDialogOptions(targetLocation);
+            }
         }
 
         switchFormTab(event) {
